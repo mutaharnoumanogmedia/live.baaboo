@@ -47,17 +47,11 @@
                     @if ($liveShow->thumbnail)
                         <div>
                             <p class="fw-bold">Thumbnail</p>
-                            <img src="{{ asset('storage/' . $liveShow->thumbnail) }}"
-                                class="img-fluid rounded shadow-sm" style="max-width:200px;">
+                            <img src="{{ $liveShow->thumbnail }}" class="img-fluid rounded shadow-sm"
+                                style="max-width:200px;">
                         </div>
                     @endif
-                    @if ($liveShow->banner)
-                        <div>
-                            <p class="fw-bold">Banner</p>
-                            <img src="{{ asset('storage/' . $liveShow->banner) }}" class="img-fluid rounded shadow-sm"
-                                style="max-width:400px;">
-                        </div>
-                    @endif
+                    
                 </div>
             </div>
         </div>

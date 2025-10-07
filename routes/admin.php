@@ -23,4 +23,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get("players", [\App\Http\Controllers\Admin\PlayerController::class, 'index'])->name('players.index');
     Route::get("players/{id}", [\App\Http\Controllers\Admin\PlayerController::class, 'show'])->name('players.show');
-});
+    
+})->middleware(['auth']);

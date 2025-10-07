@@ -110,23 +110,22 @@
                     <div class="row">
                         <div class="col-md-6 mb-4">
                             <label class="form-label">Thumbnail</label>
-                            <div class="dropzone" id="thumbnailDropzone">
+                            {{-- <div class="dropzone" id="thumbnailDropzone">
                                 <i class="fas fa-cloud-upload-alt"></i>
                                 <p class="small text-muted">Recommended: 500×300px, JPG or PNG</p>
                             </div>
-                            <input type="file" name="thumbnail" id="thumbnailInput" class="d-none" accept="image/*">
+                            <input type="file" name="thumbnail" id="thumbnailInput" class="d-none" accept="image/*"> --}}
                             <div class="preview-container" id="thumbnailPreview">
                                 @if (isset($liveShow) && $liveShow->thumbnail)
                                     <p>Current Thumbnail:</p>
                                     <img src="{{ $liveShow->thumbnail }}" class="preview-image"
                                         style="max-width:200px;">
                                 @endif
-                                <p>New Preview:</p>
-                                <img src="" class="preview-image" id="thumbnailPreviewImage">
+                              
                             </div>
                         </div>
 
-                        <div class="col-md-6 mb-4">
+                        {{-- <div class="col-md-6 mb-4">
                             <label class="form-label">Banner</label>
                             <div class="dropzone" id="bannerDropzone">
                                 <i class="fas fa-cloud-upload-alt"></i>
@@ -142,7 +141,7 @@
                                 <p>New Preview:</p>
                                 <img src="" class="preview-image" id="bannerPreviewImage">
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>
@@ -158,7 +157,7 @@
     </div>
 
     @push('styles')
-        <link href="{{ asset('assets/styles/dropzone.css') }}" rel="stylesheet">
+        {{-- <link href="{{ asset('assets/styles/dropzone.css') }}" rel="stylesheet"> --}}
         <style>
             .form-container {
                 max-width: 900px;
@@ -211,7 +210,7 @@
             }
         </style>
     @endpush
-    @push('scripts')
+    {{-- @push('scripts')
         <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script>
 
 
@@ -244,5 +243,5 @@
             initDropzone("#thumbnailDropzone", "#thumbnailInput");
             initDropzone("#bannerDropzone", "#bannerInput");
         </script>
-    @endpush
+    @endpush --}}
 </x-app-dashboard-layout>

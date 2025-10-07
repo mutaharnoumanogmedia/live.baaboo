@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Storage;
 
 class LiveShowController extends Controller
 {
+    // public function __construct()
+    // {
+    //     $this->middleware('auth');
+    // }
     /**
      * Display a listing of the resource.
      *
@@ -52,20 +56,26 @@ class LiveShowController extends Controller
             'host_name'    => 'nullable|string|max:255',
             'prize_amount' => 'required|numeric|min:0',
             'currency'     => 'required|string|max:5',
-            'thumbnail'    => 'nullable|file|image',
-            'banner'       => 'nullable|file|image',
+            // 'thumbnail'    => 'nullable|file|image',
+            // 'banner'       => 'nullable|file|image',
         ]);
 
-        if ($request->hasFile('thumbnail')) {
-            $path = $request->file('thumbnail')->store('thumbnails', 'public');
-            $validated['thumbnail'] = asset('storage/' . $path);
-        }
-        if ($request->hasFile('banner')) {
-            $path = $request->file('banner')->store('banners', 'public');
-            $validated['banner'] = asset('storage/' . $path);
-        }
+        // if ($request->hasFile('thumbnail')) {
+        //     $path = $request->file('thumbnail')->store('thumbnails', 'public');
+        //     $validated['thumbnail'] = asset('storage/' . $path);
+        // }
+        // if ($request->hasFile('banner')) {
+        //     $path = $request->file('banner')->store('banners', 'public');
+        //     $validated['banner'] = asset('storage/' . $path);
+        // }
 
         $validated['created_by'] = Auth::id();
+        $videoId = $this->extractYouTubeId($validated['stream_link'] ?? '');
+
+        $thumbnailUrl = 'https://img.youtube.com/vi/' . $videoId . '/hqdefault.jpg';
+        $validated['thumbnail'] = $thumbnailUrl;
+
+
 
         $show = LiveShow::create($validated);
 
@@ -117,18 +127,16 @@ class LiveShowController extends Controller
             'host_name'    => 'nullable|string|max:255',
             'prize_amount' => 'required|numeric|min:0',
             'currency'     => 'required|string|max:5',
-            'thumbnail'    => 'nullable|file|image',
-            'banner'       => 'nullable|file|image',
+
         ]);
 
-        if ($request->hasFile('thumbnail')) {
-            $path = $request->file('thumbnail')->store('thumbnails', 'public');
-            $validated['thumbnail'] = asset('storage/' . $path);
-        }
-        if ($request->hasFile('banner')) {
-            $path = $request->file('banner')->store('banners', 'public');
-            $validated['banner'] = asset('storage/' . $path);
-        }
+        $validated['created_by'] = Auth::id();
+        $videoId = $this->extractYouTubeId($validated['stream_link'] ?? '');
+
+
+        $thumbnailUrl = 'https://img.youtube.com/vi/' . $videoId . '/hqdefault.jpg';
+        $validated['thumbnail'] = $thumbnailUrl;
+        
 
         $live_show->update($validated);
 
@@ -222,5 +230,21 @@ class LiveShowController extends Controller
         }])->findOrFail($id);
 
         return response()->json($liveShow->users);
+    }
+
+
+    function extractYouTubeId(string $url): ?string
+    {
+        // Handle HTML entities like &amp; in the URL
+        $url = html_entity_decode($url);
+
+        // Match multiple possible YouTube URL formats
+        $pattern = '%(?:youtube\.com/(?:.*v=|(?:embed|shorts)/)|youtu\.be/)([^?&/]+)%i';
+
+        if (preg_match($pattern, $url, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 }

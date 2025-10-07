@@ -9,6 +9,11 @@ use Illuminate\Http\Request;
 class PlayerController extends Controller
 {
     //
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+    
     public function index()
     {
         $players = User::whereIn('id', function ($query) {

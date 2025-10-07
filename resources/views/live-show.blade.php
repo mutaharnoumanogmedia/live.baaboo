@@ -590,7 +590,7 @@
                 <span>Live Stream</span>
                 <small style="opacity: 0.8; margin-top: 10px;">Portrait Mode</small> -->
                 <iframe width="320" height="568"
-                    src="{{ $liveShow->stream_link }}?autoplay=1&mute=0&playsinline=1&controls=0&modestbranding=1&rel=0&showinfo=0"
+                    src="{{ $liveShow->stream_link }}?autoplay=1&mute={{ $_GET['mute'] ?? '0' }}&playsinline=1&controls=0&modestbranding=1&rel=0&showinfo=0"
                     title="YouTube video player" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture"
                     allowfullscreen style="">
                 </iframe>

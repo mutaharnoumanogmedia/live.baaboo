@@ -9,6 +9,10 @@ use App\Models\LiveShow;
 
 class LiveShowQuizController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
     public function index()
     {
         $quizzes = LiveShowQuiz::with('liveShow')

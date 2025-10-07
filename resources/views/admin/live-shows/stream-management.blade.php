@@ -24,10 +24,8 @@
                     <div class="card-body text-center">
                         <!-- Placeholder for video stream -->
                         <div class="bg-dark text-white d-flex align-items-center justify-content-center mb-3"
-                            style="height:300px;">
-                            <iframe style="width:100%; height:100%;"
-                                src="{{ $liveShow->stream_link }}?autoplay=1&mute=0&playsinline=1&controls=0&modestbranding=1&rel=0&showinfo=0"
-                                frameborder="0"></iframe>
+                            style="height:150px;">
+                           <img src="{{ $liveShow->thumbnail }}" class="img-fluid" style="width: auto; height: 100%; object-fit: contain;"  alt="">
                         </div>
                         <div class="alert">
                             <!-- Slick Slider for Questions -->
@@ -105,8 +103,8 @@
                 <div class="p-4 bg-secondary rounded">
                     <h5 class="mb-3">Live Show View</h5>
                     <div id="live-show-view" style="">
-                        <iframe style="width:100%; height:70vh; pointer-events:none;" src="{{ url('live-show-play/' . $liveShow->id) }}"
-                            frameborder="0"></iframe>
+                        <iframe style="width:100%; height:70vh; pointer-events:none;"
+                            src="{{ url('live-show-play/' . $liveShow->id . '?mute=1') }}" frameborder="0"></iframe>
                     </div>
                 </div>
             </aside>
@@ -326,7 +324,6 @@
                     .then(data => {
                         console.log('Quiz question removed:', data);
                         // Optionally, remove the quiz from the UI
-                        location.reload();
                     })
                     .catch(error => {
                         console.error('Error removing quiz question:', error);

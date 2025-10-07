@@ -14,6 +14,13 @@ class LiveShow extends Model
         'description',
         'scheduled_at',
         'status',
+        'thumbnail',
+        'stream_link',
+        'host_name',
+        'prize_amount',
+        'currency',
+        'created_by'
+        
     ];
 
     public function scopeUpcoming($query)

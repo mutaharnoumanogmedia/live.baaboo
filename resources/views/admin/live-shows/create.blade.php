@@ -88,7 +88,7 @@
             </div>
 
             <!-- Media Uploads Card -->
-            <div class="card">
+            {{-- <div class="card">
                 <div class="card-header">
                     <i class="fas fa-images me-2"></i>Media Uploads
                 </div>
@@ -123,7 +123,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
 
             <div class="text-center mt-4">
                 <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save me-2"></i>Save Live
@@ -133,7 +133,7 @@
     </div>
 
     @push('styles')
-        <link href="{{ asset('assets/styles/dropzone.css') }}" rel="stylesheet">
+        {{-- <link href="{{ asset('assets/styles/dropzone.css') }}" rel="stylesheet"> --}}
         <style>
             .form-container {
                 max-width: 900px;
@@ -187,37 +187,37 @@
         </style>
     @endpush
     @push('scripts')
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script>
+        {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script> --}}
 
 
         <script>
-            Dropzone.autoDiscover = false;
+            // Dropzone.autoDiscover = false;
 
-            function initDropzone(id, inputId) {
-                let dz = new Dropzone(id, {
-                    url: "#",
-                    autoProcessQueue: false,
-                    addRemoveLinks: true,
-                    maxFiles: 1,
-                    acceptedFiles: 'image/*',
-                    previewsContainer: null,
-                    dictDefaultMessage: "Drag files here or click to upload"
+            // function initDropzone(id, inputId) {
+            //     let dz = new Dropzone(id, {
+            //         url: "#",
+            //         autoProcessQueue: false,
+            //         addRemoveLinks: true,
+            //         maxFiles: 1,
+            //         acceptedFiles: 'image/*',
+            //         previewsContainer: null,
+            //         dictDefaultMessage: "Drag files here or click to upload"
 
 
-                });
-                dz.on("addedfile", function(file) {
-                    document.querySelector(inputId).files = file ? createFileList(file) : null;
-                });
-            }
+            //     });
+            //     dz.on("addedfile", function(file) {
+            //         document.querySelector(inputId).files = file ? createFileList(file) : null;
+            //     });
+            // }
 
-            function createFileList(file) {
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(file);
-                return dataTransfer.files;
-            }
+            // function createFileList(file) {
+            //     const dataTransfer = new DataTransfer();
+            //     dataTransfer.items.add(file);
+            //     return dataTransfer.files;
+            // }
 
-            initDropzone("#thumbnailDropzone", "#thumbnailInput");
-            initDropzone("#bannerDropzone", "#bannerInput");
+            // initDropzone("#thumbnailDropzone", "#thumbnailInput");
+            // initDropzone("#bannerDropzone", "#bannerInput");
         </script>
     @endpush
 </x-app-dashboard-layout>
