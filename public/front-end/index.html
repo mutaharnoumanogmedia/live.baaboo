@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BAABOO GAME SHOW LIVE!</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css"
+        rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Nunito:wght@400;600;700;800&display=swap');
+
+        :root {
+            --neon-pink: #ff0080;
+            --neon-blue: #00d4ff;
+            --neon-yellow: #ffff00;
+            --neon-green: #00ff80;
+            --electric-purple: #8a2be2;
+            --game-red: #ff1744;
+            --gold: #ffd700;
+            --neon-orange: #ff6f00;
+            --dark-stage: #0d0221;
+            --spotlight: rgba(255, 255, 255, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(ellipse at center, #1a0845 0%, #0d0221 70%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            font-family: 'Nunito', sans-serif;
+            overflow-x: hidden;
+            color: white;
+        }
+
+        /* Animated Background */
+        .stage-lights {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .spotlight {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: spotlight-move 8s ease-in-out infinite;
+        }
+
+        .spotlight:nth-child(1) {
+            background: radial-gradient(circle, var(--neon-pink) 0%, transparent 70%);
+            top: 10%;
+            left: 20%;
+            animation-delay: 0s;
+        }
+
+        .spotlight:nth-child(2) {
+            background: radial-gradient(circle, var(--neon-blue) 0%, transparent 70%);
+            top: 60%;
+            right: 20%;
+            animation-delay: 2s;
+        }
+
+        .spotlight:nth-child(3) {
+            background: radial-gradient(circle, var(--neon-yellow) 0%, transparent 70%);
+            bottom: 20%;
+            left: 50%;
+            animation-delay: 4s;
+        }
+
+        @keyframes spotlight-move {
+
+            0%,
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            33% {
+                transform: scale(1.2) rotate(120deg);
+            }
+
+            66% {
+                transform: scale(0.8) rotate(240deg);
+            }
+        }
+
+        /* Game Show Header */
+        .game-show-header {
+            background: linear-gradient(45deg, var(--neon-pink), var(--electric-purple), var(--neon-blue));
+            background-size: 400% 400%;
+            animation: gradient-shift 3s ease infinite;
+            padding: 10px 0;
+            margin: 10px auto;
+            border-radius: 30px;
+            box-shadow:
+                0 0 50px rgba(255, 0, 128, 0.5),
+                0 0 100px rgba(0, 212, 255, 0.3),
+                inset 0 0 50px rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes gradient-shift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .show-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.7rem;
+            text-transform: uppercase;
+            background: linear-gradient(45deg, var(--gold), white, var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow:
+                0 0 20px rgba(255, 215, 0, 0.8),
+                0 0 20px rgba(255, 215, 0, 0.6),
+                0 0 20px rgba(255, 215, 0, 0.4);
+            animation: title-glow 2s ease-in-out infinite alternate;
+            margin-bottom: 10px;
+        }
+
+        @keyframes title-glow {
+            from {
+                filter: brightness(1);
+            }
+
+            to {
+                filter: brightness(1.2) drop-shadow(0 0 20px gold);
+            }
+        }
+
+        .show-subtitle {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Game Show Cards */
+        .game-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(20px);
+            border: 2px solid transparent;
+            border-radius: 25px;
+            box-shadow:
+                0 15px 35px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.8s;
+        }
+
+        .game-card:hover::before {
+            left: 100%;
+        }
+
+        /* Video Stage */
+        .video-stage {
+            background: linear-gradient(145deg, #000, #1a0845);
+            border: 4px solid var(--gold);
+            border-radius: 30px;
+            box-shadow:
+                0 0 50px rgba(255, 215, 0, 0.6),
+                0 25px 50px rgba(0, 0, 0, 0.8),
+                inset 0 0 30px rgba(255, 215, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .video-placeholder {
+            aspect-ratio: 16/9;
+            background:
+                radial-gradient(circle at 30% 30%, var(--electric-purple) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, var(--neon-blue) 0%, transparent 50%),
+                linear-gradient(135deg, #1a0845, #0d0221);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .live-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--game-red);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 1rem;
+            text-transform: uppercase;
+            box-shadow:
+                0 0 20px var(--game-red),
+                0 5px 15px rgba(255, 23, 68, 0.6);
+            animation: live-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes live-pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 30px var(--game-red), 0 5px 25px rgba(255, 23, 68, 0.8);
+            }
+        }
+
+        .viewer-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--neon-green);
+            padding: 10px 15px;
+            border-radius: 25px;
+            font-weight: 700;
+            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 15px rgba(0, 255, 128, 0.5);
+        }
+
+        /* Stats Dashboard */
+        .stat-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(15px);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            padding: 10px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 20px;
+            padding: 2px;
+            background: linear-gradient(45deg, var(--neon-pink), var(--neon-blue), var(--neon-yellow), var(--neon-green));
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            -webkit-mask-composite: destination-out;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 0, 128, 0.3);
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--gold), white);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--neon-yellow);
+            filter: drop-shadow(0 0 10px var(--neon-yellow));
+            margin-right: 10px;
+        }
+
+        /* Game Show Quiz */
+        .quiz-arena {
+            background: linear-gradient(145deg, rgba(138, 43, 226, 0.2), rgba(255, 0, 128, 0.1));
+            backdrop-filter: blur(20px);
+            border: 3px solid var(--electric-purple);
+            border-radius: 30px;
+            padding: 10px;
+            box-shadow:
+                0 0 40px rgba(138, 43, 226, 0.5),
+                0 20px 40px rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+
+        .quiz-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.5rem;
+            color: var(--neon-yellow);
+            text-shadow:
+                0 0 0px var(--neon-yellow),
+                0 0 0px var(--neon-yellow),
+                0 0 5px var(--neon-yellow);
+            margin-bottom: 20px;
+        }
+
+        .quiz-title .prize-money {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.5rem;
+            color: var(--neon-orange);
+            text-shadow:
+                0 0 80px var(--neon-yellow),
+                0 0 80px var(--neon-yellow),
+                0 0 50px var(--neon-yellow);
+            margin-bottom: 20px;
+        }
+
+        .answer-option {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 10px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .answer-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.6s;
+        }
+
+        .answer-option:hover {
+            border-color: var(--neon-blue);
+            transform: scale(1.02);
+            box-shadow:
+                0 0 30px rgba(0, 212, 255, 0.5),
+                0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .answer-option:hover::before {
+            left: 100%;
+        }
+
+        .answer-option.selected {
+            background: linear-gradient(145deg, var(--neon-pink), var(--electric-purple));
+            border-color: var(--gold);
+            box-shadow:
+                0 0 40px rgba(255, 0, 128, 0.8),
+                0 15px 30px rgba(0, 0, 0, 0.6);
+            animation: answer-selected 0.5s ease;
+        }
+
+        @keyframes answer-selected {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1.02);
+            }
+        }
+
+        .answer-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Chat Show */
+        .chat-show {
+            background: linear-gradient(145deg, rgba(0, 212, 255, 0.15), rgba(0, 255, 128, 0.1));
+            border: 2px solid var(--neon-blue);
+            border-radius: 25px;
+            box-shadow:
+                0 0 30px rgba(0, 212, 255, 0.4),
+                0 15px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .chat-header-show {
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-green));
+            padding: 20px;
+            border-radius: 23px 23px 0 0;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            color: white;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .chat-message-show {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            border-left: 5px solid var(--neon-blue);
+            border-radius: 15px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            animation: message-appear 0.5s ease-out;
+        }
+
+        @keyframes message-appear {
+            from {
+                opacity: 0;
+                transform: translateX(-30px) scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        .chat-username {
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--neon-pink), var(--electric-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .chat-text {
+            color: #333;
+            font-weight: 600;
+        }
+
+        /* Game Show Buttons */
+        .game-btn {
+            background: linear-gradient(45deg, var(--neon-pink), var(--electric-purple));
+            border: none;
+            border-radius: 30px;
+            padding: 15px 30px;
+            color: white;
+            font-weight: 800;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(255, 0, 128, 0.4);
+        }
+
+        .game-btn:hover {
+            transform: translateY(-3px);
+            box-shadow:
+                0 15px 30px rgba(255, 0, 128, 0.6),
+                0 0 30px rgba(255, 0, 128, 0.8);
+            color: white;
+        }
+
+        /* Countdown Timer */
+        .countdown-display {
+            font-family: 'Fredoka One', cursive;
+            padding: 2px 10px;
+            font-size: 2rem;
+            color: var(--game-red);
+            text-shadow:
+                0 0 10px var(--game-red),
+                0 0 20px var(--game-red);
+            animation: countdown-pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes countdown-pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .show-title {
+                font-size: 0.5rem;
+                display: block;
+            }
+
+            .quiz-title {
+                font-size: 1.8rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+
+
+
+
+
+        .progress {
+            --value: 65;
+            /* 0–100 */
+            --bar: #4f46e5;
+            /* bar color */
+            --track: #e5e7eb;
+            /* track color */
+            --height: 12px;
+            /* bar height */
+            --radius: 999px;
+            /* pill corners */
+
+            position: relative;
+            width: 100%;
+            height: var(--height);
+            background: var(--track);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .progress__bar {
+            width: calc(var(--value) * 1%);
+            height: 100%;
+            background: var(--bar);
+            border-radius: inherit;
+            transition: width 300ms ease;
+            /* optional stripes */
+            background-image:
+                linear-gradient(45deg, rgba(255, 255, 255, .25) 25%, transparent 25%, transparent 50%,
+                    rgba(255, 255, 255, .25) 50%, rgba(255, 255, 255, .25) 75%,
+                    transparent 75%, transparent);
+            background-size: 1rem 1rem;
+            animation: progress-stripes 1s linear infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .progress__bar {
+                animation: none;
+                transition: none;
+            }
+        }
+
+        @keyframes progress-stripes {
+            to {
+                background-position: 1rem 0;
+            }
+        }
+
+        .progress[aria-valuenow]::after {
+            content: attr(data-label);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font: 600 12px/1 system-ui, sans-serif;
+            color: #111827;
+            mix-blend-mode: difference;
+            /* keeps text readable on bar */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stage-lights">
+        <div class="spotlight"></div>
+        <div class="spotlight"></div>
+        <div class="spotlight"></div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- Game Show Header -->
+        <div class="game-show-header text-center">
+
+            <h1 class="show-title">
+                <img src="https://baaboo.com/cdn/shop/files/baaboo-logo_1_256x.svg?v=1745568771" alt="baaboo Logo"
+                    style="height: 80px; margin-bottom: 0px;">
+                <span class="title-text">Game Show</span>
+            </h1>
+            <p class="show-subtitle d-md-block d-none">🎯 PLAY • WIN • COMPETE • LIVE! 🎯</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Main Game Arena -->
+            <div class="col-xl-6   order-0" id="videoSection">
+                <div class="row">
+
+                </div>
+
+
+                <!-- Video Stage -->
+                <div class="video-stage mb-4">
+                    <!-- <iframe width="560" height="315" src="https://www.youtube.com/embed/6mp9Hu8DL8U" frameborder="0"
+                        allowfullscreen>
+                    </iframe> -->
+                    <div class="video-placeholder">
+                        <div class="live-badge">
+                            <i class="bi bi-broadcast me-2"></i>LIVE
+                        </div>
+                        <div class="viewer-badge">
+                            <i class="bi bi-people me-1"></i>1,247 LIVE
+                        </div>
+                        <div class="text-center">
+                            <i class="bi bi-play-circle"
+                                style="font-size: 5rem; color: var(--gold); filter: drop-shadow(0 0 20px gold);"></i>
+                            <h3 class="mt-3"
+                                style="color: var(--neon-yellow); text-shadow: 0 0 10px var(--neon-yellow);">
+                                🎬 GAME SHOW STARTING SOON! 🎬
+                            </h3>
+                            <p class="text-info fs-5">Get ready for the ultimate challenge...</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Stats Dashboard -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3 col-6">
+                        <div class="stat-card">
+                            <i class="bi bi-eye stat-icon"></i>
+                            <span class="stat-number">1,247</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="stat-card">
+                            <i class="bi bi-chat-dots stat-icon"></i>
+                            <span class="stat-number">89</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="stat-card">
+                            <i class="bi bi-trophy stat-icon"></i>
+                            <span class="stat-number">2.1k</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="stat-card">
+                            <i class="bi bi-clock stat-icon"></i>
+                            <span class="stat-number">15:42</span>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="col-xl-4">
+                <div class="" id="quizSection">
+                    <div class="quiz-arena position-relative">
+
+                        <span class="countdown-display position-absolute top-0 end-0" id="countdown">00:20</span>
+
+                        <div class="text-center mb-4">
+                            <h2 class="quiz-title">⚡ Prize Money <span class="prize-money">€ 1000</span>⚡ </h2>
+                            <div class="  w-100">
+                                <p class="fs-5 text-white mb-2">What's your biggest remote work challenge?</p>
+
+                                <!-- <span class="text-warning fw-bold">🏆 DOUBLE POINTS ACTIVE!</span> -->
+
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="answer-option d-block" data-option="1" data-votes="45">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <input type="radio" name="quiz-answer" value="1"
+                                                class="form-check-input me-2" style="accent-color: var(--neon-pink);">
+                                            <span class="answer-text">
+                                                🤝 Communication & Collaboration
+                                            </span>
+                                        </div>
+                                        <span class="vote-percentage badge bg-warning text-dark fs-6"></span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="answer-option d-block" data-option="2" data-votes="38">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <input type="radio" name="quiz-answer" value="2"
+                                                class="form-check-input me-2" style="accent-color: var(--neon-pink);">
+                                            <span class="answer-text">
+                                                ⏰ Time Management
+                                            </span>
+                                        </div>
+                                        <span class="vote-percentage badge bg-warning text-dark fs-6"></span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="answer-option d-block" data-option="3" data-votes="35">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <input type="radio" name="quiz-answer" value="3"
+                                                class="form-check-input me-2" style="accent-color: var(--neon-pink);">
+                                            <span class="answer-text">
+                                                ⚖️ Work-Life Balance
+                                            </span>
+                                        </div>
+                                        <span class="vote-percentage badge bg-warning text-dark fs-6"></span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="answer-option d-block" data-option="4" data-votes="22">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <input type="radio" name="quiz-answer" value="4"
+                                                class="form-check-input me-2" style="accent-color: var(--neon-pink);">
+                                            <span class="answer-text">
+                                                🔧 Technical Issues
+                                            </span>
+                                        </div>
+                                        <span class="vote-percentage badge bg-warning text-dark fs-6"></span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="w-100 mt-3">
+                            <!-- <button class="game-btn w-100">
+                                Next Question <i class="bi bi-arrow-right ms-2"></i>
+                            </button> -->
+
+                            <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                                aria-valuenow="90" style="--value:90; --bar:#f59e0b; --height:6px; margin-top:10px;"
+                                data-label="">
+                                <div class="progress__bar"></div>
+                            </div>
+                        </div>
+
+                        <!-- <div class="text-center mt-4">
+                            <div class="d-flex justify-content-center align-items-center gap-4 flex-wrap">
+                                <span class="text-info fw-bold">
+                                    <i class="bi bi-graph-up me-1"></i>
+                                    Total Votes: <span id="totalVotes" class="text-warning">140</span>
+                                </span>
+                                <span class="text-success fw-bold">
+                                    <i class="bi bi-lightning me-1"></i>
+                                    Live Results
+                                </span>
+                            </div>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+            <!-- Game Show Chat -->
+            <div class="col-xl-2 order-lg-1 order-3" id="chatSection">
+                <div class="chat-show game-card">
+                    <div class="chat-header-show">
+                        <i class="bi bi-chat-square-dots me-2"></i>Live Chat Arena
+                    </div>
+                    <div class="p-3" style="height: 400px; overflow-y: auto; background: rgba(255,255,255,0.05);"
+                        id="chatMessages">
+                        <div class="chat-message-show">
+                            <span class="chat-username">Sarah:</span>
+                            <span class="chat-text">This is so exciting! 🎉🎯</span>
+                        </div>
+                        <div class="chat-message-show">
+                            <span class="chat-username">GameMaster:</span>
+                            <span class="chat-text">Double points for the next 5 answers! ⚡</span>
+                        </div>
+                        <div class="chat-message-show">
+                            <span class="chat-username">Alex:</span>
+                            <span class="chat-text">I'm winning this round! 🏆</span>
+                        </div>
+                        <div class="chat-message-show">
+                            <span class="chat-username">Emma:</span>
+                            <span class="chat-text">The graphics are amazing! 🤩</span>
+                        </div>
+                        <div class="chat-message-show">
+                            <span class="chat-username">Mike:</span>
+                            <span class="chat-text">Ready for the lightning round! ⚡⚡</span>
+                        </div>
+                    </div>
+                    <div class="p-3" style="background: rgba(255,255,255,0.1); border-radius: 0 0 23px 23px;">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Enter the arena chat..." id="chatInput"
+                                style="background: rgba(255,255,255,0.9); border: 2px solid var(--neon-blue); border-radius: 15px 0 0 15px;">
+                            <button class="game-btn" type="button" id="sendChat" style="border-radius: 0 15px 15px 0;">
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Game Show Chat functionality
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendChatBtn = document.getElementById('sendChat');
+
+        const gameShowMessages = [
+            { user: 'QuizKing', message: 'Perfect timing! 🎯', color: 'primary' },
+            { user: 'Lightning⚡', message: 'This question is tough! 🤔', color: 'warning' },
+            { user: 'Champion', message: 'Leading the scoreboard! 🏆', color: 'success' },
+            { user: 'Buzzer', message: 'Time is running out! ⏰', color: 'danger' },
+            { user: 'GameFan', message: 'Best game show ever! 🎊', color: 'info' },
+            { user: 'SpeedPlayer', message: 'Quick! Choose your answer! 🚀', color: 'primary' },
+            { user: 'WinStreak', message: 'On fire with these answers! 🔥', color: 'warning' }
+        ];
+
+        function addGameChatMessage(user, message, color = 'primary') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message-show';
+            messageDiv.innerHTML = `<span class="chat-username">${user}:</span> <span class="chat-text">${message}</span>`;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Remove old messages to keep chat fresh
+            if (chatMessages.children.length > 12) {
+                chatMessages.removeChild(chatMessages.firstChild);
+            }
+        }
+
+        function simulateGameChat() {
+            setInterval(() => {
+                const randomMessage = gameShowMessages[Math.floor(Math.random() * gameShowMessages.length)];
+                addGameChatMessage(randomMessage.user, randomMessage.message, randomMessage.color);
+            }, 3000 + Math.random() * 4000);
+        }
+
+        sendChatBtn.addEventListener('click', () => {
+            const message = chatInput.value.trim();
+            if (message) {
+                addGameChatMessage('You', message + ' 🎮', 'primary');
+                chatInput.value = '';
+            }
+        });
+
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendChatBtn.click();
+            }
+        });
+
+        // Game Show Quiz functionality
+        const answerOptions = document.querySelectorAll('.answer-option');
+        let hasAnswered = false;
+
+        answerOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                if (!hasAnswered) {
+                    // Remove selected class from all options
+                    answerOptions.forEach(opt => opt.classList.remove('selected'));
+
+                    // Add selected class to clicked option
+                    option.classList.add('selected');
+
+                    // Simulate vote counting with game show excitement
+                    const currentVotes = parseInt(option.dataset.votes);
+                    option.dataset.votes = currentVotes + 1;

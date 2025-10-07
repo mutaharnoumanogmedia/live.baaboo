@@ -1,0 +1,97 @@
+/* General table styling */
+table.data-table {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+}
+
+/* Table header */
+table.data-table thead th {
+    background-color: #2a2a2a;
+    color: #ffffff;
+    font-weight: 600;
+    padding: 12px;
+    border-bottom: 2px solid #3a3a3a;
+    text-align: left;
+}
+
+/* Hover effect on header */
+table.data-table thead th:hover {
+    background-color: #333333;
+    cursor: pointer;
+}
+
+/* Table body */
+table.data-table tbody tr {
+    border-bottom: 1px solid #2d2d2d;
+}
+
+table.data-table tbody tr:nth-child(even) {
+    background-color: #242424;
+}
+
+table.data-table tbody tr:nth-child(odd) {
+    background-color: #1e1e1e;
+}
+
+/* Row hover */
+table.data-table tbody tr:hover {
+    background-color: #333333;
+    transition: 0.2s ease;
+}
+
+/* Table cells */
+table.data-table tbody td {
+    padding: 12px;
+}
+
+/* Pagination */
+.data-tables_wrapper .data-tables_paginate .paginate_button {
+    background-color: #2a2a2a;
+    color: #ffffff !important;
+    border: none;
+    padding: 6px 12px;
+    margin: 2px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.data-tables_wrapper .data-tables_paginate .paginate_button:hover {
+    background-color: #444444;
+    color: #fff !important;
+}
+
+.data-tables_wrapper .data-tables_paginate .paginate_button.current {
+    background-color: #007bff;
+    color: #fff !important;
+}
+
+/* Search input */
+.data-tables_wrapper .data-tables_filter input {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: #e0e0e0;
+    margin-left: 8px;
+}
+
+/* Length dropdown */
+.data-tables_wrapper .data-tables_length select {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: #e0e0e0;
+}
+
+/* Info text */
+.data-tables_wrapper .data-tables_info {
+    color: #aaaaaa;
+    padding-top: 8px;
+}

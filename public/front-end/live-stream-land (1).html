@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Stream Mobile UI</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ff5f00;
+            --accent-color: #ffb380;
+            --light-bg: #fff8f5;
+            --text-dark: #2c3e50;
+            --border-light: #ffe6d9;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 0;
+            margin: 0;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+        }
+
+        .live-indicator {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #dc3545;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            z-index: 10;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .user-count {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            margin-top: 35px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            z-index: 10;
+        }
+
+        .logo {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 50px;
+            height: 50px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .quiz-section {
+            background: white;
+            border-top: 3px solid var(--primary-color);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-question {
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .quiz-option {
+            margin-bottom: 10px;
+        }
+
+        .quiz-option input[type="radio"] {
+            display: none;
+        }
+
+        .quiz-option label {
+            display: block;
+            padding: 12px 16px;
+            background: var(--light-bg);
+            border: 2px solid var(--border-light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-dark);
+        }
+
+        .quiz-option label:hover {
+            border-color: var(--accent-color);
+            background: var(--accent-color);
+            color: white;
+        }
+
+        .quiz-option input[type="radio"]:checked + label {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .submit-btn {
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 10px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .submit-btn:hover {
+            background: #e55400;
+            transform: translateY(-1px);
+        }
+
+        .chat-section {
+            height: 300px;
+            background: white;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-messages {
+            height: 200px;
+            overflow-y: auto;
+            padding: 15px;
+            background: var(--light-bg);
+        }
+
+        .message {
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 12px;
+            border-left: 3px solid var(--accent-color);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-user {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+        }
+
+        .message-text {
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            margin-top: 2px;
+        }
+
+        .chat-input {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .input-group .form-control {
+            border: 2px solid var(--border-light);
+            border-radius: 25px 0 0 25px;
+            padding: 10px 15px;
+        }
+
+        .input-group .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: none;
+        }
+
+        .send-btn {
+            background: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            color: white;
+            border-radius: 0 25px 25px 0;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            background: #e55400;
+            border-color: #e55400;
+        }
+
+        /* Custom scrollbar */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: var(--light-bg);
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Video Container -->
+    <div class="video-container">
+        <div class="video-placeholder">
+            <i class="fas fa-play-circle fa-3x"></i>
+            <span class="ms-3">Live Stream</span>
+        </div>
+        
+        <!-- Live Indicator -->
+        <div class="live-indicator">
+            <div class="live-dot"></div>
+            LIVE
+        </div>
+        
+        <!-- User Count -->
+        <div class="user-count">
+            <i class="fas fa-users"></i> 1,234 viewers
+        </div>
+        
+        <!-- Logo -->
+        <div class="logo">
+            LOGO
+        </div>
+    </div>
+
+    <!-- Quiz Section -->
+    <div class="quiz-section">
+        <div class="quiz-question">
+            <i class="fas fa-question-circle text-primary me-2"></i>
+            What is the capital of France?
+        </div>
+        
+        <div class="quiz-option">
+            <input type="radio" id="option1" name="quiz" value="london">
+            <label for="option1">A) London</label>
+        </div>
+        
+        <div class="quiz-option">
+            <input type="radio" id="option2" name="quiz" value="paris">
+            <label for="option2">B) Paris</label>
+        </div>
+        
+        <div class="quiz-option">
+            <input type="radio" id="option3" name="quiz" value="madrid">
+            <label for="option3">C) Madrid</label>
+        </div>
+        
+        <div class="quiz-option">
+            <input type="radio" id="option4" name="quiz" value="berlin">
+            <label for="option4">D) Berlin</label>
+        </div>
+        
+        <button class="submit-btn" onclick="submitQuiz()">
+            <i class="fas fa-check me-2"></i>Submit Answer
+        </button>
+    </div>
+
+    <!-- Chat Section -->
+    <div class="chat-section">
+        <div class="chat-header">
+            <i class="fas fa-comments"></i>
+            Live Chat
+            <span class="ms-auto badge bg-light text-dark">324 online</span>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message">
+                <div class="message-user">@JohnDoe</div>
+                <div class="message-text">Great stream! Thanks for sharing</div>
+            </div>
+            <div class="message">
+                <div class="message-user">@Sarah123</div>
+                <div class="message-text">The quiz is really interesting!</div>
+            </div>
+            <div class="message">
+                <div class="message-user">@TechGuru</div>
+                <div class="message-text">Can you repeat the question?</div>
+            </div>
+            <div class="message">
+                <div class="message-user">@MikeSmith</div>
+                <div class="message-text">Looking forward to the next topic</div>
+            </div>
+        </div>
+        
+        <div class="chat-input">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Type your message..." id="chatInput">
+                <button class="btn send-btn" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Quiz functionality
+        function submitQuiz() {
+            const selected = document.querySelector('input[name="quiz"]:checked');
+            if (selected) {
+                const isCorrect = selected.value === 'paris';
+                alert(isCorrect ? '🎉 Correct! Well done!' : '❌ Wrong answer. The correct answer is Paris.');
+            } else {
+                alert('Please select an answer first!');
+            }
+        }
+
+        // Chat functionality
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                const chatMessages = document.getElementById('chatMessages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message';
+                messageDiv.innerHTML = `
+                    <div class="message-user">@You</div>
+                    <div class="message-text">${message}</div>
+                `;
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                input.value = '';
+            }
+        }
+
+        // Allow Enter key to send message
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Simulate new messages
+        function addRandomMessage() {
+            const users = ['@Alice', '@Bob', '@Charlie', '@Diana', '@Eve'];
+            const messages = [
+                'This is amazing!',
+                'Great content as always',
+                'Thanks for the explanation',
+                'Can you share the slides?',
+                'Looking forward to more',
+                'Excellent presentation!',
+                'Very informative',
+                'Keep up the good work!'
+            ];
+            
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            
+            const randomUser = users[Math.floor(Math.random() * users.length)];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            
+            messageDiv.innerHTML = `
+                <div class="message-user">${randomUser}</div>
+                <div class="message-text">${randomMessage}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Remove old messages if too many
+            if (chatMessages.children.length > 10) {
+                chatMessages.removeChild(chatMessages.firstChild);
+            }
+        }
+
+        // Add random messages every 5-10 seconds
+        setInterval(addRandomMessage, Math.random() * 5000 + 5000);
+
+        // Update viewer count periodically
+        function updateViewerCount() {
+            const viewerElement = document.querySelector('.user-count');
+            const currentCount = parseInt(viewerElement.textContent.match(/\d+/)[0]);
+            const change = Math.floor(Math.random() * 10) - 5;
+            const newCount = Math.max(1000, currentCount + change);
+            viewerElement.innerHTML = `<i class="fas fa-users"></i> ${newCount.toLocaleString()} viewers`;
+        }
+
+        setInterval(updateViewerCount, 30000);
+    </script>
+</body>
+</html>

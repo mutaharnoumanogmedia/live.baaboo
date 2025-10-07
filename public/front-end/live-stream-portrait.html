@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Stream Mobile UI</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ff5f00;
+            --accent-color: #ffb380;
+            --light-bg: #fff8f5;
+            --text-dark: #2c3e50;
+            --border-light: #ffe6d9;
+        }
+
+        body {
+            background-color: #000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 0;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .main-container {
+            position: relative;
+            height: 100vh;
+            width: 100%;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .main-container.quiz-mode {
+            transform: scale(0.3) translateY(-150px);
+            border-radius: 0px;
+            overflow: hidden;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            flex-direction: column;
+           
+        }
+
+        .video-placeholder iframe {
+            border-radius: 00px;
+            width: 100%;
+            height: 100%;
+            
+            background: #000;
+        }
+
+        .video-placeholder.question-activated {
+            background: linear-gradient(45deg, #764ba2, #667eea);
+            transition: background 0.5s ease;
+            height: 32vh;
+        }
+
+        .live-indicator {
+            position: absolute;
+            top: 20px;
+            left: 15px;
+            background: #dc3545;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            z-index: 10;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .user-count {
+            position: absolute;
+            top: 20px;
+            left: 15px;
+            margin-top: 45px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 50px;
+            height: 30px;
+           
+            border-radius: 30px;           
+
+        }
+
+        .logo img {
+            width: 50px;
+            height: auto;
+             background-color: #ffe6d9; 
+             border-radius: 30px;
+        }
+
+        .show-question-btn {
+            position: absolute;
+            top: 50px;
+            right: 5px;
+            background: rgba(255, 95, 0, 0.9);
+            color: white;
+            border: none;
+            padding: 5px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 10;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(255, 95, 0, 0.3);
+        }
+
+        .show-question-btn:hover {
+            background: rgba(255, 95, 0, 1);
+            transform: scale(1.05);
+        }
+
+        .show-question-btn.active {
+            background: rgba(229, 84, 0, 0.9);
+        }
+
+        /* TikTok-style overlay chat */
+        .overlay-chat {
+            position: absolute;
+            bottom: 80px;
+            left: 1px;
+            right: 1px;
+            z-index: 5;
+            padding: 30px 0px;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 1) 100%);
+            height: 175px;
+            opacity: 0.7;
+            overflow-y: scroll;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
+        }
+
+        .overlay-chat::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Opera */
+        }
+
+        .chat-message-overlay {
+            border-radius: 20px;
+            padding: 2px 12px;
+            margin-bottom: 2px;
+
+            word-wrap: break-word;
+            animation: slideInLeft 0.5s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-100px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .chat-message-overlay .message-user {
+            font-size: 0.7rem;
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .chat-message-overlay .message-text {
+            font-size: 0.7rem;
+            color: white;
+            margin-top: 2px;
+        }
+
+        /* Chat input at bottom */
+        .bottom-chat-input {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 15px;
+            z-index: 10;
+        }
+
+        .chat-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input-field {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 12px 16px;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-input-field::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .chat-input-field:focus {
+            border-color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .send-btn-overlay {
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn-overlay:hover {
+            background: #e55400;
+            transform: scale(1.1);
+        }
+
+        /* Quiz overlay */
+        .quiz-overlay {
+            position: fixed;
+            top: 32vh;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--light-bg);
+            z-index: 20;
+            transform: translateY(100%);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+
+        }
+
+        .quiz-overlay.active {
+            transform: translateY(0);
+            height: 300px;
+        }
+
+        .quiz-content {
+            padding: 0px;
+            height: 100%;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .close-quiz-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-quiz-btn:hover {
+            background: rgba(255, 95, 0, 0.1);
+            color: var(--primary-color);
+        }
+
+        .quiz-section {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-question {
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            line-height: 1.4;
+        }
+
+        .quiz-option {
+            margin-bottom: 12px;
+        }
+
+        .quiz-option input[type="radio"] {
+            display: none;
+        }
+
+        .quiz-option label {
+            display: block;
+            padding: 8px;
+            background: var(--light-bg);
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .quiz-option label:hover {
+            border-color: var(--accent-color);
+            background: var(--accent-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .quiz-option input[type="radio"]:checked+label {
+
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .quiz-option.correct label {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .quiz-option.incorrect label {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .submit-btn {
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(255, 95, 0, 0.3);
+        }
+
+        .submit-btn:hover {
+            background: #e55400;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 95, 0, 0.4);
+        }
+
+        @media (max-width: 576px) {
+            .main-container.quiz-mode {
+                transform: scale(1) translateY(-0px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container" id="mainContainer">
+        <!-- Video Container -->
+        <div class="video-container">
+            <div class="video-placeholder" id="videoPlaceholder">
+                <!-- <i class="fas fa-play-circle fa-4x mb-3"></i>
+                <span>Live Stream</span>
+                <small style="opacity: 0.8; margin-top: 10px;">Portrait Mode</small> -->
+                <iframe width="320" height="568"
+                    src="https://www.youtube.com/embed/Nh7wN1_0VyQ?autoplay=1&mute=1&playsinline=1&controls=0&modestbranding=1&rel=0&showinfo=0"
+                    title="YouTube video player" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture"
+                    allowfullscreen style="">
+                </iframe>
+            </div>
+
+            <!-- Live Indicator -->
+            <div class="live-indicator">
+                <div class="live-dot"></div>
+                LIVE
+            </div>
+
+            <!-- User Count -->
+            <div class="user-count">
+                <i class="fas fa-users"></i> 1,234 viewers
+            </div>
+
+            <!-- Logo -->
+            <div class="logo">
+                <img src="https://baaboo.com/cdn/shop/files/baaboo-logo_1_256x.svg?v=1745568771" alt="">
+            </div>
+
+            <!-- Show Question Button -->
+            <button class="show-question-btn" id="showQuestionBtn" onclick="toggleQuiz()">
+                <i class="fas fa-question-circle me-2"></i>Show Question
+            </button>
+
+            <!-- TikTok-style Overlay Chat -->
+            <div class="overlay-chat" id="overlayChat">
+                <div class="chat-message-overlay">
+                    <div class="message-user">@JohnDoe</div>
+                    <div class="message-text">Great stream! Thanks for sharing 🔥</div>
+                </div>
+                <div class="chat-message-overlay">
+                    <div class="message-user">@Sarah123</div>
+                    <div class="message-text">The content is amazing!</div>
+                </div>
+                <div class="chat-message-overlay">
+                    <div class="message-user">@TechGuru</div>
+                    <div class="message-text">Can't wait for the quiz 🎯</div>
+                </div>
+                <div class="chat-message-overlay">
+                    <div class="message-user">@TechGuru</div>
+                    <div class="message-text">Can't wait for the quiz 🎯</div>
+                </div>
+                <div class="chat-message-overlay">
+                    <div class="message-user">@TechGuru</div>
+                    <div class="message-text">Can't wait for the quiz 🎯</div>
+                </div>
+                <div class="chat-message-overlay">
+                    <div class="message-user">@TechGuru</div>
+                    <div class="message-text">Can't wait for the quiz 🎯</div>
+                </div>
+            </div>
+
+            <!-- Bottom Chat Input -->
+            <div class="bottom-chat-input">
+                <div class="chat-input-group">
+                    <input type="text" class="chat-input-field" placeholder="Add a comment..." id="chatInput">
+                    <button class="send-btn-overlay" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Overlay -->
+    <div class="quiz-overlay" id="quizOverlay">
+        <div class="quiz-content">
+            <!-- <div class="quiz-header">
+                <h3 style="color: var(--text-dark); margin: 0;">
+                    <i class="fas fa-brain text-primary me-2"></i>
+                    Live Quiz
+                </h3>
+                <button class="close-quiz-btn" onclick="toggleQuiz()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div> -->
+
+            <div class="quiz-section">
+                <div class="quiz-question">
+                    <i class="fas fa-question-circle text-primary me-2"></i>
+                    What is the capital of Germany?
+                </div>
+
+                <div class="quiz-option">
+                    <input type="radio" id="option1" name="quiz" value="london">
+                    <label for="option1">A) London</label>
+                </div>
+
+                <div class="quiz-option">
+                    <input type="radio" id="option2" name="quiz" value="paris">
+                    <label for="option2">B) Paris</label>
+                </div>
+
+                <div class="quiz-option">
+                    <input type="radio" id="option3" name="quiz" value="madrid">
+                    <label for="option3">C) Madrid</label>
+                </div>
+
+                <div class="quiz-option">
+                    <input type="radio" id="option4" name="quiz" value="berlin">
+                    <label for="option4">D) Berlin</label>
+                </div>
+
+                <!-- <button class="submit-btn" onclick="submitQuiz()">
+                    <i class="fas fa-check me-2"></i>Submit Answer
+                </button> -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let quizMode = false;
+
+        // Toggle quiz mode
+        function toggleQuiz() {
+            const mainContainer = document.getElementById('mainContainer');
+            const quizOverlay = document.getElementById('quizOverlay');
+            const showQuestionBtn = document.getElementById('showQuestionBtn');
+            const videoPlaceholder = document.querySelector('#videoPlaceholder');
+
+            quizMode = !quizMode;
+
+            if (quizMode) {
+                mainContainer.classList.add('quiz-mode');
+                quizOverlay.classList.add('active');
+                videoPlaceholder.classList.add('question-activated');
+                showQuestionBtn.style.display = 'none';
+                showQuestionBtn.classList.add('active');
+            } else {
+                mainContainer.classList.remove('quiz-mode');
+                quizOverlay.classList.remove('active');
+                videoPlaceholder.classList.remove('question-activated');
+                showQuestionBtn.style.display = 'block';
+                showQuestionBtn.classList.remove('active');
+            }
+        }
+
+        // Quiz functionality
+        function submitQuiz() {
+            const selected = document.querySelector('input[name="quiz"]:checked');
+            if (selected) {
+                const isCorrect = selected.value === 'berlin';
+                if (isCorrect) {
+                    // Remove previous highlights
+                    document.querySelectorAll('.quiz-option').forEach(opt => {
+                        opt.classList.remove('correct', 'incorrect');
+                    });
+                    // Add 'correct' to the parent .quiz-option
+                    selected.closest('.quiz-option').classList.add('correct');
+                } else {
+                    // Remove previous highlights
+                    document.querySelectorAll('.quiz-option').forEach(opt => {
+                        opt.classList.remove('correct', 'incorrect');
+                    });
+                    // Add 'incorrect' to the parent .quiz-option
+                    selected.closest('.quiz-option').classList.add('incorrect');
+                    // Highlight the correct answer
+                    document.querySelector('input[value="paris"]').closest('.quiz-option').classList.add('correct');
+                }
+                // Auto close quiz after submission
+                setTimeout(() => {
+                    toggleQuiz();
+                }, 3000);
+            } else {
+                alert('Please select an answer first!');
+            }
+        }
+        //auto submit the quiz when radio option is selected
+        const quizOptions = document.querySelectorAll('input[name="quiz"]');
+        quizOptions.forEach(option => {
+            option.addEventListener('change', submitQuiz);
+        });
+
+        // Chat functionality
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+
+            if (message) {
+                addOverlayMessage('@You', message);
+                input.value = '';
+            }
+        }
+
+        function addOverlayMessage(user, text) {
+            const overlayChat = document.getElementById('overlayChat');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message-overlay';
+            messageDiv.innerHTML = `
+                <div class="message-user">${user}</div>
+                <div class="message-text">${text}</div>
+            `;
+
+            overlayChat.appendChild(messageDiv);
+
+            // Remove old messages if too many
+            if (overlayChat.children.length > 5) {
+                overlayChat.removeChild(overlayChat.firstChild);
+            }
+
+            // Remove message after 8 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.style.opacity = '0';
+                    messageDiv.style.transform = 'translateX(-100px)';
+                    setTimeout(() => {
+                        if (messageDiv.parentNode) {
+                            messageDiv.parentNode.removeChild(messageDiv);
+                        }
+                    }, 500);
+                }
+            }, 8000);
+        }
+
+        // Allow Enter key to send message
+        document.getElementById('chatInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Simulate new overlay messages
+        function addRandomOverlayMessage() {
+            const users = ['@Alice', '@Bob', '@Charlie', '@Diana', '@Eve', '@Mike', '@Lisa'];
+            const messages = [
+                'This is amazing! 🔥',
+                'Great content as always 👏',
+                'Thanks for the explanation 💯',
+                'Love this stream! ❤️',
+                'Keep it up! 🚀',
+                'So informative! 📚',
+                'Can\'t stop watching 😍',
+                'Best stream ever! ⭐'
+            ];
+
+            const randomUser = users[Math.floor(Math.random() * users.length)];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+
+            addOverlayMessage(randomUser, randomMessage);
+        }
+
+        // Add random messages every 4-8 seconds
+         setInterval(addRandomOverlayMessage, Math.random() * 4000 + 4000);
+
+        // Update viewer count periodically
+        function updateViewerCount() {
+            const viewerElement = document.querySelector('.user-count');
+            const currentCount = parseInt(viewerElement.textContent.match(/\d+/)[0]);
+            const change = Math.floor(Math.random() * 20) - 10;
+            const newCount = Math.max(1000, currentCount + change);
+            viewerElement.innerHTML = `<i class="fas fa-users"></i> ${newCount.toLocaleString()} viewers`;
+        }
+
+        setInterval(updateViewerCount, 30000);
+
+        // Prevent quiz overlay from closing when clicking inside
+        document.getElementById('quizOverlay').addEventListener('click', function (e) {
+            if (e.target === this) {
+                toggleQuiz();
+            }
+        });
+    </script>
+</body>
+
+</html>
