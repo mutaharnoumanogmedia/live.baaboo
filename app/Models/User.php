@@ -58,4 +58,11 @@ class User extends Authenticatable
             ->withPivot(['score', 'status', 'created_at', 'prize_won', 'is_winner', 'is_online'])
             ->withTimestamps();
     }
+
+    public function blockedLiveShows()
+    {
+        return $this->belongsToMany(LiveShow::class, 'live_show_block_users')
+            ->using(LiveShowBlockUser::class)
+            ->withTimestamps();
+    }
 }

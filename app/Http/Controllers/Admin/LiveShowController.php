@@ -302,4 +302,19 @@ class LiveShowController extends Controller
         }
         return 0;
     }
+
+
+    function blockUser(Request $request, $id, $userId)
+    {
+        $liveShow = LiveShow::findOrFail($id);
+        $user = $liveShow->users()->where('user_id', $userId)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found in this live show.'], 404);
+        }
+
+       
+
+        return response()->json(['message' => 'User has been blocked from the live show.']);
+    }
 }

@@ -20,7 +20,7 @@ class LiveShow extends Model
         'prize_amount',
         'currency',
         'created_by'
-        
+
     ];
 
     public function scopeUpcoming($query)
@@ -63,5 +63,12 @@ class LiveShow extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function blockedUsers()
+    {
+        return $this->belongsToMany(User::class, 'live_show_block_users')
+            ->using(LiveShowBlockUser::class)
+            ->withTimestamps();
     }
 }

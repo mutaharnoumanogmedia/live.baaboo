@@ -726,7 +726,8 @@
             <i class="fas fa-trophy fa-3x text-warning mb-3"></i>
             <h3 class="mb-2" style="color:#ff5f00;">Congratulations!</h3>
             <p class="mb-3" style="font-size:1.1rem;">You are selected as a winner!</p>
-            <p class="mb-3" style="font-size:1.1rem;">Your prize money is: <span id="prizeAmount"></span></p>
+            <p class="mb-3" style="font-size:1.1rem;">Your prize money is: </p>
+            <div class="text-center " style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)" id="prizeAmount"></div>
             <button class="btn btn-success" onclick="document.getElementById('winnerDialog').style.display='none';">
                 <i class="fas fa-check me-2"></i>Close
             </button>
@@ -1190,14 +1191,16 @@
             document.querySelector('#quizTimer').style.display = "none";
 
             console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
-            if (isCurrentAnswerCorrect === true) {
-                fireConfetti();
-                appendEvaluationStatus('success');
-            } else if (isCurrentAnswerCorrect === false) {
-                isEliminated = true;
-                appendEvaluationStatus('fail');
-            } else {
-                appendEvaluationStatus('warning');
+            if (!isEliminated) {
+                if (isCurrentAnswerCorrect === true) {
+                    fireConfetti();
+                    appendEvaluationStatus('success');
+                } else if (isCurrentAnswerCorrect === false) {
+                    isEliminated = true;
+                    appendEvaluationStatus('fail');
+                } else {
+                    appendEvaluationStatus('warning');
+                }
             }
             // Reset for next question
             // isCurrentAnswerCorrect = null;
