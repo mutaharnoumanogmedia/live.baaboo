@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Stream Mobile UI</title>
+    <title>baaboo Live Game Show {{ $liveShow->id ?? '' }}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -35,6 +35,7 @@
             left: 0;
             right: 0;
             z-index: 50;
+            padding: 5px 15px;
         }
 
         .main-container {
@@ -145,10 +146,10 @@
         }
 
         .logo {
-            position: ;
+
             top: 10px;
             right: 10px;
-            width: 50px;
+            width: 70px;
             height: 30px;
 
             border-radius: 30px;
@@ -156,7 +157,7 @@
         }
 
         .logo img {
-            width: 50px;
+            width: 100%;
             height: auto;
             background-color: #ffe6d9;
             border-radius: 30px;
@@ -498,6 +499,13 @@
             width: 180px;
             text-align: center;
         }
+
+
+        @media (min-width: 992px) {
+            .navbar-expand-lg {
+                justify-content: space-between
+            }
+        }
     </style>
 </head>
 
@@ -634,7 +642,7 @@
             <div class="modal-content" style="border-radius: 20px;">
                 <div class="modal-header" style="border-bottom: none;">
                     <h5 class="modal-title" id="registerModalLabel">
-                        <i class="fas fa-user-plus me-2 text-warning"></i>Register to Chat
+                        <i class="fas fa-user-plus me-2 text-warning"></i>Register to Participate
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -1167,7 +1175,7 @@
                 appendEvaluationStatus('warning');
             }
             // Reset for next question
-            isCurrentAnswerCorrect = null;
+            // isCurrentAnswerCorrect = null;
             //uncheckAndEnableOptions();
         }
 
@@ -1180,20 +1188,25 @@
 
             if (type === 'success') {
                 alertClass = 'alert-success';
-                message = `<i class="fas fa-check-circle me-2"></i>Correct Answer! You are safe.`;
+                message = `<i class="fas fa-check-circle me-2"></i>Correct Answer!`;
             } else if (type === 'fail') {
                 alertClass = 'alert-danger';
-                message = `<i class="fas fa-times-circle me-2"></i>Incorrect Answer. Eliminated!`;
+                message = `<i class="fas fa-times-circle me-2"></i> Eliminated!`;
+                updateEliminatedStatus();
+
             } else {
                 alertClass = 'alert-warning';
-                message = `<i class="fas fa-exclamation-circle me-2"></i>No answer selected. Eliminated!`;
+                message = `<i class="fas fa-exclamation-circle me-2"></i> Eliminated!`;
+                updateEliminatedStatus();
+
             }
 
             evaluationDiv.innerHTML = `
-                    <div class="alert ${alertClass} text-center" role="alert">
+                    <div class="alert ${alertClass} text-center w-auto mx-auto rounded" style='font-size: 1.2rem;' role="alert">
                         ${message}
                     </div>
                 `;
+
 
             // Clear message after 5 seconds
             setTimeout(() => {
@@ -1202,6 +1215,27 @@
                 document.querySelector('#videoContainer').style.display = "block";
 
             }, 3000);
+        }
+
+
+        function updateEliminatedStatus() {
+            if (isEliminated) {
+                // Disable all options
+                document.querySelectorAll('input[name="option"]').forEach(option => {
+                    option.disabled = true;
+
+                });
+            }
+            //ajax to update server about elimination status
+            fetch('{{ url('live-show/' . $liveShow->id . '/update-elimination-status') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    is_eliminated: isEliminated
+                })
+            });
         }
     </script>
 

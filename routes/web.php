@@ -31,6 +31,8 @@ Route::post('live-show/{id}/report-message', [GamePlayController::class, 'report
 Route::post("live-show/{id}/user/register", [GamePlayController::class, 'registerUser'])->name('live-show.user.register');
 //livestream.logout
 Route::post('liveshow/{id}/logout', [GamePlayController::class, 'liveShowLogout'])->name('livestream.logout');
+//update-elimination-status
+Route::post('live-show/{id}/update-elimination-status', [GamePlayController::class, 'updateEliminationStatus'])->name('live-show.update-elimination-status');
 
 //submit-quiz
 Route::post('live-show/{id}/submit-quiz', [GamePlayController::class, 'submitQuiz'])->name('live-show.submit-quiz');

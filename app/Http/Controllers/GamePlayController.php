@@ -9,6 +9,7 @@ use App\Models\LiveShow;
 use App\Models\LiveShowMessages;
 use App\Models\QuizOption;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class GamePlayController extends Controller
 {
@@ -34,16 +35,37 @@ class GamePlayController extends Controller
             $liveShow = LiveShow::find($liveShowId);
 
             if ($liveShow) {
-                $liveShow->users()->syncWithoutDetaching([$existingUser->id => ['is_online' => 1]]);
+                $liveShow->users()->syncWithoutDetaching(
+                    [
+                        $existingUser->id =>
+                        [
+                            'is_online' => 1,
+                            'is_winner' => 0,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                            'score' => 0,
+                            'status' => 'registered',
+                            'last_active_at' => now()
+                        ]
+                    ]
+                );
             }
 
             Auth::login($existingUser);
 
             $request->session()->regenerate();
+            $this->triggerOnlineUsersEvent($liveShowId);
+
+            //Job : send email to user with login details 
+
             return response()->json(['success' => true, 'message' => 'User logged in successfully.', 'user' => $existingUser, 'authStatus' => Auth::check()]);
         }
+        //end of existing user login
 
-        $validator = \Validator::make($request->all(), [
+
+
+
+        $validator = Validator::make($request->all(), [
             'name'  => 'required|alpha_num|string|max:255|unique:users,name',
             'email' => 'required|email|max:255|unique:users,email',
         ]);
@@ -65,7 +87,18 @@ class GamePlayController extends Controller
         $user = \App\Models\User::create($validated);
 
         // Attach the user to the live show with default values
-        $liveShow->users()->attach($user->id, ['is_online' => 1, 'is_winner' => 0]);
+        $liveShow->users()->attach(
+            $user->id,
+            [
+                'is_online' => 1,
+                'is_winner' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'score' => 0,
+                'status' => 'registered',
+                'last_active_at' => now()
+            ]
+        );
 
         Auth::login($user);
 
@@ -105,7 +138,9 @@ class GamePlayController extends Controller
         if ($liveShow) {
             $activeUsers = $liveShow->users()
                 ->wherePivot('is_online', 1)
+                ->orderBy('pivot_is_online', 'desc')
                 ->get()
+
                 ->map(function ($user) {
                     return [
                         'id' => $user->id,
@@ -113,6 +148,7 @@ class GamePlayController extends Controller
                         'email' => $user->email,
                         'is_online' => $user->pivot->is_online,
                         'is_winner' => $user->pivot->is_winner ?? null,
+                        'status' => $user->pivot->status ?? null,
                     ];
                 })->toArray();
 
@@ -171,6 +207,26 @@ class GamePlayController extends Controller
         }
     }
 
+    public function updateEliminationStatus(Request $request, $liveShowId)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::check()], 401);
+        }
+
+        $liveShow = LiveShow::find($liveShowId);
+        if (!$liveShow) {
+            return response()->json(['message' => 'Live show not found.'], 404);
+        }
+
+        //update pivot table
+        $updateResult = $liveShow->users()->updateExistingPivot($user->id, ['status' => 'eliminated']);
+
+        $this->triggerOnlineUsersEvent($liveShowId);
+
+        return response()->json(['success' => true, 'message' => 'User elimination status updated.', 'updateResult' => $updateResult]);
+    }
+
     public function postMessage(Request $request, $liveShowId)
     {
         $user = Auth::user();
@@ -226,7 +282,8 @@ class GamePlayController extends Controller
         return response()->json(['messages' => $messages], 200);
     }
 
-    public function reportUserMessage(){
+    public function reportUserMessage()
+    {
         //code to report user message for admin review
         return response()->json(['message' => 'Message reported for review.'], 200);
     }

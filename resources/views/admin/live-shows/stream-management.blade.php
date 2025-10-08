@@ -25,7 +25,8 @@
                         <!-- Placeholder for video stream -->
                         <div class="bg-dark text-white d-flex align-items-center justify-content-center mb-3"
                             style="height:150px;">
-                           <img src="{{ $liveShow->thumbnail }}" class="img-fluid" style="width: auto; height: 100%; object-fit: contain;"  alt="">
+                            <img src="{{ $liveShow->thumbnail }}" class="img-fluid"
+                                style="width: auto; height: 100%; object-fit: contain;" alt="">
                         </div>
                         <div class="alert">
                             <!-- Slick Slider for Questions -->
@@ -230,9 +231,9 @@
                 }
 
                 players.forEach(player => {
-                    const li = `<li class="list-group-item bg-dark text-white d-flex justify-content-between align-items-center">
+                    const li = `<li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
                         <div>
-                            <strong>${player.name}</strong>
+                            <strong class='${player.status != 'eliminated' ? 'text-white' : 'text-secondary'}'>${player.name}</strong>
                             <span class="ms-2 ${player.is_online == 1 ? 'text-success' : 'text-secondary'}">
                            <i class="bi bi-circle-fill" style="font-size: 0.75rem;"></i>
                             </span>
