@@ -16,12 +16,14 @@ class ShowPlayerAsWinnerEvent implements ShouldBroadcast
 
     public $userId;
     public $liveShowId;
+    public $prizeMoney = 0;
 
-    public function __construct($userId, $liveShowId)
+    public function __construct($userId, $liveShowId, $prizeMoney = 0)
     {
         //
         $this->userId = $userId;
         $this->liveShowId = $liveShowId;
+        $this->prizeMoney = $prizeMoney;
     }
 
     public function broadcastOn()
@@ -37,6 +39,7 @@ class ShowPlayerAsWinnerEvent implements ShouldBroadcast
         return [
             'userId' => $this->userId,
             'liveShowId' => $this->liveShowId,
+            'prizeMoney' => $this->prizeMoney
         ];
     }
 }

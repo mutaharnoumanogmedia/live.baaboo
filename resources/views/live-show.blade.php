@@ -506,6 +506,15 @@
                 justify-content: space-between
             }
         }
+
+        input[type="radio"]:disabled+label {
+            background: #f0f0f0;
+            border-color: #ddd;
+            color: #aaa;
+            cursor: not-allowed;
+            pointer-events: none;
+            opacity: 0.7;
+        }
     </style>
 </head>
 
@@ -717,6 +726,7 @@
             <i class="fas fa-trophy fa-3x text-warning mb-3"></i>
             <h3 class="mb-2" style="color:#ff5f00;">Congratulations!</h3>
             <p class="mb-3" style="font-size:1.1rem;">You are selected as a winner!</p>
+            <p class="mb-3" style="font-size:1.1rem;">Your prize money is: <span id="prizeAmount"></span></p>
             <button class="btn btn-success" onclick="document.getElementById('winnerDialog').style.display='none';">
                 <i class="fas fa-check me-2"></i>Close
             </button>
@@ -1306,6 +1316,8 @@
             console.log('You are a winner!', data);
             addOverlayMessage('@System', 'Congratulations! You are selected as a winner!');
             fireConfetti();
+
+            document.getElementById('prizeAmount').textContent = data.prizeMoney + ' EUR';
             showWinnerDialogDiv();
             // Optionally, you can add more UI feedback here, like a popup or sound effect.
         });

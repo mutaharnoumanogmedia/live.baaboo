@@ -235,7 +235,7 @@ class LiveShowController extends Controller
         //update all  notEliminatedUsers to winner
         foreach ($notEliminatedUsers as $user) {
             $liveShow->users()->updateExistingPivot($user->id, ['is_winner' => 1, 'prize_won' => $prizeWon]);
-            ShowPlayerAsWinnerEvent::dispatch($user->id, (string)$liveShowId);
+            ShowPlayerAsWinnerEvent::dispatch($user->id, (string)$liveShowId, $prizeWon);
         }
 
 
