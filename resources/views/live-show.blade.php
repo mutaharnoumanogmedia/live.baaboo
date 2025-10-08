@@ -709,6 +709,21 @@
     </div>
 
 
+    <!-- Winner Dialog -->
+    <div id="winnerDialog"
+        style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+        <div
+            style="background:#fff; border-radius:20px; padding:40px 30px; text-align:center; max-width:350px; margin:auto; margin-top: 20%; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+            <i class="fas fa-trophy fa-3x text-warning mb-3"></i>
+            <h3 class="mb-2" style="color:#ff5f00;">Congratulations!</h3>
+            <p class="mb-3" style="font-size:1.1rem;">You are selected as a winner!</p>
+            <button class="btn btn-success" onclick="document.getElementById('winnerDialog').style.display='none';">
+                <i class="fas fa-check me-2"></i>Close
+            </button>
+        </div>
+    </div>
+
+
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -1276,6 +1291,30 @@
             // }, timer * 1000);
 
         });
+
+
+
+
+        @auth
+        var channelShowWinner = pusher.subscribe('live-show-winner-user.{{ $liveShow->id }}.{{ Auth::user()->id }}');
+        // System subscription event
+        channelShowWinner.bind('pusher:subscription_succeeded', function() {
+            console.log('Winner Subscribed successfully!');
+        });
+        // Your Laravel broadcast event (drop the dot)
+        channelShowWinner.bind('ShowPlayerAsWinnerEvent', function(data) {
+            console.log('You are a winner!', data);
+            addOverlayMessage('@System', 'Congratulations! You are selected as a winner!');
+            fireConfetti();
+            showWinnerDialogDiv();
+            // Optionally, you can add more UI feedback here, like a popup or sound effect.
+        });
+
+        function showWinnerDialogDiv() {
+            // Show the winner dialog
+            document.querySelector('#winnerDialog').style.display = 'block';
+        }
+        @endauth
     </script>
 </body>
 

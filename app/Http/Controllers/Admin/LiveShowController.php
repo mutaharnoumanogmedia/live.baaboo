@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\RemoveLiveShowQuizQuestionEvent;
 use App\Events\ShowLiveShowQuizQuestionEvent;
+use App\Events\ShowPlayerAsWinnerEvent;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\LiveShow;
@@ -136,7 +137,7 @@ class LiveShowController extends Controller
 
         $thumbnailUrl = 'https://img.youtube.com/vi/' . $videoId . '/hqdefault.jpg';
         $validated['thumbnail'] = $thumbnailUrl;
-        
+
 
         $live_show->update($validated);
 
@@ -213,6 +214,36 @@ class LiveShowController extends Controller
     }
 
 
+
+    public function updateWinners(Request $request, $liveShowId)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::check()], 401);
+        }
+
+        $liveShow = LiveShow::find($liveShowId);
+        if (!$liveShow) {
+            return response()->json(['message' => 'Live show not found.'], 404);
+        }
+        //take not eliminated users only
+        $notEliminatedUsers = $liveShow->users()->wherePivot('status', '!=', 'eliminated')->get();
+        if ($notEliminatedUsers->isEmpty()) {
+            return response()->json(['message' => 'No users found for this live show.'], 404);
+        }
+        $prizeWon = $this->calculateEachWinnerPrize($liveShow);
+        //update all  notEliminatedUsers to winner
+        foreach ($notEliminatedUsers as $user) {
+            $liveShow->users()->updateExistingPivot($user->id, ['is_winner' => 1, 'prize_won' => $prizeWon]);
+            ShowPlayerAsWinnerEvent::dispatch($user->id, (string)$liveShowId);
+        }
+
+
+
+        return response()->json(['success' => true, 'message' => 'Users winner status updated.', 'winnerUsers' => $notEliminatedUsers]);
+    }
+
+
     public function apiGetLiveShowMessages($id)
     {
         $liveShow = LiveShow::findOrFail($id);
@@ -226,8 +257,22 @@ class LiveShowController extends Controller
     public function apiGetLiveShowUsers($id)
     {
         $liveShow = LiveShow::with(['users' => function ($query) {
-            $query->withPivot(['score', 'status', 'created_at', 'last_active', 'is_online']);
-        }])->findOrFail($id);
+            $query->withPivot(['score', 'status', 'is_winner', 'created_at', 'last_active', 'is_online']);
+        }])
+
+            ->findOrFail($id);
+
+
+        $liveShow->users = $liveShow->users->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'is_online' => $user->pivot->is_online,
+                'is_winner' => $user->pivot->is_winner ?? null,
+                'status' => $user->pivot->status ?? null,
+            ];
+        });
 
         return response()->json($liveShow->users);
     }
@@ -246,5 +291,15 @@ class LiveShowController extends Controller
         }
 
         return null;
+    }
+
+
+    function calculateEachWinnerPrize(LiveShow $liveShow)
+    {
+        $winnersCount = $liveShow->users()->wherePivot('status', 'registered')->count();
+        if ($winnersCount > 0) {
+            return $liveShow->prize_amount / $winnersCount;
+        }
+        return 0;
     }
 }

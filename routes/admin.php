@@ -16,12 +16,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get("live-shows/stream-management/{id}", [\App\Http\Controllers\Admin\LiveShowController::class, 'streamManagement'])->name('live-shows.stream-management');
     Route::post("live-shows/stream-management/{id}/quizzes/{quizId}/send-quiz-question", [\App\Http\Controllers\Admin\LiveShowController::class, 'sendQuizQuestion'])->name('live-shows.stream-management.send-quiz-question');
-   
+
     Route::post("live-shows/stream-management/{id}/quizzes/{quizId}/remove-quiz-question", [\App\Http\Controllers\Admin\LiveShowController::class, 'removeQuizQuestion'])->name('live-shows.stream-management.remove-quiz-question');
 
     Route::get("live-shows/stream-management/{id}/fetch-messages", [\App\Http\Controllers\Admin\LiveShowController::class, 'fetchChatMessages'])->name('live-shows.stream-management.fetch-chat-messages');
 
+    //updateWinners
+    Route::post("live-shows/stream-management/{liveShowId}/update-winners", [\App\Http\Controllers\Admin\LiveShowController::class, 'updateWinners'])->name('live-shows.update-winners');
+
     Route::get("players", [\App\Http\Controllers\Admin\PlayerController::class, 'index'])->name('players.index');
     Route::get("players/{id}", [\App\Http\Controllers\Admin\PlayerController::class, 'show'])->name('players.show');
-    
 })->middleware(['auth']);

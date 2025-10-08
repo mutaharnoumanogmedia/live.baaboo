@@ -227,6 +227,7 @@ class GamePlayController extends Controller
         return response()->json(['success' => true, 'message' => 'User elimination status updated.', 'updateResult' => $updateResult]);
     }
 
+
     public function postMessage(Request $request, $liveShowId)
     {
         $user = Auth::user();

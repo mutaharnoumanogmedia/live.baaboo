@@ -75,6 +75,13 @@
 
                                                 </center>
                                             </div>
+
+                                            <div class="mb-3">
+                                                <button type="button" class="btn btn-warning"
+                                                    onclick="updateWinners()">
+                                                    Mark All Non-Eliminated Users as Winners
+                                                </button>
+                                            </div>
                                         @endif
                                     </div>
                                 @endforeach
@@ -204,12 +211,14 @@
                     .then(response => response.json())
                     .then(data => {
                         // Assuming data is an array of player names
+                        console.log('Active Players Data:', data);
 
                         data = data.map(player => {
                             return {
                                 name: player.name,
-                                is_online: player.pivot.is_online,
-                                is_winner: player.is_winner
+                                is_online: player.is_online,
+                                is_winner: player.is_winner,
+                                status: player.status
                             }
                         });
                         console.log(data);
@@ -328,6 +337,32 @@
                     })
                     .catch(error => {
                         console.error('Error removing quiz question:', error);
+                    });
+            }
+
+            function updateWinners() {
+                if (!confirm('Are you sure you want to mark all non-eliminated users as winners?')) {
+                    return;
+                }
+
+                fetch(`{{ route('admin.live-shows.update-winners', ['liveShowId' => $liveShow->id]) }}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Winners updated:', data);
+                        alert(data.message);
+                        // Optionally, refresh the player list to show winners
+                        fetchActivePlayers().then(activePlayers => {
+                            appendPlayerList(activePlayers);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error updating winners:', error);
                     });
             }
         </script>
