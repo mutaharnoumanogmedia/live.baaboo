@@ -196,7 +196,7 @@
         /* TikTok-style overlay chat */
         .overlay-chat {
             position: absolute;
-            bottom: 80px;
+            bottom: 100px;
             left: 1px;
             right: 1px;
             z-index: 5;
@@ -252,13 +252,15 @@
         /* Chat input at bottom */
         .bottom-chat-input {
             position: absolute;
-            bottom: 20px;
+            bottom: 0px;
             left: 0;
             right: 0;
             background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(20px);
             padding: 15px;
             z-index: 10;
+            height: 120px;
+            background: black;
         }
 
         .chat-input-group {
@@ -1355,9 +1357,9 @@
 
 
 
-        
+
         var channelShowWinner = pusher.subscribe(
-        'live-show-winner-user.{{ $liveShow->id }}.{{ Auth::user()->id ?? '' }}');
+            'live-show-winner-user.{{ $liveShow->id }}.{{ Auth::user()->id ?? '' }}');
         // System subscription event
         channelShowWinner.bind('pusher:subscription_succeeded', function() {
             console.log('Winner Subscribed successfully!');
@@ -1377,7 +1379,6 @@
             // Show the winner dialog
             document.querySelector('#winnerDialog').style.display = 'block';
         }
-         
     </script>
 
     <script>
