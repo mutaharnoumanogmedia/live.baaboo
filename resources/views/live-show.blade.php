@@ -1241,7 +1241,7 @@
                 } else {
                     appendEvaluationStatus('warning');
                 }
-            }else{
+            } else {
                 showVideoContainer();
             }
 
@@ -1355,8 +1355,9 @@
 
 
 
-        @auth
-        var channelShowWinner = pusher.subscribe('live-show-winner-user.{{ $liveShow->id }}.{{ Auth::user()->id }}');
+        
+        var channelShowWinner = pusher.subscribe(
+        'live-show-winner-user.{{ $liveShow->id }}.{{ Auth::user()->id ?? '' }}');
         // System subscription event
         channelShowWinner.bind('pusher:subscription_succeeded', function() {
             console.log('Winner Subscribed successfully!');
@@ -1376,7 +1377,7 @@
             // Show the winner dialog
             document.querySelector('#winnerDialog').style.display = 'block';
         }
-        @endauth
+         
     </script>
 
     <script>
