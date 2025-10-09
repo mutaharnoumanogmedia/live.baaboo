@@ -259,7 +259,7 @@
             backdrop-filter: blur(20px);
             padding: 15px;
             z-index: 10;
-            height: 120px;
+            height: 130px;
             background: black;
         }
 
@@ -644,7 +644,7 @@
             <!-- Bottom Chat Input -->
             <div class="bottom-chat-input">
                 <div class="chat-input-group">
-                    <input type="text" class="chat-input-field" placeholder="Add a comment..." id="chatInput">
+                    <input type="text" class="chat-input-field" maxlength="120" placeholder="write something..." id="chatInput">
                     <button class="send-btn-overlay" onclick="sendMessage()">
                         <i class="fas fa-paper-plane"></i>
                     </button>
