@@ -72,13 +72,17 @@
 
         }
 
-        .video-container iframe {
+        .video-container #player {
             border-radius: 00px;
             width: 100%;
             height: 100%;
-
             background: #000;
+            object-fit: cover;
+            pointer-events: none;
+
         }
+
+
 
         .video-container.question-activated {
             background: linear-gradient(45deg, #764ba2, #667eea);
@@ -590,7 +594,7 @@
                     </button>
                 @endguest
             </div>
-            <div class="logo">
+            <div class="logo" id="logo">
                 <img src="https://baaboo.com/cdn/shop/files/baaboo-logo_1_256x.svg?v=1745568771" alt="">
             </div>
 
@@ -603,14 +607,19 @@
         <!-- Video Container -->
         <div class="video-container" id="videoContainer">
             <div class="video-placeholder" id="videoPlaceholder">
+                <div id="player"></div>
+
+
+
+
                 <!-- <i class="fas fa-play-circle fa-4x mb-3"></i>
                 <span>Live Stream</span>
                 <small style="opacity: 0.8; margin-top: 10px;">Portrait Mode</small> -->
-                <iframe width="320" height="568"
+                {{-- <iframe width="320" height="568" id="player"
                     src="{{ $liveShow->stream_link }}?autoplay=1&mute={{ $_GET['mute'] ?? '0' }}&playsinline=1&controls=0&modestbranding=1&rel=0&showinfo=0"
                     title="YouTube video player" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture"
                     allowfullscreen style="">
-                </iframe>
+                </iframe> --}}
             </div>
 
 
@@ -737,6 +746,25 @@
 
 
 
+    <!-- Centered Play Button Overlay -->
+    <div id="playButtonOverlay"
+        style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);">
+
+        <button id="playButton"
+            style="background:var(--primary-color);border:none;border-radius:50%;width:100px;height:100px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(255,95,0,0.3);cursor:pointer;">
+            <i class="fas fa-play fa-3x" style="color:white;"></i>
+        </button>
+
+        <div style="color:white;font-size:0.9rem;margin-top:15px;opacity:0.8;text-align:center;width:100px;">
+            Tap to Play
+        </div>
+    </div>
+
+
+
+
+
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
@@ -747,7 +775,15 @@
         let timer = 5;
 
         let isCurrentAnswerCorrect = null;
-        let isEliminated = false;
+
+        let isEliminated = {{ $isEliminated ? 'true' : 'false' }};
+        isEliminated = isEliminated == 'true' ? true : false;
+
+        let isLoggedIn = {{ Auth::check() ? 'true' : 'false' }};
+        isLoggedIn = isLoggedIn == 'true' ? true : false;
+
+        console.log('isEliminated:', isEliminated);
+        console.log('isLoggedIn:', isLoggedIn);
 
         Pusher.logToConsole = true;
         var pusher = new Pusher('{{ env('PUSHER_APP_KEY', '2a66d003a7ded9fe567a') }}', {
@@ -757,12 +793,7 @@
 
         $(document).ready(function() {
             // Initialize Pusher
-
             fetchMessages();
-
-
-
-
         });
         // Toggle quiz mode
         function toggleQuiz() {
@@ -1052,6 +1083,14 @@
                         // Optionally: update UI to reflect logged-in user
                         addOverlayMessage('@' + username, 'has joined the chat!');
                         replaceRegisterButtonWithUsername(username);
+                        isLoggedIn = true;
+                        registerButton.disabled = false;
+                        isEliminated = data.isEliminated == true ? true : false;
+
+
+
+                        console.log('User registered successfully:', data, 'isEliminated:', isEliminated,
+                            'isLoggedIn:', isLoggedIn);
                     } else {
                         errorDiv.textContent = typeof data.message === 'object' ? JSON.stringify(data.message) :
                             (data.message || 'Registration failed.');
@@ -1191,17 +1230,21 @@
             document.querySelector('#quizTimer').style.display = "none";
 
             console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
-            if (!isEliminated) {
+            if (!isEliminated && isLoggedIn) {
                 if (isCurrentAnswerCorrect === true) {
                     fireConfetti();
                     appendEvaluationStatus('success');
                 } else if (isCurrentAnswerCorrect === false) {
-                    isEliminated = true;
                     appendEvaluationStatus('fail');
+
+                    isEliminated = true;
                 } else {
                     appendEvaluationStatus('warning');
                 }
+            }else{
+                showVideoContainer();
             }
+
             // Reset for next question
             // isCurrentAnswerCorrect = null;
             //uncheckAndEnableOptions();
@@ -1240,9 +1283,13 @@
             setTimeout(() => {
                 evaluationDiv.innerHTML = '';
                 document.querySelector('#quizTimer').style.display = "none";
-                document.querySelector('#videoContainer').style.display = "block";
+                showVideoContainer();
 
             }, 3000);
+        }
+
+        function showVideoContainer() {
+            document.querySelector('#videoContainer').style.display = "block";
         }
 
 
@@ -1330,6 +1377,50 @@
             document.querySelector('#winnerDialog').style.display = 'block';
         }
         @endauth
+    </script>
+
+    <script>
+        // 1. Load the IFrame Player API
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        var player;
+
+        // 2. Create player
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '315',
+                width: '560',
+                videoId: '{{ $liveShow->stream_id ?? 0 }}',
+                playerVars: {
+                    autoplay: 1,
+                    controls: 0, // Hide play/pause bar
+                    disablekb: 1, // Disable keyboard shortcuts (e.g. spacebar)
+                    modestbranding: 1,
+                    rel: 0,
+                    playsinline: 1
+                }
+            });
+        }
+
+        // 3. Play with sound after user click
+        function playWithSoundAfterDelay() {
+            setTimeout(function() {
+                if (player && typeof player.unMute === 'function' && typeof player.playVideo === 'function') {
+                    player.unMute();
+                    player.playVideo();
+                }
+            }, 100);
+        }
+
+        // Example: call after user interaction
+
+        document.getElementById('playButton').onclick = function() {
+            document.getElementById('playButtonOverlay').style.display = 'none';
+            playWithSoundAfterDelay();
+        };
     </script>
 </body>
 

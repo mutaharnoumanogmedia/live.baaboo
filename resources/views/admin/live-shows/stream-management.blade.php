@@ -95,27 +95,61 @@
                 </div>
             </main>
 
-            <!-- Chat Section -->
-            <aside class="col-md-2 p-4 bg-secondary rounded">
-                <h5 class="mb-3">Live Chat</h5>
-                <div id="live-chat-messages" style="">
+            <div class="col-lg-6">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item">
+                        <a href="#chat-tab" class="nav-link active" data-bs-toggle="tab">
+                            Live Chat
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#live-show-preview" class="nav-link" data-bs-toggle="tab">
+                            Live Show Preview
+                        </a>
+                    </li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="chat-tab">
+                        <div class="w-100">
+                            <aside class="w-100 p-4 bg-secondary rounded">
+                                <h5 class="mb-3">Live Chat</h5>
+                                <div id="live-chat-messages" style="">
 
 
-                </div>
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Type a message...">
-                    <button class="btn btn-primary">Send</button>
-                </div>
-            </aside>
-            <aside class="col-md-4 ">
-                <div class="p-4 bg-secondary rounded">
-                    <h5 class="mb-3">Live Show View</h5>
-                    <div id="live-show-view" style="">
-                        <iframe style="width:100%; height:70vh; pointer-events:none;"
-                            src="{{ url('live-show-play/' . $liveShow->id . '?mute=1') }}" frameborder="0"></iframe>
+                                </div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Type a message...">
+                                    <button class="btn btn-primary">Send</button>
+                                </div>
+                            </aside>
+                        </div>
+                    </div>
+
+
+
+                    <div class="tab-pane" id="live-show-preview">
+                        <div class="w-100">
+                            <aside class="p-4 bg-secondary rounded">
+                                <h5 class="mb-3">Live Show View</h5>
+                                <div id="live-show-view" style="">
+                                    <iframe style="width:100%; height:70vh; pointer-events:none;"
+                                        src="{{ url('live-show-play/' . $liveShow->id . '?mute=1') }}"
+                                        frameborder="0"></iframe>
+                                </div>
+
+                            </aside>
+
+                        </div>
                     </div>
                 </div>
-            </aside>
+
+            </div>
+
+            <!-- Chat Section -->
+
+
+
+
         </div>
     </div>
 

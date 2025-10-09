@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Models\LiveShow;
 use App\Models\LiveShowMessages;
 use App\Models\QuizOption;
+use App\Models\UserQuiz;
+use App\Models\UserQuizResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -17,7 +19,12 @@ class GamePlayController extends Controller
     public function liveShow($id)
     {
         $liveShow = LiveShow::with('quizzes.options')->findOrFail($id);
-        return view('live-show', compact('liveShow'));
+
+
+
+        $isEliminated = $this->getEliminationStatus($id);
+
+        return view('live-show', compact('liveShow', 'isEliminated'));
     }
 
 
@@ -58,7 +65,7 @@ class GamePlayController extends Controller
 
             //Job : send email to user with login details 
 
-            return response()->json(['success' => true, 'message' => 'User logged in successfully.', 'user' => $existingUser, 'authStatus' => Auth::check()]);
+            return response()->json(['success' => true, 'message' => 'User logged in successfully.', 'user' => $existingUser, 'authStatus' => Auth::check(), 'isEliminated' => $this->getEliminationStatus($liveShowId)]);
         }
         //end of existing user login
 
@@ -175,8 +182,35 @@ class GamePlayController extends Controller
             return response()->json(['message' => 'Quiz ID and option are required.'], 422);
         }
 
+        $userQuiz = UserQuiz::firstOrCreate(
+            [
+                'user_id' => $user->id,
+                'live_show_id' => $liveShow->id,
+                'quiz_id' => $quizId,
+            ],
+            [
+                'created_at' => now(),
+            ]
+        );
+
         // Here you would typically check the option against the correct answer stored in the database.
         $quizOption = QuizOption::where('id', $option)->where('quiz_id', $quizId)->first();
+        //store in user_quiz_responses table
+        if ($quizOption) {
+            UserQuizResponse::updateOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'quiz_id' => $quizId,
+                    'user_quiz_id' => $userQuiz->id,
+                ],
+                [
+                    'quiz_option_id' => $quizOption->id,
+                    'is_correct' => $quizOption->is_correct,
+                    'user_response' => $quizOption->option_text,
+                    'created_at' => now(),
+                ]
+            );
+        }
         if (!$quizOption) {
             return response()->json(['success' => false, 'message' => 'Invalid quiz option.'], 422);
         }
@@ -287,5 +321,28 @@ class GamePlayController extends Controller
     {
         //code to report user message for admin review
         return response()->json(['message' => 'Message reported for review.'], 200);
+    }
+
+
+    public function getEliminationStatus($liveShowId): bool
+    {
+        if (!Auth::check()) {
+            return false;
+        }
+
+
+        $user = Auth::user();
+        if (!$user) {
+            return false;
+        }
+
+        $liveShow = LiveShow::find($liveShowId);
+        if (!$liveShow) {
+            return false;
+        }
+
+        $status = $liveShow->users()->where('user_id', $user->id)->first()->pivot->status ?? 'registered';
+
+        return $status == 'eliminated' ? true : false;
     }
 }

@@ -23,6 +23,15 @@ class LiveShow extends Model
 
     ];
 
+    protected $casts = [
+        'scheduled_at' => 'datetime',
+        'prize_amount' => 'float',
+    ];
+    
+    protected $appends = ['stream_id'];
+
+   
+
     public function scopeUpcoming($query)
     {
         return $query->where('scheduled_at', '>', now());
@@ -70,5 +79,33 @@ class LiveShow extends Model
         return $this->belongsToMany(User::class, 'live_show_block_users')
             ->using(LiveShowBlockUser::class)
             ->withTimestamps();
+    }
+
+
+    public function getStreamIdAttribute()
+    {
+        return $this->extractYouTubeId($this->stream_link);
+    }
+
+
+
+
+
+
+
+
+    function extractYouTubeId(string $url): ?string
+    {
+        // Handle HTML entities like &amp; in the URL
+        $url = html_entity_decode($url);
+
+        // Match multiple possible YouTube URL formats
+        $pattern = '%(?:youtube\.com/(?:.*v=|(?:embed|shorts)/)|youtu\.be/)([^?&/]+)%i';
+
+        if (preg_match($pattern, $url, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
     }
 }
