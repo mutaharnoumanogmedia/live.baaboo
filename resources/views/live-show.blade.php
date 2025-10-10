@@ -30,12 +30,15 @@
         }
 
         nav.navbar {
-            position: relative;
+            position: absolute;
             top: 0;
             left: 0;
             right: 0;
             z-index: 50;
-            padding: 5px 15px;
+            padding: 2px;
+            height: auto;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8) 0%,
+                    rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0.0) 100%);
         }
 
         .main-container {
@@ -105,7 +108,7 @@
             color: white;
             padding: 6px 12px;
             border-radius: 15px;
-            font-size: 0.8rem;
+            font-size: 0.6rem;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -572,11 +575,11 @@
             </div>
         </div>
 
-        <nav class="navbar navbar-expand-lg navbar-light  shadow-sm py-2">
+        <nav class="navbar navbar-expand-lg navbar-light ">
             <div class="container-fluid d-flex justify-content-between align-items-center">
 
                 <!-- Left: Live Indicator + User Count -->
-                <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-1">
                     <div class="live-indicator d-flex align-items-center">
                         <div class="live-dot me-2"
                             style="width:10px;height:10px;border-radius:50%;background:red;animation:pulse 1s infinite;">
@@ -593,7 +596,7 @@
                 <!-- Center: Logo -->
                 <div class="navbar-brand mx-auto">
                     <img src="https://baaboo.com/cdn/shop/files/baaboo-logo_1_256x.svg?v=1745568771" alt="Logo"
-                        style="height:40px;">
+                        style="height:30px;">
                 </div>
 
                 <!-- Right: Register / User Button -->
@@ -601,13 +604,13 @@
                     @guest('web')
                         <button class="btn btn-warning btn-sm px-3 py-1 fw-semibold rounded-pill shadow-sm"
                             data-bs-target="#registerModal" data-bs-toggle="modal"
-                            style="background-color:#ff5f00;border:none;box-shadow:0 4px 15px rgba(255,95,0,0.3);">
+                            style="font-size: 0.6rem;background-color:#ff5f00;border:none;box-shadow:0 4px 15px rgba(255,95,0,0.3);">
                             <i class="fas fa-user-plus me-2"></i>REGISTER
                         </button>
                     @elseauth('web')
                         <button class="btn btn-success btn-sm px-3 py-1 fw-semibold rounded-pill shadow-sm"
                             data-bs-toggle="modal" data-bs-target="#userInfoModal"
-                            style="background-color:#28a745;border:none;box-shadow:0 4px 15px rgba(40,167,69,0.3);">
+                            style="font-size: 0.6rem;background-color:#28a745;border:none;box-shadow:0 4px 15px rgba(40,167,69,0.3);">
                             <i class="fas fa-user me-2"></i>{{ Auth::guard('web')->user()->name }}
                             <span id="auth-player-points">(pts)</span>
                         </button>
