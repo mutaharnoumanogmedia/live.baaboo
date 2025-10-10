@@ -31,8 +31,8 @@ class GamePlayController extends Controller
     public function registerUser(Request $request, $liveShowId)
     {
 
-        if (Auth::check()) {
-            return response()->json(['success' => false, 'message' => 'User already logged in.', 'user' => Auth::user(), 'authStatus' => Auth::check()]);
+        if (Auth::guard('web')->check()) {
+            return response()->json(['success' => false, 'message' => 'User already logged in.', 'user' => Auth::guard('web')->user(), 'authStatus' => Auth::guard('web')->check()]);
         }
 
         //if user already registered , login it and update pivot table
@@ -58,14 +58,14 @@ class GamePlayController extends Controller
                 );
             }
 
-            Auth::login($existingUser);
+            Auth::guard('web')->login($existingUser);
 
             $request->session()->regenerate();
             $this->triggerOnlineUsersEvent($liveShowId);
 
             //Job : send email to user with login details 
 
-            return response()->json(['success' => true, 'message' => 'User logged in successfully.', 'user' => $existingUser, 'authStatus' => Auth::check(), 'isEliminated' => $this->getEliminationStatus($liveShowId)]);
+            return response()->json(['success' => true, 'message' => 'User logged in successfully.', 'user' => $existingUser, 'authStatus' => Auth::guard('web')->check(), 'isEliminated' => $this->getEliminationStatus($liveShowId)]);
         }
         //end of existing user login
 
@@ -75,10 +75,13 @@ class GamePlayController extends Controller
         $validator = Validator::make($request->all(), [
             'name'  => 'required|alpha_num|string|max:255|unique:users,name',
             'email' => 'required|email|max:255|unique:users,email',
+        ], [
+            'name.unique' => 'The username has already been taken. Please choose a different one.',
+            'email.unique' => 'The email has already been registered. Please use a different email.',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()], 422);
+            return response()->json(['messages' => $validator->errors()->all()], 422);
         }
 
         $validated = $validator->validated();
@@ -107,12 +110,12 @@ class GamePlayController extends Controller
             ]
         );
 
-        Auth::login($user);
+        Auth::guard('web')->login($user);
 
         $request->session()->regenerate();
 
         $this->triggerOnlineUsersEvent($liveShowId);
-        return response()->json(['success' => true, 'message' => 'User registered successfully.', 'user' => $user, 'authStatus' => Auth::check()]);
+        return response()->json(['success' => true, 'message' => 'User registered successfully.', 'user' => $user, 'authStatus' => Auth::guard('web')->check()]);
     }
 
     public function liveShowLogout(Request $request, $liveShow)
@@ -124,7 +127,7 @@ class GamePlayController extends Controller
         //dispatch event to update online users
 
 
-        $user = Auth::user();
+        $user = Auth::guard('web')->user();
         if ($user) {
             //update pivot table
             $updateResult = $liveShow->users()->updateExistingPivot($user->id, ['is_online' => 0]);
@@ -132,7 +135,7 @@ class GamePlayController extends Controller
 
         $this->triggerOnlineUsersEvent($liveShow->id);
 
-        Auth::logout();
+        Auth::guard('web')->logout();
         request()->session()->invalidate();
         request()->session()->regenerateToken();
         return redirect()->back();
@@ -165,9 +168,9 @@ class GamePlayController extends Controller
 
     public function submitQuiz(Request $request, $liveShowId)
     {
-        $user = Auth::user();
+        $user = Auth::guard('web')->user();
         if (!$user) {
-            return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::check()], 401);
+            return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::guard('web')->check()], 401);
         }
 
         $liveShow = LiveShow::find($liveShowId);
@@ -243,9 +246,9 @@ class GamePlayController extends Controller
 
     public function updateEliminationStatus(Request $request, $liveShowId)
     {
-        $user = Auth::user();
+        $user = Auth::guard('web')->user();
         if (!$user) {
-            return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::check()], 401);
+            return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::guard('web')->check()], 401);
         }
 
         $liveShow = LiveShow::find($liveShowId);
@@ -264,9 +267,9 @@ class GamePlayController extends Controller
 
     public function postMessage(Request $request, $liveShowId)
     {
-        $user = Auth::user();
+        $user = Auth::guard('web')->user();
         if (!$user) {
-            return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::check()], 401);
+            return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::guard('web')->check()], 401);
         }
 
         $liveShow = LiveShow::find($liveShowId);
@@ -326,12 +329,12 @@ class GamePlayController extends Controller
 
     public function getEliminationStatus($liveShowId): bool
     {
-        if (!Auth::check()) {
+        if (!Auth::guard('web')->check()) {
             return false;
         }
 
 
-        $user = Auth::user();
+        $user = Auth::guard('web')->user();
         if (!$user) {
             return false;
         }

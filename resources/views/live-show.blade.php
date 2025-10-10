@@ -30,7 +30,7 @@
         }
 
         nav.navbar {
-            position: absolute;
+            position: relative;
             top: 0;
             left: 0;
             right: 0;
@@ -101,7 +101,7 @@
             /* position: absolute; */
             top: 20px;
             left: 15px;
-            background: #dc3545;
+            background: #dc354540;
             color: white;
             padding: 6px 12px;
             border-radius: 15px;
@@ -136,10 +136,7 @@
         }
 
         .user-count {
-            position: ;
-            top: 20px;
-            left: 15px;
-            margin-top: 45px;
+            position: relative;
             background: rgba(0, 0, 0, 0.6);
             color: white;
             padding: 6px 12px;
@@ -150,12 +147,10 @@
         }
 
         .logo {
-
             top: 10px;
             right: 10px;
             width: 70px;
             height: 30px;
-
             border-radius: 30px;
 
         }
@@ -577,34 +572,49 @@
             </div>
         </div>
 
-        <nav class="navbar navbar-expand-lg navbar-light" style="">
-            <!-- Live Indicator -->
-            <div class="live-indicator">
-                <div class="live-dot"></div>
-                LIVE
+        <nav class="navbar navbar-expand-lg navbar-light  shadow-sm py-2">
+            <div class="container-fluid d-flex justify-content-between align-items-center">
+
+                <!-- Left: Live Indicator + User Count -->
+                <div class="d-flex align-items-center gap-3">
+                    <div class="live-indicator d-flex align-items-center">
+                        <div class="live-dot me-2"
+                            style="width:10px;height:10px;border-radius:50%;background:red;animation:pulse 1s infinite;">
+                        </div>
+                        <span class="fw-bold text-white">LIVE</span>
+                    </div>
+
+                    <div class="user-count d-flex align-items-center text-white">
+                        <i class="fas fa-users me-1"></i>
+                        <span id="user-count">0</span>
+                    </div>
+                </div>
+
+                <!-- Center: Logo -->
+                <div class="navbar-brand mx-auto">
+                    <img src="https://baaboo.com/cdn/shop/files/baaboo-logo_1_256x.svg?v=1745568771" alt="Logo"
+                        style="height:40px;">
+                </div>
+
+                <!-- Right: Register / User Button -->
+                <div class="register-button">
+                    @guest('web')
+                        <button class="btn btn-warning btn-sm px-3 py-1 fw-semibold rounded-pill shadow-sm"
+                            data-bs-target="#registerModal" data-bs-toggle="modal"
+                            style="background-color:#ff5f00;border:none;box-shadow:0 4px 15px rgba(255,95,0,0.3);">
+                            <i class="fas fa-user-plus me-2"></i>REGISTER
+                        </button>
+                    @elseauth('web')
+                        <button class="btn btn-success btn-sm px-3 py-1 fw-semibold rounded-pill shadow-sm"
+                            data-bs-toggle="modal" data-bs-target="#userInfoModal"
+                            style="background-color:#28a745;border:none;box-shadow:0 4px 15px rgba(40,167,69,0.3);">
+                            <i class="fas fa-user me-2"></i>{{ Auth::guard('web')->user()->name }}
+                            <span id="auth-player-points">(pts)</span>
+                        </button>
+                    @endauth
+                </div>
+
             </div>
-            <div class="register-button" style="position: ; top: 20px; left: 90px;">
-                @guest
-                    <button class="btn btn-warning btn-sm" data-bs-target="#registerModal" data-bs-toggle="modal"
-                        style="background-color: #ff5f00; border: none; font-weight: 600; padding: 5px 10px; border-radius: 20px; box-shadow: 0 4px 15px rgba(255, 95, 0, 0.3);">
-                        <i class="fas fa-user-plus me-2"></i>REGISTER
-                    </button>
-                @else
-                    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#userInfoModal"
-                        style="background-color: #28a745; border: none; font-weight: 600; padding: 5px 10px; border-radius: 20px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);">
-                        <i class="fas fa-user me-2"></i>{{ Auth::user()->name }} <span id="auth-player-points">( pts)</span>
-                    </button>
-                @endguest
-            </div>
-            <div class="logo" id="logo">
-                <img src="https://baaboo.com/cdn/shop/files/baaboo-logo_1_256x.svg?v=1745568771" alt="">
-            </div>
-
-            <!-- User Count -->
-
-
-            <!-- Logo -->
-
         </nav>
         <!-- Video Container -->
         <div class="video-container" id="videoContainer">
@@ -644,7 +654,8 @@
             <!-- Bottom Chat Input -->
             <div class="bottom-chat-input">
                 <div class="chat-input-group">
-                    <input type="text" class="chat-input-field" maxlength="120" placeholder="write something..." id="chatInput">
+                    <input type="text" class="chat-input-field" maxlength="120" placeholder="write something..."
+                        id="chatInput">
                     <button class="send-btn-overlay" onclick="sendMessage()">
                         <i class="fas fa-paper-plane"></i>
                     </button>
@@ -704,17 +715,17 @@
                 </div>
                 <div class="modal-body text-center">
                     <div class="mb-3">
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'User') }}&background=ffb380&color=fff&size=96"
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::guard('web')->user()->name ?? 'User') }}&background=ffb380&color=fff&size=96"
                             alt="Avatar" class="rounded-circle mb-2" width="80" height="80">
                     </div>
-                    <h6 class="mb-1">{{ Auth::user()->name ?? 'Guest' }}</h6>
+                    <h6 class="mb-1">{{ Auth::guard('web')->user()->name ?? 'Guest' }}</h6>
                     <div class="text-muted mb-3" style="font-size: 0.95rem;">
-                        {{ Auth::user()->email ?? '' }}
+                        {{ Auth::guard('web')->user()->email ?? '' }}
                     </div>
                     <div class="mb-3">
                         <span class="badge bg-success" style="font-size: 1rem;">
                             <i class="fas fa-star me-1"></i>
-                            {{ Auth::user()->points ?? 0 }} pts
+                            {{ Auth::guard('web')->user()->points ?? 0 }} pts
                         </span>
                     </div>
                     <form method="POST" action="{{ route('livestream.logout', [$liveShow->id]) }}">
@@ -781,7 +792,7 @@
         let isEliminated = {{ $isEliminated ? 'true' : 'false' }};
         isEliminated = isEliminated == 'true' ? true : false;
 
-        let isLoggedIn = {{ Auth::check() ? 'true' : 'false' }};
+        let isLoggedIn = {{ Auth::guard('web')->check() ? 'true' : 'false' }};
         isLoggedIn = isLoggedIn == 'true' ? true : false;
 
         console.log('isEliminated:', isEliminated);
@@ -1028,7 +1039,7 @@
                 .then(data => {
                     const newCount = data.length;
                     viewerElement.innerHTML =
-                        `<i class="fas fa-users"></i> ${newCount.toLocaleString()} viewers`;
+                        `${newCount.toLocaleString()} `;
                 })
                 .catch(() => {
                     // Optionally handle error or fallback
@@ -1059,6 +1070,8 @@
             const email = document.getElementById('registerEmail').value.trim();
             const errorDiv = document.getElementById('registerError');
             errorDiv.style.display = 'none';
+            errorDiv.innerHTML = '';
+
 
             if (!username || !email) {
                 errorDiv.textContent = 'Please fill in all fields.';
@@ -1080,30 +1093,58 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+
                         var modal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
                         modal.hide();
                         // Optionally: update UI to reflect logged-in user
                         addOverlayMessage('@' + username, 'has joined the chat!');
                         replaceRegisterButtonWithUsername(username);
                         isLoggedIn = true;
-                        registerButton.disabled = false;
+
+                        enabledRegisterButton();
+
                         isEliminated = data.isEliminated == true ? true : false;
-
-
 
                         console.log('User registered successfully:', data, 'isEliminated:', isEliminated,
                             'isLoggedIn:', isLoggedIn);
+
+                        playerAsWinnerEventTrigger(data.user.id);
                     } else {
-                        errorDiv.textContent = typeof data.message === 'object' ? JSON.stringify(data.message) :
-                            (data.message || 'Registration failed.');
+
+
+                        const ul = document.createElement('ul');
+                        ul.classList.add('text-danger', 'mt-2'); // optional bootstrap styling
+
+                        data.messages.forEach(msg => {
+                            const li = document.createElement('li');
+                            li.textContent = msg;
+                            ul.appendChild(li);
+                        });
+
+                        errorDiv.appendChild(ul);
+
+
                         errorDiv.style.display = 'block';
+
+                        enabledRegisterButton();
                     }
                 })
                 .catch(() => {
+
+
                     errorDiv.textContent = 'An error occurred. Please try again.';
                     errorDiv.style.display = 'block';
+
+                    enabledRegisterButton();
                 });
         });
+
+
+        function enabledRegisterButton() {
+            const registerButton = document.querySelector('#registerForm button[type="submit"]');
+            registerButton.disabled = false;
+            registerButton.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Register';
+        }
 
         //function to replace the register button with username after successful registration
         function replaceRegisterButtonWithUsername(username) {
@@ -1358,22 +1399,25 @@
 
 
 
-        var channelShowWinner = pusher.subscribe(
-            'live-show-winner-user.{{ $liveShow->id }}.{{ Auth::user()->id ?? '' }}');
-        // System subscription event
-        channelShowWinner.bind('pusher:subscription_succeeded', function() {
-            console.log('Winner Subscribed successfully!');
-        });
-        // Your Laravel broadcast event (drop the dot)
-        channelShowWinner.bind('ShowPlayerAsWinnerEvent', function(data) {
-            console.log('You are a winner!', data);
-            addOverlayMessage('@System', 'Congratulations! You are selected as a winner!');
-            fireConfetti();
+        function playerAsWinnerEventTrigger(user_id) {
+            var channelShowWinner = pusher.subscribe(
+                'live-show-winner-user.{{ $liveShow->id }}.' + user_id);
+            // System subscription event
+            channelShowWinner.bind('pusher:subscription_succeeded', function() {
+                console.log('Winner Subscribed successfully!');
+            });
+            // Your Laravel broadcast event (drop the dot)
+            channelShowWinner.bind('ShowPlayerAsWinnerEvent', function(data) {
+                console.log('You are a winner!', data);
+                addOverlayMessage('@System', 'Congratulations! You are selected as a winner!');
+                fireConfetti();
 
-            document.getElementById('prizeAmount').textContent = data.prizeMoney + ' EUR';
-            showWinnerDialogDiv();
-            // Optionally, you can add more UI feedback here, like a popup or sound effect.
-        });
+                document.getElementById('prizeAmount').textContent = data.prizeMoney + ' EUR';
+                showWinnerDialogDiv();
+                // Optionally, you can add more UI feedback here, like a popup or sound effect.
+            });
+
+        }
 
         function showWinnerDialogDiv() {
             // Show the winner dialog

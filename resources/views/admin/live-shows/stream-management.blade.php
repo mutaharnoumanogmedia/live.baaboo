@@ -15,7 +15,7 @@
             </nav>
 
             <!-- Main Content -->
-            <main class="col-md-4 p-4">
+            <main class="col-md-6 p-4">
                 <!-- Stream / Question Control -->
                 <div class="card mb-4" style="height: 70vh">
                     <div class="card-header bg-primary text-white">
@@ -95,7 +95,7 @@
                 </div>
             </main>
 
-            <div class="col-lg-6">
+            <div class="col-lg-4">
                 <ul class="nav nav-tabs">
                     <li class="nav-item">
                         <a href="#chat-tab" class="nav-link active" data-bs-toggle="tab">
@@ -132,9 +132,9 @@
                             <aside class="p-4 bg-secondary rounded">
                                 <h5 class="mb-3">Live Show View</h5>
                                 <div id="live-show-view" style="">
-                                    <iframe style="width:100%; height:70vh; pointer-events:none;"
+                                    {{-- <iframe style="width:100%; height:70vh; pointer-events:none;"
                                         src="{{ url('live-show-play/' . $liveShow->id . '?mute=1') }}"
-                                        frameborder="0"></iframe>
+                                        frameborder="0"></iframe> --}}
                                 </div>
 
                             </aside>
@@ -182,9 +182,8 @@
             var pusher = new Pusher('{{ env('PUSHER_APP_KEY', '2a66d003a7ded9fe567a') }}', {
                 cluster: '{{ env('PUSHER_APP_CLUSTER', 'eu') }}',
             });
+            
             document.addEventListener('DOMContentLoaded', function() {
-
-
                 fetchActivePlayers().then(activePlayers => {
                     appendPlayerList(activePlayers);
                 });
