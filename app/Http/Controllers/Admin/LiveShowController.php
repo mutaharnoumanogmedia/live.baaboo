@@ -8,8 +8,14 @@ use App\Events\ShowPlayerAsWinnerEvent;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\LiveShow;
+use App\Models\UserQuizResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use App\Services\LiveShowService;
+use App\Services\LiveShowQuizService;
+use Illuminate\Http\JsonResponse;
+
 
 class LiveShowController extends Controller
 {
@@ -235,10 +241,12 @@ class LiveShowController extends Controller
         //update all  notEliminatedUsers to winner
         foreach ($notEliminatedUsers as $user) {
             $liveShow->users()->updateExistingPivot($user->id, ['is_winner' => 1, 'prize_won' => $prizeWon]);
+
+            //make rest of the users eliminated
+            $liveShow->users()->wherePivot('status', 'eliminated')->updateExistingPivot($user->id, ['is_winner' => 0, 'prize_won' => 0]);
+
             ShowPlayerAsWinnerEvent::dispatch($user->id, (string)$liveShowId, $prizeWon);
         }
-
-
 
         return response()->json(['success' => true, 'message' => 'Users winner status updated.', 'winnerUsers' => $notEliminatedUsers]);
     }
@@ -258,9 +266,7 @@ class LiveShowController extends Controller
     {
         $liveShow = LiveShow::with(['users' => function ($query) {
             $query->withPivot(['score', 'status', 'is_winner', 'created_at', 'last_active', 'is_online']);
-        }])
-
-            ->findOrFail($id);
+        }])->findOrFail($id);
 
 
         $liveShow->users = $liveShow->users->map(function ($user) {
@@ -313,8 +319,62 @@ class LiveShowController extends Controller
             return response()->json(['message' => 'User not found in this live show.'], 404);
         }
 
-       
+
 
         return response()->json(['message' => 'User has been blocked from the live show.']);
+    }
+
+    public function updateLiveShow(Request $request, $id)
+    {
+        $liveShow = LiveShow::findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|in:scheduled,live,completed',
+        ]);
+
+        $liveShow->status = $request->input('status');
+        $liveShow->save();
+
+        // Broadcast the update live show event
+        \App\Events\UpdateLiveShowEvent::dispatch((string)$liveShow->id, $liveShow->status);
+
+        return response()->json(['message' => 'Live show has been updated successfully.']);
+    }
+
+
+
+
+    public function getUsersQuizResponses(
+        Request $request,
+        LiveShowQuizService $quizService, //  Inject the service via method injection
+        $id,
+        $quiz_id
+    ): JsonResponse {
+
+        // 1. VALIDATION & DATA FETCHING
+        $liveShow = LiveShow::find($id);
+        if (!$liveShow) {
+            return response()->json(['success' => false, 'message' => 'Live show not found.'], 404);
+        }
+
+        // Find the quiz and eager-load its options, as the service needs them
+        $quiz = $liveShow->quizzes()->with('options')->find($quiz_id);
+        if (!$quiz) {
+            return response()->json(['success' => false, 'message' => 'Quiz not found for this live show.'], 404);
+        }
+
+
+        // Delegate the complex calculation logic to the service
+        $statistics = $quizService->calculateResponseStatistics($quiz);
+
+        // Fetch any other data needed for the response
+        $userQuizzes = $quiz->userQuizzes()->with('userQuizResponses')->get();
+
+
+        // The controller's job is to format the final JSON response
+        return response()->json([
+            'success' => true,
+            'statistics' => $statistics
+        ]);
     }
 }

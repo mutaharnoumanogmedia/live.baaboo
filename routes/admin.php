@@ -30,4 +30,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get("players", [\App\Http\Controllers\Admin\PlayerController::class, 'index'])->name('players.index');
     Route::get("players/{id}", [\App\Http\Controllers\Admin\PlayerController::class, 'show'])->name('players.show');
+
+    Route::get("live-shows/{id}/get-users-quiz-responses/{quiz_id}", [\App\Http\Controllers\Admin\LiveShowController::class, 'getUsersQuizResponses'])->name('live-shows.get-users-quiz-responses');
+
+
+    Route::post("live-shows/{id}/update-live-show", [\App\Http\Controllers\Admin\LiveShowController::class, 'updateLiveShow'])->name('live-shows.update-live-show');
 })->middleware(['auth']);

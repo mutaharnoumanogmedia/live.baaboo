@@ -30,15 +30,23 @@ Route::get('live-show/{id}/messages', [GamePlayController::class, 'fetchMessages
 
 Route::middleware(['auth:web'])->group(function () {
     Route::post("live-show/{id}/user/updateOnlineStatus", [GamePlayController::class, 'updateOnlineStatus'])->name('live-show.user.updateOnlineStatus');
+
     Route::post('live-show/{id}/send-message', [GamePlayController::class, 'postMessage'])->name('live-show.post-message');
+
     //report user message 
     Route::post('live-show/{id}/report-message', [GamePlayController::class, 'reportUserMessage'])->name('live-show.report-message');
+
     Route::post('liveshow/{id}/logout', [GamePlayController::class, 'liveShowLogout'])->name('livestream.logout');
+
     //update-elimination-status
     Route::post('live-show/{id}/update-elimination-status', [GamePlayController::class, 'updateEliminationStatus'])->name('live-show.update-elimination-status');
     //submit-quiz
+    
     Route::post('live-show/{id}/submit-quiz', [GamePlayController::class, 'submitQuiz'])->name('live-show.submit-quiz');
 });
+
+
+
 
 require __DIR__ . '/admin.php';
 require __DIR__ . '/auth.php';

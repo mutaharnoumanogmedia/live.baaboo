@@ -29,6 +29,15 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
+        body .end-show {
+            color: rgb(255, 255, 255);
+            font-size: 2.5rem;
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            text-align: center;
+        }
+
         nav.navbar {
             position: absolute;
             top: 0;
@@ -37,8 +46,13 @@
             z-index: 50;
             padding: 2px;
             height: auto;
-            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8) 0%,
-                    rgba(255, 255, 255, 0.8) 50%, rgba(255, 255, 255, 0.0) 100%);
+            background: bisque;
+            transition: background 0.4s ease;
+        }
+
+        .quiz-mode nav.navbar {
+            background: transparent;
+            transition: background 0.4s ease;
         }
 
         .main-container {
@@ -72,7 +86,6 @@
             font-size: 1.5rem;
             background: linear-gradient(45deg, #1e3c72, #2a5298);
             flex-direction: column;
-
         }
 
         .video-container #player {
@@ -82,7 +95,6 @@
             background: #000;
             object-fit: cover;
             pointer-events: none;
-
         }
 
 
@@ -519,6 +531,21 @@
             pointer-events: none;
             opacity: 0.7;
         }
+
+
+        .btn-register {
+            background-color: #ff5f00;
+            color: white;
+            font-size: 0.8rem;
+            border: none;
+        }
+
+        .btn-user-profile {
+            background-color: #28a745;
+            color: white;
+            font-size: 0.8rem;
+            border: none;
+        }
     </style>
 </head>
 
@@ -580,12 +607,12 @@
 
                 <!-- Left: Live Indicator + User Count -->
                 <div class="d-flex align-items-center gap-1">
-                    <div class="live-indicator d-flex align-items-center">
+                    {{-- <div class="live-indicator d-flex align-items-center">
                         <div class="live-dot me-2"
                             style="width:10px;height:10px;border-radius:50%;background:red;animation:pulse 1s infinite;">
                         </div>
                         <span class="fw-bold text-white">LIVE</span>
-                    </div>
+                    </div> --}}
 
                     <div class="user-count d-flex align-items-center text-white">
                         <i class="fas fa-users me-1"></i>
@@ -602,15 +629,13 @@
                 <!-- Right: Register / User Button -->
                 <div class="register-button">
                     @guest('web')
-                        <button class="btn btn-warning btn-sm px-3 py-1 fw-semibold rounded-pill shadow-sm"
-                            data-bs-target="#registerModal" data-bs-toggle="modal"
-                            style="font-size: 0.6rem;background-color:#ff5f00;border:none;box-shadow:0 4px 15px rgba(255,95,0,0.3);">
+                        <button class="btn btn-warning btn-sm px-3 py-1 fw-semibold rounded-pill shadow-sm btn-register"
+                            data-bs-target="#registerModal" data-bs-toggle="modal" style="">
                             <i class="fas fa-user-plus me-2"></i>REGISTER
                         </button>
                     @elseauth('web')
-                        <button class="btn btn-success btn-sm px-3 py-1 fw-semibold rounded-pill shadow-sm"
-                            data-bs-toggle="modal" data-bs-target="#userInfoModal"
-                            style="font-size: 0.6rem;background-color:#28a745;border:none;box-shadow:0 4px 15px rgba(40,167,69,0.3);">
+                        <button class="btn btn-success btn-sm px-3 py-1 fw-semibold rounded-pill shadow-sm btn-user-profile"
+                            data-bs-toggle="modal" data-bs-target="#userInfoModal" style="">
                             <i class="fas fa-user me-2"></i>{{ Auth::guard('web')->user()->name }}
                             <span id="auth-player-points">(pts)</span>
                         </button>
@@ -619,6 +644,7 @@
 
             </div>
         </nav>
+
         <!-- Video Container -->
         <div class="video-container" id="videoContainer">
             <div class="video-placeholder" id="videoPlaceholder">
@@ -1113,12 +1139,12 @@
 
                         playerAsWinnerEventTrigger(data.user.id);
                     } else {
-
+                        let errorMessages = data.messages || ['Registration failed. Please try again.'];
 
                         const ul = document.createElement('ul');
                         ul.classList.add('text-danger', 'mt-2'); // optional bootstrap styling
 
-                        data.messages.forEach(msg => {
+                        errorMessages.forEach(msg => {
                             const li = document.createElement('li');
                             li.textContent = msg;
                             ul.appendChild(li);
@@ -1132,10 +1158,11 @@
                         enabledRegisterButton();
                     }
                 })
-                .catch(() => {
+                .catch((error) => {
 
 
-                    errorDiv.textContent = 'An error occurred. Please try again.';
+                    errorDiv.textContent = "Error : " + (error.message ||
+                        'Failed to register. Please try again.');
                     errorDiv.style.display = 'block';
 
                     enabledRegisterButton();
@@ -1285,6 +1312,7 @@
 
                     isEliminated = true;
                 } else {
+                    isEliminated = true;
                     appendEvaluationStatus('warning');
                 }
             } else {
@@ -1426,6 +1454,10 @@
             // Show the winner dialog
             document.querySelector('#winnerDialog').style.display = 'block';
         }
+
+        @auth('web')
+            playerAsWinnerEventTrigger('{{ Auth::guard('web')->user()->id }}')
+        @endauth
     </script>
 
     <script>
@@ -1470,6 +1502,65 @@
             document.getElementById('playButtonOverlay').style.display = 'none';
             playWithSoundAfterDelay();
         };
+
+
+
+        var channelUpdateLiveShow = pusher.subscribe('update-live-show.{{ $liveShow->id }}');
+
+        // System subscription event
+        channelUpdateLiveShow.bind('pusher:subscription_succeeded', function() {
+            console.log('Update Live Show Subscribed successfully!');
+        });
+
+        // Your Laravel broadcast event (drop the dot)
+        channelUpdateLiveShow.bind('UpdateLiveShowEvent', function(data) {
+            console.log('Update Live Show:', data);
+            // Show alert and redirect to home page after 5 seconds
+            alert('The live show has been updated.');
+            if (data.status && data.status != 'live') {
+                emptyTheBodyWithEndShow();
+            } else {
+                //reload the page to reflect the changes
+                location.reload();
+            }
+
+            emptyTheBodyWithEndShow();
+            //
+        });
+
+
+        function emptyTheBodyWithEndShow() {
+            document.body.innerHTML = '';
+            document.body.style.backgroundColor = '#000';
+            const endDiv = document.createElement('div');
+            endDiv.className = 'end-show';
+            endDiv.innerHTML = 'The live show has ended. Thank you for participating!';
+            document.body.appendChild(endDiv);
+
+
+        }
+
+
+        @if ($liveShow->status != 'live')
+            emptyTheBodyWithEndShow();
+        @endif
+
+
+
+
+
+        // window.addEventListener('beforeunload', function(e) {
+        //     if (isLoggedIn) {
+        //         fetch('{{ route('livestream.logout', [$liveShow->id]) }}', {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json',
+        //                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        //             },
+        //             body: JSON.stringify({})
+        //         });
+        //     }
+        // });
     </script>
 </body>
 

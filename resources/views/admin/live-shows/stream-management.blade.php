@@ -35,54 +35,82 @@
                                 @foreach ($liveShow->quizzes as $quiz)
                                     <div>
                                         <h5 class="mb-2">{{ $quiz->question }}</h5>
-                                        <p>{{ $quiz->body }}</p>
-                                        @if ($quiz->options)
-                                            <ul
-                                                class="list-group list-group-horizontal-md w-100 justify-content-center mb-3">
-                                                @foreach ($quiz->options as $option)
-                                                    <li
-                                                        class="list-group-item  {{ $option->is_correct == 1 ? 'bg-success text-white' : '' }}">
-                                                        {{ $option->option_text }}
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                            <div class="mb-3 w-auto">
-                                                <center>
-                                                    <form method="POST" action="" class="input-group"
+
+                                        <div class="row">
+
+
+
+
+                                            @if ($quiz->options)
+                                                <div class="col-lg-4">
+                                                    <div
+                                                        class="list-group list-group-vertical-md w-100 justify-content-start mb-3">
+                                                        @foreach ($quiz->options as $option)
+                                                            <div
+                                                                class="list-group-item  text-start {{ $option->is_correct == 1 ? 'bg-success text-white' : '' }}">
+                                                                {{ $option->option_text }}
+                                                                <div class="option-result-container position-relative"
+                                                                    style="width: 100%; background: #eee; border-radius: 5px;">
+                                                                    <div id="option-result-bar-{{ $option->id }}"
+                                                                        class="option-result-bar"></div>
+                                                                    <span id="option-result-label-{{ $option->id }}"
+                                                                        style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); font-size: 12px; color: black;">
+                                                                        0%
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                                <div class=" col-lg-8 mb-3">
+
+                                                    <form method="POST" action="" class="i "
                                                         style="max-width: 450px"
                                                         id="quiz-timer-form-{{ $quiz->id }}"
                                                         onsubmit="submitQuizTimerForm(event, {{ $quiz->id }})">
                                                         @csrf
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">
+                                                                <i class="fa fa-clock"></i>
+                                                            </span>
+                                                            <input type="number" min="1" name="seconds"
+                                                                id="timer-{{ $quiz->id }}" value="10"
+                                                                style="width: 80px; flex: 0 0 auto;"
+                                                                class="form-control form-control-sm text-center"
+                                                                required>
 
-                                                        <span class="input-group-text">Seconds:</span>
-                                                        <input type="number" min="1" name="seconds"
-                                                            id="timer-{{ $quiz->id }}" value="10"
-                                                            class="form-control form-control-sm text-center" required>
+                                                        </div>
 
                                                         @if ($loop->last)
                                                             <input type="hidden" name="is_last" value="1">
                                                         @endif
+                                                        <div class="my-3 d-flex justify-content-start gap-2">
+                                                            <button type="submit" class="btn btn-sm btn-success">
+                                                                <i class="fa fa-play"></i>
+                                                            </button>
 
-                                                        <button type="submit" class="btn btn-sm btn-success">
-                                                            Set Timer & Show Question
-                                                        </button>
+                                                            <button class="btn btn-sm btn-danger" type="button"
+                                                                onclick="removeQuiz({{ $quiz->id }})">
+                                                                <i class="fa fa-stop"></i>
+                                                            </button>
 
-                                                        <button class="btn btn-sm btn-danger" type="button"
-                                                            onclick="removeQuiz({{ $quiz->id }})">
-                                                            Remove
-                                                        </button>
+                                                            <button type="button"
+                                                                onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }})"
+                                                                class="btn btn-sm btn-info" target="_blank">
+
+                                                                reveal responses
+
+                                                            </button>
+                                                        </div>
                                                     </form>
 
-                                                </center>
-                                            </div>
+                                                    <div class="my-2">
 
-                                            <div class="mb-3">
-                                                <button type="button" class="btn btn-warning"
-                                                    onclick="updateWinners()">
-                                                    Mark All Non-Eliminated Users as Winners
-                                                </button>
-                                            </div>
-                                        @endif
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                        </div>
                                     </div>
                                 @endforeach
                             </div>
@@ -90,8 +118,35 @@
 
                         </div>
 
+                        <div class="d-block  justify-items-start">
+                            <div class="mb-2 flex-1 me-3 d-flex justify-content-start">
+                                <button type="button" class="btn btn-warning" onclick="updateWinners()">
+                                    Mark All Non-Eliminated Users as Winners
+                                </button>
+                            </div>
+
+
+
+                            <div class="mb-2 flex-1 me-3 d-flex justify-content-start">
+                                <form action="" method="post" id="live-show-status-form">
+                                    <select class="form-select w-auto d-inline-block me-2" id="liveShowStatusSelect"
+                                        onchange="">
+                                        <option value="live" {{ $liveShow->status == 'live' ? 'selected' : '' }}>Live
+                                        </option>
+                                        <option value="completed"
+                                            {{ $liveShow->status == 'completed' ? 'selected' : '' }}>
+                                            Completed</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-danger" onclick="">
+                                        Update Live Show Status
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
 
                     </div>
+
+
                 </div>
             </main>
 
@@ -169,8 +224,16 @@
             #live-chat-messages .message {
                 align-self: flex-start;
                 padding: 8px;
-                border-bottom: 1px solid #ddd;
+                border-bottom: 1px solid #ccc;
                 margin-bottom: 10px;
+            }
+
+            .option-result-bar {
+                height: 15px;
+                background: linear-gradient(90deg, #1e90ff, #00bfff);
+                width: 0;
+                transition: width 0.4s ease-in-out;
+                border-radius: 5px;
             }
         </style>
     @endpush
@@ -182,7 +245,7 @@
             var pusher = new Pusher('{{ env('PUSHER_APP_KEY', '2a66d003a7ded9fe567a') }}', {
                 cluster: '{{ env('PUSHER_APP_CLUSTER', 'eu') }}',
             });
-            
+
             document.addEventListener('DOMContentLoaded', function() {
                 fetchActivePlayers().then(activePlayers => {
                     appendPlayerList(activePlayers);
@@ -412,6 +475,74 @@
                     adaptiveHeight: true
                 });
             });
+
+
+            document.getElementById('live-show-status-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const status = document.getElementById('liveShowStatusSelect').value;
+
+                updateLiveShowStatus(status);
+            });
+
+
+            function updateLiveShowStatus(status) {
+                if (!confirm('Are you sure you want to update the status to ' + status + '?')) {
+                    return;
+                }
+
+                $.ajax({
+                    url: "{{ route('admin.live-shows.update-live-show', ['id' => $liveShow->id]) }}",
+                    method: "POST",
+                    data: JSON.stringify({
+                        status: status
+                    }),
+                    headers: {
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                        "Accept": "application/json"
+                    },
+                    contentType: "application/json",
+                    success: function(data) {
+                        console.log("Live show updated:", data);
+                        alert(data.message);
+                        // Optionally redirect or update the UI
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error ending live show:", error);
+                        console.log(xhr.responseText);
+                    }
+                });
+
+
+            }
+
+
+            function viewResponses(liveShowId, quizId) {
+                fetch(`{{ url('admin/live-shows') }}/${liveShowId}/get-users-quiz-responses/${quizId}`, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                    }).then(response => response.json())
+                    .then(data => {
+                        console.log('Quiz responses:', data);
+                        // Handle displaying the responses in the UI
+                        let stats = data.statistics;
+                        stats.forEach(stat => {
+                            let bar = document.getElementById(`option-result-bar-${stat.quiz_option_id}`);
+                            let label = document.getElementById(`option-result-label-${stat.quiz_option_id}`);
+                            if (bar) {
+                                bar.style.width = `${stat.percentage}%`;
+                            }
+                            if (label) {
+                                label.textContent = `${stat.percentage}% (${stat.total_response_for_option})`;
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching quiz responses:', error);
+                    });
+            }
         </script>
     @endpush
 

@@ -65,4 +65,19 @@ class User extends Authenticatable
             ->using(LiveShowBlockUser::class)
             ->withTimestamps();
     }
+
+    public function messages()
+    {
+        return $this->hasMany(LiveShowMessages::class, 'user_id');
+    }
+
+    public function quizzes()
+    {
+        return $this->hasMany(UserQuiz::class, 'user_id');
+    }
+
+    public function quizResponses()
+    {
+        return $this->hasMany(UserQuizResponse::class, 'user_id');
+    }
 }

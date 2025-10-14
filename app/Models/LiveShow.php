@@ -27,10 +27,10 @@ class LiveShow extends Model
         'scheduled_at' => 'datetime',
         'prize_amount' => 'float',
     ];
-    
+
     protected $appends = ['stream_id'];
 
-   
+
 
     public function scopeUpcoming($query)
     {
@@ -40,9 +40,9 @@ class LiveShow extends Model
     {
         return $query->where('scheduled_at', '<=', now());
     }
-    public function scopeActive($query)
+    public function scopeLive($query)
     {
-        return $query->where('status', 'active');
+        return $query->where('status', 'live');
     }
 
     public function scopeInactive($query)
@@ -107,5 +107,31 @@ class LiveShow extends Model
         }
 
         return null;
+    }
+
+
+
+    public static function clearGameShowUsers($liveShowId)
+    {
+        // Clear users from the specified live show
+        try {
+            $liveShow = LiveShow::with('users')->find($liveShowId);
+
+            $liveShowUsers  =  $liveShow->users()->get();
+
+
+            foreach ($liveShowUsers as $user) {
+                UserQuiz::where('user_id', $user->id)
+                    ->where('live_show_id', $liveShowId)
+                    ->with('userQuizResponses')
+                    ->delete();
+            }
+            $liveShow->users()->detach();
+
+            return true;
+        } catch (\Exception $e) {
+
+            return false;
+        }
     }
 }

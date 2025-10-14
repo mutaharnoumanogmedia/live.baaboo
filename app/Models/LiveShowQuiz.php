@@ -9,13 +9,19 @@ class LiveShowQuiz extends Model
 {
     use HasFactory;
     protected $fillable = ['live_show_id', 'question'];
-    
+
     public function liveShow()
     {
         return $this->belongsTo(LiveShow::class);
     }
+    
     public function options()
     {
         return $this->hasMany(QuizOption::class, 'quiz_id');
+    }
+
+    public function userQuizzes()
+    {
+        return $this->hasMany(UserQuiz::class, 'quiz_id');
     }
 }
