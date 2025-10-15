@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\LiveShowQuizUserResponses;
 use App\Events\RemoveLiveShowQuizQuestionEvent;
 use App\Events\ShowLiveShowQuizQuestionEvent;
 use App\Events\ShowPlayerAsWinnerEvent;
@@ -370,6 +371,8 @@ class LiveShowController extends Controller
         // Fetch any other data needed for the response
         $userQuizzes = $quiz->userQuizzes()->with('userQuizResponses')->get();
 
+        // 2. BROADCASTING
+       LiveShowQuizUserResponses::dispatch((string)$liveShow->id, (string)$quiz->id, $statistics);
 
         // The controller's job is to format the final JSON response
         return response()->json([

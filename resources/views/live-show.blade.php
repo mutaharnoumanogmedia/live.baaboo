@@ -68,6 +68,37 @@
             overflow: hidden;
         }
 
+        .option-result-container {
+            display: none;
+            width: 95% !important;
+            position: absolute;
+            border-radius: 5px;
+            top: 1px;
+            left: 16px;
+            height: 40px;
+            border-radius: 12px;
+            opacity: 1;
+        }
+
+        .option-result-label {
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            color: black;
+            font-weight: 600;
+            z-index: 10;
+        }
+
+        .option-result-bar {
+            height: 40px;
+            background: linear-gradient(90deg, #1e90ff, #00bfff);
+            width: 0;
+            transition: width 0.4s ease-in-out;
+            border-radius: 12px;
+        }
+
         .video-container {
             position: relative;
             width: 100%;
@@ -546,6 +577,47 @@
             font-size: 0.8rem;
             border: none;
         }
+
+        #playButtonOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        #playButtonOverlay #playButton {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(255, 95, 0, 0.3);
+            cursor: pointer;
+        }
+
+        #playButtonOverlay #playButton:hover {
+            background: #e55400;
+            transform: scale(1.1);
+        }
+
+        #playButtonOverlay #tapToPlayLabel {
+            color: white;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            opacity: 0.8;
+            text-align: center;
+            width: 100px;
+        }
     </style>
 </head>
 
@@ -554,15 +626,7 @@
         <!-- Quiz Overlay -->
         <div class="quiz-overlay" id="quizOverlay">
             <div class="quiz-content">
-                <!-- <div class="quiz-header">
-                <h3 style="color: var(--text-dark); margin: 0;">
-                    <i class="fas fa-brain text-primary me-2"></i>
-                    Live Quiz
-                </h3>
-                <button class="close-quiz-btn" onclick="toggleQuiz()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div> -->
+
                 <div style="height: 200px">
                     <div class="quiz-timer" id="quizTimer">
                         <svg class="timer-svg" viewBox="0 0 180 180" width="180" height="180">
@@ -662,14 +726,6 @@
                     allowfullscreen style="">
                 </iframe> --}}
             </div>
-
-
-
-            <!-- Show Question Button -->
-            {{-- <button class="show-question-btn" id="showQuestionBtn" onclick="toggleQuiz()">
-                <i class="fas fa-question-circle me-2"></i>Show Question
-            </button> --}}
-
 
         </div>
 
@@ -789,15 +845,11 @@
 
 
     <!-- Centered Play Button Overlay -->
-    <div id="playButtonOverlay"
-        style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);">
-
-        <button id="playButton"
-            style="background:var(--primary-color);border:none;border-radius:50%;width:100px;height:100px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(255,95,0,0.3);cursor:pointer;">
+    <div id="playButtonOverlay" style="">
+        <button id="playButton" style="">
             <i class="fas fa-play fa-3x" style="color:white;"></i>
         </button>
-
-        <div style="color:white;font-size:0.9rem;margin-top:15px;opacity:0.8;text-align:center;width:100px;">
+        <div id="tapToPlayLabel" style="">
             Tap to Play
         </div>
     </div>
@@ -838,7 +890,7 @@
             fetchMessages();
         });
         // Toggle quiz mode
-        function toggleQuiz() {
+        function toggleQuiz(action) {
             const mainContainer = document.getElementById('mainContainer');
             const quizOverlay = document.getElementById('quizOverlay');
             // const showQuestionBtn = document.getElementById('showQuestionBtn');
@@ -846,7 +898,7 @@
 
             quizMode = !quizMode;
 
-            if (quizMode) {
+            if (action == "show") {
                 mainContainer.classList.add('quiz-mode');
                 quizOverlay.classList.add('active');
                 videoContainer.classList.add('question-activated');
@@ -882,7 +934,13 @@
                     </div>
                     <div class="quiz-options row">
                         ${quiz.options.map((option, index) =>
-                        `<div class="quiz-option col-md-6"> <input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}">${option.option_text}</label>  </div> `).join('')}
+                        `<div class="quiz-option col-md-6 position-relative mb-3"> 
+                                                                                                                                                                                                        <div class="option-result-container " style="">
+                                                                                                                                                                                                          <div id="option-result-bar-${option.id}" class="option-result-bar"></div>
+                                                                                                                                                                                                              <span id="option-result-label-${option.id}" class="option-result-label" style=""> 0% </span>
+                                                                                                                                                                                                          </div>
+                                                                                                                                                                                                      
+                                                                                                                                                                                 <input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}">${option.option_text}</label>  </div> `).join('')}
                     </div>
              </div>
             `;
@@ -1082,7 +1140,7 @@
         // Prevent quiz overlay from closing when clicking inside
         document.getElementById('quizOverlay').addEventListener('click', function(e) {
             if (e.target === this) {
-                toggleQuiz();
+                toggleQuiz("show");
             }
         });
     </script>
@@ -1191,12 +1249,10 @@
 
 
         var channel = pusher.subscribe('live-show-quiz.{{ $liveShow->id }}');
-
         // System subscription event
         channel.bind('pusher:subscription_succeeded', function() {
             console.log('Quiz Subscribed successfully!');
         });
-
         // Your Laravel broadcast event (drop the dot)
         channel.bind('LiveShowQuizQuestionEvent', function(data) {
             console.log('Quiz Question:', data);
@@ -1207,11 +1263,8 @@
             let quizQuestion = data.quizQuestion;
             showQuestionAndSetTimer(quizQuestion, timer);
             quizMode = false;
-            toggleQuiz();
-            // Auto close quiz after timer seconds
-            // setTimeout(() => {
-            //     toggleQuiz();
-            // }, timer * 1000);
+            toggleQuiz("show");
+            
 
         });
 
@@ -1241,19 +1294,17 @@
 
         function showQuestionAndSetTimer(quiz, timer) {
             isCurrentAnswerCorrect = null; //reset current answer status
+            $(".option-result-container").css("display", "none");
 
             console.log('Showing quiz question:', quiz, 'with timer:', timer);
             appendQuizQuestion(quiz);
             startTimer(timer, evaluateElinimation);
             quizMode = false;
-            toggleQuiz();
-            // Auto close quiz after timer seconds
-            // setTimeout(() => {
-            //     toggleQuiz();
-            // }, timer * 1000);
+            toggleQuiz("show");
+
         }
 
-        // showQuestionAndSetTimer(quizDummy, 7);
+        // showQuestionAndSetTimer(quizDummy, 100);
 
 
 
@@ -1418,12 +1469,7 @@
         // Your Laravel broadcast event (drop the dot)
         channelRemoveQuestion.bind('RemoveLiveShowQuizQuestionEvent', function(data) {
             console.log('Remove Quiz Question:', data);
-            toggleQuiz();
-            // Auto close quiz after timer seconds
-            // setTimeout(() => {
-            //     toggleQuiz();
-            // }, timer * 1000);
-
+            toggleQuiz("remove");
         });
 
 
@@ -1539,6 +1585,43 @@
 
 
         }
+
+
+        function revealResponses(data) {
+            $(".option-result-container").css("display", "block");
+            console.log('Quiz responses:', data);
+            // Handle displaying the responses in the UI
+            let stats = data.statistics;
+
+            stats.forEach(stat => {
+                try {
+                    let bar = document.getElementById(`option-result-bar-${stat.quiz_option_id}`);
+                    let label = document.getElementById(`option-result-label-${stat.quiz_option_id}`);
+                    if (bar) {
+                        bar.style.width = `${stat.percentage}%`;
+                    }
+                    if (label) {
+                        label.textContent = `${stat.percentage}% (${stat.total_response_for_option})`;
+                    }
+                } catch (e) {
+                    console.error('Error revealing responses:', stat);
+                }
+            });
+
+        }
+
+
+
+        var channelUsersQuizResponses = pusher.subscribe('live-show-quiz-users-responses.{{ $liveShow->id }}');
+        // System subscription event
+        channelUsersQuizResponses.bind('pusher:subscription_succeeded', function() {
+            console.log('Quiz Users responses successfully!');
+        });
+        // Your Laravel broadcast event (drop the dot)
+        channelUsersQuizResponses.bind('LiveShowQuizUserResponses', function(data) {
+            console.log('User Responses:', data);
+            revealResponses(data);
+        });
 
 
         @if ($liveShow->status != 'live')
