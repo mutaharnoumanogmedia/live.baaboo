@@ -299,8 +299,9 @@
             background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(20px);
             padding: 15px;
+            padding-bottom: 60px;
             z-index: 10;
-            height: 130px;
+            height: auto;
             background: black;
         }
 
@@ -713,23 +714,9 @@
         <div class="video-container" id="videoContainer">
             <div class="video-placeholder" id="videoPlaceholder">
                 <div id="player"></div>
-
-
-
-
-                <!-- <i class="fas fa-play-circle fa-4x mb-3"></i>
-                <span>Live Stream</span>
-                <small style="opacity: 0.8; margin-top: 10px;">Portrait Mode</small> -->
-                {{-- <iframe width="320" height="568" id="player"
-                    src="{{ $liveShow->stream_link }}?autoplay=1&mute={{ $_GET['mute'] ?? '0' }}&playsinline=1&controls=0&modestbranding=1&rel=0&showinfo=0"
-                    title="YouTube video player" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture"
-                    allowfullscreen style="">
-                </iframe> --}}
             </div>
 
         </div>
-
-
         <div class="chat-container" id="chatContainer">
             <!-- TikTok-style Overlay Chat -->
             <div class="overlay-chat" id="overlayChat">
@@ -752,8 +739,7 @@
 
 
     <!-- Register Modal -->
-    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius: 20px;">
                 <div class="modal-header" style="border-bottom: none;">
@@ -934,13 +920,7 @@
                     </div>
                     <div class="quiz-options row">
                         ${quiz.options.map((option, index) =>
-                        `<div class="quiz-option col-md-6 position-relative mb-3"> 
-                                                                                                                                                                                                        <div class="option-result-container " style="">
-                                                                                                                                                                                                          <div id="option-result-bar-${option.id}" class="option-result-bar"></div>
-                                                                                                                                                                                                              <span id="option-result-label-${option.id}" class="option-result-label" style=""> 0% </span>
-                                                                                                                                                                                                          </div>
-                                                                                                                                                                                                      
-                                                                                                                                                                                 <input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}">${option.option_text}</label>  </div> `).join('')}
+                        `<div class="quiz-option col-md-6 position-relative mb-3">  <div class="option-result-container " style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}">${option.option_text}</label>  </div> `).join('')}
                     </div>
              </div>
             `;
@@ -1050,6 +1030,11 @@
 
         // Chat functionality
         function sendMessage() {
+
+            if (isLoggedIn == false) {
+                showRegisterModal();
+                return;
+            }
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
 
@@ -1264,7 +1249,7 @@
             showQuestionAndSetTimer(quizQuestion, timer);
             quizMode = false;
             toggleQuiz("show");
-            
+
 
         });
 

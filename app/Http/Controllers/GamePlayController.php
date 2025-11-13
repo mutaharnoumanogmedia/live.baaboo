@@ -221,6 +221,10 @@ class GamePlayController extends Controller
                 'created_at' => now(),
             ]
         );
+        //if user already eliminated , do not process quiz
+        if ($userPivot && $userPivot->pivot->status === 'eliminated') {
+            return response()->json(['success' => false, 'message' => 'User is eliminated and cannot submit quiz.'], 403);
+        }
 
         // Here you would typically check the option against the correct answer stored in the database.
         $quizOption = QuizOption::where('id', $option)->where('quiz_id', $quizId)->first();
