@@ -104,7 +104,7 @@
             width: 100%;
             height: 100vh;
 
-            overflow: hidden;
+            overflow: scroll;
         }
 
         .video-placeholder {
