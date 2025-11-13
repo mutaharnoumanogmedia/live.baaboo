@@ -1120,7 +1120,7 @@
         updateViewerCount();
 
 
-        setInterval(updateViewerCount, 100000);
+        setInterval(updateViewerCount, 5000);
 
         // Prevent quiz overlay from closing when clicking inside
         document.getElementById('quizOverlay').addEventListener('click', function(e) {
