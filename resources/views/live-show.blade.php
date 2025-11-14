@@ -23,7 +23,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 0;
             margin: 0;
-            height: 100dvh;
+            height: 100vh;
             overflow: hidden;
 
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -57,7 +57,7 @@
 
         .main-container {
             position: relative;
-            height: 100dvh;
+            height: 100vh;
             width: 100%;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
