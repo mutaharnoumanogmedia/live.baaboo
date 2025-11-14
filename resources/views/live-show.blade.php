@@ -297,14 +297,14 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.8) !important;
             backdrop-filter: blur(20px);
             padding: 15px;
             padding-bottom: 0px;
             z-index: 10;
-            height: auto;
+            height: 85px;
             background: black;
-            margin-bottom: 40px;
+            margin-bottom: 0px;
         }
 
         .chat-input-group {
