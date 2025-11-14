@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\GameResetEvent;
 use App\Events\LiveShowMessageEvent;
 use App\Events\LiveShowOnlineUsersEvent;
 use Illuminate\Http\Request;
@@ -378,4 +379,6 @@ class GamePlayController extends Controller
 
         return $status == 'eliminated' ? true : false;
     }
+
+
 }

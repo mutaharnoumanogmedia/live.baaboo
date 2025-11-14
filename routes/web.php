@@ -41,8 +41,9 @@ Route::middleware(['auth:web'])->group(function () {
     //update-elimination-status
     Route::post('live-show/{id}/update-elimination-status', [GamePlayController::class, 'updateEliminationStatus'])->name('live-show.update-elimination-status');
     //submit-quiz
-    
+
     Route::post('live-show/{id}/submit-quiz', [GamePlayController::class, 'submitQuiz'])->name('live-show.submit-quiz');
+
 });
 
 

@@ -32,7 +32,7 @@
                             {{ $liveShow->currency }}</p>
                         <p><strong>Stream Link:</strong>
                             @if ($liveShow->stream_link)
-                                <a href="{{ $liveShow->stream_link }}" target="_blank"
+                                <a href="{{ route('live-show', $liveShow->id) }}" target="_blank"
                                     class="btn btn-sm btn-outline-primary">
                                     Watch Stream <i class="fas fa-external-link-alt ms-1"></i>
                                 </a>
@@ -51,7 +51,7 @@
                                 style="max-width:200px;">
                         </div>
                     @endif
-                    
+
                 </div>
             </div>
         </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\GameResetEvent;
 use App\Events\LiveShowQuizUserResponses;
 use App\Events\RemoveLiveShowQuizQuestionEvent;
 use App\Events\ShowLiveShowQuizQuestionEvent;
@@ -9,6 +10,7 @@ use App\Events\ShowPlayerAsWinnerEvent;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\LiveShow;
+use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -372,12 +374,38 @@ class LiveShowController extends Controller
         $userQuizzes = $quiz->userQuizzes()->with('userQuizResponses')->get();
 
         // 2. BROADCASTING
-       LiveShowQuizUserResponses::dispatch((string)$liveShow->id, (string)$quiz->id, $statistics);
+        LiveShowQuizUserResponses::dispatch((string)$liveShow->id, (string)$quiz->id, $statistics);
 
         // The controller's job is to format the final JSON response
         return response()->json([
             'success' => true,
             'statistics' => $statistics
         ]);
+    }
+
+
+
+
+    public function resetGame(Request $request, $liveShowId)
+    {
+        $liveShow = LiveShow::find($liveShowId);
+        if (!$liveShow) {
+            return response()->json(['message' => 'Live show not found.'], 404);
+        }
+        //remove all user quiz responses
+
+        UserQuizResponse::whereIn('user_quiz_id', function ($query) use ($liveShowId) {
+            $query->select('id')
+                ->from('user_quizzes')
+                ->where('live_show_id', $liveShowId);
+        })->delete();
+        UserQuiz::where('live_show_id', $liveShowId)->delete();
+        // Detach all users from the live show
+        $liveShow->users()->detach();
+
+        event(new GameResetEvent($liveShowId));
+
+
+        return response()->json(['success' => true, 'message' => 'Game has been reset successfully.']);
     }
 }

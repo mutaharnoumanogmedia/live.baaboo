@@ -619,6 +619,42 @@
             text-align: center;
             width: 100px;
         }
+
+
+
+        .alert-popup-middle {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+
+            z-index: 9999;
+
+            background: #ffffff !important;
+            color: #000;
+            padding: 20px 30px;
+
+            border-radius: 8px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+
+            width: auto;
+            max-width: 90%;
+            text-align: center;
+
+            animation: fadeInScale 0.3s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
     </style>
 </head>
 
@@ -857,10 +893,14 @@
         let isCurrentAnswerCorrect = null;
 
         let isEliminated = {{ $isEliminated ? 'true' : 'false' }};
-        isEliminated = isEliminated == 'true' ? true : false;
 
         let isLoggedIn = {{ Auth::guard('web')->check() ? 'true' : 'false' }};
-        isLoggedIn = isLoggedIn == 'true' ? true : false;
+        console.log("initial val of issLoggedIn ", isLoggedIn);
+        if (isLoggedIn === true) {
+            console.log("user is logged in, fetching player points");
+        }
+
+
 
         console.log('isEliminated:', isEliminated);
         console.log('isLoggedIn:', isLoggedIn);
@@ -1368,22 +1408,22 @@
             let message = ``;
 
             if (type === 'success') {
-                alertClass = 'alert-success';
+                alertClass = 'text-success';
                 message = `<i class="fas fa-check-circle me-2"></i>Correct Answer!`;
             } else if (type === 'fail') {
-                alertClass = 'alert-danger';
+                alertClass = 'text-danger';
                 message = `<i class="fas fa-times-circle me-2"></i> Eliminated!`;
                 updateEliminatedStatus();
 
             } else {
-                alertClass = 'alert-warning';
+                alertClass = 'text-warning';
                 message = `<i class="fas fa-exclamation-circle me-2"></i> Eliminated!`;
                 updateEliminatedStatus();
 
             }
 
             evaluationDiv.innerHTML = `
-                    <div class="alert ${alertClass} text-center w-auto mx-auto rounded" style='font-size: 1.2rem;' role="alert">
+                    <div class="alert alert-popup-middle ${alertClass} text-center w-auto mx-auto rounded" style='font-size: 1.2rem;' role="alert">
                         ${message}
                     </div>
                 `;
@@ -1612,6 +1652,40 @@
         @if ($liveShow->status != 'live')
             emptyTheBodyWithEndShow();
         @endif
+
+
+
+
+        var channelGameReset = pusher.subscribe('live-show-game-reset.{{ $liveShow->id }}');
+        // System subscription event
+        channelGameReset.bind('pusher:subscription_succeeded', function() {
+            console.log('Game reset channel subscribed successfully!');
+        });
+        // Your Laravel broadcast event (drop the dot)
+        channelGameReset.bind('GameResetEvent', function(data) {
+            console.log('Game reset event received:', data);
+
+
+            // FORCE LOGOUT OR REDIRECT
+            localStorage.clear();
+            sessionStorage.clear();
+
+            fetch('{{ route('livestream.logout', [$liveShow->id]) }}', {
+                    method: 'POST',
+                })
+
+                .then(data => {
+                    // Fetch was successful → now reload
+                    alert('The game has been reset by the admin. You will be redirected.');
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+
+
+
 
 
 

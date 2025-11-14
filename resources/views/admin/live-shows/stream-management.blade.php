@@ -17,9 +17,20 @@
             <!-- Main Content -->
             <main class="col-md-6 p-4">
                 <!-- Stream / Question Control -->
-                <div class="card mb-4" style="height: 70vh">
-                    <div class="card-header bg-primary text-white">
-                        Live Stream & Question Control
+                <div class="card mb-4">
+                    <div
+                        class="card-header bg-primary text-white d-inline-flex   justify-content-between align-items-center">
+                        <div>
+                            Live Stream & Question Control
+                        </div>
+
+                        <div class="">
+                            <button class="btn btn-light text-primary" id="resetGameButton">
+                                <i class="fas fa-redo me-2"></i>
+                                Reset Game.
+                            </button>
+
+                        </div>
                     </div>
                     <div class="card-body text-center">
                         <!-- Placeholder for video stream -->
@@ -28,28 +39,28 @@
                             <img src="{{ $liveShow->thumbnail }}" class="img-fluid"
                                 style="width: auto; height: 100%; object-fit: contain;" alt="">
                         </div>
-                        <div class="alert">
+                        <div class="">
                             <!-- Slick Slider for Questions -->
                             <h4 class="text-center mb-4">Choose Question to Show</h4>
-                            <div class="question-slider d-inline-flex w-100 justify-content-center">
+                            <div class="question-slider px-3  w-100 justify-content-center">
                                 @foreach ($liveShow->quizzes as $quiz)
                                     <div>
-                                        <h5 class="mb-2">{{ $quiz->question }}</h5>
+                                        <h5 class="mb-5">{{ $quiz->question }}</h5>
 
-                                        <div class="row">
+                                        <div class=" ">
 
 
 
 
                                             @if ($quiz->options)
-                                                <div class="col-lg-4">
-                                                    <div
-                                                        class="list-group list-group-vertical-md w-100 justify-content-start mb-3">
+                                                <div class="w-100 px-5">
+                                                    <div class="row w-100 w-100  p-4  mb-3 bg-light rounded"
+                                                        style="border-rad">
                                                         @foreach ($quiz->options as $option)
                                                             <div
-                                                                class="list-group-item  text-start {{ $option->is_correct == 1 ? 'bg-success text-white' : '' }}">
+                                                                class="mb-4 col-lg-6 position-relative text-start {{ $option->is_correct == 1 ? 'bg-success text-white' : 'text-dark' }} rounded p-2">
                                                                 {{ $option->option_text }}
-                                                                <div class="option-result-container position-relative"
+                                                                <div class="option-result-container position-relative  "
                                                                     style="width: 100%; background: #eee; border-radius: 5px;">
                                                                     <div id="option-result-bar-{{ $option->id }}"
                                                                         class="option-result-bar"></div>
@@ -62,43 +73,45 @@
                                                         @endforeach
                                                     </div>
                                                 </div>
-                                                <div class=" col-lg-8 mb-3">
+                                                <div class="w-100 my-3 mb-3">
 
-                                                    <form method="POST" action="" class="i "
-                                                        style="max-width: 450px"
+                                                    <form method="POST" action="" class="row"
                                                         id="quiz-timer-form-{{ $quiz->id }}"
                                                         onsubmit="submitQuizTimerForm(event, {{ $quiz->id }})">
                                                         @csrf
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">
-                                                                <i class="fa fa-clock"></i>
-                                                            </span>
-                                                            <input type="number" min="1" name="seconds"
-                                                                id="timer-{{ $quiz->id }}" value="10"
-                                                                style="width: 80px; flex: 0 0 auto;"
-                                                                class="form-control form-control-sm text-center"
-                                                                required>
+                                                        <div class="col-lg-4">
+                                                            <div class="input-group w-100 ">
+                                                                <span class="input-group-text">
+                                                                    <i class="fa fa-clock"></i>
+                                                                </span>
+                                                                <input type="number" min="1" name="seconds"
+                                                                    id="timer-{{ $quiz->id }}" value="10"
+                                                                    style=""
+                                                                    class="form-control form-control-sm text-center"
+                                                                    required>
 
+                                                            </div>
                                                         </div>
+
 
                                                         @if ($loop->last)
                                                             <input type="hidden" name="is_last" value="1">
                                                         @endif
-                                                        <div class="my-3 d-flex justify-content-start gap-2">
+                                                        <div class="col-lg-8">
                                                             <button type="submit" class="btn btn-sm btn-success">
-                                                                <i class="fa fa-play"></i>
+                                                                <i class="fa fa-play"></i> Show Question
                                                             </button>
 
                                                             <button class="btn btn-sm btn-danger" type="button"
                                                                 onclick="removeQuiz({{ $quiz->id }})">
-                                                                <i class="fa fa-stop"></i>
+                                                                <i class="fa fa-stop"></i> Hide Question
                                                             </button>
 
                                                             <button type="button"
                                                                 onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }})"
                                                                 class="btn btn-sm btn-info" target="_blank">
 
-                                                                reveal responses
+                                                                Show Responses
 
                                                             </button>
                                                         </div>
@@ -119,7 +132,7 @@
                         </div>
 
                         <div class="d-block  justify-items-start">
-                            <div class="mb-2 flex-1 me-3 d-flex justify-content-start">
+                            <div class="mb-4 flex-1 me-3 d-flex justify-content-start">
                                 <button type="button" class="btn btn-warning" onclick="updateWinners()">
                                     Mark All Non-Eliminated Users as Winners
                                 </button>
@@ -543,6 +556,34 @@
                         console.error('Error fetching quiz responses:', error);
                     });
             }
+
+
+
+            document.getElementById('resetGameButton').addEventListener('click', function() {
+                if (!confirm('Are you sure you want to reset the game? This will remove all players current progress.')) {
+                    return;
+                }
+
+                fetch(`{{ route('admin.live-shows.reset-game', ['id' => $liveShow->id]) }}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Game reset:', data);
+                        alert(data.message);
+                        // Optionally, refresh the player list to show all players as active
+                        fetchActivePlayers().then(activePlayers => {
+                            appendPlayerList(activePlayers);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error resetting game:', error);
+                    });
+            });
         </script>
     @endpush
 
