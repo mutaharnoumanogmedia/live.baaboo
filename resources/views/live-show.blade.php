@@ -293,8 +293,8 @@
 
         /* Chat input at bottom */
         .bottom-chat-input {
-            position: absolute;
-            bottom: 30px;
+            position: fixed;
+            bottom: 0;
             left: 0;
             right: 0;
             background: rgba(0, 0, 0, 0.8);
@@ -304,6 +304,7 @@
             z-index: 10;
             height: auto;
             background: black;
+            margin-bottom: 40px;
         }
 
         .chat-input-group {
