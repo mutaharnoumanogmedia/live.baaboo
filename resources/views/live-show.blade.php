@@ -141,6 +141,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             border-radius: 100%;
+            overflow: hidden;
         }
 
         .live-indicator {
@@ -732,7 +733,7 @@
                     @guest('web')
                         <button class="btn btn-warning btn-sm px-3 py-1 fw-semibold rounded-pill shadow-sm btn-register"
                             data-bs-target="#registerModal" data-bs-toggle="modal" style="">
-                            <i class="fas fa-user-plus me-2"></i>REGISTER
+                            <i class="fas fa-user-plus me-2"></i> Join Now
                         </button>
                     @elseauth('web')
                         <button class="btn btn-success btn-sm px-3 py-1 fw-semibold rounded-pill shadow-sm btn-user-profile"
@@ -1672,6 +1673,8 @@
 
             fetch('{{ route('livestream.logout', [$liveShow->id]) }}', {
                     method: 'POST',
+
+
                 })
 
                 .then(data => {
