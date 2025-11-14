@@ -44,7 +44,7 @@
             left: 0;
             right: 0;
             z-index: 50;
-            padding: 2px;
+            padding: 20px 2px;
             height: auto;
             background: bisque;
             transition: background 0.4s ease;
