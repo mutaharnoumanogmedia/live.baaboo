@@ -45,7 +45,7 @@
             right: 0;
             z-index: 50;
             padding: 2px;
-            padding-top: 25px;
+            padding-top: 15px;
             height: auto;
             background: bisque;
             transition: background 0.4s ease;
@@ -573,6 +573,7 @@
             color: white;
             font-size: 0.8rem;
             border: none;
+            padding: 10px 28px !important
         }
 
         .btn-user-profile {
