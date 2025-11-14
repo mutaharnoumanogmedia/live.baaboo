@@ -294,13 +294,13 @@
         /* Chat input at bottom */
         .bottom-chat-input {
             position: absolute;
-            bottom: 0px;
+            bottom: 30px;
             left: 0;
             right: 0;
             background: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(20px);
             padding: 15px;
-            padding-bottom: 60px;
+            padding-bottom: 0px;
             z-index: 10;
             height: auto;
             background: black;
