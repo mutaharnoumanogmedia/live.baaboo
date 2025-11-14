@@ -238,7 +238,7 @@
         /* TikTok-style overlay chat */
         .overlay-chat {
             position: absolute;
-            bottom: 100px;
+            bottom: 890px;
             left: 1px;
             right: 1px;
             z-index: 5;
