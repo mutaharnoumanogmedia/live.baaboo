@@ -178,6 +178,8 @@ class GamePlayController extends Controller
     public function submitQuiz(Request $request, $liveShowId)
     {
         $user = Auth::guard('web')->user();
+        $totalSecondsToSubmit = $request->seconds_to_submit ?? 1;
+        $totalSecondsToSubmit = $totalSecondsToSubmit == 0 ? 1 : $totalSecondsToSubmit;
         if (!$user) {
             return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::guard('web')->check()], 401);
         }
@@ -240,7 +242,7 @@ class GamePlayController extends Controller
                 [
                     'quiz_option_id' => $quizOption->id,
                     'is_correct' => $quizOption->is_correct,
-                    'seconds_to_submit' => $request->seconds_to_submit ?? 0,
+                    'seconds_to_submit' => $totalSecondsToSubmit,
                     'user_response' => $quizOption->option_text,
                     'created_at' => now(),
                 ]
@@ -263,7 +265,7 @@ class GamePlayController extends Controller
 
             ], 200);
         } else {
-            $newScore =  $currentScore + 1;
+            $newScore = round($currentScore + (1 + 1 / $totalSecondsToSubmit ) * 100); //example scoring logic
             $liveShow->users()->updateExistingPivot($user->id, ['score' => $newScore]);
             return response()->json([
                 'success' => true,

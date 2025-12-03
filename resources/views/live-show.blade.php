@@ -7,8 +7,11 @@
     <title>baaboo Live Game Show {{ $liveShow->id ?? '' }}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <link href='https://fonts.googleapis.com/css?family=Preahvihear' rel='stylesheet'>
+
     <style>
-        @import url('https://fonts.googleapis.com/css?family=Bitcount+Grid+Single');
+       
 
         :root {
             --primary-color: #ff5f00;
@@ -20,13 +23,13 @@
 
         body {
             background-color: #000;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Preahvihear', cursive;
             padding: 0;
             margin: 0;
             height: 100vh;
             overflow: hidden;
 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
         }
 
         body .end-show {
