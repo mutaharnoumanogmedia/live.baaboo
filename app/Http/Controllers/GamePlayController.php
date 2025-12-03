@@ -240,6 +240,7 @@ class GamePlayController extends Controller
                 [
                     'quiz_option_id' => $quizOption->id,
                     'is_correct' => $quizOption->is_correct,
+                    'seconds_to_submit' => $request->seconds_to_submit ?? 0,
                     'user_response' => $quizOption->option_text,
                     'created_at' => now(),
                 ]
@@ -324,7 +325,7 @@ class GamePlayController extends Controller
         $message->save();
 
         // Broadcast the message to other users (you can implement this using events and broadcasting)
-        LiveShowMessageEvent::dispatch([
+        $event = LiveShowMessageEvent::dispatch([
             'id' => $message->id,
             'live_show_id' => $liveShow->id,
             'user' => [
@@ -340,7 +341,9 @@ class GamePlayController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Message sent successfully.',
-            'data' => $message
+            'data' => $message,
+            'user' => $user,
+            'event' => $event
         ], 200);
     }
 
@@ -379,6 +382,53 @@ class GamePlayController extends Controller
 
         return $status == 'eliminated' ? true : false;
     }
+    //getLiveShowUsersWithScores
+    public function getLiveShowUsersWithScores($liveShowId)
+    {
+        $liveShow = LiveShow::find($liveShowId);
+        if (!$liveShow) {
+            return response()->json(['message' => 'Live show not found.'], 404);
+        }
 
+        $usersWithScores = $liveShow->users()
+            ->with(['quizResponses' => function ($query) use ($liveShowId) {
+                $query->whereHas('userQuiz.quiz', function ($q) use ($liveShowId) {
+                    $q->where('live_show_id', $liveShowId);
+                });
+            }])
+            ->wherePivot('status', 'registered')
+            ->get()
+            ->map(function ($user) use ($liveShowId) {
+                // Calculate total score
+                $score = $user->pivot->score ?? 0;
+                // Find the user's quiz responses for this live show and calculate total seconds_to_submit
+                $userQuizResponses = $user->quizResponses()
+                    ->whereHas('userQuiz', function ($q) use ($liveShowId) {
+                        $q->where('live_show_id', $liveShowId);
+                    })
+                    ->get();
 
+                $totalSecondsToSubmit = $userQuizResponses->sum('seconds_to_submit');
+                $firstResponseTime = $userQuizResponses->min('created_at') ?? now();
+
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'score' => $score,
+                    'is_winner' => $user->pivot->is_winner ?? false,
+                    'total_seconds_to_submit' => $totalSecondsToSubmit,
+                    'first_response_time' => $firstResponseTime,
+                ];
+            })
+            ->sort(function ($a, $b) {
+                // Sort by score descending, then by total_seconds_to_submit ascending
+                if ($a['score'] === $b['score']) {
+                    return $a['total_seconds_to_submit'] <=> $b['total_seconds_to_submit'];
+                }
+                return $b['score'] <=> $a['score'];
+            })
+            ->values();
+
+        return response()->json(['users' => $usersWithScores], 200);
+    }
 }

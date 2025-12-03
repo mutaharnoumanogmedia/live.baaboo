@@ -39,4 +39,8 @@ class LiveShowMessageEvent implements ShouldBroadcast
     {
         return 'LiveShowMessageEvent';
     }
+    // public function broadcastWith()
+    // {
+    //     return $this->data;
+    // }
 }

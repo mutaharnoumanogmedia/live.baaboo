@@ -15,5 +15,22 @@ class UserQuizResponse extends Model
         'user_id',
         'is_correct',
         'user_response',
+        'seconds_to_submit',
     ];
+    public function userQuiz()
+    {
+        return $this->belongsTo(UserQuiz::class, 'user_quiz_id');
+    }
+    public function quizOption()
+    {
+        return $this->belongsTo(QuizOption::class, 'quiz_option_id');
+    }
+    public function quiz()
+    {
+        return $this->belongsTo(LiveShowQuiz::class, 'quiz_id');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

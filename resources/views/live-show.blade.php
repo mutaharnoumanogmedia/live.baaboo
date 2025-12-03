@@ -58,7 +58,12 @@
 
         .main-container {
             position: relative;
-            height: 100vh;
+            min-height: 100vh;
+            /* fallback */
+            min-height: 100svh;
+            /* small viewport (bars visible) */
+            min-height: 100dvh;
+            /* dynamic viewport */
             width: 100%;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -236,22 +241,60 @@
             background: rgba(229, 84, 0, 0.9);
         }
 
+
+        #liveShowTabContainer {
+            position: fixed;
+            bottom: 00px;
+            width: 100%;
+            z-index: 10;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 1) 100%);
+            height: 50vh;
+            overflow: hidden;
+        }
+
+        #liveShowTabs li.nav-item {
+            list-style: none;
+
+        }
+
+        #liveShowTabs {
+            padding: 0px !important;
+            display: block;
+            text-align: center;
+            border: none
+        }
+
+        #liveShowTabs li.nav-item .nav-link {
+            color: white;
+            background: rgba(255, 95, 0, 0.3);
+            border: none;
+            margin: 5px;
+            border-radius: 20px;
+            font-weight: 600;
+            padding: 5px 15px;
+        }
+
+        #liveShowTabs li.nav-item .nav-link.active {
+            background: rgba(255, 95, 0, 0.8);
+            color: white;
+        }
+
+        .players-list-group-container {
+            height: 40vh;
+            overflow-y: auto;
+            padding: 10px;
+            background: #ffffff;
+            border-radius: 15px;
+        }
+
         /* TikTok-style overlay chat */
         .overlay-chat {
-            position: absolute;
-            bottom: 890px;
-            left: 1px;
-            right: 1px;
             z-index: 5;
-            padding: 30px 0px;
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 1) 100%);
-            height: 250px;
+            padding: 10px 00px 40px 0px;
             opacity: 0.7;
             overflow-y: scroll;
             scrollbar-width: none;
-            /* Firefox */
-            -ms-overflow-style: none;
-            /* IE and Edge */
+            height: 25vh;
         }
 
         .overlay-chat::-webkit-scrollbar {
@@ -301,9 +344,9 @@
             background: rgba(0, 0, 0, 0.8) !important;
             backdrop-filter: blur(20px);
             padding: 15px;
-            padding-bottom: 0px;
+            padding-bottom: 20px;
             z-index: 10;
-            height: 85px;
+            /* height: 120px; */
             background: black;
             margin-bottom: 0px;
         }
@@ -659,6 +702,58 @@
                 transform: translate(-50%, -50%) scale(1);
             }
         }
+
+        .blinking-dot {
+            color: red;
+            animation: glow-blink 1.2s infinite;
+        }
+
+        @keyframes glow-blink {
+
+            0%,
+            100% {
+                opacity: 1;
+                text-shadow: 0 0 5px red, 0 0 10px red;
+            }
+
+            50% {
+                opacity: 0.3;
+                text-shadow: none;
+            }
+        }
+
+        .typing-fade {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-fade span {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: fade 1s infinite;
+        }
+
+        .typing-fade span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-fade span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes fade {
+
+            0%,
+            100% {
+                opacity: 0.2;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
@@ -719,10 +814,10 @@
                         <span class="fw-bold text-white">LIVE</span>
                     </div> --}}
 
-                    <div class="user-count d-flex align-items-center text-white">
+                    {{-- <div class="user-count d-flex align-items-center text-white">
                         <i class="fas fa-users me-1"></i>
                         <span id="user-count">0</span>
-                    </div>
+                    </div> --}}
                 </div>
 
                 <!-- Center: Logo -->
@@ -756,30 +851,74 @@
                 <div id="player"></div>
             </div>
 
-        </div>
-        <div class="chat-container" id="chatContainer">
-            <!-- TikTok-style Overlay Chat -->
-            <div class="overlay-chat" id="overlayChat">
+            <div id="liveShowTabContainer">
+                <ul class="nav nav-tabs" id="liveShowTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link " id="chatTab-tab" data-bs-toggle="tab" data-bs-target="#chatTab"
+                            type="button" role="tab" aria-controls="chatTab" aria-selected="true">
+                            <i class="fas fa-comments"></i>
+                            {{-- <i class="fas fa-circle blinking-dot"></i> --}}
+                            <div class="typing-fade">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="playerTab-tab" data-bs-toggle="tab"
+                            data-bs-target="#playerTab" type="button" role="tab" aria-controls="playerTab"
+                            onclick="updatePlayersLeaderboard()" aria-selected="false">
+                            <i class="fas fa-users me-1"></i>
+                            <span id="user-count">0</span>
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="liveShowTabsContent">
+                    <div class="tab-pane fade" id="chatTab" role="tabpanel" aria-labelledby="chatTab-tab">
+                        <div class="chat-container" id="chatContainer">
+                            <!-- TikTok-style Overlay Chat -->
+                            <div class="overlay-chat" id="overlayChat"></div>
 
-            </div>
+                            <!-- Bottom Chat Input -->
+                            <div class="bottom-chat-input">
+                                <div class="chat-input-group">
+                                    <input type="text" class="chat-input-field" maxlength="120"
+                                        placeholder="write something..." id="chatInput">
+                                    <button class="send-btn-overlay" onclick="sendMessage()">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
 
-            <!-- Bottom Chat Input -->
-            <div class="bottom-chat-input">
-                <div class="chat-input-group">
-                    <input type="text" class="chat-input-field" maxlength="120" placeholder="write something..."
-                        id="chatInput">
-                    <button class="send-btn-overlay" onclick="sendMessage()">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade show active" id="playerTab" role="tabpanel"
+                        aria-labelledby="playerTab-tab">
+                        <!-- Player List -->
+                        <div class="container-fluid ">
+                            <div class="players-list-group-container">
+                                <h5 class="mb-3"><i class="fas fa-users me-2 text-primary"></i>Players & Scores</h5>
+                                <ul class="list-group" id="players-leaderbord">
+
+
+
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
         </div>
+
     </div>
 
 
     <!-- Register Modal -->
-    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius: 20px;">
                 <div class="modal-header" style="border-bottom: none;">
@@ -893,6 +1032,7 @@
     <script>
         let quizMode = false;
         let timer = 5;
+        let currentCountdownSeconds = 0;
 
         let isCurrentAnswerCorrect = null;
 
@@ -918,6 +1058,7 @@
         $(document).ready(function() {
             // Initialize Pusher
             fetchMessages();
+            updatePlayersLeaderboard();
         });
         // Toggle quiz mode
         function toggleQuiz(action) {
@@ -979,6 +1120,8 @@
 
         // Quiz functionality
         function submitQuiz() {
+
+
             const selected = document.querySelector('input[name="option"]:checked');
             if (selected) {
                 console.log('Selected option:', selected.value);
@@ -998,7 +1141,8 @@
                         },
                         body: JSON.stringify({
                             option: option,
-                            quiz_id: document.getElementById('quizId').value
+                            quiz_id: document.getElementById('quizId').value,
+                            seconds_to_submit: currentCountdownSeconds
                         })
                     })
                     .then(response => response.json())
@@ -1327,7 +1471,7 @@
 
             console.log('Showing quiz question:', quiz, 'with timer:', timer);
             appendQuizQuestion(quiz);
-            startTimer(timer, evaluateElinimation);
+            startTimer(timer, evaluateAnswerWithTimeToSubmit);
             quizMode = false;
             toggleQuiz("show");
 
@@ -1370,6 +1514,7 @@
                     }, 1500);
                 }
                 timeLeft--;
+                currentCountdownSeconds = duration - timeLeft;
             }
 
             updateTimer();
@@ -1377,6 +1522,19 @@
         }
 
         // Example: start a 10 second timer
+
+
+        function evaluateAnswerWithTimeToSubmit() {
+            document.querySelector('#quizTimer').style.display = "none";
+
+            console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
+            if (!isEliminated && isLoggedIn) {
+                if (isCurrentAnswerCorrect === true) {
+                    fireConfetti();
+                }
+            }
+            showVideoContainer();
+        }
 
 
         function evaluateElinimation() {
@@ -1417,12 +1575,12 @@
             } else if (type === 'fail') {
                 alertClass = 'text-danger';
                 message = `<i class="fas fa-times-circle me-2"></i> Eliminated!`;
-                updateEliminatedStatus();
+                // updateEliminatedStatus();
 
             } else {
                 alertClass = 'text-warning';
                 message = `<i class="fas fa-exclamation-circle me-2"></i> Eliminated!`;
-                updateEliminatedStatus();
+                // updateEliminatedStatus();
 
             }
 
@@ -1503,8 +1661,6 @@
 
 
 
-
-
         function playerAsWinnerEventTrigger(user_id) {
             var channelShowWinner = pusher.subscribe(
                 'live-show-winner-user.{{ $liveShow->id }}.' + user_id);
@@ -1572,21 +1728,16 @@
         }
 
         // Example: call after user interaction
-
         document.getElementById('playButton').onclick = function() {
             document.getElementById('playButtonOverlay').style.display = 'none';
             playWithSoundAfterDelay();
         };
 
-
-
         var channelUpdateLiveShow = pusher.subscribe('update-live-show.{{ $liveShow->id }}');
-
         // System subscription event
         channelUpdateLiveShow.bind('pusher:subscription_succeeded', function() {
             console.log('Update Live Show Subscribed successfully!');
         });
-
         // Your Laravel broadcast event (drop the dot)
         channelUpdateLiveShow.bind('UpdateLiveShowEvent', function(data) {
             console.log('Update Live Show:', data);
@@ -1598,9 +1749,7 @@
                 //reload the page to reflect the changes
                 location.reload();
             }
-
             emptyTheBodyWithEndShow();
-            //
         });
 
 
@@ -1611,8 +1760,6 @@
             endDiv.className = 'end-show';
             endDiv.innerHTML = 'The live show has ended. Thank you for participating!';
             document.body.appendChild(endDiv);
-
-
         }
 
 
@@ -1676,10 +1823,7 @@
 
             fetch('{{ route('livestream.logout', [$liveShow->id]) }}', {
                     method: 'POST',
-
-
                 })
-
                 .then(data => {
                     // Fetch was successful → now reload
                     alert('The game has been reset by the admin. You will be redirected.');
@@ -1690,6 +1834,83 @@
                 });
         });
 
+
+        var channel2 = pusher.subscribe('live-show-message.{{ $liveShow->id }}');
+
+        // System subscription event
+        channel2.bind('pusher:subscription_succeeded', function() {
+            console.log('Subscribed message event successfully!');
+        });
+
+        // Your Laravel broadcast event (drop the dot)
+        channel2.bind('LiveShowMessageEvent', function(data) {
+            console.log('new message:', data.data);
+            addOverlayMessage('@' + data.data.user.name, data.data.message);
+        });
+
+        //updatePlayersLeaderboard every 5 seconds
+        setInterval(updatePlayersLeaderboard, 5000);
+
+
+        function updatePlayersLeaderboard() {
+
+            //fetch users list with scores
+            fetch('{{ url('live-show/' . $liveShow->id . '/get-live-show-users-with-scores') }}')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Fetched players with scores:');
+
+                    const users = data.users;
+                    console.log('Players with scores:', data);
+
+                    const playersListContainer = document.getElementById('players-leaderbord');
+                    playersListContainer.innerHTML = '';
+
+                    users.forEach((user, index) => {
+
+                        let bgColor = '';
+                        switch (index) {
+                            case 0:
+                                bgColor =
+                                    'background: linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%);'; // Gold
+                                break;
+                            case 1:
+                                bgColor =
+                                    'background: linear-gradient(90deg, #C0C0C0 0%, #F5F5F5 100%);'; // Silver
+                                break;
+                            case 2:
+                                bgColor =
+                                    'background: linear-gradient(90deg, #CD7F32 0%, #FFE4C4 100%);'; // Bronze
+                                break;
+                            default:
+                                bgColor = '';
+                        }
+                        const userDiv = document.createElement('div');
+                        userDiv.className =
+                            'player-list-item d-flex justify-content-between align-items-center mb-2 p-2 rounded ';
+                        if (user.score > 0) {
+                            userDiv.style = bgColor;
+                        }
+
+                        userDiv.innerHTML = `
+                       
+                    <div >
+                <span style="margin-right: 20px;">${index + 1}</span>
+                        <strong>${user.name}</strong>
+                      
+                        <span class="ms-2">${user.is_winner ? '<i class="fas fa-trophy text-warning ms-2" title="Winner"></i>' : ''}</span>
+                    </div>
+                    <div>
+                        Score: ${user.score || 0}
+                    </div>
+                `;
+                        playersListContainer.appendChild(userDiv);
+                    });
+                })
+                .catch(error => console.error('Error fetching players with scores:', error));
+
+
+        }
 
 
 

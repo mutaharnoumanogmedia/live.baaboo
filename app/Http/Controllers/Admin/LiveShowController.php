@@ -235,23 +235,64 @@ class LiveShowController extends Controller
         if (!$liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
-        //take not eliminated users only
-        $notEliminatedUsers = $liveShow->users()->wherePivot('status', '!=', 'eliminated')->get();
-        if ($notEliminatedUsers->isEmpty()) {
-            return response()->json(['message' => 'No users found for this live show.'], 404);
+        $topThreeUsersByScore =
+            $topThreeUsersByScore = $liveShow->users()
+            ->with(['quizResponses' => function ($query) use ($liveShowId) {
+                $query->whereHas('userQuiz.quiz', function ($q) use ($liveShowId) {
+                    $q->where('live_show_id', $liveShowId);
+                });
+            }])
+            ->wherePivot('status', 'registered')
+            ->get()
+            ->map(function ($user) use ($liveShowId) {
+                // Calculate total score
+                $score = $user->pivot->score ?? 0;
+                // Find the user's quiz responses for this live show and calculate total seconds_to_submit
+                $userQuizResponses = $user->quizResponses()
+                    ->whereHas('userQuiz', function ($q) use ($liveShowId) {
+                        $q->where('live_show_id', $liveShowId);
+                    })
+                    ->get();
+
+                $totalSecondsToSubmit = $userQuizResponses->sum('seconds_to_submit');
+                $firstResponseTime = $userQuizResponses->min('created_at') ?? now();
+
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'score' => $score,
+                    'total_seconds_to_submit' => $totalSecondsToSubmit,
+                    'first_response_time' => $firstResponseTime,
+                ];
+            })
+            ->sort(function ($a, $b) {
+                // Sort by score descending, then by total_seconds_to_submit ascending
+                if ($a['score'] === $b['score']) {
+                    return $a['total_seconds_to_submit'] <=> $b['total_seconds_to_submit'];
+                }
+                return $b['score'] <=> $a['score'];
+            })
+            ->values()
+            ->take(3);
+
+        // Update pivot table to set is_winner = true for top three users
+        foreach ($topThreeUsersByScore as $winner) {
+            $liveShow->users()->updateExistingPivot($winner['id'], ['is_winner' => true]);
         }
+
+
+
         $prizeWon = $this->calculateEachWinnerPrize($liveShow);
-        //update all  notEliminatedUsers to winner
-        foreach ($notEliminatedUsers as $user) {
-            $liveShow->users()->updateExistingPivot($user->id, ['is_winner' => 1, 'prize_won' => $prizeWon]);
-
-            //make rest of the users eliminated
-            $liveShow->users()->wherePivot('status', 'eliminated')->updateExistingPivot($user->id, ['is_winner' => 0, 'prize_won' => 0]);
-
-            ShowPlayerAsWinnerEvent::dispatch($user->id, (string)$liveShowId, $prizeWon);
+        //update each winner prize won
+        foreach ($topThreeUsersByScore as $winner) {
+            $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon]);
+            ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string)$liveShowId, $prizeWon);
         }
 
-        return response()->json(['success' => true, 'message' => 'Users winner status updated.', 'winnerUsers' => $notEliminatedUsers]);
+
+
+
+        return response()->json(['success' => true, 'message' => 'Users winner status updated.', 'winnerUsers' => $topThreeUsersByScore]);
     }
 
 
@@ -305,7 +346,7 @@ class LiveShowController extends Controller
 
     function calculateEachWinnerPrize(LiveShow $liveShow)
     {
-        $winnersCount = $liveShow->users()->wherePivot('status', 'registered')->count();
+        $winnersCount = $liveShow->users()->wherePivot('status', 'registered')->wherePivot('is_winner', true)->count();
         if ($winnersCount > 0) {
             return $liveShow->prize_amount / $winnersCount;
         }

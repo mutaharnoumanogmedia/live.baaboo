@@ -26,4 +26,5 @@ Route::prefix("live-show")->group(function () {
     Route::get("/{id}/get-live-show-messages", [AdminLiveShowController::class, 'apiGetLiveShowMessages']);
 
     Route::post("/{id}/user/updateOnlineStatus", [UserLiveShowController::class, 'updateOnlineStatus']);
+   
 });
