@@ -11,8 +11,6 @@
     <link href='https://fonts.googleapis.com/css?family=Preahvihear' rel='stylesheet'>
 
     <style>
-       
-
         :root {
             --primary-color: #ff5f00;
             --accent-color: #ffb380;
@@ -856,7 +854,7 @@
 
             <div id="liveShowTabContainer">
                 <ul class="nav nav-tabs" id="liveShowTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
+                    <li class="nav-item active" role="presentation">
                         <button class="nav-link " id="chatTab-tab" data-bs-toggle="tab" data-bs-target="#chatTab"
                             type="button" role="tab" aria-controls="chatTab" aria-selected="true">
                             <i class="fas fa-comments"></i>
@@ -869,8 +867,8 @@
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="playerTab-tab" data-bs-toggle="tab"
-                            data-bs-target="#playerTab" type="button" role="tab" aria-controls="playerTab"
+                        <button class="nav-link" id="playerTab-tab" data-bs-toggle="tab" data-bs-target="#playerTab"
+                            type="button" role="tab" aria-controls="playerTab"
                             onclick="updatePlayersLeaderboard()" aria-selected="false">
                             <i class="fas fa-users me-1"></i>
                             <span id="user-count">0</span>
@@ -878,7 +876,8 @@
                     </li>
                 </ul>
                 <div class="tab-content" id="liveShowTabsContent">
-                    <div class="tab-pane fade" id="chatTab" role="tabpanel" aria-labelledby="chatTab-tab">
+                    <div class="tab-pane fade show active" id="chatTab" role="tabpanel"
+                        aria-labelledby="chatTab-tab">
                         <div class="chat-container" id="chatContainer">
                             <!-- TikTok-style Overlay Chat -->
                             <div class="overlay-chat" id="overlayChat"></div>
@@ -896,8 +895,7 @@
 
                         </div>
                     </div>
-                    <div class="tab-pane fade show active" id="playerTab" role="tabpanel"
-                        aria-labelledby="playerTab-tab">
+                    <div class="tab-pane fade  " id="playerTab" role="tabpanel" aria-labelledby="playerTab-tab">
                         <!-- Player List -->
                         <div class="container-fluid ">
                             <div class="players-list-group-container">
@@ -1914,25 +1912,6 @@
 
 
         }
-
-
-
-
-
-
-
-        // window.addEventListener('beforeunload', function(e) {
-        //     if (isLoggedIn) {
-        //         fetch('{{ route('livestream.logout', [$liveShow->id]) }}', {
-        //             method: 'POST',
-        //             headers: {
-        //                 'Content-Type': 'application/json',
-        //                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        //             },
-        //             body: JSON.stringify({})
-        //         });
-        //     }
-        // });
     </script>
 </body>
 

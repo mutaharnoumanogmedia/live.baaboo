@@ -134,7 +134,7 @@
                         <div class="d-block  justify-items-start">
                             <div class="mb-4 flex-1 me-3 d-flex justify-content-start">
                                 <button type="button" class="btn btn-warning" onclick="updateWinners()">
-                                    Mark All Non-Eliminated Users as Winners
+                                    Announce Winners
                                 </button>
                             </div>
 
@@ -428,9 +428,9 @@
 
 
             function removeQuiz(quizId) {
-                if (!confirm('Are you sure you want to remove this quiz question?')) {
-                    return;
-                }
+                // if (!confirm('Are you sure you want to remove this quiz question?')) {
+                //     return;
+                // }
 
                 fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/quizzes/${quizId}/remove-quiz-question`, {
                         method: 'POST',
@@ -450,7 +450,7 @@
             }
 
             function updateWinners() {
-                if (!confirm('Are you sure you want to mark all non-eliminated users as winners?')) {
+                if (!confirm('Are you sure you want to announce winners?')) {
                     return;
                 }
 
