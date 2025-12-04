@@ -140,8 +140,8 @@
         .video-container.question-activated .video-placeholder {
             background: linear-gradient(45deg, #764ba2, #667eea);
             transition: background 0.5s ease;
-            height: 100px;
-            width: 100px;
+            height: 110px;
+            width: 110px;
             z-index: 50;
             position: absolute;
             top: 100px;
