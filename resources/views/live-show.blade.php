@@ -156,7 +156,7 @@
 
         .main-container {
             position: absolute;
-            height: calc(100vh - 80px);
+            height: calc(100vh - 100px);
 
             /* dynamic viewport */
             width: 100%;
