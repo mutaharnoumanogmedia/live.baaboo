@@ -155,8 +155,8 @@
         }
 
         .main-container {
-            position: relative;
-            height: 100%;
+            position: absolute;
+            height: calc(100vh - 80px);
 
             /* dynamic viewport */
             width: 100%;
@@ -204,7 +204,7 @@
         .video-container {
             position: relative;
             width: 100%;
-            height: inherit;
+            height: 100%;
 
             overflow: hidden;
         }
@@ -852,7 +852,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            font-size: 1rem;
+            font-size: 0.8rem;
             color: #333;
             transition: all 0.3s ease;
             border-radius: 20px;
