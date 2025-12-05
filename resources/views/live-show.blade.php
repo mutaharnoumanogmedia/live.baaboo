@@ -22,12 +22,36 @@
         body {
             background-color: #000;
             font-family: 'Preahvihear', cursive;
-            padding: 0;
+            padding-bottom: 76px;
             margin: 0;
             height: 100vh;
             overflow: hidden;
 
+
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #e55400;
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
         }
 
         body .end-show {
@@ -39,7 +63,80 @@
             text-align: center;
         }
 
-        nav.navbar {
+
+        /* Bottom fixed navbar styling */
+        .bottom-nav {
+            background: #ffffff;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
+            height: 80px;
+            background: white;
+            z-index: 1030;
+            /* above most stuff */
+            padding: 10px 5px;
+
+            /* iPhone home bar safe area */
+        }
+
+        /* Inner layout */
+        .bottom-nav-inner {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            height: 100%;
+            padding: 0 12px;
+        }
+
+        /* Left / Center / Right areas */
+        .bottom-nav-left {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            min-width: 40px;
+        }
+
+        .bottom-nav-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .bottom-nav-right {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Logo size */
+        .bottom-nav-logo {
+            height: 30px;
+            width: auto;
+        }
+
+        /* Nice “app-like” button feel */
+        .btn-register,
+        .btn-user-profile {
+            font-size: 0.85rem;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+        }
+
+        /* Slightly smaller on tiny screens */
+        @media (max-width: 360px) {
+            .bottom-nav-logo {
+                height: 26px;
+            }
+
+            .btn-register,
+            .btn-user-profile {
+                font-size: 0.78rem;
+                padding: 0.25rem 0.6rem !important;
+            }
+        }
+
+
+        /* nav.navbar {
             position: absolute;
             top: 0;
             left: 0;
@@ -50,7 +147,7 @@
             height: auto;
             background: bisque;
             transition: background 0.4s ease;
-        }
+        } */
 
         .quiz-mode nav.navbar {
             background: transparent;
@@ -59,14 +156,12 @@
 
         .main-container {
             position: relative;
-            min-height: 100vh;
-            /* fallback */
-            min-height: 100svh;
-            /* small viewport (bars visible) */
-            min-height: 100dvh;
+            height: 100%;
+
             /* dynamic viewport */
             width: 100%;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
         }
 
         .main-container.quiz-mode {
@@ -109,9 +204,9 @@
         .video-container {
             position: relative;
             width: 100%;
-            height: 100vh;
+            height: inherit;
 
-            overflow: scroll;
+            overflow: hidden;
         }
 
         .video-placeholder {
@@ -244,12 +339,12 @@
 
 
         #liveShowTabContainer {
-            position: fixed;
+            position: absolute;
             bottom: 00px;
             width: 100%;
             z-index: 10;
             background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 1) 100%);
-            height: 50vh;
+            height: auto;
             overflow: hidden;
         }
 
@@ -338,14 +433,14 @@
 
         /* Chat input at bottom */
         .bottom-chat-input {
-            position: fixed;
+            position: relative;
             bottom: 0;
             left: 0;
             right: 0;
             background: rgba(0, 0, 0, 0.8) !important;
             backdrop-filter: blur(20px);
             padding: 15px;
-            padding-bottom: 20px;
+            padding-bottom: 25px;
             z-index: 10;
             /* height: 120px; */
             background: black;
@@ -613,10 +708,7 @@
 
 
         .btn-register {
-            background-color: #ff5f00;
-            color: white;
-            font-size: 0.8rem;
-            border: none;
+
             padding: 10px 28px !important
         }
 
@@ -755,6 +847,23 @@
                 opacity: 1;
             }
         }
+
+        .mobile-nav .nav-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 1rem;
+            color: #333;
+            transition: all 0.3s ease;
+            border-radius: 20px;
+        }
+
+        .mobile-nav .nav-link.active{
+            background: var(--primary-color);
+            color: white;
+
+
+        }
     </style>
 </head>
 
@@ -803,48 +912,7 @@
             </div>
         </div>
 
-        <nav class="navbar navbar-expand-lg navbar-light ">
-            <div class="container-fluid d-flex justify-content-between align-items-center">
 
-                <!-- Left: Live Indicator + User Count -->
-                <div class="d-flex align-items-center gap-1">
-                    {{-- <div class="live-indicator d-flex align-items-center">
-                        <div class="live-dot me-2"
-                            style="width:10px;height:10px;border-radius:50%;background:red;animation:pulse 1s infinite;">
-                        </div>
-                        <span class="fw-bold text-white">LIVE</span>
-                    </div> --}}
-
-                    {{-- <div class="user-count d-flex align-items-center text-white">
-                        <i class="fas fa-users me-1"></i>
-                        <span id="user-count">0</span>
-                    </div> --}}
-                </div>
-
-                <!-- Center: Logo -->
-                <div class="navbar-brand mx-auto">
-                    <img src="https://baaboo.com/cdn/shop/files/baaboo-logo_1_256x.svg?v=1745568771" alt="Logo"
-                        style="height:30px;">
-                </div>
-
-                <!-- Right: Register / User Button -->
-                <div class="register-button">
-                    @guest('web')
-                        <button class="btn btn-warning btn-sm px-3 py-1 fw-semibold rounded-pill shadow-sm btn-register"
-                            data-bs-target="#registerModal" data-bs-toggle="modal" style="">
-                            <i class="fas fa-user-plus me-2"></i> Join Now
-                        </button>
-                    @elseauth('web')
-                        <button class="btn btn-success btn-sm px-3 py-1 fw-semibold rounded-pill shadow-sm btn-user-profile"
-                            data-bs-toggle="modal" data-bs-target="#userInfoModal" style="">
-                            <i class="fas fa-user me-2"></i>{{ Auth::guard('web')->user()->name }}
-                            <span id="auth-player-points">(pts)</span>
-                        </button>
-                    @endauth
-                </div>
-
-            </div>
-        </nav>
 
         <!-- Video Container -->
         <div class="video-container" id="videoContainer">
@@ -853,31 +921,9 @@
             </div>
 
             <div id="liveShowTabContainer">
-                <ul class="nav nav-tabs" id="liveShowTabs" role="tablist">
-                    <li class="nav-item active" role="presentation">
-                        <button class="nav-link " id="chatTab-tab" data-bs-toggle="tab" data-bs-target="#chatTab"
-                            type="button" role="tab" aria-controls="chatTab" aria-selected="true">
-                            <i class="fas fa-comments"></i>
-                            {{-- <i class="fas fa-circle blinking-dot"></i> --}}
-                            <div class="typing-fade">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="playerTab-tab" data-bs-toggle="tab" data-bs-target="#playerTab"
-                            type="button" role="tab" aria-controls="playerTab"
-                            onclick="updatePlayersLeaderboard()" aria-selected="false">
-                            <i class="fas fa-users me-1"></i>
-                            <span id="user-count">0</span>
-                        </button>
-                    </li>
-                </ul>
+             
                 <div class="tab-content" id="liveShowTabsContent">
-                    <div class="tab-pane fade show active" id="chatTab" role="tabpanel"
-                        aria-labelledby="chatTab-tab">
+                    <div class="tab-pane fade show active" id="chatTab" role="tabpanel" aria-labelledby="chatTab-tab">
                         <div class="chat-container" id="chatContainer">
                             <!-- TikTok-style Overlay Chat -->
                             <div class="overlay-chat" id="overlayChat"></div>
@@ -887,7 +933,7 @@
                                 <div class="chat-input-group">
                                     <input type="text" class="chat-input-field" maxlength="120"
                                         placeholder="write something..." id="chatInput">
-                                    <button class="send-btn-overlay" onclick="sendMessage()">
+                                    <button class="send-btn-overlay" id="send-btn-overlay" onclick="sendMessage()">
                                         <i class="fas fa-paper-plane"></i>
                                     </button>
                                 </div>
@@ -901,20 +947,75 @@
                             <div class="players-list-group-container">
                                 <h5 class="mb-3"><i class="fas fa-users me-2 text-primary"></i>Players & Scores</h5>
                                 <ul class="list-group" id="players-leaderbord">
-
-
-
-
                                 </ul>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
 
+
     </div>
+    <nav class="navbar fixed-bottom mobile-nav bottom-nav bg-white border-top">
+        <ul class="nav d-flex flex-row flex-nowrap w-100 justify-content-between align-items-center text-center px-2">
+
+            <!-- 1) Logo -->
+            <li class="nav-item flex-fill">
+                <a href="#"
+                    class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0">
+                    <img src="https://baaboo.com/cdn/shop/files/baaboo-logo_1_256x.svg?v=1745568771" alt="Logo"
+                        style="height:26px;width:auto;">
+                </a>
+            </li>
+
+            <!-- 2) Chat -->
+            <li class="nav-item flex-fill" role="presentation">
+                <a class="nav-link active d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                    id="chatTab-tab" data-bs-toggle="tab" href="#chatTab" role="tab" aria-controls="chatTab"
+                    aria-selected="true">
+                    <i class="fas fa-comments fs-5"></i>
+                    <small class="mt-1">Chat</small>
+                </a>
+            </li>
+
+            <!-- 3) Players -->
+            <li class="nav-item flex-fill" role="presentation">
+                <a class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                    id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
+                    aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-users fs-5 me-1"></i>
+                        <span id="user-count" class="fw-semibold small">0</span>
+                    </div>
+                    <small class="mt-1">Players</small>
+                </a>
+            </li>
+
+            <!-- 4) Register / Profile -->
+            <li class="nav-item flex-fill">
+                @guest('web')
+                    <a href="#"
+                        class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                        data-bs-target="#registerModal" data-bs-toggle="modal">
+                        <i class="fas fa-user-plus fs-5"></i>
+                        <small class="mt-1">Join</small>
+                    </a>
+                @elseauth('web')
+                    <a href="#"
+                        class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                        data-bs-toggle="modal" data-bs-target="#userInfoModal">
+                        <i class="fas fa-user fs-5"></i>
+                        <small class="mt-1 text-truncate" style="max-width:70px;">
+                            {{ Auth::guard('web')->user()->name }}
+                        </small>
+                    </a>
+                @endauth
+            </li>
+
+        </ul>
+    </nav>
+
 
 
     <!-- Register Modal -->
@@ -990,7 +1091,6 @@
         </div>
     </div>
 
-
     <!-- Winner Dialog -->
     <div id="winnerDialog"
         style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
@@ -1006,9 +1106,6 @@
             </button>
         </div>
     </div>
-
-
-
 
     <!-- Centered Play Button Overlay -->
     <div id="playButtonOverlay" style="">
@@ -1040,12 +1137,14 @@
         let isEliminated = {{ $isEliminated ? 'true' : 'false' }};
 
         let isLoggedIn = {{ Auth::guard('web')->check() ? 'true' : 'false' }};
-        console.log("initial val of issLoggedIn ", isLoggedIn);
+        let userId = {{ Auth::guard('web')->check() ? Auth::guard('web')->user()->id : -1 }};
+        console.log("initial val of issLoggedIn ", isLoggedIn, userId);
+
+
         if (isLoggedIn === true) {
             console.log("user is logged in, fetching player points");
+
         }
-
-
 
         console.log('isEliminated:', isEliminated);
         console.log('isLoggedIn:', isLoggedIn);
@@ -1227,6 +1326,9 @@
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
 
+            input.disabled = true;
+            document.querySelector('#send-btn-overlay').disabled = true;
+
             if (message) {
                 //ajax
                 $.ajax({
@@ -1240,8 +1342,10 @@
                     },
                     success: function(response) {
                         // Handle success
-                        addOverlayMessage('@You', message);
+                        // addOverlayMessage('@You', message);
                         input.value = '';
+                        input.disabled = false;
+                        document.querySelector('#send-btn-overlay').disabled = false;
                     },
                     error: function(xhr) {
                         // Handle error
@@ -1263,7 +1367,10 @@
                     const overlayChat = document.getElementById('overlayChat');
                     overlayChat.innerHTML = ''; // Clear existing messages
                     data.messages.forEach(msg => {
-                        addOverlayMessage('@' + msg.user.name, msg.message);
+                        if (userId != msg.user.id) {
+                            addOverlayMessage('@' + msg.user.name, msg.message);
+
+                        }
                     });
                 })
                 .catch(error => console.error('Error fetching messages:', error));
@@ -1309,7 +1416,12 @@
         updateViewerCount();
 
 
-        setInterval(updateViewerCount, 5000);
+        setInterval(
+            function() {
+                updateViewerCount();
+                updatePlayersLeaderboard();
+
+            }, 5000);
 
         // Prevent quiz overlay from closing when clicking inside
         document.getElementById('quizOverlay').addEventListener('click', function(e) {
@@ -1360,14 +1472,17 @@
                         // Optionally: update UI to reflect logged-in user
                         addOverlayMessage('@' + username, 'has joined the chat!');
                         replaceRegisterButtonWithUsername(username);
+
                         isLoggedIn = true;
+                        userId = data.user.id;
+
 
                         enabledRegisterButton();
 
                         isEliminated = data.isEliminated == true ? true : false;
 
                         console.log('User registered successfully:', data, 'isEliminated:', isEliminated,
-                            'isLoggedIn:', isLoggedIn);
+                            'isLoggedIn:', isLoggedIn, 'userId:', userId);
 
                         playerAsWinnerEventTrigger(data.user.id);
                     } else {
@@ -1848,10 +1963,6 @@
             console.log('new message:', data.data);
             addOverlayMessage('@' + data.data.user.name, data.data.message);
         });
-
-        //updatePlayersLeaderboard every 5 seconds
-        setInterval(updatePlayersLeaderboard, 5000);
-
 
         function updatePlayersLeaderboard() {
 

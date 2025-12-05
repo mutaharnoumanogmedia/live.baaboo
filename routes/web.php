@@ -41,13 +41,10 @@ Route::middleware(['auth:web'])->group(function () {
     //update-elimination-status
     Route::post('live-show/{id}/update-elimination-status', [GamePlayController::class, 'updateEliminationStatus'])->name('live-show.update-elimination-status');
 
-
-
-    Route::get("live-show/{id}/get-live-show-users-with-scores", [GamePlayController::class, 'getLiveShowUsersWithScores']);
-
-
     Route::post('live-show/{id}/submit-quiz', [GamePlayController::class, 'submitQuiz'])->name('live-show.submit-quiz');
 });
+Route::get("live-show/{id}/get-live-show-users-with-scores", [GamePlayController::class, 'getLiveShowUsersWithScores']);
+
 
 Route::get('/test-message-event', function () {
     event(new \App\Events\LiveShowMessageEvent([

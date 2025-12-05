@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Models\LiveShow;
 use App\Models\LiveShowMessages;
 use App\Models\QuizOption;
+use App\Models\User;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use Illuminate\Support\Facades\Auth;
@@ -32,100 +33,123 @@ class GamePlayController extends Controller
     public function registerUser(Request $request, $liveShowId)
     {
 
-        if (Auth::guard('web')->check()) {
-            return response()->json(['success' => false, 'messages' => ['User already logged in.'], 'user' => Auth::guard('web')->user(), 'authStatus' => Auth::guard('web')->check()]);
-        }
+        try {
 
-        //if user already registered , login it and update pivot table
-        $existingUser = \App\Models\User::where('email', $request->email)->first();
-        if ($existingUser) {
+
+
+            if (Auth::guard('web')->check()) {
+                return response()->json(['success' => false, 'messages' => ['User already logged in.'], 'user' => Auth::guard('web')->user(), 'authStatus' => Auth::guard('web')->check()]);
+            }
+
+            //if user already registered , login it and update pivot table
+            $existingUser = \App\Models\User::where('email', $request->email)->first();
+            if ($existingUser) {
+                /********************** */
             //match name also
-            if ($existingUser->name !== $request->name) {
-                return response()->json(['success' => false, 'messages' => ['The email is already registered with a different username. Please use the correct username or register with a different email.'], 'authStatus' => Auth::guard('web')->check()], 422);
-            }
-            //update pivot table
-            $liveShow = LiveShow::live()->find($liveShowId);
+            // if ($existingUser->name !== $request->name) {
+            //     return response()->json(['success' => false, 'messages' => ['The email is already registered with a different username. Please use the correct username or register with a different email.'], 'authStatus' => Auth::guard('web')->check()], 422);
+            // }
+                /********************** */
 
-            if ($liveShow) {
 
-                $userPivot = $liveShow->users()->where('user_id', $existingUser->id)->first();
-
-                if ($userPivot && $userPivot->pivot->status === 'eliminated') {
-                    // Do not update if eliminated, just update online status
-                    $liveShow->users()->updateExistingPivot($existingUser->id, ['is_online' => 1, 'last_active_at' => now()]);
-                } else {
-                    $liveShow->users()->syncWithoutDetaching(
-                        [
-                            $existingUser->id =>
-                            [
-                                'is_online' => 1,
-                                'is_winner' => 0,
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                                'score' => 0,
-                                'status' => 'registered',
-                                'last_active_at' => now()
-                            ]
-                        ]
-                    );
+                //update username if different
+                if ($existingUser->name !== $request->name) {
+                    $existingUser->name = $request->name;
+                    $existingUser->save();
                 }
+
+                //update pivot table
+                $liveShow = LiveShow::live()->find($liveShowId);
+
+                if ($liveShow) {
+                    $userPivot = $liveShow->users()->where('user_id', $existingUser->id)->first();
+                    if ($userPivot && $userPivot->pivot->status === 'eliminated') {
+                        // Do not update if eliminated, just update online status
+                        $liveShow->users()->updateExistingPivot($existingUser->id, ['is_online' => 1, 'last_active_at' => now()]);
+                    } else {
+                        $liveShow->users()->syncWithoutDetaching(
+                            [
+                                $existingUser->id =>
+                                [
+                                    'is_online' => 1,
+                                    'is_winner' => 0,
+                                    'created_at' => now(),
+                                    'updated_at' => now(),
+                                    'score' => 0,
+                                    'status' => 'registered',
+                                    'last_active_at' => now()
+                                ]
+                            ]
+                        );
+                    }
+                }
+
+                Auth::guard('web')->login($existingUser);
+                $sessionResult =  $this->sessionGeneration(Auth::user(), $request);
+
+                if (!$sessionResult['success']) {
+                    return response()->json(['success' => false, 'messages' => [$sessionResult['message']], 'user' => null, 'authStatus' => Auth::guard('web')->check()], 500);
+                }
+
+                $this->triggerOnlineUsersEvent($liveShowId);
+
+                //Job : send email to user with login details 
+
+                return response()->json(['success' => true, 'message' => 'User logged in successfully.', 'user' => $existingUser, 'authStatus' => Auth::guard('web')->check(), 'isEliminated' => $this->getEliminationStatus($liveShowId)]);
+            }
+            //end of existing user login
+
+            $validator = Validator::make($request->all(), [
+                'name'  => 'required|alpha_num|string|max:255|unique:users,name',
+                'email' => 'required|email|max:255|unique:users,email',
+            ], [
+                'name.unique' => 'The username has already been taken. Please choose a different one.',
+                'email.unique' => 'The email has already been registered. Please use a different email.',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['messages' => $validator->errors()->all()], 422);
             }
 
-            Auth::guard('web')->login($existingUser);
+            $validated = $validator->validated();
+            //add rand password
+            $validated['password'] = bcrypt(\Str::random(8));
 
-            $request->session()->regenerate();
+            $liveShow = LiveShow::live()->find($liveShowId);
+            if (!$liveShow) {
+                return response()->json(['message' => 'Live show not found.'], 404);
+            }
+
+            // Create the user
+            $user = \App\Models\User::create($validated);
+
+            // Attach the user to the live show with default values
+            $liveShow->users()->attach(
+                $user->id,
+                [
+                    'is_online' => 1,
+                    'is_winner' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                    'score' => 0,
+                    'status' => 'registered',
+                    'last_active_at' => now()
+                ]
+            );
+
+            Auth::guard('web')->login($user);
+
+            $sessionResult =  $this->sessionGeneration(Auth::user(), $request);
+
+            if (!$sessionResult['success']) {
+                return response()->json(['success' => false, 'messages' => [$sessionResult['message']], 'user' => null, 'authStatus' => Auth::guard('web')->check()], 500);
+            }
+
             $this->triggerOnlineUsersEvent($liveShowId);
-
-            //Job : send email to user with login details 
-
-            return response()->json(['success' => true, 'message' => 'User logged in successfully.', 'user' => $existingUser, 'authStatus' => Auth::guard('web')->check(), 'isEliminated' => $this->getEliminationStatus($liveShowId)]);
+            return response()->json(['success' => true, 'message' => 'User registered successfully.', 'user' => $user, 'authStatus' => Auth::guard('web')->check()]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'messages' => ['Registration failed: ' . $e->getMessage()], 'user' => null, 'authStatus' => Auth::guard('web')->check()], 500);
         }
-        //end of existing user login
-
-        $validator = Validator::make($request->all(), [
-            'name'  => 'required|alpha_num|string|max:255|unique:users,name',
-            'email' => 'required|email|max:255|unique:users,email',
-        ], [
-            'name.unique' => 'The username has already been taken. Please choose a different one.',
-            'email.unique' => 'The email has already been registered. Please use a different email.',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['messages' => $validator->errors()->all()], 422);
-        }
-
-        $validated = $validator->validated();
-        //add rand password
-        $validated['password'] = bcrypt(\Str::random(8));
-
-        $liveShow = LiveShow::live()->find($liveShowId);
-        if (!$liveShow) {
-            return response()->json(['message' => 'Live show not found.'], 404);
-        }
-
-        // Create the user
-        $user = \App\Models\User::create($validated);
-
-        // Attach the user to the live show with default values
-        $liveShow->users()->attach(
-            $user->id,
-            [
-                'is_online' => 1,
-                'is_winner' => 0,
-                'created_at' => now(),
-                'updated_at' => now(),
-                'score' => 0,
-                'status' => 'registered',
-                'last_active_at' => now()
-            ]
-        );
-
-        Auth::guard('web')->login($user);
-
-        $request->session()->regenerate();
-
-        $this->triggerOnlineUsersEvent($liveShowId);
-        return response()->json(['success' => true, 'message' => 'User registered successfully.', 'user' => $user, 'authStatus' => Auth::guard('web')->check()]);
     }
 
     public function liveShowLogout(Request $request, $liveShow)
@@ -145,7 +169,15 @@ class GamePlayController extends Controller
 
         $this->triggerOnlineUsersEvent($liveShow->id);
 
+        $user = Auth::user();
+        if ($user) {
+            $user->forceFill(['current_session_id' => null])->save();
+        }
+        \DB::table('sessions')->where('user_id', Auth::id())->delete();
+
         Auth::logout();
+
+        //remove session from sessions table
 
         return redirect(route('live-show', [$liveShow->id]))->with('success', 'You have been logged out successfully.');
     }
@@ -265,7 +297,7 @@ class GamePlayController extends Controller
 
             ], 200);
         } else {
-            $newScore = round($currentScore + (1 + 1 / $totalSecondsToSubmit ) * 100); //example scoring logic
+            $newScore = round($currentScore + (1 + 1 / $totalSecondsToSubmit) * 100); //example scoring logic
             $liveShow->users()->updateExistingPivot($user->id, ['score' => $newScore]);
             return response()->json([
                 'success' => true,
@@ -432,5 +464,48 @@ class GamePlayController extends Controller
             ->values();
 
         return response()->json(['users' => $usersWithScores], 200);
+    }
+
+
+    private function sessionGeneration(User $user, Request $request)
+    {
+        try {
+            // session lifetime in seconds
+            $lifetimeSeconds = config('session.lifetime') * 60;
+            $activeAfter = now()->subSeconds($lifetimeSeconds)->timestamp;
+
+            $hasOtherActiveSession = \DB::table('sessions')
+                ->where('user_id', $user->id)
+                ->where('id', '!=', session()->getId())
+                ->where('last_activity', '>=', $activeAfter)
+                ->exists();
+
+            if ($hasOtherActiveSession) {
+                Auth::logout();
+
+                return  [
+                    'success' => false,
+                    'message' => 'This account is already logged in on another device.'
+                ];
+            }
+
+            // mark this session as the only allowed one
+            $user->forceFill(['current_session_id' => session()->getId()])->save();
+            \DB::table('sessions')->insert([
+                'id' => session()->getId(), // string, unique session ID
+                'user_id' => $user->id,
+                'ip_address' => request()->ip(), // string, nullable
+                'user_agent' => request()->header('User-Agent'), // string, nullable
+                'payload' => "", // string, usually serialized data
+                'last_activity' => now()->timestamp, // int, timestamp
+            ]);
+
+
+            return ['success' => true];
+        } catch (\Exception $e) {
+            // Log the exception or handle it as needed
+            \Log::error('Session generation error: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Session generation failed. ' . $e->getMessage()];
+        }
     }
 }
