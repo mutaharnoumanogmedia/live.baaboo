@@ -69,11 +69,11 @@
             background: #ffffff;
             border-top: 1px solid rgba(0, 0, 0, 0.08);
             box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
-            height: 80px;
+            height: 60px;
             background: white;
             z-index: 1030;
             /* above most stuff */
-            padding: 10px 5px;
+            padding: 0;
 
             /* iPhone home bar safe area */
         }
