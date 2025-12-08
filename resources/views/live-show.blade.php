@@ -345,7 +345,7 @@
 
 
         #liveShowTabContainer {
-            position: absolute;
+            position: relative;
             bottom: 00px;
             width: 100%;
             z-index: 10;
@@ -382,11 +382,16 @@
         }
 
         .players-list-group-container {
-            height: 40vh;
-            overflow-y: auto;
+            
+             
             padding: 10px;
             background: #ffffff;
             border-radius: 15px;
+            margin-bottom: 10px;
+        }
+        .players-list-group-container ul.list-group {
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         /* TikTok-style overlay chat */
@@ -926,101 +931,107 @@
                 <div id="player"></div>
             </div>
 
-            <div id="liveShowTabContainer">
 
-                <div class="tab-content" id="liveShowTabsContent">
-                    <div class="tab-pane fade show active" id="chatTab" role="tabpanel" aria-labelledby="chatTab-tab">
-                        <div class="chat-container" id="chatContainer">
-                            <!-- TikTok-style Overlay Chat -->
-                            <div class="overlay-chat" id="overlayChat"></div>
+        </div>
 
-                            <!-- Bottom Chat Input -->
-                            <div class="bottom-chat-input">
-                                <div class="chat-input-group">
-                                    <input type="text" class="chat-input-field" maxlength="120"
-                                        placeholder="write something..." id="chatInput">
-                                    <button class="send-btn-overlay" id="send-btn-overlay" onclick="sendMessage()">
-                                        <i class="fas fa-paper-plane"></i>
-                                    </button>
-                                </div>
+
+    </div>
+
+    <div class="fixed-bottom">
+        <div id="liveShowTabContainer">
+
+            <div class="tab-content" id="liveShowTabsContent">
+                <div class="tab-pane fade show active" id="chatTab" role="tabpanel" aria-labelledby="chatTab-tab">
+                    <div class="chat-container" id="chatContainer">
+                        <!-- TikTok-style Overlay Chat -->
+                        <div class="overlay-chat" id="overlayChat"></div>
+
+                        <!-- Bottom Chat Input -->
+                        <div class="bottom-chat-input">
+                            <div class="chat-input-group">
+                                <input type="text" class="chat-input-field" maxlength="120"
+                                    placeholder="write something..." id="chatInput">
+                                <button class="send-btn-overlay" id="send-btn-overlay" onclick="sendMessage()">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
                             </div>
-
                         </div>
+
                     </div>
-                    <div class="tab-pane fade  " id="playerTab" role="tabpanel" aria-labelledby="playerTab-tab">
-                        <!-- Player List -->
-                        <div class="container-fluid ">
-                            <div class="players-list-group-container">
-                                <h5 class="mb-3"><i class="fas fa-users me-2 text-primary"></i>Players & Scores</h5>
-                                <ul class="list-group" id="players-leaderbord">
-                                </ul>
-                            </div>
+                </div>
+                <div class="tab-pane fade  " id="playerTab" role="tabpanel" aria-labelledby="playerTab-tab">
+                    <!-- Player List -->
+                    <div class="container-fluid ">
+                        <div class="players-list-group-container">
+                            <h5 class="mb-3"><i class="fas fa-users me-2 text-primary"></i>Players & Scores</h5>
+                            <ul class="list-group" id="players-leaderbord">
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <nav class="navbar  mobile-nav bottom-nav bg-white border-top">
+            <ul
+                class="nav d-flex flex-row flex-nowrap w-100 justify-content-between align-items-center text-center px-2">
 
+                <!-- 1) Logo -->
+                <li class="nav-item flex-fill">
+                    <a href="#"
+                        class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0">
+                        <img src="https://baaboo.com/cdn/shop/files/baaboo-logo_1_256x.svg?v=1745568771"
+                            alt="Logo" style="height:26px;width:auto;">
+                    </a>
+                </li>
 
+                <!-- 2) Chat -->
+                <li class="nav-item flex-fill" role="presentation">
+                    <a class="nav-link active d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                        id="chatTab-tab" data-bs-toggle="tab" href="#chatTab" role="tab"
+                        aria-controls="chatTab" aria-selected="true">
+                        <i class="fas fa-comments fs-5"></i>
+                        <small class="mt-1">Chat</small>
+                    </a>
+                </li>
+
+                <!-- 3) Players -->
+                <li class="nav-item flex-fill" role="presentation">
+                    <a class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                        id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
+                        aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-users fs-5 me-1"></i>
+                            <span id="user-count" class="fw-semibold small">0</span>
+                        </div>
+                        <small class="mt-1">Players</small>
+                    </a>
+                </li>
+
+                <!-- 4) Register / Profile -->
+                <li class="nav-item flex-fill" id="register-profile-item">
+                    @guest('web')
+                        <a href="#"
+                            class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                            data-bs-target="#registerModal" data-bs-toggle="modal">
+                            <i class="fas fa-user-plus fs-5"></i>
+                            <small class="mt-1">Join</small>
+                        </a>
+                    @elseauth('web')
+                        <a href="#"
+                            class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                            data-bs-toggle="modal" data-bs-target="#userInfoModal">
+                            <i class="fas fa-user fs-5"></i>
+                            <small class="mt-1 text-truncate" style="max-width:70px;">
+                                {{ Auth::guard('web')->user()->name }}
+                            </small>
+                        </a>
+                    @endauth
+                </li>
+
+            </ul>
+        </nav>
     </div>
-    <nav class="navbar fixed-bottom mobile-nav bottom-nav bg-white border-top">
-        <ul class="nav d-flex flex-row flex-nowrap w-100 justify-content-between align-items-center text-center px-2">
 
-            <!-- 1) Logo -->
-            <li class="nav-item flex-fill">
-                <a href="#"
-                    class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0">
-                    <img src="https://baaboo.com/cdn/shop/files/baaboo-logo_1_256x.svg?v=1745568771" alt="Logo"
-                        style="height:26px;width:auto;">
-                </a>
-            </li>
-
-            <!-- 2) Chat -->
-            <li class="nav-item flex-fill" role="presentation">
-                <a class="nav-link active d-flex flex-column align-items-center justify-content-center py-2 px-0"
-                    id="chatTab-tab" data-bs-toggle="tab" href="#chatTab" role="tab" aria-controls="chatTab"
-                    aria-selected="true">
-                    <i class="fas fa-comments fs-5"></i>
-                    <small class="mt-1">Chat</small>
-                </a>
-            </li>
-
-            <!-- 3) Players -->
-            <li class="nav-item flex-fill" role="presentation">
-                <a class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
-                    id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
-                    aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-users fs-5 me-1"></i>
-                        <span id="user-count" class="fw-semibold small">0</span>
-                    </div>
-                    <small class="mt-1">Players</small>
-                </a>
-            </li>
-
-            <!-- 4) Register / Profile -->
-            <li class="nav-item flex-fill" id="register-profile-item">
-                @guest('web')
-                    <a href="#"
-                        class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
-                        data-bs-target="#registerModal" data-bs-toggle="modal">
-                        <i class="fas fa-user-plus fs-5"></i>
-                        <small class="mt-1">Join</small>
-                    </a>
-                @elseauth('web')
-                    <a href="#"
-                        class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
-                        data-bs-toggle="modal" data-bs-target="#userInfoModal">
-                        <i class="fas fa-user fs-5"></i>
-                        <small class="mt-1 text-truncate" style="max-width:70px;">
-                            {{ Auth::guard('web')->user()->name }}
-                        </small>
-                    </a>
-                @endauth
-            </li>
-
-        </ul>
-    </nav>
 
 
 
