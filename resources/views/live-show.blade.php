@@ -1671,7 +1671,10 @@
             console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
             if (!isEliminated && isLoggedIn) {
                 if (isCurrentAnswerCorrect === true) {
+                    appendQuestionResponseStatus('success');
                     fireConfetti();
+                }else{
+                    appendQuestionResponseStatus('fail');
                 }
             }
             showVideoContainer();
@@ -1685,14 +1688,14 @@
             if (!isEliminated && isLoggedIn) {
                 if (isCurrentAnswerCorrect === true) {
                     fireConfetti();
-                    appendEvaluationStatus('success');
+                    appendQuestionResponseStatus('success');
                 } else if (isCurrentAnswerCorrect === false) {
-                    appendEvaluationStatus('fail');
+                    appendQuestionResponseStatus('fail');
 
                     isEliminated = true;
                 } else {
                     isEliminated = true;
-                    appendEvaluationStatus('warning');
+                    appendQuestionResponseStatus('warning');
                 }
             } else {
                 showVideoContainer();
@@ -1704,7 +1707,7 @@
         }
 
 
-        function appendEvaluationStatus(type) {
+        function appendQuestionResponseStatus(type) {
             const evaluationDiv = document.getElementById('evaluationStatus');
             let alertClass = 'alert-info';
 
@@ -1712,15 +1715,15 @@
 
             if (type === 'success') {
                 alertClass = 'text-success';
-                message = `<i class="fas fa-check-circle me-2"></i>Correct Answer!`;
+                message = `<i class="fas fa-check-circle me-2"></i>Hurray!<br>Correct Answer.`;
             } else if (type === 'fail') {
                 alertClass = 'text-danger';
-                message = `<i class="fas fa-times-circle me-2"></i> Eliminated!`;
+                message = `<i class="fas fa-times-circle me-2"></i>Oops!<br>Wrong Answer`;
                 // updateEliminatedStatus();
 
             } else {
                 alertClass = 'text-warning';
-                message = `<i class="fas fa-exclamation-circle me-2"></i> Eliminated!`;
+                message = `<i class="fas fa-exclamation-circle me-2"></i> Wrong Answer!`;
                 // updateEliminatedStatus();
 
             }
