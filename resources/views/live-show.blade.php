@@ -31,6 +31,12 @@
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
         }
 
+        input,
+        textarea,
+        select {
+            font-size: 16px !important;
+        }
+
         .btn-primary {
             background-color: var(--primary-color);
             color: white;
@@ -426,7 +432,7 @@
         }
 
         .chat-message-overlay .message-text {
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: white;
             margin-top: 2px;
         }
@@ -460,7 +466,7 @@
             border-radius: 25px;
             padding: 12px 16px;
             color: white;
-            font-size: 0.9rem;
+            font-size: 16px !important;
             outline: none;
             backdrop-filter: blur(10px);
         }
