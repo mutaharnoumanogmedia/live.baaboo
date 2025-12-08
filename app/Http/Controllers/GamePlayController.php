@@ -14,6 +14,7 @@ use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Termwind\Components\Li;
 
 class GamePlayController extends Controller
 {
@@ -385,9 +386,13 @@ class GamePlayController extends Controller
     }
 
 
-    public function fetchMessages()
+    public function fetchMessages($liveShowId)
     {
-        $messages = LiveShowMessages::with('user')->where('is_removed', false)->orderBy('created_at', 'asc')->get();
+        if(!LiveShow::find($liveShowId)){
+            return response()->json(['message' => 'Live show not found.'], 404);
+        }
+        
+        $messages = LiveShowMessages::with('user')->where("live_show_id", $liveShowId)->where('is_removed', false)->orderBy('created_at', 'asc')->get();
         return response()->json(['messages' => $messages], 200);
     }
 
