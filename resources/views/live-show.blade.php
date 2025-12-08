@@ -25,7 +25,7 @@
             padding-bottom: 76px;
             margin: 0;
             height: 100vh;
-            overflow: hidden;
+            overflow-y: scroll;
 
 
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
@@ -523,7 +523,8 @@
 
         .quiz-overlay.active {
             transform: translateY(0);
-            height: 580px;
+            max-height: 580px;
+            overflow: auto
         }
 
         .quiz-content {
@@ -1122,9 +1123,9 @@
 
     <!-- Winner Dialog -->
     <div id="winnerDialog"
-        style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+        style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;max-height:100vh; overflow-y:auto;">
         <div
-            style="background:#fff; border-radius:20px; padding:40px 30px; text-align:center; max-width:350px; margin:auto; margin-top: 20%; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+            style="background:#fff; border-radius:20px; padding:40px 30px; text-align:center; max-width:350px; margin:auto; margin-top: 20%; box-shadow:0 8px 32px rgba(0,0,0,0.2); ">
             <i class="fas fa-trophy fa-3x text-warning mb-3"></i>
             <h3 class="mb-2" style="color:#ff5f00;">Congratulations!</h3>
             <p class="mb-3" style="font-size:1.1rem;">You are selected as a winner!</p>
@@ -1505,7 +1506,7 @@
                         console.log('User registered successfully:', data, 'isEliminated:', isEliminated,
                             'isLoggedIn:', isLoggedIn, 'userId:', userId);
 
-                        playerAsWinnerEventTrigger(data.user.id);
+                        playerAsWinnerEventTrigger();
                     } else {
                         let errorMessages = data.messages || ['Registration failed. Please try again.'];
 
@@ -1674,7 +1675,7 @@
                 if (isCurrentAnswerCorrect === true) {
                     appendQuestionResponseStatus('success');
                     fireConfetti();
-                }else{
+                } else {
                     appendQuestionResponseStatus('fail');
                 }
             }
@@ -1806,21 +1807,28 @@
 
 
 
-        function playerAsWinnerEventTrigger(user_id) {
+        function playerAsWinnerEventTrigger() {
             var channelShowWinner = pusher.subscribe(
-                'live-show-winner-user.{{ $liveShow->id }}.' + user_id);
+                'live-show-winner-user.{{ $liveShow->id }}');
             // System subscription event
             channelShowWinner.bind('pusher:subscription_succeeded', function() {
                 console.log('Winner Subscribed successfully!');
             });
             // Your Laravel broadcast event (drop the dot)
             channelShowWinner.bind('ShowPlayerAsWinnerEvent', function(data) {
-                console.log('You are a winner!', data);
-                addOverlayMessage('@System', 'Congratulations! You are selected as a winner!');
+               
                 fireConfetti();
 
                 document.getElementById('prizeAmount').textContent = data.prizeMoney + ' EUR';
-                showWinnerDialogDiv();
+                if (data.userId == userId) {
+                console.log('You are a winner!', data);
+
+                    addOverlayMessage('@System', 'Congratulations! You have won ' + data.prizeMoney + ' EUR!');
+                    showWinnerDialogDiv();
+                }
+                document.getElementById('playerTab-tab').click();
+
+
                 // Optionally, you can add more UI feedback here, like a popup or sound effect.
             });
 
@@ -1830,10 +1838,7 @@
             // Show the winner dialog
             document.querySelector('#winnerDialog').style.display = 'block';
         }
-
-        @auth('web')
-            playerAsWinnerEventTrigger('{{ Auth::guard('web')->user()->id }}')
-        @endauth
+        playerAsWinnerEventTrigger()
     </script>
 
     <script>
