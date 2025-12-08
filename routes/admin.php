@@ -21,6 +21,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post("live-shows/stream-management/{id}/quizzes/{quizId}/remove-quiz-question", [\App\Http\Controllers\Admin\LiveShowController::class, 'removeQuizQuestion'])->name('live-shows.stream-management.remove-quiz-question');
 
     Route::get("live-shows/stream-management/{id}/fetch-messages", [\App\Http\Controllers\Admin\LiveShowController::class, 'fetchChatMessages'])->name('live-shows.stream-management.fetch-chat-messages');
+    Route::post("live-shows/stream-management/{id}/send-message", [\App\Http\Controllers\Admin\LiveShowController::class, 'sendMessage'])->name('live-shows.stream-management.send-message');
 
     //updateWinners
     Route::post("live-shows/stream-management/{liveShowId}/update-winners", [\App\Http\Controllers\Admin\LiveShowController::class, 'updateWinners'])->name('live-shows.update-winners');

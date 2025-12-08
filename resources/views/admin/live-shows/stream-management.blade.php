@@ -1,3 +1,4 @@
+-- Active: 1764218239848@@127.0.0.1@3306@live_baaboo
 <x-app-dashboard-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -185,10 +186,12 @@
 
 
                                 </div>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" placeholder="Type a message...">
-                                    <button class="btn btn-primary">Send</button>
-                                </div>
+                                
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="messageInput" placeholder="Type a message...">
+                                        <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+                                    </div>
+                                 
                             </aside>
                         </div>
                     </div>
@@ -295,6 +298,37 @@
                 messages.forEach(message => {
                     appendSingleMessage(message);
                 });
+            }
+
+            function sendMessage() {
+                console.log('Sending message...');
+                // Simulate sending a message via an API call
+                message = document.querySelector('#messageInput').value;
+                if (!message || message.trim() === '') {
+                    
+                    return;
+                }
+                 fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/send-message`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: message
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.data) {
+                            
+                            document.querySelector('#messageInput').value = '';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error sending message:', error);
+                    });
             }
 
             function appendSingleMessage(message) {
@@ -560,7 +594,8 @@
 
 
             document.getElementById('resetGameButton').addEventListener('click', function() {
-                if (!confirm('Are you sure you want to reset the game? This will remove all players current progress.')) {
+                if (!confirm(
+                        'Are you sure you want to reset the game? This will remove all players current progress.')) {
                     return;
                 }
 

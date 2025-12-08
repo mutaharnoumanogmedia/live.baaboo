@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Events\GameResetEvent;
+use App\Events\LiveShowMessageEvent;
 use App\Events\LiveShowQuizUserResponses;
 use App\Events\RemoveLiveShowQuizQuestionEvent;
 use App\Events\ShowLiveShowQuizQuestionEvent;
@@ -10,6 +11,7 @@ use App\Events\ShowPlayerAsWinnerEvent;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\LiveShow;
+use App\Models\LiveShowMessages;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use Illuminate\Support\Facades\Auth;
@@ -302,6 +304,68 @@ class LiveShowController extends Controller
         $messages = $liveShow->messages()->with('user')->orderBy('created_at', 'desc')->get()->reverse()->values();
         return response()->json($messages);
     }
+
+    public function sendMessage(Request $request, $id)
+    {
+        $request->validate([
+            'message' => 'required|string|max:1000',
+        ]);
+
+        $liveShow = LiveShow::findOrFail($id);
+        $user = Auth::guard('admin')->user();
+        if (!$user) {
+            return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::check()], 401);
+        }
+        $messageText = $request->input('message');
+
+
+        // saving the message to the database
+        $message = $liveShow->messages()->create([
+            'user_id' => $user->id,
+            'message' => $messageText,
+        ]);
+
+        // Broadcast the new message to users
+
+
+        // Broadcast the message to other users (you can implement this using events and broadcasting)
+        $event = LiveShowMessageEvent::dispatch([
+            'id' => $message->id,
+            'live_show_id' => $liveShow->id,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+            'message' => $message->message,
+            'created_at' => $message->created_at,
+            'time_ago' => $message->time_ago,
+        ]);
+
+        $messageResponse = [
+            'id' => $message->id,
+            'live_show_id' => $liveShow->id,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+            'message' => $message->message,
+            'created_at' => $message->created_at,
+            'time_ago' => $message->time_ago,
+        ];
+        // For simplicity, we'll just return the message in the response
+        return response()->json([
+            'success' => true,
+            'message' => 'Message sent successfully.',
+            'data' => $messageResponse,
+            'user' => $user,
+            'event' => $event
+        ], 200);
+    }
+
+
+
 
 
 
