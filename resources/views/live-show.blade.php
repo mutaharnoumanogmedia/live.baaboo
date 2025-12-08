@@ -529,7 +529,7 @@
         .quiz-content {
             padding: 0px;
             height: 100%;
-            background: var(--light-bg);
+            background: rgba(255, 255, 255, 0.4);
             border-radius: 20px;
         }
 
