@@ -858,7 +858,7 @@
             border-radius: 20px;
         }
 
-        .mobile-nav .nav-link.active{
+        .mobile-nav .nav-link.active {
             background: var(--primary-color);
             color: white;
 
@@ -921,7 +921,7 @@
             </div>
 
             <div id="liveShowTabContainer">
-             
+
                 <div class="tab-content" id="liveShowTabsContent">
                     <div class="tab-pane fade show active" id="chatTab" role="tabpanel" aria-labelledby="chatTab-tab">
                         <div class="chat-container" id="chatContainer">
@@ -993,7 +993,7 @@
             </li>
 
             <!-- 4) Register / Profile -->
-            <li class="nav-item flex-fill">
+            <li class="nav-item flex-fill" id="register-profile-item">
                 @guest('web')
                     <a href="#"
                         class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
@@ -1525,11 +1525,16 @@
 
         //function to replace the register button with username after successful registration
         function replaceRegisterButtonWithUsername(username) {
-            const registerButtonDiv = document.querySelectorAll('.register-button')[0];
+            const registerButtonDiv = document.querySelector('#register-profile-item');
             registerButtonDiv.innerHTML = `
-                <button class="btn btn-success btn-sm" style="background-color: #28a745; border: none; font-weight: 600; padding: 5px 10px; border-radius: 20px; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);" data-bs-toggle="modal" data-bs-target="#userInfoModal">
-                    <i class="fas fa-user me-2"></i>${username}
-                </button>
+                  <a href="#"
+                        class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                        data-bs-toggle="modal" data-bs-target="#userInfoModal">
+                        <i class="fas fa-user fs-5"></i>
+                        <small class="mt-1 text-truncate" style="max-width:70px;">
+                            ${username}
+                        </small>
+                    </a>
             `;
         }
     </script>
@@ -1973,7 +1978,7 @@
                     console.log('Fetched players with scores:');
 
                     const users = data.users;
-                    console.log('Players with scores:', data);
+                    console.log('Players with scores:', users);
 
                     const playersListContainer = document.getElementById('players-leaderbord');
                     playersListContainer.innerHTML = '';
@@ -2006,16 +2011,16 @@
 
                         userDiv.innerHTML = `
                        
-                    <div >
-                <span style="margin-right: 20px;">${index + 1}</span>
-                        <strong>${user.name}</strong>
-                      
-                        <span class="ms-2">${user.is_winner ? '<i class="fas fa-trophy text-warning ms-2" title="Winner"></i>' : ''}</span>
-                    </div>
-                    <div>
-                        Score: ${user.score || 0}
-                    </div>
-                `;
+                                    <div >
+                                <span style="margin-right: 20px;">${index + 1}</span>
+                                        <strong>${user.name}</strong>
+                                    
+                                        <span class="ms-2">${user.is_winner ? '<i class="fas fa-trophy text-warning ms-2" title="Winner"></i>' : ''}</span>
+                                    </div>
+                                    <div>
+                                        Score: ${user.score || 0}
+                                    </div>
+                                `;
                         playersListContainer.appendChild(userDiv);
                     });
                 })

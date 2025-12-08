@@ -85,7 +85,8 @@ class GamePlayController extends Controller
                 }
 
                 Auth::guard('web')->login($existingUser);
-                $sessionResult =  $this->sessionGeneration(Auth::user(), $request);
+              
+                $sessionResult =  $this->sessionGeneration(Auth::guard('web')->user(), $request);
 
                 if (!$sessionResult['success']) {
                     return response()->json(['success' => false, 'messages' => [$sessionResult['message']], 'user' => null, 'authStatus' => Auth::guard('web')->check()], 500);
@@ -139,7 +140,9 @@ class GamePlayController extends Controller
 
             Auth::guard('web')->login($user);
 
-            $sessionResult =  $this->sessionGeneration(Auth::user(), $request);
+           
+
+            $sessionResult =  $this->sessionGeneration(Auth::guard('web')->user(), $request);
 
             if (!$sessionResult['success']) {
                 return response()->json(['success' => false, 'messages' => [$sessionResult['message']], 'user' => null, 'authStatus' => Auth::guard('web')->check()], 500);
