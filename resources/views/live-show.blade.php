@@ -382,13 +382,14 @@
         }
 
         .players-list-group-container {
-            
-             
+
+
             padding: 10px;
             background: #ffffff;
             border-radius: 15px;
             margin-bottom: 10px;
         }
+
         .players-list-group-container ul.list-group {
             max-height: 300px;
             overflow-y: auto;
@@ -736,7 +737,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            z-index: 100;
+            z-index: 999999;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -879,6 +880,16 @@
 </head>
 
 <body>
+
+    <!-- Centered Play Button Overlay -->
+    <div id="playButtonOverlay" style="">
+        <button id="playButton" style="">
+            <i class="fas fa-play fa-3x" style="color:white;"></i>
+        </button>
+        <div id="tapToPlayLabel" style="">
+            Tap to Play
+        </div>
+    </div>
     <div class="main-container" id="mainContainer">
         <!-- Quiz Overlay -->
         <div class="quiz-overlay" id="quizOverlay">
@@ -1124,15 +1135,7 @@
         </div>
     </div>
 
-    <!-- Centered Play Button Overlay -->
-    <div id="playButtonOverlay" style="">
-        <button id="playButton" style="">
-            <i class="fas fa-play fa-3x" style="color:white;"></i>
-        </button>
-        <div id="tapToPlayLabel" style="">
-            Tap to Play
-        </div>
-    </div>
+
 
 
 
