@@ -186,12 +186,15 @@
 
 
                                 </div>
-                                
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" id="messageInput" placeholder="Type a message...">
-                                        <button class="btn btn-primary" onclick="sendMessage()">Send</button>
-                                    </div>
-                                 
+
+                                <form onsubmit="event.preventDefault() ; sendMessage(event)" class="input-group">
+                                    <input type="text" class="form-control" id="messageInput"
+                                        placeholder="Type a message...">
+                                    <button class="btn btn-primary" type="submit">
+                                        Send
+                                    </button>
+                                </form>
+
                             </aside>
                         </div>
                     </div>
@@ -305,10 +308,10 @@
                 // Simulate sending a message via an API call
                 message = document.querySelector('#messageInput').value;
                 if (!message || message.trim() === '') {
-                    
+
                     return;
                 }
-                 fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/send-message`, {
+                fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/send-message`, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -322,7 +325,7 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.data) {
-                            
+
                             document.querySelector('#messageInput').value = '';
                         }
                     })
