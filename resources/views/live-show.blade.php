@@ -652,6 +652,7 @@
 
         .main-container.quiz-mode {
             transform: scale(1) translateY(-0px);
+            z-index: 99999;
         }
 
 
