@@ -171,6 +171,7 @@
         }
 
         .main-container.quiz-mode {
+            height: 90dvh;
             transform: scale(0.3) translateY(-150px);
             border-radius: 0px;
             overflow: hidden;
@@ -523,11 +524,12 @@
 
         .quiz-overlay.active {
             transform: translateY(0);
-            max-height: 580px;
-            overflow: auto
+            max-height: 100%;
+            overflow: auto;
         }
 
         .quiz-content {
+            position: relative;
             padding: 0px;
             height: 100%;
             background: rgba(255, 255, 255, 0.4);
@@ -558,6 +560,8 @@
         }
 
         .quiz-section {
+            position: absolute;
+            bottom: 0;
             background: white;
             border-radius: 15px;
             padding: 15px;
@@ -897,7 +901,7 @@
         <div class="quiz-overlay" id="quizOverlay">
             <div class="quiz-content">
 
-                <div style="height: 200px">
+                <div style="height: auto">
                     <div class="quiz-timer" id="quizTimer">
                         <svg class="timer-svg" viewBox="0 0 180 180" width="180" height="180">
                             <!-- Background circle -->
