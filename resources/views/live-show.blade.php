@@ -946,7 +946,8 @@
         <!-- Video Container -->
         <div class="video-container" id="videoContainer">
             <div class="video-placeholder" id="videoPlaceholder">
-                <div id="player"></div>
+                {{-- <div id="player"></div> --}}
+                <iframe src="{{$liveShow->stream_link}}" frameborder="0"></iframe>
             </div>
 
 
