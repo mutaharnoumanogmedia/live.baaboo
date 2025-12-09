@@ -561,6 +561,7 @@
 
         .quiz-section {
             position: absolute;
+            width: 100%;
             bottom: 0;
             background: white;
             border-radius: 15px;
