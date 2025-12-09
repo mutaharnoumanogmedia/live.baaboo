@@ -44,6 +44,9 @@
                             </div>
                             <div class="col-lg-6">
                                 <div id="qrcode" style="width: 200px; height: 200px;background:whitesmoke"></div>
+                                <a href="{{ url('live-show-play/' . $liveShow->id) }}">
+                                    {{ url('live-show-play/' . $liveShow->id) }}
+                                </a>
                             </div>
                         </div>
                         <div class="">
