@@ -20,25 +20,31 @@
                 <!-- Stream / Question Control -->
                 <div class="card mb-4">
                     <div
-                        class="card-header bg-primary text-white d-inline-flex   justify-content-between align-items-center">
+                        class="card-header bg-info text-dark d-inline-flex   justify-content-between align-items-center">
                         <div>
                             Live Stream & Question Control
                         </div>
 
                         <div class="">
+                            <a href="{{ route('admin.live-shows.edit', $liveShow->id) }}" class="btn btn-success">Edit
+                                Game Show</a>
                             <button class="btn btn-light text-primary" id="resetGameButton">
                                 <i class="fas fa-redo me-2"></i>
-                                Reset Game.
+                                Reset Game
                             </button>
 
                         </div>
                     </div>
                     <div class="card-body text-center">
                         <!-- Placeholder for video stream -->
-                        <div class="bg-dark text-white d-flex align-items-center justify-content-center mb-3"
-                            style="height:150px;">
-                            <img src="{{ $liveShow->thumbnail }}" class="img-fluid"
-                                style="width: auto; height: 100%; object-fit: contain;" alt="">
+                        <div class="row mb-3">
+                            <div class="col-lg-6">
+                                <img src="{{ $liveShow->thumbnail }}" class="img-fluid"
+                                    style="width: auto; height: 200px; object-fit: contain;" alt="">
+                            </div>
+                            <div class="col-lg-6">
+                                <div id="qrcode" style="width: 200px; height: 200px;background:whitesmoke"></div>
+                            </div>
                         </div>
                         <div class="">
                             <!-- Slick Slider for Questions -->
@@ -622,6 +628,44 @@
                         console.error('Error resetting game:', error);
                     });
             });
+        </script>
+
+
+        <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+        <script>
+            generateQRCode('{{ url('live-show-play/' . $liveShow->id) }}');
+            // Function to generate the QR code
+            function generateQRCode(link) {
+                // 1. Get the container element
+                const qrcodeContainer = document.getElementById('qrcode');
+
+                // 2. Clear any existing QR code before generating a new one
+                // The library may append a new canvas/image if you don't clear it.
+                qrcodeContainer.innerHTML = '';
+
+                // 3. Get the data from the input field
+                const dataToEncode = link;
+
+                // Check if the input is not empty
+                if (dataToEncode.trim() === '') {
+                    alert('Please enter some text or a URL to generate the QR code.');
+                    return;
+                }
+
+                // 4. Generate the QR Code using the QRCode constructor
+                // Syntax: new QRCode(element, options);
+                const qrcode = new QRCode(qrcodeContainer, {
+                    text: dataToEncode,
+                    width: 200,
+                    height: 200,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H // High error correction level
+                });
+
+                console.log('QR Code generated for:', dataToEncode);
+            }
         </script>
     @endpush
 
