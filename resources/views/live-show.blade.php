@@ -1424,8 +1424,8 @@
 
 
         // Update viewer count periodically
-        function updateViewerCount() {
-            console.log('Updating viewer count...');
+        function updateViewerCount() {  
+            //console.log('Updating viewer count...');
 
             const viewerElement = document.querySelector('#user-count');
             fetch('{{ url('api/live-show/' . $liveShow->id . '/get-live-show-users') }}')
@@ -1933,6 +1933,13 @@
                     if (label) {
                         label.textContent = `${stat.percentage}% (${stat.total_response_for_option})`;
                     }
+                    //make correct option green
+                    console.log('Correct option id:', data.correctOptionId, 'Current option id:', stat.quiz_option_id);
+                    if (data.correctOptionId == stat.quiz_option_id) {
+                        console.log("green for correct applying");
+                        
+                        bar.style.background = '#28a745'; // Green for correct
+                    } 
                 } catch (e) {
                     console.error('Error revealing responses:', stat);
                 }
@@ -2008,10 +2015,10 @@
             fetch('{{ url('live-show/' . $liveShow->id . '/get-live-show-users-with-scores') }}')
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Fetched players with scores:');
+                    
 
                     const users = data.users;
-                    console.log('Players with scores:', users);
+                    // console.log('Players with scores:', users);
 
                     const playersListContainer = document.getElementById('players-leaderbord');
                     playersListContainer.innerHTML = '';

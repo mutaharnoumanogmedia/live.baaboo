@@ -22,11 +22,14 @@ class LiveShowQuizUserResponses implements ShouldBroadcast
     public $liveShowId;
     public $quizId;
     public $statistics;
-    public function __construct($liveShowId, $quizId, $statistics)
+    public $correctOptionId;
+
+    public function __construct($liveShowId, $quizId, $statistics, $correctOptionId)
     {
         $this->liveShowId = $liveShowId;
         $this->quizId = $quizId;
         $this->statistics = $statistics;
+        $this->correctOptionId = $correctOptionId;
     }
 
 
@@ -49,7 +52,8 @@ class LiveShowQuizUserResponses implements ShouldBroadcast
         return [
             'liveShowId' => $this->liveShowId,
             'quizId' => $this->quizId,
-            'statistics' => $this->statistics
+            'statistics' => $this->statistics,
+            'correctOptionId' => $this->correctOptionId,
         ];
     }
 }

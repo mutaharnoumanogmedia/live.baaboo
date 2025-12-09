@@ -477,14 +477,20 @@ class LiveShowController extends Controller
 
         // Fetch any other data needed for the response
         $userQuizzes = $quiz->userQuizzes()->with('userQuizResponses')->get();
+        //  take the correct answer id
+        $correctOption = $quiz->options->firstWhere('is_correct', true);
+        $correctOptionId = $correctOption ? $correctOption->id : null;
 
         // 2. BROADCASTING
-        LiveShowQuizUserResponses::dispatch((string)$liveShow->id, (string)$quiz->id, $statistics);
+        LiveShowQuizUserResponses::dispatch((string)$liveShow->id, (string)$quiz->id, $statistics, $correctOptionId);
+
+
 
         // The controller's job is to format the final JSON response
         return response()->json([
             'success' => true,
-            'statistics' => $statistics
+            'statistics' => $statistics,
+            'correct_option_id' => $correctOptionId,
         ]);
     }
 
