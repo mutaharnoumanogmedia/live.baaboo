@@ -228,7 +228,8 @@
             flex-direction: column;
         }
 
-        .video-container #player {
+        .video-container #player,
+        .video-container iframe {
             border-radius: 00px;
             width: 100%;
             height: 100%;
@@ -236,6 +237,7 @@
             object-fit: cover;
             pointer-events: none;
         }
+
 
 
 
@@ -947,13 +949,10 @@
         <div class="video-container" id="videoContainer">
             <div class="video-placeholder" id="videoPlaceholder">
                 {{-- <div id="player"></div> --}}
-                <iframe src="{{$liveShow->stream_link}}" frameborder="0"></iframe>
+                <iframe src="{{ route('show-live-broadcast', [$liveShow->id]) }}" frameborder="0"></iframe>
             </div>
 
-
         </div>
-
-
     </div>
 
     <div class="fixed-bottom">
@@ -1426,7 +1425,7 @@
 
 
         // Update viewer count periodically
-        function updateViewerCount() {  
+        function updateViewerCount() {
             //console.log('Updating viewer count...');
 
             const viewerElement = document.querySelector('#user-count');
@@ -1822,12 +1821,12 @@
             });
             // Your Laravel broadcast event (drop the dot)
             channelShowWinner.bind('ShowPlayerAsWinnerEvent', function(data) {
-               
+
                 fireConfetti();
 
                 document.getElementById('prizeAmount').textContent = data.prizeMoney + ' EUR';
                 if (data.userId == userId) {
-                console.log('You are a winner!', data);
+                    console.log('You are a winner!', data);
 
                     addOverlayMessage('@System', 'Congratulations! You have won ' + data.prizeMoney + ' EUR!');
                     showWinnerDialogDiv();
@@ -1936,12 +1935,13 @@
                         label.textContent = `${stat.percentage}% (${stat.total_response_for_option})`;
                     }
                     //make correct option green
-                    console.log('Correct option id:', data.correctOptionId, 'Current option id:', stat.quiz_option_id);
+                    console.log('Correct option id:', data.correctOptionId, 'Current option id:', stat
+                        .quiz_option_id);
                     if (data.correctOptionId == stat.quiz_option_id) {
                         console.log("green for correct applying");
-                        
+
                         bar.style.background = '#28a745'; // Green for correct
-                    } 
+                    }
                 } catch (e) {
                     console.error('Error revealing responses:', stat);
                 }
@@ -2017,7 +2017,7 @@
             fetch('{{ url('live-show/' . $liveShow->id . '/get-live-show-users-with-scores') }}')
                 .then(response => response.json())
                 .then(data => {
-                    
+
 
                     const users = data.users;
                     // console.log('Players with scores:', users);

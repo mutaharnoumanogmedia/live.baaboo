@@ -6,6 +6,7 @@ use App\Events\GameResetEvent;
 use App\Events\LiveShowMessageEvent;
 use App\Events\LiveShowQuizUserResponses;
 use App\Events\RemoveLiveShowQuizQuestionEvent;
+use App\Events\SetBroadcastRoomIdEvent;
 use App\Events\ShowLiveShowQuizQuestionEvent;
 use App\Events\ShowPlayerAsWinnerEvent;
 use App\Http\Controllers\Controller;
@@ -518,5 +519,28 @@ class LiveShowController extends Controller
 
 
         return response()->json(['success' => true, 'message' => 'Game has been reset successfully.']);
+    }
+
+
+    public function streamBroadcaster($id)
+    {
+        $liveShow = LiveShow::with(['quizzes.options'])->findOrFail($id);
+        return view('admin.live-shows.stream-broadcaster', compact('liveShow'));
+    }
+
+    public function saveRoomID(Request $request, $id)
+    {
+        $request->validate([
+            'room_id' => 'required|string|max:255',
+        ]);
+
+        $liveShow = LiveShow::findOrFail($id);
+        $liveShow->stream_id = $request->input('room_id');
+        $liveShow->save();
+
+        //call event set broadcast room id
+        event(new SetBroadcastRoomIdEvent($liveShow->id, $liveShow->stream_id));
+
+        return response()->json(['message' => 'Room ID saved successfully!', 'room_id' => $liveShow->stream_id]);
     }
 }

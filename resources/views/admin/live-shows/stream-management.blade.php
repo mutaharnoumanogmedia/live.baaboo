@@ -21,12 +21,13 @@
                 <div class="card mb-4">
                     <div
                         class="card-header bg-info text-dark d-inline-flex   justify-content-between align-items-center">
-                        <div>
-                            Live Stream & Question Control
-                        </div>
+
 
                         <div class="">
-                            <a href="{{ route('admin.live-shows.edit', $liveShow->id) }}" class="btn btn-success">Edit
+                            <a target="_blank" class="btn btn-primary me-2" href="{{ route('admin.live-shows.stream-management.broadcaster', [$liveShow->id]) }}">
+                                Broadcaster View
+                            </a>
+                            <a target="_blank" href="{{ route('admin.live-shows.edit', $liveShow->id) }}" class="btn btn-success me-2">Edit
                                 Game Show</a>
                             <button class="btn btn-light text-primary" id="resetGameButton">
                                 <i class="fas fa-redo me-2"></i>
@@ -510,7 +511,7 @@
                     .then(response => response.json())
                     .then(data => {
                         console.log('Winners updated:', data);
-                        alert(data.message);
+                        // alert(data.message);
                         // Optionally, refresh the player list to show winners
                         fetchActivePlayers().then(activePlayers => {
                             appendPlayerList(activePlayers);

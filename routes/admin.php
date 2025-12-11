@@ -16,6 +16,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('live-show-quizzes', \App\Http\Controllers\Admin\LiveShowQuizController::class);
 
     Route::get("live-shows/stream-management/{id}", [\App\Http\Controllers\Admin\LiveShowController::class, 'streamManagement'])->name('live-shows.stream-management');
+    Route::get("live-shows/stream-broadcaster/{id}", [\App\Http\Controllers\Admin\LiveShowController::class, 'streamBroadcaster'])->name('live-shows.stream-management.broadcaster');
+
+    Route::post("live-shows/stream-management/{id}/save-room-id", [\App\Http\Controllers\Admin\LiveShowController::class, 'saveRoomID'])->name('live-shows.stream-management.save-room-id');
+
     Route::post("live-shows/stream-management/{id}/quizzes/{quizId}/send-quiz-question", [\App\Http\Controllers\Admin\LiveShowController::class, 'sendQuizQuestion'])->name('live-shows.stream-management.send-quiz-question');
 
     Route::post("live-shows/stream-management/{id}/quizzes/{quizId}/remove-quiz-question", [\App\Http\Controllers\Admin\LiveShowController::class, 'removeQuizQuestion'])->name('live-shows.stream-management.remove-quiz-question');

@@ -14,7 +14,7 @@ use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Termwind\Components\Li;
+
 
 class GamePlayController extends Controller
 {
@@ -86,7 +86,7 @@ class GamePlayController extends Controller
                 }
 
                 Auth::guard('web')->login($existingUser);
-              
+
                 $sessionResult =  $this->sessionGeneration(Auth::guard('web')->user(), $request);
 
                 if (!$sessionResult['success']) {
@@ -141,7 +141,7 @@ class GamePlayController extends Controller
 
             Auth::guard('web')->login($user);
 
-           
+
 
             $sessionResult =  $this->sessionGeneration(Auth::guard('web')->user(), $request);
 
@@ -388,10 +388,10 @@ class GamePlayController extends Controller
 
     public function fetchMessages($liveShowId)
     {
-        if(!LiveShow::find($liveShowId)){
+        if (!LiveShow::find($liveShowId)) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
-        
+
         $messages = LiveShowMessages::with('user')->where("live_show_id", $liveShowId)->where('is_removed', false)->orderBy('created_at', 'asc')->get();
         return response()->json(['messages' => $messages], 200);
     }
@@ -515,5 +515,12 @@ class GamePlayController extends Controller
             \Log::error('Session generation error: ' . $e->getMessage());
             return ['success' => false, 'message' => 'Session generation failed. ' . $e->getMessage()];
         }
+    }
+
+
+    public function showLiveBroadcast($id)
+    {
+        $liveShow = \DB::table('live_shows')->where('id', $id)->first();
+        return view('show-live-broadcast', compact('liveShow'));
     }
 }

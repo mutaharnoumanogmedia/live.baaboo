@@ -107,6 +107,9 @@
                 <i class="fas fa-arrow-left me-1"></i> Back
             </a>
             <div>
+                  <a href="{{ route('admin.live-shows.stream-management', $liveShow->id) }}" class="btn btn-primary">
+                     Manage
+                </a>
                 <a href="{{ route('admin.live-shows.edit', $liveShow->id) }}" class="btn btn-warning">
                     <i class="fas fa-edit me-1"></i> Edit
                 </a>

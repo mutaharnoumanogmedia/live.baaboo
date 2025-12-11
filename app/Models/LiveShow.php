@@ -11,6 +11,7 @@ class LiveShow extends Model
 
     protected $fillable = [
         'title',
+        'stream_id',
         'description',
         'scheduled_at',
         'status',
