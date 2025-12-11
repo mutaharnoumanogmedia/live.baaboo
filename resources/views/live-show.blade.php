@@ -8,7 +8,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-    <link href='https://fonts.googleapis.com/css?family=Preahvihear' rel='stylesheet'>
+<link href='https://fonts.googleapis.com/css?family=Outfit' rel='stylesheet'>
 
     <style>
         :root {
@@ -21,7 +21,7 @@
 
         body {
             background-color: #000;
-            font-family: 'Preahvihear', cursive;
+            font-family: 'Outfit', sans-serif;
             padding-bottom: 76px;
             margin: 0;
             height: 100vh;
@@ -192,7 +192,7 @@
         .option-result-label {
             position: absolute;
             top: 6px;
-            left: 50%;
+            right: 0%;
             transform: translateX(-50%);
             font-size: 16px;
             color: black;
@@ -202,7 +202,7 @@
 
         .option-result-bar {
             height: 40px;
-            background: linear-gradient(90deg, #1e90ff, #00bfff);
+            background: #1e8fff48;
             width: 0;
             transition: width 0.4s ease-in-out;
             border-radius: 12px;
@@ -534,7 +534,7 @@
             position: relative;
             padding: 0px;
             height: 100%;
-            background: rgba(255, 255, 255, 0.4);
+            background: transparent !important;
             border-radius: 20px;
         }
 
@@ -614,14 +614,14 @@
         }
 
         .quiz-option.correct input[type="radio"]:checked+label {
-            background: #28a745;
-            border-color: #28a745;
+            background: #28a74580;
+            border-color: #28a74580;
             color: white;
         }
 
         .quiz-option.correct label {
-            background: #28a745;
-            border-color: #28a745;
+            background: #28a74580;
+            border-color: #28a74580;
             color: white;
         }
 
@@ -734,7 +734,7 @@
         }
 
         .btn-user-profile {
-            background-color: #28a745;
+            background-color: #28a74580;
             color: white;
             font-size: 0.8rem;
             border: none;
@@ -1940,7 +1940,7 @@
                     if (data.correctOptionId == stat.quiz_option_id) {
                         console.log("green for correct applying");
 
-                        bar.style.background = '#28a745'; // Green for correct
+                        bar.style.background = '#28a74580'; // Green for correct
                     }
                 } catch (e) {
                     console.error('Error revealing responses:', stat);
