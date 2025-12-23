@@ -10,6 +10,7 @@ use App\Events\SetBroadcastRoomIdEvent;
 use App\Events\ShowLiveShowQuizQuestionEvent;
 use App\Events\ShowPlayerAsWinnerEvent;
 use App\Http\Controllers\Controller;
+use App\Jobs\SendWinnerEmailJob;
 use Illuminate\Http\Request;
 use App\Models\LiveShow;
 use App\Models\LiveShowMessages;
@@ -290,6 +291,8 @@ class LiveShowController extends Controller
         foreach ($topThreeUsersByScore as $winner) {
             $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon]);
             ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string)$liveShowId, $prizeWon);
+            // Dispatch job to send winner email
+            SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow);
         }
 
 

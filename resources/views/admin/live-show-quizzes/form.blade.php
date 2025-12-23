@@ -44,11 +44,11 @@
                         @foreach ($options as $i => $opt)
                             <div class="col-lg-3  mb-2 option-item">
                                 <div class="input-group">
-                                    <input type="text" name="questions[0][options][option_text][]"
+                                    <input type="text" name="questions[0][options][][option_text]"
                                         class="form-control" placeholder="Option text 0, {{ $i }}"
                                         value="{{ $opt['option_text'] ?? '' }}" required>
                                     <div class="input-group-text">
-                                        <input type="checkbox" name="questions[0][options][is_correct][]" value="1"
+                                        <input type="radio" name="questions[0][correct]" value="{{ $i }}"
                                             {{ !empty($opt['is_correct']) ? 'checked' : '' }}> Correct
                                     </div>
 
@@ -90,36 +90,36 @@
             <div id="options-wrapper${index}" class="row">
                 <div class="col-lg-3  mb-2 option-item">
                     <div class="input-group">
-                        <input type="text" name="questions[${index}][options][option_text][]" class="form-control" placeholder="Option text" required>
+                        <input type="text" name="questions[${index}][options][][option_text]" class="form-control" placeholder="Option text" required>
                         <div class="input-group-text">
-                            <input type="checkbox" name="questions[${index}][options][is_correct][]" value="1"> Correct
+                            <input type="radio" name="questions[${index}][correct]" value="0"> Correct
                         </div>
                         <button type="button" class="btn btn-danger remove-option"> <i class="bi bi-x"></i></button>
                     </div>
                 </div>
                 <div class="col-lg-3  mb-2 option-item">
                     <div class="input-group">
-                        <input type="text" name="questions[${index}][options][option_text][]" class="form-control" placeholder="Option text" required>
+                        <input type="text" name="questions[${index}][options][][option_text]" class="form-control" placeholder="Option text" required>
                         <div class="input-group-text">
-                            <input type="checkbox" name="questions[${index}][options][is_correct][]" value="1"> Correct
+                            <input type="radio" name="questions[${index}][correct]" value="1"> Correct
                         </div>
                         <button type="button" class="btn btn-danger remove-option"> <i class="bi bi-x"></i></button>
                     </div>
                 </div>
                 <div class="col-lg-3  mb-2 option-item">
                     <div class="input-group">
-                        <input type="text" name="questions[${index}][options][option_text][]" class="form-control" placeholder="Option text" required>
+                        <input type="text" name="questions[${index}][options][][option_text]" class="form-control" placeholder="Option text" required>
                         <div class="input-group-text">
-                            <input type="checkbox" name="questions[${index}][options][is_correct][]" value="1"> Correct
+                            <input type="radio" name="questions[${index}][correct]" value="2"> Correct
                         </div>
                         <button type="button" class="btn btn-danger remove-option"> <i class="bi bi-x"></i></button>
                     </div>
                 </div>
                 <div class="col-lg-3  mb-2 option-item">
                     <div class="input-group">
-                        <input type="text" name="questions[${index}][options][option_text][]" class="form-control" placeholder="Option text" required>
+                        <input type="text" name="questions[${index}][options][][option_text]" class="form-control" placeholder="Option text" required>
                         <div class="input-group-text">
-                            <input type="checkbox" name="questions[${index}][options][is_correct][]" value="1"> Correct
+                            <input type="radio" name="questions[${index}][correct]" value="3"> Correct
                         </div>
                         <button type="button" class="btn btn-danger remove-option"> <i class="bi bi-x"></i></button>
                     </div>
@@ -140,9 +140,9 @@
             const optionHtml = `
             <div class="col-lg-3  mb-2 option-item">
                 <div class="input-group">
-                    <input type="text" name="questions[${questionIndex}][options][option_text][]" class="form-control" placeholder="Option text" required>
+                    <input type="text" name="questions[${questionIndex}][options][][option_text]" class="form-control" placeholder="Option text" required>
                     <div class="input-group-text">
-                        <input type="checkbox" name="questions[${questionIndex}][options][is_correct][]" value="1"> Correct
+                        <input type="radio" name="questions[${questionIndex}][correct]" value="${optionCount}"> Correct
                     </div>
                     <button type="button" class="btn btn-danger remove-option"> <i class="bi bi-x"></i></button>
                 </div>

@@ -5,8 +5,8 @@ use App\Http\Controllers\Admin\LiveShowController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
-
-
+use App\Http\Controllers\Admin\AdminProfileController;
+use App\Http\Controllers\Admin\PushNotificationController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminHomeController::class, 'home'])->name('dashboard');
@@ -43,4 +43,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post("live-shows/{id}/update-live-show", [\App\Http\Controllers\Admin\LiveShowController::class, 'updateLiveShow'])->name('live-shows.update-live-show');
 
     Route::post('live-show/{id}/admin/reset-game', [LiveShowController::class, 'resetGame'])->name('live-shows.reset-game');
+
+
+    Route::get('/profile/password', [AdminProfileController::class, 'showChangePasswordForm'])
+        ->name('password.form');
+
+    Route::post('/profile/password', [AdminProfileController::class, 'updatePassword'])
+        ->name('password.update');
+
+
+    Route::get('/test-notification', [PushNotificationController::class, 'testNotifcation'])->name('test-notification');
+
+    Route::resource(
+        'push-notifications',
+       PushNotificationController::class
+    )->only(['index', 'create', 'store', 'show']);
 })->middleware(['auth']);

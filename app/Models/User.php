@@ -51,11 +51,18 @@ class User extends Authenticatable
         return $this->getRoleNames()->first();
     }
 
+    public function scopeRole($query, $role)
+    {
+        return $query->whereHas('roles', function ($q) use ($role) {
+            $q->where('name', $role);
+        });
+    }
+
     public function liveShows()
     {
         return $this->belongsToMany(LiveShow::class, 'user_live_shows')
             ->using(UserLiveShow::class)
-            ->withPivot(['score', 'status', 'created_at', 'prize_won', 'is_winner', 'is_online'])
+            ->withPivot(['score', 'status', 'created_at', 'prize_won', 'is_winner', 'is_online', 'created_at'])
             ->withTimestamps();
     }
 

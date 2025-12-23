@@ -45,8 +45,7 @@
                     {{ Auth::user()->name }}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item" href="#!">Settings</a></li>
-                    <li><a class="dropdown-item" href="#!">Activity Log</a></li>
+                    <li><a class="dropdown-item" href="{{ route('admin.password.form') }}">Settings</a></li>
                     <li>
                         <hr class="dropdown-divider" />
                     </li>
@@ -85,19 +84,19 @@
                         </a>
 
                         <a class="nav-link" href="#">
-                            <div class="sb-nav-link-icon"><i class="bi bi-trophy-fill"></i></div>
-                            Winners
-                        </a>
-
-                        <a class="nav-link" href="#">
                             <div class="sb-nav-link-icon"><i class="bi bi-graph-up-arrow"></i></div>
                             Analytics
                         </a>
 
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" href="{{ route('admin.password.form') }}">
                             <div class="sb-nav-link-icon"><i class="bi bi-gear-fill"></i></div>
                             Settings
                         </a>
+                        <a class="nav-link" href="{{ route('admin.push-notifications.index') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-bell-fill"></i></div>
+                            Push Notifications
+                        </a>
+
 
                         <a class="nav-link mt-4" href="#"
                             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

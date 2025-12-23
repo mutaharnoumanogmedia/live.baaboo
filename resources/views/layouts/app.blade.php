@@ -62,7 +62,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#">
+                    <a href="{{ route('admin.password.form') }}">
                         <i class="bi bi-gear-fill"></i> Settings
                     </a>
                 </li>
@@ -108,7 +108,8 @@
                             <ul class="dropdown-menu dropdown-menu-end shadow">
                                 <li><a class="dropdown-item" href="#"><i
                                             class="bi bi-person-circle me-2"></i>Profile</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Settings</a>
+                                <li><a class="dropdown-item" href="{{ route('admin.password.form') }}"><i
+                                            class="bi bi-gear me-2"></i>Settings</a>
                                 </li>
                                 <li><a class="dropdown-item" href="#"><i
                                             class="bi bi-bell me-2"></i>Notifications</a>

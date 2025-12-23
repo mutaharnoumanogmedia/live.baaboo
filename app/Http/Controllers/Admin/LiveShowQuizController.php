@@ -31,35 +31,41 @@ class LiveShowQuizController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'live_show_id' => 'required|exists:live_shows,id',
+
             'questions' => 'required|array|min:1',
-            'questions.*.question' => 'required|string',
-            'questions.*.options' => 'required|array|min:2', // at least 2 options
-            'questions.*.options.*.option_text' => 'required|string',
-            'questions.*.options.*.is_correct' => 'nullable|boolean',
+            'questions.*.question' => 'required|string|max:255',
+
+            'questions.*.options' => 'required|array|min:2',
+            'questions.*.options.*.option_text' => 'required|string|max:255',
+
+            'questions.*.correct' => 'nullable|integer',
         ]);
 
-        foreach ($validated['questions'] as $qData) {
-            // Create the quiz question
+        foreach ($request->questions as $qIndex => $qData) {
+
             $quiz = LiveShowQuiz::create([
-                'live_show_id' => $validated['live_show_id'],
-                'question' => $qData['question'],
+                'live_show_id' => $request->live_show_id,
+                'question'     => $qData['question'],
             ]);
 
-            // Attach its options
-            foreach ($qData['options'] as $optData) {
+            $correctIndex = $qData['correct'] ?? null;
+
+            foreach ($qData['options'] as $oIndex => $opt) {
                 $quiz->options()->create([
-                    'option_text' => $optData['option_text'],
-                    'is_correct' => isset($optData['is_correct']) ? 1 : 0,
+                    'option_text' => $opt['option_text'],
+                    'is_correct'  => ($oIndex == $correctIndex) ? 1 : 0,
                 ]);
             }
         }
 
         return redirect()
-            ->route('admin.live-show-quizzes.index', ['live_show_id' => $validated['live_show_id']])
-            ->with('success', 'Quiz created successfully!');
+            ->route('admin.live-show-quizzes.index')
+            ->with('success', 'Quiz created successfully.');
     }
+
+
 
     public function show($id)
     {
@@ -76,27 +82,49 @@ class LiveShowQuizController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Capture raw submission for debugging
+        // dd($request->all());
+
         $quiz = LiveShowQuiz::findOrFail($id);
 
+        // Validate based on nested structure: questions[0][options]
         $request->validate([
             'live_show_id' => 'required|exists:live_shows,id',
-            'question' => 'required|string|max:255',
-            'options.*.option_text' => 'required|string|max:255',
-            'options.*.is_correct' => 'nullable|boolean',
+            'question'     => 'required|string|max:255',
+
+            'questions' => 'required|array',
+            'questions.0.options' => 'required|array|min:2',
+
+            'questions.0.options.*.option_text' => 'required|string|max:255',
+            'questions.0.correct'  => 'nullable|boolean',
         ]);
 
-        $quiz->update($request->only('live_show_id', 'question'));
+        // Update main quiz fields
+        $quiz->update([
+            'live_show_id' => $request->live_show_id,
+            'question'     => $request->question,
+        ]);
+
+        // Remove old options
         $quiz->options()->delete();
 
-        foreach ($request->options as $option) {
+        // Extract options array
+        $options = $request->questions[0]['options'];
+        $correctIndex = $request->questions[0]['correct'] ?? null;
+
+        // Loop and save new options
+        foreach ($options as $index => $option) {
             $quiz->options()->create([
                 'option_text' => $option['option_text'],
-                'is_correct' => $option['is_correct'] ?? false,
+                'is_correct'  => $index == $correctIndex ? 1 : 0,
             ]);
         }
 
-        return redirect()->route('admin.live-show-quizzes.index')->with('success', 'Quiz updated successfully.');
+        return redirect()
+            ->route('admin.live-show-quizzes.index')
+            ->with('success', 'Quiz updated successfully.');
     }
+
 
     public function destroy($id)
     {

@@ -12,6 +12,7 @@ use App\Models\QuizOption;
 use App\Models\User;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
+use App\Models\Viewer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
@@ -22,10 +23,8 @@ class GamePlayController extends Controller
     public function liveShow($id)
     {
         $liveShow = LiveShow::with('quizzes.options')->findOrFail($id);
-
-
-
         $isEliminated = $this->getEliminationStatus($id);
+        Viewer::recordView(request());
 
         return view('live-show', compact('liveShow', 'isEliminated'));
     }
@@ -35,9 +34,6 @@ class GamePlayController extends Controller
     {
 
         try {
-
-
-
             if (Auth::guard('web')->check()) {
                 return response()->json(['success' => false, 'messages' => ['User already logged in.'], 'user' => Auth::guard('web')->user(), 'authStatus' => Auth::guard('web')->check()]);
             }

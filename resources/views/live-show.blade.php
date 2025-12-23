@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <title>baaboo Live Game Show {{ $liveShow->id ?? '' }}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-<link href='https://fonts.googleapis.com/css?family=Outfit' rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/css?family=Outfit' rel='stylesheet'>
 
     <style>
         :root {
@@ -1146,6 +1147,9 @@
 
 
 
+    <button id="enable-push">
+        Enable Notifications
+    </button>
 
 
 
@@ -1162,6 +1166,9 @@
         let isCurrentAnswerCorrect = null;
 
         let isEliminated = {{ $isEliminated ? 'true' : 'false' }};
+
+        const VAPID_PUBLIC_KEY = "{{ env('VAPID_PUBLIC_KEY') }}";
+        const csrfToken = "{{ csrf_token() }}";
 
         let isLoggedIn = {{ Auth::guard('web')->check() ? 'true' : 'false' }};
         let userId = {{ Auth::guard('web')->check() ? Auth::guard('web')->user()->id : -1 }};
@@ -2069,6 +2076,53 @@
                 .catch(error => console.error('Error fetching players with scores:', error));
 
 
+        }
+    </script>
+
+
+    <script>
+        const VAPID_PUBLIC_KEY = '{{ env('VAPID_PUBLIC_KEY') }}';
+
+        /* REQUIRED conversion */
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding)
+                .replace(/-/g, '+')
+                .replace(/_/g, '/');
+
+            const rawData = atob(base64);
+            return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+        }
+
+        async function enablePush() {
+            if (!('serviceWorker' in navigator)) {
+                console.log('Service workers not supported');
+                return;
+            }
+
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                console.log('Permission denied');
+                return;
+            }
+
+            const registration = await navigator.serviceWorker.register('/sw.js');
+
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+            });
+
+            await fetch('{{ url('/') }}/api/push/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify(subscription)
+            });
+
+            console.log('Push notifications enabled');
         }
     </script>
 </body>

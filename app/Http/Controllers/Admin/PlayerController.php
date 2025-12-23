@@ -13,13 +13,12 @@ class PlayerController extends Controller
     {
         $this->middleware('auth');
     }
-    
+
     public function index()
     {
-        $players = User::whereIn('id', function ($query) {
-            $query->select('user_id')
-                ->from('user_quizzes');
-        })->get();
+        $players = User::role('user')->where('is_active', 1)
+            ->with('liveShows')
+            ->get();
         return view('admin.players.index', compact('players'));
     }
 
