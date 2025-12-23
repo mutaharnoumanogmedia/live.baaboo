@@ -2093,6 +2093,10 @@
             return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
         }
 
+        document.getElementById("playButton").addEventListener("click", function() {
+            enablePush();
+        });
+
         async function enablePush() {
             if (!('serviceWorker' in navigator)) {
                 console.log('Service workers not supported');
