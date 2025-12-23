@@ -2081,7 +2081,6 @@
 
 
     <script>
-        const VAPID_PUBLIC_KEY = '{{ env('VAPID_PUBLIC_KEY') }}';
 
         /* REQUIRED conversion */
         function urlBase64ToUint8Array(base64String) {
