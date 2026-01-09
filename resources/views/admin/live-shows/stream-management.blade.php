@@ -176,6 +176,9 @@
                                 <h6 class="text-muted small text-uppercase fw-bold mb-3">Show Status</h6>
                                 <form action="" method="post" id="live-show-status-form" class="d-flex gap-2">
                                     <select class="form-select fw-bold" id="liveShowStatusSelect">
+                                        <option value="scheduled"
+                                            {{ $liveShow->status == 'scheduled' ? 'selected' : '' }}>⏳
+                                            Scheduled</option>
                                         <option value="live" {{ $liveShow->status == 'live' ? 'selected' : '' }}>🟢
                                             Live</option>
                                         <option value="completed"
