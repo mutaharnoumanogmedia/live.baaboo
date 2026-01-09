@@ -53,8 +53,8 @@
             // 3) only after save succeeds, use it
             const userID = Math.floor(Math.random() * 10000) + "";
             const userName = "userName" + userID;
-            const appID = 1251897065;
-            const serverSecret = "ac4b30ceb3e43b0280c7fa40be34d2ef";
+            const appID = {{ env('ZEGO_APP_ID', 1251897065) }};
+            const serverSecret = "{{ env('ZEGO_SERVER_SECRET', 'ac4b30ceb3e43b0280c7fa40be34d2ef') }}";
             const TOKEN = generatePrebuiltToken(appID, serverSecret, roomID, userID, userName);
 
             let roleParam = getUrlParams(window.location.href)['role'] || 'Host';

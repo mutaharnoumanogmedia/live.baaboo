@@ -2,11 +2,12 @@
 
 <head>
     <style>
-        body{
+        body {
             margin: 0;
             padding: 0;
             overflow: hidden;
         }
+
         #root {
             width: 100vw;
             height: 100vh;
@@ -61,7 +62,7 @@
             return result;
         }
 
-      
+
 
         // Generate a Token by calling a method.
         // @param 1: appID
@@ -72,8 +73,8 @@
         const roomID = "{{ $liveShow->stream_id }}";
         const userID = "{{ session()->getId() }}";
         const userName = "player-{{ session()->getId() }}";
-        const appID = 1666432032;
-        const serverSecret = "393034b3a0a3fd5a4a271e339ed6d25f";
+        const appID = {{ env('ZEGO_APP_ID', 1251897065) }};
+        const serverSecret = "{{ env('ZEGO_SERVER_SECRET', 'ac4b30ceb3e43b0280c7fa40be34d2ef') }}";
         const TOKEN = generatePrebuiltToken(appID, serverSecret, roomID, userID, userName);
 
 
