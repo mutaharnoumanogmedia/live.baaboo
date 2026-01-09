@@ -16,7 +16,7 @@ class LiveShow extends Model
         'scheduled_at',
         'status',
         'thumbnail',
-        'stream_link',
+
         'host_name',
         'prize_amount',
         'currency',
