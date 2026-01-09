@@ -1906,7 +1906,8 @@
             // Show alert and redirect to home page after 5 seconds
             alert('The live show has been updated.');
             if (data.status && data.status != 'live') {
-                emptyTheBodyWithEndShow();
+                emptyTheBodyWithEndShow('The live show status has changed to "' + data.status +
+                    '". You will be redirected shortly.');
             } else {
                 //reload the page to reflect the changes
                 location.reload();
@@ -1915,12 +1916,12 @@
         });
 
 
-        function emptyTheBodyWithEndShow() {
+        function emptyTheBodyWithEndShow(messageText = 'The live show has ended. Thank you for participating!') {
             document.body.innerHTML = '';
             document.body.style.backgroundColor = '#000';
             const endDiv = document.createElement('div');
             endDiv.className = 'end-show';
-            endDiv.innerHTML = 'The live show has ended. Thank you for participating!';
+            endDiv.innerHTML = messageText;
             document.body.appendChild(endDiv);
         }
 
@@ -1971,7 +1972,9 @@
 
 
         @if ($liveShow->status != 'live')
-            emptyTheBodyWithEndShow();
+            emptyTheBodyWithEndShow(
+                'The status of this live show is "{{ $liveShow->status }}". You will be redirected shortly.'
+            );
         @endif
 
 
@@ -2081,7 +2084,6 @@
 
 
     <script>
-
         /* REQUIRED conversion */
         function urlBase64ToUint8Array(base64String) {
             const padding = '='.repeat((4 - base64String.length % 4) % 4);
