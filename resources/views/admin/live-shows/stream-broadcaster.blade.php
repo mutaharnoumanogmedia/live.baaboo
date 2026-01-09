@@ -53,8 +53,8 @@
             // 3) only after save succeeds, use it
             const userID = Math.floor(Math.random() * 10000) + "";
             const userName = "userName" + userID;
-            const appID = 1666432032;
-            const serverSecret = "393034b3a0a3fd5a4a271e339ed6d25f";
+            const appID = 1251897065;
+            const serverSecret = "ac4b30ceb3e43b0280c7fa40be34d2ef";
             const TOKEN = generatePrebuiltToken(appID, serverSecret, roomID, userID, userName);
 
             let roleParam = getUrlParams(window.location.href)['role'] || 'Host';
@@ -85,6 +85,18 @@
                         role
                     },
                 },
+                // --- ADD THIS SECTION BELOW ---
+                onInRoomStateChanged: (state) => {
+                    console.log("Connection state:", state);
+                    if (state === 'DISCONNECTED') {
+                        console.warn("Network timeout (1002099). Reconnecting...");
+                        // Short delay to allow network to stabilize, then refresh
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    }
+                },
+                // ------------------------------
                 sharedLinks: [{
                     name: 'Join as an audience',
                     url: window.location.origin +
