@@ -93,7 +93,7 @@ class LiveShowController extends Controller
 
         $show = LiveShow::create($validated);
 
-        return redirect()->route('live-shows.show', $show->id)->with('success', 'Live Show created successfully!');
+        return redirect()->route('admin.live-shows.show', $show->id)->with('success', 'Live Show created successfully!');
     }
 
     /**
