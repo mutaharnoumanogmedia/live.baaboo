@@ -85,7 +85,7 @@ class LiveShow extends Model
 
     // public function getStreamIdAttribute()
     // {
-    //     // return $this->extractYouTubeId($this->stream_link);
+    //     return $this->extractYouTubeId($this->stream_link);
     // }
 
 
