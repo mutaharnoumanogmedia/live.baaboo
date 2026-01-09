@@ -38,7 +38,7 @@ class LiveShowController extends Controller
     public function index()
     {
         //
-        $liveShows = LiveShow::orderBy('id', 'asc')->get();
+        $liveShows = LiveShow::orderBy('id', 'desc')->get();
         return view('admin.live-shows.index', compact('liveShows'));
     }
 
