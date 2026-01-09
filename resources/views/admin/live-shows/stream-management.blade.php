@@ -65,7 +65,7 @@
                                 <label class="small text-muted d-block mb-2">Join via QR Code</label>
                                 <div id="qrcode" class="mx-auto p-2  border rounded"
                                     style="width: 160px; height: 160px;"></div>
-                                <div class="mt-2">
+                                <div class="mt-4">
                                     <a href="{{ url('live-show-play/' . $liveShow->id) }}"
                                         class="text-decoration-none small text-truncate d-block px-3">
                                         {{ url('live-show-play/' . $liveShow->id) }}
@@ -93,7 +93,7 @@
                                                     @foreach ($quiz->options as $option)
                                                         <div class="col-md-6">
                                                             <div
-                                                                class="p-3 border rounded @if ($option->is_correct) border-success  @endif">
+                                                                class="p-3 border rounded @if ($option->is_correct) border-success @endif">
                                                                 <div class="d-flex justify-content-between mb-2">
                                                                     <span
                                                                         class="fw-bold @if ($option->is_correct) text-success @endif">
@@ -207,8 +207,7 @@
                     <div class="card-body p-0">
                         <div class="tab-content">
                             <div class="tab-pane fade show active" id="chat-tab">
-                                <div id="live-chat-messages" class="p-3 "
-                                    style="height: 65vh; overflow-y: auto;">
+                                <div id="live-chat-messages" class="p-3 " style="height: 65vh; overflow-y: auto;">
                                 </div>
                                 <div class="p-3 border-top">
                                     <form onsubmit="event.preventDefault(); sendMessage(event)" class="input-group">
@@ -232,27 +231,40 @@
                                             <tr>
                                                 <th>Status</th>
                                                 <td>
-                                                    @if($liveShow->status == 'live')
+                                                    @if ($liveShow->status == 'live')
                                                         <span class="badge bg-success">Live</span>
                                                     @elseif($liveShow->status == 'completed')
                                                         <span class="badge bg-danger">Completed</span>
                                                     @else
-                                                        <span class="badge bg-secondary">{{ ucfirst($liveShow->status) }}</span>
+                                                        <span
+                                                            class="badge bg-secondary">{{ ucfirst($liveShow->status) }}</span>
                                                     @endif
                                                 </td>
                                             </tr>
                                             <tr>
+                                                <th>Stream ID</th>
+                                                <td>{{ $liveShow->stream_id }}</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td>Live URL</td>
+                                                <td>
+                                                    <a href="{{ url('live-show-play/' . $liveShow->id) }}"
+                                                        class="text-decoration-none small text-truncate d-block px-3">
+                                                        {{ url('live-show-play/' . $liveShow->id) }}
+                                                    </a>
+                                                </td>
+                                            </tr>
+
+                                            <tr>
                                                 <th>Prize</th>
-                                                <td>{{ $liveShow->currency }} {{ number_format($liveShow->prize_amount, 2) }}</td>
+                                                <td>{{ $liveShow->currency }}
+                                                    {{ number_format($liveShow->prize_amount, 2) }}</td>
                                             </tr>
                                             <tr>
-                                                <th>Start Time</th>
-                                                <td>{{ $liveShow->start_time ? $liveShow->start_time->format('Y-m-d H:i') : '-' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>End Time</th>
-                                                <td>{{ $liveShow->end_time ? $liveShow->end_time->format('Y-m-d H:i') : '-' }}</td>
-                                            </tr>
+                                                <th>Scheduled At</th>
+                                                <td>{{ $liveShow->scheduled_at->format('Y-m-d H:i') }}</td>
+                                        
                                             <tr>
                                                 <th>Total Questions</th>
                                                 <td>{{ $liveShow->quizzes->count() }}</td>

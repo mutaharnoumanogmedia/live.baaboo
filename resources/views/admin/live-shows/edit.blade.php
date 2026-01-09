@@ -62,12 +62,12 @@
                             </select>
                         </div>
 
-                        <div class="col-md-12 mb-3">
+                        {{-- <div class="col-md-12 mb-3">
                             <label class="form-label">Stream Link</label>
                             <input type="text" name="stream_link" class="form-control" placeholder="https://"
                                 value="{{ old('stream_link', $liveShow->stream_link ?? '') }}">
                             <div class="form-text">Enter the URL where your live stream will be hosted</div>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>

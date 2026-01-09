@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('live_shows', function (Blueprint $table) {
             $table->id();
-            $table->string('stream_id')->nullable();
+            $table->string('stream_id')->nullable()->default("000");
             $table->string('title');
             $table->text('description')->nullable();
             $table->dateTime('scheduled_at')->nullable();

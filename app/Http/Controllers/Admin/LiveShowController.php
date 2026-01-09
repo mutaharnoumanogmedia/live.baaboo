@@ -65,7 +65,7 @@ class LiveShowController extends Controller
             'title'        => 'required|string|max:255',
             'description'  => 'nullable|string',
             'scheduled_at' => 'required|date',
-            'stream_link'  => 'nullable|string',
+            
             'status'       => 'required|in:scheduled,live,completed',
             'host_name'    => 'nullable|string|max:255',
             'prize_amount' => 'required|numeric|min:0',
@@ -133,7 +133,6 @@ class LiveShowController extends Controller
             'title'        => 'required|string|max:255',
             'description'  => 'nullable|string',
             'scheduled_at' => 'required|date',
-            'stream_link'  => 'nullable|string',
             'status'       => 'required|in:scheduled,live,completed',
             'host_name'    => 'nullable|string|max:255',
             'prize_amount' => 'required|numeric|min:0',
