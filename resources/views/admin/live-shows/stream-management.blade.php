@@ -13,6 +13,10 @@
                     <div class="card-header  border-bottom py-3">
                         <h6 class="mb-0 fw-bold text-uppercase small text-muted">
                             <i class="fas fa-users me-2 text-primary"></i>Active Players
+
+                            <span id="total-users-count">
+                                ({{ $liveShow->users()->count() }})
+                            </span>
                         </h6>
                     </div>
                     <div class="card-body p-0">
@@ -504,6 +508,8 @@
                     </li>`;
                     activePlayersList.innerHTML += li;
                 });
+
+                document.getElementById('total-users-count').innerText = `(${players.length})`;
             }
 
 
