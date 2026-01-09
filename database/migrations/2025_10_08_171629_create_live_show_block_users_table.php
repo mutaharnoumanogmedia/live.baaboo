@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('live_show_block_users', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('live_show_id')->constrained('live_shows')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('live_show_id')->constrained('live_shows')->onDelete('no action');
+            $table->foreignId('user_id')->constrained('users')->onDelete('no action');
             $table->timestamps();
         });
     }

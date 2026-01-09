@@ -84,10 +84,7 @@ class LiveShowController extends Controller
         // }
 
         $validated['created_by'] = Auth::id();
-        $videoId = $this->extractYouTubeId($validated['stream_link'] ?? '');
-
-        $thumbnailUrl = 'https://img.youtube.com/vi/' . $videoId . '/hqdefault.jpg';
-        $validated['thumbnail'] = $thumbnailUrl;
+        
 
 
 
@@ -145,11 +142,7 @@ class LiveShowController extends Controller
         ]);
 
         $validated['created_by'] = Auth::id();
-        $videoId = $this->extractYouTubeId($validated['stream_link'] ?? '');
-
-
-        $thumbnailUrl = 'https://img.youtube.com/vi/' . $videoId . '/hqdefault.jpg';
-        $validated['thumbnail'] = $thumbnailUrl;
+       
 
 
         $live_show->update($validated);

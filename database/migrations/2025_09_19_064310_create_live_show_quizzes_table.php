@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('live_show_quizzes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('live_show_id')->constrained('live_shows')->onDelete('cascade');
+            $table->foreignId('live_show_id')->constrained('live_shows')->onDelete('no action');
             $table->string('question');
             $table->timestamps();
         });

@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('quiz_options', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('quiz_id')->constrained('live_show_quizzes')->onDelete('cascade');
+            $table->foreignId('quiz_id')->constrained('live_show_quizzes')->onDelete('no action');
             $table->string('option_text');
             $table->boolean('is_correct')->default(false);
             $table->timestamps();

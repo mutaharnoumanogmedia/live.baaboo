@@ -1863,21 +1863,21 @@
         var player;
 
         // 2. Create player
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '315',
-                width: '560',
-                videoId: '{{ $liveShow->stream_id ?? 0 }}',
-                playerVars: {
-                    autoplay: 1,
-                    controls: 0, // Hide play/pause bar
-                    disablekb: 1, // Disable keyboard shortcuts (e.g. spacebar)
-                    modestbranding: 1,
-                    rel: 0,
-                    playsinline: 1
-                }
-            });
-        }
+        // function onYouTubeIframeAPIReady() {
+        //     player = new YT.Player('player', {
+        //         height: '315',
+        //         width: '560',
+        //         videoId: '{{ $liveShow->stream_id ?? 0 }}',
+        //         playerVars: {
+        //             autoplay: 1,
+        //             controls: 0, // Hide play/pause bar
+        //             disablekb: 1, // Disable keyboard shortcuts (e.g. spacebar)
+        //             modestbranding: 1,
+        //             rel: 0,
+        //             playsinline: 1
+        //         }
+        //     });
+        // }
 
         // 3. Play with sound after user click
         function playWithSoundAfterDelay() {

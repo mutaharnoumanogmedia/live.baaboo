@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('live_show_messages', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('live_show_id')->constrained('live_shows')->onDelete('cascade');
-            $table->unsignedBigInteger('user_id')->constrained('users')->onDelete('cascade');
+            $table->unsignedBigInteger('live_show_id')->constrained('live_shows')->onDelete('no action');
+            $table->unsignedBigInteger('user_id')->constrained('users')->onDelete('no action');
             $table->text('message');
             $table->boolean('is_removed')->default(false);
             $table->timestamps();

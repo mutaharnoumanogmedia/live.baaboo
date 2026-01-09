@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UsersByRoleSeeder::class,
             LiveShowSeeder::class,
-            LiveShowQuizSeeder::class,
+            
         ]);
     }
 }

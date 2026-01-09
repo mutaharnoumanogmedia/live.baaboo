@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Faker\Factory as Faker;
 
 class UsersByRoleSeeder extends Seeder
 {
@@ -25,8 +27,14 @@ class UsersByRoleSeeder extends Seeder
         $admin->assignRole('admin');
 
         //create 500 users with role user 
-        User::factory(1000)->create()->each(function ($user) {
+        for ($i = 1; $i <= 50; $i++) {
+
+            $user = User::create([
+                'name'     => "player{$i}",         // username
+                'email'    => "p{$i}@baaboo.com",
+                'password' => Hash::make('password123'), // or random: Str::random(10)
+            ]);
             $user->assignRole('user');
-        });
+        }
     }
 }
