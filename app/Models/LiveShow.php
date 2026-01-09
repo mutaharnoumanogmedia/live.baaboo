@@ -29,7 +29,7 @@ class LiveShow extends Model
         'prize_amount' => 'float',
     ];
 
-    protected $appends = ['stream_id'];
+    // protected $appends = ['stream_id'];
 
 
 
@@ -83,10 +83,10 @@ class LiveShow extends Model
     }
 
 
-    public function getStreamIdAttribute()
-    {
-        return $this->extractYouTubeId($this->stream_link);
-    }
+    // public function getStreamIdAttribute()
+    // {
+    //     return $this->extractYouTubeId($this->stream_link);
+    // }
 
 
 
