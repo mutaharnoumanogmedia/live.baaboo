@@ -85,7 +85,7 @@
                             @foreach ($liveShow->quizzes as $quiz)
                                 <div class="px-2">
                                     <div class="card border mb-3">
-                                        <div class="card-body">
+                                        <div class="card-body" style="height: 450px; overflow-y:scroll">
                                             <h5 class="text-center mb-4 fw-bold">{{ $quiz->question }}</h5>
 
                                             @if ($quiz->options)
@@ -264,7 +264,7 @@
                                             <tr>
                                                 <th>Scheduled At</th>
                                                 <td>{{ $liveShow->scheduled_at->format('Y-m-d H:i') }}</td>
-                                        
+
                                             <tr>
                                                 <th>Total Questions</th>
                                                 <td>{{ $liveShow->quizzes->count() }}</td>
