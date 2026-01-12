@@ -1833,11 +1833,13 @@
 
                 fireConfetti();
 
-                document.getElementById('prizeAmount').textContent = data.prizeMoney + ' EUR';
+                let prizeMoney = parseFloat(data.prizeMoney).toFixed(2);
+
+                document.getElementById('prizeAmount').textContent = prizeMoney + ' EUR';
                 if (data.userId == userId) {
                     console.log('You are a winner!', data);
 
-                    addOverlayMessage('@System', 'Congratulations! You have won ' + data.prizeMoney + ' EUR!');
+                    addOverlayMessage('@System', 'Congratulations! You have won ' + prizeMoney + ' EUR!');
                     showWinnerDialogDiv();
                 }
                 document.getElementById('playerTab-tab').click();
