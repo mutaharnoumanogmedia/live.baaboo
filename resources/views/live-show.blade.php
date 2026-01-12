@@ -886,6 +886,14 @@
 
 
         }
+
+        #registerModal {
+            z-index: 200000;
+        }
+
+        #registerModal+.modal-backdrop {
+            z-index: 199000;
+        }
     </style>
 </head>
 
@@ -1152,9 +1160,9 @@
 
 
 
-    <button id="enable-push">
+    {{-- <button id="enable-push">
         Enable Notifications
-    </button>
+    </button> --}}
 
 
 
@@ -2156,7 +2164,7 @@
             enablePush();
             if (isLoggedIn == false)
                 showRegisterModal();
-            
+
         });
         /**
          * Pusher test event subscription for debugging
