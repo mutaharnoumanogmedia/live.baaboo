@@ -172,7 +172,7 @@
         }
 
         .main-container.quiz-mode {
-            height: 90dvh;
+            height: 92dvh;
             transform: scale(0.3) translateY(-150px);
             border-radius: 0px;
             overflow: hidden;
