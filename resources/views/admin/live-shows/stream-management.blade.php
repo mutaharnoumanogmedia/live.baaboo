@@ -773,6 +773,20 @@
 
                 console.log('QR Code generated for:', dataToEncode);
             }
+
+            function announcementEventTest() {
+                fetch('{{ route('admin.announcement.send') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                    },
+                }).then(response => response.text()).then(data => {
+                    console.log('Announcement sent:', data);
+                }).catch(error => {
+                    console.error('Error sending announcement:', error);
+                });
+            }
         </script>
     @endpush
 

@@ -54,8 +54,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/test-notification', [PushNotificationController::class, 'testNotifcation'])->name('test-notification');
 
+    Route::post('announcement', function () {
+        event(new \App\Events\AnnouncementEvent("This is a test announcement @ " . date('Y-m-d H:i:s')));
+        return response()->json(['success' => true, 'message' => 'Announcement sent successfully']);
+    })->name('announcement.send');
+
     Route::resource(
         'push-notifications',
-       PushNotificationController::class
+        PushNotificationController::class
     )->only(['index', 'create', 'store', 'show']);
 })->middleware(['auth']);

@@ -1062,9 +1062,14 @@
                 <div class="modal-header" style="border-bottom: none;">
                     <h5 class="modal-title" id="registerModalLabel">
                         <i class="fas fa-user-plus me-2 text-warning"></i>Register to Participate
+                        <div>
+                          <span style="font-size: 12px">  Already have an account? Login to participate.</span>
+                        </div>
                     </h5>
+
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+
                 <form id="registerForm" autocomplete="off">
                     <div class="modal-body">
                         <div class="mb-3">
@@ -1853,6 +1858,9 @@
         function showWinnerDialogDiv() {
             // Show the winner dialog
             document.querySelector('#winnerDialog').style.display = 'block';
+            //hide question
+            toggleQuiz("remove");
+
         }
         playerAsWinnerEventTrigger()
     </script>
@@ -2132,6 +2140,26 @@
 
             console.log('Push notifications enabled');
         }
+
+        document.getElementById("playButton").addEventListener("click", function() {
+            console.log('Tap to play clicked');
+            enablePush();
+            @if (!Auth::check())
+                showRegisterModal();
+            @endif
+        });
+        /**
+         * Pusher test event subscription for debugging
+         */
+        var channelTest = pusher.subscribe('announcement-event-channel');
+        channelTest.bind('pusher:subscription_succeeded', function() {
+            console.log('Subscribed to announcement-event-channel successfully!');
+        });
+        channelTest.bind('AnnouncementEvent', function(data) {
+            console.log('Received AnnouncementEvent:', data);
+            alert('Pusher AnnouncementEvent received: ' + JSON.stringify(data));
+        });
+
     </script>
 </body>
 
