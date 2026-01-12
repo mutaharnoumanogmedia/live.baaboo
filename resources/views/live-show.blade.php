@@ -1063,7 +1063,7 @@
                     <h5 class="modal-title" id="registerModalLabel">
                         <i class="fas fa-user-plus me-2 text-warning"></i>Register to Participate
                         <div>
-                          <span style="font-size: 12px">  Already have an account? Login to participate.</span>
+                            <span style="font-size: 12px"> Already have an account? Login to participate.</span>
                         </div>
                     </h5>
 
@@ -1600,6 +1600,10 @@
             quizMode = false;
             toggleQuiz("show");
 
+            //disable chatInput
+            document.getElementById('chatInput').disabled = true;
+            document.getElementById('send-btn-overlay').disabled = true;
+
 
         });
 
@@ -1688,6 +1692,10 @@
 
         function evaluateAnswerWithTimeToSubmit() {
             document.querySelector('#quizTimer').style.display = "none";
+            //disable all options
+            document.querySelectorAll('input[name="option"]').forEach(option => {
+                option.disabled = true;
+            });
 
             console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
             if (!isEliminated && isLoggedIn) {
@@ -1822,6 +1830,8 @@
         channelRemoveQuestion.bind('RemoveLiveShowQuizQuestionEvent', function(data) {
             console.log('Remove Quiz Question:', data);
             toggleQuiz("remove");
+            document.getElementById('chatInput').disabled = false;
+            document.getElementById('send-btn-overlay').disabled = false;
         });
 
 
@@ -2144,9 +2154,9 @@
         document.getElementById("playButton").addEventListener("click", function() {
             console.log('Tap to play clicked');
             enablePush();
-            @if (!Auth::check())
+            if (isLoggedIn == false)
                 showRegisterModal();
-            @endif
+            
         });
         /**
          * Pusher test event subscription for debugging
@@ -2159,7 +2169,6 @@
             console.log('Received AnnouncementEvent:', data);
             alert('Pusher AnnouncementEvent received: ' + JSON.stringify(data));
         });
-
     </script>
 </body>
 
