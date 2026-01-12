@@ -1450,12 +1450,14 @@
         updateViewerCount();
 
 
-        setInterval(
-            function() {
-                updateViewerCount();
-                updatePlayersLeaderboard();
+        @if ($liveShow->status == 'live')
+            // setInterval(
+            //     function() {
+            //         updateViewerCount();
+            //         updatePlayersLeaderboard();
 
-            }, 5000);
+            //     }, 10000);
+        @endif
 
         // Prevent quiz overlay from closing when clicking inside
         document.getElementById('quizOverlay').addEventListener('click', function(e) {
@@ -1754,7 +1756,7 @@
                 evaluationDiv.innerHTML = '';
                 document.querySelector('#quizTimer').style.display = "none";
                 showVideoContainer();
-
+                updatePlayersLeaderboard();
             }, 3000);
         }
 
@@ -1903,8 +1905,7 @@
         // Your Laravel broadcast event (drop the dot)
         channelUpdateLiveShow.bind('UpdateLiveShowEvent', function(data) {
             console.log('Update Live Show:', data);
-            // Show alert and redirect to home page after 5 seconds
-            alert('The live show has been updated.');
+
             if (data.status && data.status != 'live') {
                 emptyTheBodyWithEndShow('The live show status has changed to "' + data.status +
                     '". You will be redirected shortly.');

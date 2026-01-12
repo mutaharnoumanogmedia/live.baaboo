@@ -284,7 +284,12 @@ class LiveShowController extends Controller
             $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon]);
             ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string)$liveShowId, $prizeWon);
             // Dispatch job to send winner email
+            try{
             SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow);
+            }catch (\Exception $e){
+                //log the error
+                \Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: " . $e->getMessage());
+            }
         }
 
 

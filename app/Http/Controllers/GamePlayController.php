@@ -41,12 +41,12 @@ class GamePlayController extends Controller
             //if user already registered , login it and update pivot table
             $existingUser = \App\Models\User::where('email', $request->email)->first();
             if ($existingUser) {
-                /********************** */
-            //match name also
-            // if ($existingUser->name !== $request->name) {
-            //     return response()->json(['success' => false, 'messages' => ['The email is already registered with a different username. Please use the correct username or register with a different email.'], 'authStatus' => Auth::guard('web')->check()], 422);
-            // }
-                /********************** */
+
+                //match name also
+                // if ($existingUser->name !== $request->name) {
+                //     return response()->json(['success' => false, 'messages' => ['The email is already registered with a different username. Please use the correct username or register with a different email.'], 'authStatus' => Auth::guard('web')->check()], 422);
+                // }
+
 
 
                 //update username if different
@@ -120,6 +120,7 @@ class GamePlayController extends Controller
 
             // Create the user
             $user = \App\Models\User::create($validated);
+            $user->assignRole('user');
 
             // Attach the user to the live show with default values
             $liveShow->users()->attach(

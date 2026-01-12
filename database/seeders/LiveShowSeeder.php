@@ -166,7 +166,7 @@ class LiveShowSeeder extends Seeder
 
                 'host_name'    => fake()->name(),
                 'prize_amount' => rand(50, 500),
-                'currency'     => 'USD',
+                'currency'     => 'EUR',
                 'created_by'   => 1, // adjust for your admin user
             ]);
 
