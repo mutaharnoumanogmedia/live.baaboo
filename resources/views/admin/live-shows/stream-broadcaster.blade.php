@@ -69,10 +69,20 @@
                     showMyCameraToggleButton: true,
                     showAudioVideoSettingsButton: true,
                     showScreenSharingButton: true,
-                    showTextChat: true,
-                    showUserList: true,
+                    showTextChat: false,
+                    showUserList: false,
                     showPreJoinView: false
 
+                };
+            }else {
+                config = {
+                    turnOnCameraWhenJoining: false,
+                    showMyCameraToggleButton: false,
+                    showAudioVideoSettingsButton: false,
+                    showScreenSharingButton: false,
+                    showTextChat: false,
+                    showUserList: false,
+                    showPreJoinView: false
                 };
             }
 
