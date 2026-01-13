@@ -12,8 +12,8 @@
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header  border-bottom py-3">
                         <h6 class="mb-0 fw-bold text-uppercase small text-muted">
-                            <i class="fas fa-users me-2 text-primary"></i>Active Players
-
+                            <i class="fas fa-users me-2 text-primary"></i>
+                            Active Players
                             <span id="total-users-count">
                                 ({{ $liveShow->users()->count() }})
                             </span>
@@ -475,7 +475,8 @@
                                 name: player.name,
                                 is_online: player.is_online,
                                 is_winner: player.is_winner,
-                                status: player.status
+                                status: player.status,
+                                score: player.score
                             }
                         });
                         console.log(data);
@@ -503,6 +504,9 @@
                             <span class="ms-2 ${player.is_online == 1 ? 'text-success' : 'text-secondary'}">
                            <i class="bi bi-circle-fill" style="font-size: 0.75rem;"></i>
                             </span>
+                            <span class='ms-2 text-white'>
+                                ${player.score !== null ? ` ${player.score}` : ''}
+                                </span>
                             ${player.is_winner ? '<i class="bi bi-trophy-fill text-warning"></i>' : ''}
                         </div>
                     </li>`;

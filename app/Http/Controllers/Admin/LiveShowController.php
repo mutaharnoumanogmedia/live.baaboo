@@ -386,8 +386,11 @@ class LiveShowController extends Controller
                 'is_online' => $user->pivot->is_online,
                 'is_winner' => $user->pivot->is_winner ?? null,
                 'status' => $user->pivot->status ?? null,
+                'score' => $user->pivot->score ?? null,
             ];
-        });
+        })
+        ->sortByDesc('score')
+        ->values();
 
         return response()->json($liveShow->users);
     }

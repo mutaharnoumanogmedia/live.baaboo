@@ -46,8 +46,11 @@ class LiveShowController extends Controller
                     'email' => $user->email,
                     'is_online' => $user->pivot->is_online,
                     'is_winner' => $user->pivot->is_winner ?? null,
+                    'score' => $user->pivot->score ?? null,
                 ];
-            })->toArray();
+            })
+            ->sortByDesc('score')
+            ->toArray();
 
         LiveShowOnlineUsersEvent::dispatch($updatedOnlineUsers, (string)$liveShowId);
 

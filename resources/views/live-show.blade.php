@@ -5,9 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-    <title>baaboo Live Game Show {{ $liveShow->id ?? '' }}</title>
+    <title>baaboo Live | {{ $liveShow->title ?? '' }}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="baaboo Live | {{ $liveShow->title ?? '' }}">
+    <meta property="og:description" content="Join the baaboo Live Game Show and compete for prizes!">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ asset('og-image.webp') }}">
+    <meta property="og:site_name" content="baaboo Live Game Show">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="baaboo Live | {{ $liveShow->title ?? '' }}">
+    <meta name="twitter:description" content="Join the baaboo Live Game Show and compete for prizes!">
+    <meta name="twitter:image" content="{{ asset('og-image.webp') }}">
 
     <link href='https://fonts.googleapis.com/css?family=Outfit' rel='stylesheet'>
 
