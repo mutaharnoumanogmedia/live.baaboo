@@ -2237,10 +2237,10 @@
             }
 
             overlay.addEventListener('click', unmuteAndHide);
-            overlay.addEventListener('touchend', function(e) {
-                e.preventDefault();
-                unmuteAndHide();
-            }, { passive: false });
+            // overlay.addEventListener('touchend', function(e) {
+            //     e.preventDefault();
+            //     unmuteAndHide();
+            // }, { passive: false });
         })();
     </script>
 </body>
