@@ -121,11 +121,11 @@
         // SAFARI AUDIO UNMUTE - ROBUST SOLUTION
         // ============================================
         (function() {
-            var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent) ||
-                /iPhone|iPad|iPod/.test(navigator.userAgent) ||
-                (navigator.vendor && navigator.vendor.indexOf('Apple') > -1);
+            // var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent) ||
+            //     /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+            //     (navigator.vendor && navigator.vendor.indexOf('Apple') > -1);
 
-            if (!isSafari) return;
+            // if (!isSafari) return;
 
             var hasUnmuted = false;
             var maxRetries = 10;
