@@ -116,7 +116,8 @@
             ...config
         });
 
-        Safari: show "Touch to unmute" overlay (when page is opened directly)
+        // Safari: show "Touch to unmute" overlay (when page is opened directly)
+       
         (function() {
             // var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent) ||
             //     /iPhone|iPad|iPod/.test(navigator.userAgent) ||
