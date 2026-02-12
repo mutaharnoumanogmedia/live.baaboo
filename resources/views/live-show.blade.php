@@ -2195,7 +2195,7 @@
     </script>
 
     <!-- Safari: show "Touch to unmute" overlay and unmute videos inside broadcast iframe -->
-    <script>
+    {{-- <script>
         (function() {
             // Uncomment to limit to Safari only:
             // var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent) ||
@@ -2390,7 +2390,7 @@
             }, 30000);
 
         })();
-    </script>
+    </script> --}}
 </body>
 
 </html>
