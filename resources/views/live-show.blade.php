@@ -2137,11 +2137,11 @@
             return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
         }
 
-        document.getElementById("playButton").addEventListener("click", function() {
-            // enablePush();
+        // document.getElementById("playButton").addEventListener("click", function() {
+        //     // enablePush();
 
-            unmuteAndHide();
-        });
+        //     unmuteAndHide();
+        // });
 
         async function enablePush() {
             if (!('serviceWorker' in navigator)) {
