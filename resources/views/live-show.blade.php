@@ -248,7 +248,7 @@
             height: 100%;
             background: #000;
             object-fit: cover;
-            pointer-events: none;
+            pointer-events: all;
         }
 
 
@@ -2192,7 +2192,7 @@
     </script>
 
     <!-- Safari: show "Touch to unmute" overlay and unmute videos inside broadcast iframe -->
-    <script>
+    {{-- <script>
     (function() {
         var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent) ||
             /iPhone|iPad|iPod/.test(navigator.userAgent) ||
@@ -2236,7 +2236,7 @@
             unmuteAndHide();
         }, { passive: false });
     })();
-    </script>
+    </script> --}}
 </body>
 
 </html>
