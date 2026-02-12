@@ -2194,10 +2194,10 @@
     <!-- Safari: show "Touch to unmute" overlay and unmute videos inside broadcast iframe -->
     <script>
     (function() {
-        var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent) ||
-            /iPhone|iPad|iPod/.test(navigator.userAgent) ||
-            (navigator.vendor && navigator.vendor.indexOf('Apple') > -1);
-        if (!isSafari) return;
+        // var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent) ||
+        //     /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+        //     (navigator.vendor && navigator.vendor.indexOf('Apple') > -1);
+        // if (!isSafari) return;
 
         var style = document.createElement('style');
         style.textContent = [
