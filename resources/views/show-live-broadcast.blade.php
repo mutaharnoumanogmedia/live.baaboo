@@ -22,9 +22,9 @@
             height: 100%;
         }
 
-        .zg_autoplay_mask {
+        /* .zg_autoplay_mask {
             display: none !important;
-        }
+        } */
 
         .dIzgYQV4CBbzZxzJbwbS,
         #ZegoRoomFooter,
