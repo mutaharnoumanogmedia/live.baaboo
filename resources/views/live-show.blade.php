@@ -970,7 +970,8 @@
         <div class="video-container" id="videoContainer">
             <div class="video-placeholder" id="videoPlaceholder">
                 {{-- <div id="player"></div> --}}
-                <iframe id="live-broadcast-iframe" src="{{ route('show-live-broadcast', [$liveShow->id]) }}" frameborder="0"></iframe>
+                <iframe id="live-broadcast-iframe" src="{{ route('show-live-broadcast', [$liveShow->id]) }}"
+                    frameborder="0"></iframe>
             </div>
 
         </div>
@@ -2193,49 +2194,52 @@
 
     <!-- Safari: show "Touch to unmute" overlay and unmute videos inside broadcast iframe -->
     <script>
-    (function() {
-        // var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent) ||
-        //     /iPhone|iPad|iPod/.test(navigator.userAgent) ||
-        //     (navigator.vendor && navigator.vendor.indexOf('Apple') > -1);
-        // if (!isSafari) return;
+        (function() {
+            // var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent) ||
+            //     /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+            //     (navigator.vendor && navigator.vendor.indexOf('Apple') > -1);
+            // if (!isSafari) return;
 
-        var style = document.createElement('style');
-        style.textContent = [
-            '.safari-unmute-overlay{',
-            '  position:fixed;inset:0;z-index:9999;',
-            '  display:flex;align-items:center;justify-content:center;',
-            '  background:rgba(0,0,0,0.5);color:#fff;',
-            '  font-family:system-ui,sans-serif;font-size:1rem;cursor:pointer;',
-            '}',
-            '.safari-unmute-overlay.hidden{display:none !important;}'
-        ].join('');
-        document.head.appendChild(style);
+            var style = document.createElement('style');
+            style.textContent = [
+                '.safari-unmute-overlay{',
+                '  position:fixed;inset:0;z-index:9999;',
+                '  display:flex;align-items:center;justify-content:center;',
+                '  background:rgba(0,0,0,0.5);color:#fff;',
+                '  font-family:system-ui,sans-serif;font-size:1rem;cursor:pointer;',
+                '}',
+                '.safari-unmute-overlay.hidden{display:none !important;}'
+            ].join('');
+            document.head.appendChild(style);
 
-        var overlay = document.createElement('div');
-        overlay.className = 'safari-unmute-overlay';
-        overlay.setAttribute('aria-label', 'Touch to unmute');
-        overlay.textContent = 'Touch to unmute';
-        document.body.appendChild(overlay);
+            var overlay = document.createElement('div');
+            overlay.className = 'safari-unmute-overlay';
+            overlay.setAttribute('aria-label', 'Touch to unmute');
+            overlay.textContent = 'Touch to unmute';
+            document.body.appendChild(overlay);
 
-        function unmuteAndHide() {
-            var iframe = document.getElementById('live-broadcast-iframe');
-            var doc = iframe && iframe.contentDocument;
-            if (doc) {
-                doc.querySelectorAll('#root video').forEach(function(v) {
-                    if (v.muted) v.muted = false;
-                });
+            function unmuteAndHide() {
+                var iframe = document.getElementById('live-broadcast-iframe');
+                var doc = iframe && iframe.contentDocument;
+                if (doc) {
+                    doc.querySelectorAll('#root video').forEach(function(v) {
+                        console.log('Unmuting video:', v);
+                        if (v.muted) v.muted = false;
+                        v.removeAttribute('muted');
+                        v.play();
+                    });
+                }
+                overlay.classList.add('hidden');
+                overlay.removeEventListener('click', unmuteAndHide);
+                overlay.removeEventListener('touchend', unmuteAndHide);
             }
-            overlay.classList.add('hidden');
-            overlay.removeEventListener('click', unmuteAndHide);
-            overlay.removeEventListener('touchend', unmuteAndHide);
-        }
 
-        overlay.addEventListener('click', unmuteAndHide);
-        // overlay.addEventListener('touchend', function(e) {
-        //     e.preventDefault();
-        //     unmuteAndHide();
-        // }, { passive: false });
-    })();
+            overlay.addEventListener('click', unmuteAndHide);
+            overlay.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                unmuteAndHide();
+            }, { passive: false });
+        })();
     </script>
 </body>
 
