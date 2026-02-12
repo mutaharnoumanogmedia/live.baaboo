@@ -26,6 +26,12 @@
             display: none !important;
         } */
 
+        .zg_autoplay_mask {
+            background: rgba(0, 0, 0, 0.7) !important;
+            font-family: -apple-system, system-ui, sans-serif !important;
+            font-size: 18px !important;
+        }
+
         .dIzgYQV4CBbzZxzJbwbS,
         #ZegoRoomFooter,
         #ZegoRoomHeader {
@@ -115,12 +121,35 @@
             }],
             ...config
         });
-
-
-
-
-
     }
+
+    // Watch for Zego's autoplay mask and customize its content
+    (function() {
+        var observer = new MutationObserver(function(mutations) {
+            var mask = document.querySelector('.zg_autoplay_mask');
+            if (mask && !mask.dataset.customized) {
+                mask.dataset.customized = 'true';
+
+                // Replace the inner content with your custom message
+                mask.innerHTML = '<div style="text-align:center;padding:20px;">' +
+                    '<div style="font-size:50px;margin-bottom:15px;">🔊</div>' +
+                    '<div style="font-size:18px;font-weight:500;">Tap to enable sound</div>' +
+                    '</div>';
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        // Stop observing after 30 seconds (mask should have appeared by then)
+        setTimeout(function() {
+            observer.disconnect();
+        }, 30000);
+    })();
+
+
     var channel2 = pusher.subscribe('set-broadcast-room-id.{{ $liveShow->id }}');
 
     // System subscription event
