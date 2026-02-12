@@ -2219,29 +2219,33 @@
             overlay.textContent = 'Touch to unmute';
             document.body.appendChild(overlay);
 
-            function unmuteAndHide() {
-                console.log('Unmuting and hiding');
-                var iframe = document.getElementById('live-broadcast-iframe');
-                var doc = iframe && iframe.contentDocument;
-                if (doc) {
-                    doc.querySelectorAll('#root video').forEach(function(v) {
-                        console.log('Unmuting video:', v);
-                        if (v.muted) v.muted = false;
-                        v.removeAttribute('muted');
-                        v.play();
-                    });
-                }
-                overlay.classList.add('hidden');
-                overlay.removeEventListener('click', unmuteAndHide);
-                overlay.removeEventListener('touchend', unmuteAndHide);
-            }
 
-            overlay.addEventListener('click', unmuteAndHide);
-            overlay.addEventListener('touchend', function(e) {
-                e.preventDefault();
-                unmuteAndHide();
-            }, { passive: false });
         })();
+
+        function unmuteAndHide() {
+            console.log('Unmuting and hiding');
+            var iframe = document.getElementById('live-broadcast-iframe');
+            var doc = iframe && iframe.contentDocument;
+            if (doc) {
+                doc.querySelectorAll('#root video').forEach(function(v) {
+                    console.log('Unmuting video:', v);
+                    if (v.muted) v.muted = false;
+                    v.removeAttribute('muted');
+                    v.play();
+                });
+            }
+            overlay.classList.add('hidden');
+            overlay.removeEventListener('click', unmuteAndHide);
+            overlay.removeEventListener('touchend', unmuteAndHide);
+        }
+
+        overlay.addEventListener('click', unmuteAndHide);
+        overlay.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            unmuteAndHide();
+        }, {
+            passive: false
+        });
     </script>
 </body>
 
