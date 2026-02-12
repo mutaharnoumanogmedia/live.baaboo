@@ -2197,6 +2197,7 @@
     <!-- Safari: show "Touch to unmute" overlay and unmute videos inside broadcast iframe -->
     <script>
         (function() {
+            // Uncomment to limit to Safari only:
             // var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent) ||
             //     /iPhone|iPad|iPod/.test(navigator.userAgent) ||
             //     (navigator.vendor && navigator.vendor.indexOf('Apple') > -1);
@@ -2206,41 +2207,188 @@
             style.textContent = [
                 '.safari-unmute-overlay{',
                 '  position:fixed;inset:0;z-index:9999;',
-                '  display:flex;align-items:center;justify-content:center;',
-                '  background:rgba(0,0,0,0.5);color:#fff;',
-                '  font-family:system-ui,sans-serif;font-size:1rem;cursor:pointer;',
+                '  display:flex;flex-direction:column;align-items:center;justify-content:center;',
+                '  background:rgba(0,0,0,0.6);color:#fff;',
+                '  font-family:-apple-system,system-ui,sans-serif;cursor:pointer;',
+                '  -webkit-tap-highlight-color:transparent;',
                 '}',
+                '.safari-unmute-overlay .icon{',
+                '  width:70px;height:70px;margin-bottom:15px;',
+                '  border:3px solid #fff;border-radius:50%;',
+                '  display:flex;align-items:center;justify-content:center;',
+                '}',
+                '.safari-unmute-overlay .icon svg{width:35px;height:35px;fill:#fff;}',
+                '.safari-unmute-overlay .text{font-size:18px;font-weight:500;}',
                 '.safari-unmute-overlay.hidden{display:none !important;}'
             ].join('');
             document.head.appendChild(style);
 
             var overlay = document.createElement('div');
             overlay.className = 'safari-unmute-overlay';
-            overlay.setAttribute('aria-label', 'Touch to unmute');
-            overlay.textContent = 'Touch to unmute';
+            overlay.innerHTML = [
+                '<div class="icon">',
+                '  <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>',
+                '</div>',
+                '<div class="text">Tap to enable sound</div>'
+            ].join('');
             document.body.appendChild(overlay);
 
-            function unmuteAndHide() {
+            var hasUnmuted = false;
+            var retryInterval = null;
+            var observer = null;
+
+            // Get iframe document safely
+            function getIframeDoc() {
                 var iframe = document.getElementById('live-broadcast-iframe');
-                var doc = iframe && iframe.contentDocument;
-                if (doc) {
-                    doc.querySelectorAll('#root video').forEach(function(v) {
-                        console.log('Unmuting video:', v);
-                        if (v.muted) v.muted = false;
-                        v.removeAttribute('muted');
-                        v.play();
-                    });
+                try {
+                    return iframe && iframe.contentDocument;
+                } catch (e) {
+                    return null; // Cross-origin error
                 }
-                overlay.classList.add('hidden');
-                overlay.removeEventListener('click', unmuteAndHide);
-                overlay.removeEventListener('touchend', unmuteAndHide);
             }
 
-            overlay.addEventListener('click', unmuteAndHide);
-            overlay.addEventListener('touchend', function(e) {
-                e.preventDefault();
-                unmuteAndHide();
-            }, { passive: false });
+            // Force unmute all videos in iframe
+            function forceUnmute() {
+                var doc = getIframeDoc();
+                if (!doc) return false;
+
+                var videos = doc.querySelectorAll('#root video');
+                if (videos.length === 0) return false;
+
+                var success = false;
+                videos.forEach(function(v) {
+                    console.log('Attempting unmute on video:', v);
+
+                    // Multiple approaches
+                    if (v.muted) {
+                        v.muted = false;
+                        success = true;
+                    }
+                    v.removeAttribute('muted');
+                    v.volume = 1;
+
+                    // Try to play if paused
+                    if (v.paused) {
+                        v.play().catch(function() {});
+                    }
+                });
+
+                return success;
+            }
+
+            // Check if audio is actually enabled
+            function isAudioWorking() {
+                var doc = getIframeDoc();
+                if (!doc) return false;
+
+                var videos = doc.querySelectorAll('#root video');
+                for (var i = 0; i < videos.length; i++) {
+                    if (!videos[i].muted && videos[i].volume > 0) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            // Hide overlay and cleanup
+            function hideOverlay() {
+                overlay.classList.add('hidden');
+                if (retryInterval) {
+                    clearInterval(retryInterval);
+                    retryInterval = null;
+                }
+                if (observer) {
+                    observer.disconnect();
+                    observer = null;
+                }
+            }
+
+            // Start watching for videos in iframe (after user tap)
+            function watchForVideos() {
+                var doc = getIframeDoc();
+                if (!doc) return;
+
+                var root = doc.querySelector('#root');
+                if (!root) return;
+
+                observer = new MutationObserver(function() {
+                    if (forceUnmute() && isAudioWorking()) {
+                        hasUnmuted = true;
+                        hideOverlay();
+                    }
+                });
+                observer.observe(root, {
+                    childList: true,
+                    subtree: true
+                });
+            }
+
+            // Main unmute handler - called on user tap
+            function onUserTap(e) {
+                if (e) e.preventDefault();
+
+                console.log('User tapped - attempting unmute');
+
+                // Attempt 1: Immediate
+                forceUnmute();
+
+                // Attempt 2-5: Quick retries
+                setTimeout(forceUnmute, 100);
+                setTimeout(forceUnmute, 300);
+                setTimeout(forceUnmute, 600);
+                setTimeout(forceUnmute, 1000);
+
+                // Start polling every 500ms until success (max 30 seconds)
+                var attempts = 0;
+                retryInterval = setInterval(function() {
+                    attempts++;
+                    console.log('Retry attempt', attempts);
+
+                    forceUnmute();
+
+                    if (isAudioWorking()) {
+                        console.log('Audio unmuted successfully!');
+                        hasUnmuted = true;
+                        hideOverlay();
+                    } else if (attempts >= 60) { // 30 seconds max
+                        console.log('Max retries reached');
+                        clearInterval(retryInterval);
+                        retryInterval = null;
+                    }
+                }, 500);
+
+                // Also watch for new videos being added
+                watchForVideos();
+
+                // Remove tap listeners (user already tapped)
+                overlay.removeEventListener('click', onUserTap);
+                overlay.removeEventListener('touchend', onUserTap);
+
+                // Hide overlay after tap regardless (user initiated action)
+                setTimeout(function() {
+                    overlay.classList.add('hidden');
+                }, 500);
+            }
+
+            overlay.addEventListener('click', onUserTap);
+            overlay.addEventListener('touchend', onUserTap, {
+                passive: false
+            });
+
+            // Auto-hide if audio works without user tap (desktop browsers)
+            var autoCheckInterval = setInterval(function() {
+                if (isAudioWorking()) {
+                    console.log('Audio already working - hiding overlay');
+                    hideOverlay();
+                    clearInterval(autoCheckInterval);
+                }
+            }, 1000);
+
+            // Stop auto-check after 30 seconds
+            setTimeout(function() {
+                clearInterval(autoCheckInterval);
+            }, 30000);
+
         })();
     </script>
 </body>
