@@ -158,6 +158,16 @@
                         video.removeAttribute('muted');
                         unmutedAny = true;
                     }
+
+                    console.log('Unmuting video:', video);
+                    console.log('Unmuted:', unmutedAny);
+                    console.log('Videos:', videos.length);
+                    console.log('Audio enabled:', isAudioEnabled());
+                    console.log('Has unmuted:', hasUnmuted);
+                    console.log('Retry count:', retryCount);
+                    console.log('Max retries:', maxRetries);
+                    console.log('Retry unmute:', retryUnmute);
+                    console.log('Force unmute:', forceUnmute);
                 });
 
                 return unmutedAny || videos.length > 0;
