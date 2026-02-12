@@ -2195,6 +2195,7 @@
 
     <!-- Safari: show "Touch to unmute" overlay and unmute videos inside broadcast iframe -->
     <script>
+        var overlay;
         (function() {
             // var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent) ||
             //     /iPhone|iPad|iPod/.test(navigator.userAgent) ||
@@ -2213,7 +2214,7 @@
             ].join('');
             document.head.appendChild(style);
 
-            var overlay = document.createElement('div');
+             overlay = document.createElement('div');
             overlay.className = 'safari-unmute-overlay';
             overlay.setAttribute('aria-label', 'Touch to unmute');
             overlay.textContent = 'Touch to unmute';
