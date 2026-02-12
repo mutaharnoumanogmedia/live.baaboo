@@ -2138,9 +2138,9 @@
         }
 
         document.getElementById("playButton").addEventListener("click", function() {
-            enablePush();
+            // enablePush();
 
-            
+            unmuteAndHide();
         });
 
         async function enablePush() {
