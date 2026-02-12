@@ -2139,7 +2139,6 @@
 
         document.getElementById("playButton").addEventListener("click", function() {
             enablePush();
-
             unmuteAndHide()
         });
 
@@ -2221,6 +2220,7 @@
             document.body.appendChild(overlay);
 
             function unmuteAndHide() {
+                console.log('Unmuting and hiding');
                 var iframe = document.getElementById('live-broadcast-iframe');
                 var doc = iframe && iframe.contentDocument;
                 if (doc) {
@@ -2237,10 +2237,10 @@
             }
 
             overlay.addEventListener('click', unmuteAndHide);
-            // overlay.addEventListener('touchend', function(e) {
-            //     e.preventDefault();
-            //     unmuteAndHide();
-            // }, { passive: false });
+            overlay.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                unmuteAndHide();
+            }, { passive: false });
         })();
     </script>
 </body>
