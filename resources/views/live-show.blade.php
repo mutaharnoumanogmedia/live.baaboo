@@ -2176,7 +2176,7 @@
 
         document.getElementById("playButton").addEventListener("click", function() {
             console.log('Tap to play clicked');
-            enablePush();
+            // enablePush();
             if (isLoggedIn == false)
                 showRegisterModal();
 
