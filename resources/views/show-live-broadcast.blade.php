@@ -122,7 +122,6 @@
             ...config
         });
     }
-
     // Watch for Zego's autoplay mask and customize its content
     (function() {
         var observer = new MutationObserver(function(mutations) {
@@ -148,6 +147,8 @@
             observer.disconnect();
         }, 30000);
     })();
+
+
 
 
     var channel2 = pusher.subscribe('set-broadcast-room-id.{{ $liveShow->id }}');

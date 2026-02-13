@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 use Agence104\LiveKit\AccessToken;
 use Agence104\LiveKit\AccessTokenOptions;
 use Agence104\LiveKit\VideoGrant;
+use App\Http\Controllers\GamePlayController;
 use App\Http\Controllers\PushNotificationController;
 
 /*
@@ -75,3 +76,6 @@ Route::get('/livekit-token', function (Request $request) {
 });
 
 Route::post('/push/subscribe', [PushNotificationController::class, 'subscribe']);
+
+
+Route::get('/get-latest-live-or-scheduled-show', [GamePlayController::class, 'getLatestLiveOrScheduledShow'])->name('api.get-latest-live-or-scheduled-show');

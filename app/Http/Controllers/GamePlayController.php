@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\GameResetEvent;
 use App\Events\LiveShowMessageEvent;
 use App\Events\LiveShowOnlineUsersEvent;
-use Illuminate\Http\Request;
 use App\Models\LiveShow;
 use App\Models\LiveShowMessages;
 use App\Models\QuizOption;
@@ -13,9 +11,9 @@ use App\Models\User;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use App\Models\Viewer;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-
 
 class GamePlayController extends Controller
 {
@@ -29,7 +27,6 @@ class GamePlayController extends Controller
         return view('live-show', compact('liveShow', 'isEliminated'));
     }
 
-
     public function registerUser(Request $request, $liveShowId)
     {
 
@@ -38,24 +35,22 @@ class GamePlayController extends Controller
                 return response()->json(['success' => false, 'messages' => ['User already logged in.'], 'user' => Auth::guard('web')->user(), 'authStatus' => Auth::guard('web')->check()]);
             }
 
-            //if user already registered , login it and update pivot table
+            // if user already registered , login it and update pivot table
             $existingUser = \App\Models\User::where('email', $request->email)->first();
             if ($existingUser) {
 
-                //match name also
+                // match name also
                 // if ($existingUser->name !== $request->name) {
                 //     return response()->json(['success' => false, 'messages' => ['The email is already registered with a different username. Please use the correct username or register with a different email.'], 'authStatus' => Auth::guard('web')->check()], 422);
                 // }
 
-
-
-                //update username if different
+                // update username if different
                 if ($existingUser->name !== $request->name) {
                     $existingUser->name = $request->name;
                     $existingUser->save();
                 }
 
-                //update pivot table
+                // update pivot table
                 $liveShow = LiveShow::live()->find($liveShowId);
 
                 if ($liveShow) {
@@ -66,16 +61,15 @@ class GamePlayController extends Controller
                     } else {
                         $liveShow->users()->syncWithoutDetaching(
                             [
-                                $existingUser->id =>
-                                [
+                                $existingUser->id => [
                                     'is_online' => 1,
                                     'is_winner' => 0,
                                     'created_at' => now(),
                                     'updated_at' => now(),
                                     'score' => 0,
                                     'status' => 'registered',
-                                    'last_active_at' => now()
-                                ]
+                                    'last_active_at' => now(),
+                                ],
                             ]
                         );
                     }
@@ -83,22 +77,22 @@ class GamePlayController extends Controller
 
                 Auth::guard('web')->login($existingUser);
 
-                $sessionResult =  $this->sessionGeneration(Auth::guard('web')->user(), $request);
+                $sessionResult = $this->sessionGeneration(Auth::guard('web')->user(), $request);
 
-                if (!$sessionResult['success']) {
+                if (! $sessionResult['success']) {
                     return response()->json(['success' => false, 'messages' => [$sessionResult['message']], 'user' => null, 'authStatus' => Auth::guard('web')->check()], 500);
                 }
 
                 $this->triggerOnlineUsersEvent($liveShowId);
 
-                //Job : send email to user with login details 
+                // Job : send email to user with login details
 
                 return response()->json(['success' => true, 'message' => 'User logged in successfully.', 'user' => $existingUser, 'authStatus' => Auth::guard('web')->check(), 'isEliminated' => $this->getEliminationStatus($liveShowId)]);
             }
-            //end of existing user login
+            // end of existing user login
 
             $validator = Validator::make($request->all(), [
-                'name'  => 'required|alpha_num|string|max:255|unique:users,name',
+                'name' => 'required|alpha_num|string|max:255|unique:users,name',
                 'email' => 'required|email|max:255|unique:users,email',
             ], [
                 'name.unique' => 'The username has already been taken. Please choose a different one.',
@@ -110,11 +104,11 @@ class GamePlayController extends Controller
             }
 
             $validated = $validator->validated();
-            //add rand password
+            // add rand password
             $validated['password'] = bcrypt(\Str::random(8));
 
             $liveShow = LiveShow::live()->find($liveShowId);
-            if (!$liveShow) {
+            if (! $liveShow) {
                 return response()->json(['message' => 'Live show not found.'], 404);
             }
 
@@ -132,39 +126,37 @@ class GamePlayController extends Controller
                     'updated_at' => now(),
                     'score' => 0,
                     'status' => 'registered',
-                    'last_active_at' => now()
+                    'last_active_at' => now(),
                 ]
             );
 
             Auth::guard('web')->login($user);
 
+            $sessionResult = $this->sessionGeneration(Auth::guard('web')->user(), $request);
 
-
-            $sessionResult =  $this->sessionGeneration(Auth::guard('web')->user(), $request);
-
-            if (!$sessionResult['success']) {
+            if (! $sessionResult['success']) {
                 return response()->json(['success' => false, 'messages' => [$sessionResult['message']], 'user' => null, 'authStatus' => Auth::guard('web')->check()], 500);
             }
 
             $this->triggerOnlineUsersEvent($liveShowId);
+
             return response()->json(['success' => true, 'message' => 'User registered successfully.', 'user' => $user, 'authStatus' => Auth::guard('web')->check()]);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'messages' => ['Registration failed: ' . $e->getMessage()], 'user' => null, 'authStatus' => Auth::guard('web')->check()], 500);
+            return response()->json(['success' => false, 'messages' => ['Registration failed: '.$e->getMessage()], 'user' => null, 'authStatus' => Auth::guard('web')->check()], 500);
         }
     }
 
     public function liveShowLogout(Request $request, $liveShow)
     {
         $liveShow = LiveShow::find($liveShow);
-        if (!$liveShow) {
+        if (! $liveShow) {
             return redirect()->back()->withErrors(['message' => 'Live show not found.']);
         }
-        //dispatch event to update online users
-
+        // dispatch event to update online users
 
         $user = Auth::guard('web')->user();
         if ($user) {
-            //update pivot table
+            // update pivot table
             $updateResult = $liveShow->users()->updateExistingPivot($user->id, ['is_online' => 0]);
         }
 
@@ -178,11 +170,10 @@ class GamePlayController extends Controller
 
         Auth::logout();
 
-        //remove session from sessions table
+        // remove session from sessions table
 
         return redirect(route('live-show', [$liveShow->id]))->with('success', 'You have been logged out successfully.');
     }
-
 
     private function triggerOnlineUsersEvent($liveShowId)
     {
@@ -207,7 +198,7 @@ class GamePlayController extends Controller
                 ->sortByDesc('score')
                 ->toArray();
 
-            LiveShowOnlineUsersEvent::dispatch($activeUsers, (string)$liveShowId);
+            LiveShowOnlineUsersEvent::dispatch($activeUsers, (string) $liveShowId);
         }
     }
 
@@ -216,26 +207,26 @@ class GamePlayController extends Controller
         $user = Auth::guard('web')->user();
         $totalSecondsToSubmit = $request->seconds_to_submit ?? 1;
         $totalSecondsToSubmit = $totalSecondsToSubmit == 0 ? 1 : $totalSecondsToSubmit;
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::guard('web')->check()], 401);
         }
 
         $liveShow = LiveShow::find($liveShowId);
-        if (!$liveShow) {
+        if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
 
         $quizId = $request->quiz_id;
         $option = $request->option;
 
-        if (!$quizId || !$option) {
+        if (! $quizId || ! $option) {
             return response()->json(['message' => 'Quiz ID and option are required.'], 422);
         }
 
-        //check if liveshow has the user
+        // check if liveshow has the user
         $userPivot = $liveShow->users()->where('user_id', $user->id)->first();
-        if (!$userPivot) {
-            //add user to liveshow
+        if (! $userPivot) {
+            // add user to liveshow
             $liveShow->users()->attach(
                 $user->id,
                 [
@@ -245,7 +236,7 @@ class GamePlayController extends Controller
                     'updated_at' => now(),
                     'score' => 0,
                     'status' => 'registered',
-                    'last_active_at' => now()
+                    'last_active_at' => now(),
                 ]
             );
         }
@@ -260,14 +251,14 @@ class GamePlayController extends Controller
                 'created_at' => now(),
             ]
         );
-        //if user already eliminated , do not process quiz
+        // if user already eliminated , do not process quiz
         if ($userPivot && $userPivot->pivot->status === 'eliminated') {
             return response()->json(['success' => false, 'message' => 'User is eliminated and cannot submit quiz.'], 403);
         }
 
         // Here you would typically check the option against the correct answer stored in the database.
         $quizOption = QuizOption::where('id', $option)->where('quiz_id', $quizId)->first();
-        //store in user_quiz_responses table
+        // store in user_quiz_responses table
         if ($quizOption) {
             UserQuizResponse::updateOrCreate(
                 [
@@ -284,32 +275,34 @@ class GamePlayController extends Controller
                 ]
             );
         }
-        if (!$quizOption) {
+        if (! $quizOption) {
             return response()->json(['success' => false, 'message' => 'Invalid quiz option.'], 422);
         }
         $currentScore = $liveShow->users()->where('user_id', $user->id)->first()->pivot->score ?? 0;
 
-        if (!$quizOption->is_correct) {
+        if (! $quizOption->is_correct) {
             $correctOption = QuizOption::where('quiz_id', $quizId)->where('is_correct', 1)->first();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Incorrect option selected.',
                 'is_correct' => false,
                 'selected_option_id' => $quizOption->id,
                 'correct_option_id' => $correctOption->id,
-                'score' => $currentScore
+                'score' => $currentScore,
 
             ], 200);
         } else {
-            $newScore = round($currentScore + (1 + 1 / $totalSecondsToSubmit) * 100); //example scoring logic
+            $newScore = round($currentScore + (1 + 1 / $totalSecondsToSubmit) * 100); // example scoring logic
             $liveShow->users()->updateExistingPivot($user->id, ['score' => $newScore]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Correct option selected.',
                 'selected_option_id' => $quizOption->id,
                 'correct_option_id' => $quizOption->id,
                 'is_correct' => true,
-                'score' => $newScore
+                'score' => $newScore,
             ], 200);
         }
     }
@@ -317,16 +310,16 @@ class GamePlayController extends Controller
     public function updateEliminationStatus(Request $request, $liveShowId)
     {
         $user = Auth::guard('web')->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::guard('web')->check()], 401);
         }
 
         $liveShow = LiveShow::find($liveShowId);
-        if (!$liveShow) {
+        if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
 
-        //update pivot table
+        // update pivot table
         $updateResult = $liveShow->users()->updateExistingPivot($user->id, ['status' => 'eliminated']);
 
         $this->triggerOnlineUsersEvent($liveShowId);
@@ -334,27 +327,26 @@ class GamePlayController extends Controller
         return response()->json(['success' => true, 'message' => 'User elimination status updated.', 'updateResult' => $updateResult]);
     }
 
-
     public function postMessage(Request $request, $liveShowId)
     {
         $user = Auth::guard('web')->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::guard('web')->check()], 401);
         }
 
         $liveShow = LiveShow::find($liveShowId);
-        if (!$liveShow) {
+        if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
 
         $messageText = $request->message;
 
-        if (!$messageText || strlen(trim($messageText)) == 0) {
+        if (! $messageText || strlen(trim($messageText)) == 0) {
             return response()->json(['message' => 'Message cannot be empty.'], 422);
         }
 
         // Save the message to the database
-        $message = new LiveShowMessages();
+        $message = new LiveShowMessages;
         $message->live_show_id = $liveShow->id;
         $message->user_id = $user->id;
         $message->message = trim($messageText);
@@ -375,48 +367,47 @@ class GamePlayController extends Controller
             'created_at' => $message->created_at,
             'time_ago' => $message->time_ago,
         ]);
+
         // For simplicity, we'll just return the message in the response
         return response()->json([
             'success' => true,
             'message' => 'Message sent successfully.',
             'data' => $message,
             'user' => $user,
-            'event' => $event
+            'event' => $event,
         ], 200);
     }
 
-
     public function fetchMessages($liveShowId)
     {
-        if (!LiveShow::find($liveShowId)) {
+        if (! LiveShow::find($liveShowId)) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
 
-        $messages = LiveShowMessages::with('user')->where("live_show_id", $liveShowId)->where('is_removed', false)->orderBy('created_at', 'asc')->get();
+        $messages = LiveShowMessages::with('user')->where('live_show_id', $liveShowId)->where('is_removed', false)->orderBy('created_at', 'asc')->get();
+
         return response()->json(['messages' => $messages], 200);
     }
 
     public function reportUserMessage()
     {
-        //code to report user message for admin review
+        // code to report user message for admin review
         return response()->json(['message' => 'Message reported for review.'], 200);
     }
 
-
     public function getEliminationStatus($liveShowId): bool
     {
-        if (!Auth::guard('web')->check()) {
+        if (! Auth::guard('web')->check()) {
             return false;
         }
 
-
         $user = Auth::guard('web')->user();
-        if (!$user) {
+        if (! $user) {
             return false;
         }
 
         $liveShow = LiveShow::find($liveShowId);
-        if (!$liveShow) {
+        if (! $liveShow) {
             return false;
         }
 
@@ -424,11 +415,12 @@ class GamePlayController extends Controller
 
         return $status == 'eliminated' ? true : false;
     }
-    //getLiveShowUsersWithScores
+
+    // getLiveShowUsersWithScores
     public function getLiveShowUsersWithScores($liveShowId)
     {
         $liveShow = LiveShow::find($liveShowId);
-        if (!$liveShow) {
+        if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
 
@@ -467,13 +459,13 @@ class GamePlayController extends Controller
                 if ($a['score'] === $b['score']) {
                     return $a['total_seconds_to_submit'] <=> $b['total_seconds_to_submit'];
                 }
+
                 return $b['score'] <=> $a['score'];
             })
             ->values();
 
         return response()->json(['users' => $usersWithScores], 200);
     }
-
 
     private function sessionGeneration(User $user, Request $request)
     {
@@ -491,9 +483,9 @@ class GamePlayController extends Controller
             if ($hasOtherActiveSession) {
                 Auth::logout();
 
-                return  [
+                return [
                     'success' => false,
-                    'message' => 'This account is already logged in on another device.'
+                    'message' => 'This account is already logged in on another device.',
                 ];
             }
 
@@ -504,23 +496,54 @@ class GamePlayController extends Controller
                 'user_id' => $user->id,
                 'ip_address' => request()->ip(), // string, nullable
                 'user_agent' => request()->header('User-Agent'), // string, nullable
-                'payload' => "", // string, usually serialized data
+                'payload' => '', // string, usually serialized data
                 'last_activity' => now()->timestamp, // int, timestamp
             ]);
-
 
             return ['success' => true];
         } catch (\Exception $e) {
             // Log the exception or handle it as needed
-            \Log::error('Session generation error: ' . $e->getMessage());
-            return ['success' => false, 'message' => 'Session generation failed. ' . $e->getMessage()];
+            \Log::error('Session generation error: '.$e->getMessage());
+
+            return ['success' => false, 'message' => 'Session generation failed. '.$e->getMessage()];
         }
     }
-
 
     public function showLiveBroadcast($id)
     {
         $liveShow = \DB::table('live_shows')->where('id', $id)->first();
+
         return view('show-live-broadcast', compact('liveShow'));
+    }
+
+    public function getLatestLiveOrScheduledShow()
+    {
+        // Check if the incoming request header contains a valid hash key
+        $headerHashKey = request()->header('X-Hash-Key');
+        $expectedHashKey = env('LIVE_SHOW_HASH_KEY'); // Make sure to set this in your .env
+
+        if (! $headerHashKey || $headerHashKey !== $expectedHashKey) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized: Invalid or missing hash key.',
+            ], 401);
+        }
+        // Get the latest live show, or if not present, the latest scheduled show
+        $show = LiveShow::whereIn('status', ['live', 'scheduled'])
+            ->orderByRaw("FIELD(status, 'live', 'scheduled')")
+            ->orderByDesc('scheduled_at')
+            ->first();
+
+        if ($show) {
+            return response()->json([
+                'success' => true,
+                'show' => $show,
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'No live or scheduled show found.',
+            ]);
+        }
     }
 }
