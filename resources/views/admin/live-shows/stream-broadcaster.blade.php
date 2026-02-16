@@ -57,7 +57,7 @@
             const serverSecret = "{{ env('ZEGO_SERVER_SECRET', 'ac4b30ceb3e43b0280c7fa40be34d2ef') }}";
             const TOKEN = generatePrebuiltToken(appID, serverSecret, roomID, userID, userName);
 
-            let roleParam =  'Host';
+            let roleParam = 'Host';
             let role = roleParam === 'Host' ?
                 ZegoUIKitPrebuilt.Host :
                 ZegoUIKitPrebuilt.Audience;
@@ -72,10 +72,10 @@
                     showTextChat: false,
                     showUserList: false,
                     showPreJoinView: false,
-                    isUserStatusNotify:false
+                    showUserJoinAndLeave: false
 
                 };
-            }else {
+            } else {
                 config = {
                     turnOnCameraWhenJoining: false,
                     showMyCameraToggleButton: false,
@@ -83,7 +83,8 @@
                     showScreenSharingButton: false,
                     showTextChat: false,
                     showUserList: false,
-                    showPreJoinView: false
+                    showPreJoinView: false,
+                    showUserJoinAndLeave: false
                 };
             }
 
