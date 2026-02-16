@@ -1280,7 +1280,10 @@
 
         // Quiz functionality
         function submitQuiz() {
-
+            if (isLoggedIn == false) {
+                showRegisterModal();
+                return;
+            }
 
             const selected = document.querySelector('input[name="option"]:checked');
             if (selected) {
