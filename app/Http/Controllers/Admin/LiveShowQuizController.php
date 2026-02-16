@@ -129,6 +129,7 @@ class LiveShowQuizController extends Controller
     public function destroy($id)
     {
         $quiz = LiveShowQuiz::findOrFail($id);
+        $quiz->options()->delete();
         $quiz->delete();
         return redirect()->route('admin.live-show-quizzes.index')->with('success', 'Quiz deleted successfully.');
     }
