@@ -154,7 +154,7 @@
         document.querySelector('.zg_autoplay_mask').querySelectorAll('.zg_autoplay_content')[0].innerHTML =
             '<div style="text-align:center;padding:20px;">' +
             '<div style="font-size:50px;margin-bottom:15px;">🔊</div>' +
-            '<div style="font-size:18px;font-weight:500;">Tap resume enable audio</div>' +
+            '<div style="font-size:18px;font-weight:500;">Tap or click resume enable audio</div>' +
             '</div>';
     });
 
