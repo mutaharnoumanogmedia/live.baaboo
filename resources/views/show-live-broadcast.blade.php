@@ -98,7 +98,8 @@
                 showMyCameraToggleButton: false,
                 showAudioVideoSettingsButton: false,
                 showScreenSharingButton: false,
-                showPreJoinView: false
+                showPreJoinView: false,
+                isUserStatusNotify:false
 
             }
         }

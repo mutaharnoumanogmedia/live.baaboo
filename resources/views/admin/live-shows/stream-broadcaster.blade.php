@@ -57,7 +57,7 @@
             const serverSecret = "{{ env('ZEGO_SERVER_SECRET', 'ac4b30ceb3e43b0280c7fa40be34d2ef') }}";
             const TOKEN = generatePrebuiltToken(appID, serverSecret, roomID, userID, userName);
 
-            let roleParam = getUrlParams(window.location.href)['role'] || 'Host';
+            let roleParam =  'Host';
             let role = roleParam === 'Host' ?
                 ZegoUIKitPrebuilt.Host :
                 ZegoUIKitPrebuilt.Audience;
@@ -71,7 +71,8 @@
                     showScreenSharingButton: true,
                     showTextChat: false,
                     showUserList: false,
-                    showPreJoinView: false
+                    showPreJoinView: false,
+                    isUserStatusNotify:false
 
                 };
             }else {
