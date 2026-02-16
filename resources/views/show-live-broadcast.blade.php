@@ -22,9 +22,7 @@
             height: 100%;
         }
 
-        /* .zg_autoplay_mask {
-            display: none !important;
-        } */
+      
 
         .zg_autoplay_mask {
             background: rgba(0, 0, 0, 0.7) !important;
@@ -40,6 +38,11 @@
 
         .QAHxuJxRZWb3P_cbR8QA {
             display: block !important;
+        }
+
+
+        .zg_autoplay_mask {
+            display: none !important;
         }
     </style>
 </head>
@@ -99,7 +102,7 @@
                 showAudioVideoSettingsButton: false,
                 showScreenSharingButton: false,
                 showPreJoinView: false,
-                isUserStatusNotify:false
+                isUserStatusNotify: false
 
             }
         }
@@ -123,31 +126,37 @@
             ...config
         });
     }
-    // Watch for Zego's autoplay mask and customize its content
-    (function() {
-        var observer = new MutationObserver(function(mutations) {
-            var mask = document.querySelector('.zg_autoplay_mask');
-            if (mask && !mask.dataset.customized) {
-                mask.dataset.customized = 'true';
 
-                // Replace the inner content with your custom message
-                mask.innerHTML = '<div style="text-align:center;padding:20px;">' +
-                    '<div style="font-size:50px;margin-bottom:15px;">🔊</div>' +
-                    '<div style="font-size:18px;font-weight:500;">Tap to enable sound</div>' +
-                    '</div>';
+
+    function onZgAutoplayMaskAppeared(callback) {
+        let executed = false;
+        const observer = new MutationObserver((mutationsList) => {
+            if (!executed && document.querySelector('.zg_autoplay_mask')) {
+                executed = true;
+                callback();
+                observer.disconnect();
             }
         });
 
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+        // In case it's already on the page
+        if (document.querySelector('.zg_autoplay_mask')) {
+            executed = true;
+            callback();
+        } else {
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+    }
 
-        // Stop observing after 30 seconds (mask should have appeared by then)
-        setTimeout(function() {
-            observer.disconnect();
-        }, 30000);
-    })();
+    // Usage: log once when .zg_autoplay_mask appears
+    onZgAutoplayMaskAppeared(() => {
+        console.log('zg_autoplay_mask appeared');
+        document.querySelector('.zg_autoplay_mask').style = 'display: flex !important';
+        document.querySelector('.zg_autoplay_mask').querySelectorAll('.zg_autoplay_content')[0].innerHTML =
+            '<div style="text-align:center;padding:20px;">' +
+            '<div style="font-size:50px;margin-bottom:15px;">🔊</div>' +
+            '<div style="font-size:18px;font-weight:500;">Tap resume enable audio</div>' +
+            '</div>';
+    });
 
 
 
@@ -163,48 +172,6 @@
     channel2.bind('SetBroadcastRoomIdEvent', function(data) {
         window.location.reload();
     });
-
-    // Safari: show "Touch to unmute" overlay (when page is opened directly)
-
-    // (function() {
-    //     // var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent) ||
-    //     //     /iPhone|iPad|iPod/.test(navigator.userAgent) ||
-    //     //     (navigator.vendor && navigator.vendor.indexOf('Apple') > -1);
-    //     // if (!isSafari) return;
-
-    //     var style = document.createElement('style');
-    //     style.textContent = [
-    //         '.safari-unmute-overlay{',
-    //         '  position:fixed;inset:0;z-index:9999;',
-    //         '  display:flex;align-items:center;justify-content:center;',
-    //         '  background:rgba(0,0,0,0.5);color:#fff;',
-    //         '  font-family:system-ui,sans-serif;font-size:1rem;cursor:pointer;',
-    //         '}',
-    //         '.safari-unmute-overlay.hidden{display:none !important;}'
-    //     ].join('');
-    //     document.head.appendChild(style);
-
-    //     var overlay = document.createElement('div');
-    //     overlay.className = 'safari-unmute-overlay';
-    //     overlay.setAttribute('aria-label', 'Touch to unmute');
-    //     overlay.textContent = 'Touch to unmute';
-    //     document.body.appendChild(overlay);
-
-    //     function unmuteAndHide() {
-    //         document.querySelectorAll('#root video').forEach(function(v) {
-    //             if (v.muted) v.muted = false;
-    //         });
-    //         overlay.classList.add('hidden');
-    //         overlay.removeEventListener('click', unmuteAndHide);
-    //         overlay.removeEventListener('touchend', unmuteAndHide);
-    //     }
-
-    //     overlay.addEventListener('click', unmuteAndHide);
-    //     overlay.addEventListener('touchend', function(e) {
-    //         e.preventDefault();
-    //         unmuteAndHide();
-    //     }, { passive: false });
-    // })();
 </script>
 
 </html>
