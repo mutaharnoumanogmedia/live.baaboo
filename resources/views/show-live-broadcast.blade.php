@@ -102,7 +102,8 @@
                 showAudioVideoSettingsButton: false,
                 showScreenSharingButton: false,
                 showPreJoinView: false,
-                isUserStatusNotify: false
+               
+                showUserJoinAndLeave: false
 
             }
         }
