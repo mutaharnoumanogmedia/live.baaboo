@@ -79,3 +79,4 @@ Route::post('/push/subscribe', [PushNotificationController::class, 'subscribe'])
 
 
 Route::get('/get-latest-live-or-scheduled-show', [GamePlayController::class, 'getLatestLiveOrScheduledShow'])->name('api.get-latest-live-or-scheduled-show');
+

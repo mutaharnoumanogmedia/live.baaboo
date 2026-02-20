@@ -546,4 +546,23 @@ class GamePlayController extends Controller
             ]);
         }
     }
+
+    public function getLiveShowUserPoints($liveShowId)
+    {
+        if (! Auth::guard('web')->check()) {
+            return response()->json(['message' => 'Unauthorized.'], 401);
+        }
+        $user = Auth::guard('web')->user();
+        if (! $user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+        $liveShow = LiveShow::find($liveShowId);
+        if (! $liveShow) {
+            return response()->json(['message' => 'Live show not found.'], 404);
+        }
+        $userPoints = $liveShow->users()->where('user_id', $user->id)->first()->pivot->score ?? 0;
+
+        return response()->json(['success' => true, 'points' => $userPoints, 'user' => $user, 'liveShow' => $liveShow], 200);
+
+    }
 }

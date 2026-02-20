@@ -184,7 +184,7 @@
         }
 
         .main-container.quiz-mode {
-            height: 92dvh;
+            height: 94dvh;
             transform: scale(0.3) translateY(-150px);
             border-radius: 0px;
             overflow: hidden;
@@ -257,11 +257,11 @@
         .video-container.question-activated .video-placeholder {
             background: linear-gradient(45deg, #764ba2, #667eea);
             transition: background 0.5s ease;
-            height: 110px;
-            width: 110px;
+            height: 170px;
+            width: 170px;
             z-index: 50;
             position: absolute;
-            top: 100px;
+            top: 115px;
             left: 50%;
             transform: translate(-50%, -50%);
             border-radius: 100%;
@@ -547,7 +547,7 @@
             position: relative;
             padding: 0px;
             height: 100%;
-            background: transparent !important;
+            background: var(--primary-color) !important;
             border-radius: 20px;
         }
 
@@ -577,7 +577,7 @@
         .quiz-section {
             position: absolute;
             width: 100%;
-            bottom: 0;
+            bottom: 20px;
             background: white;
             border-radius: 15px;
             padding: 15px;
@@ -680,8 +680,8 @@
 
 
         .quiz-timer {
-            width: 180px;
-            height: 180px;
+            width: 210px;
+            height: 210px;
             margin: 0 auto 10px;
             /* center above question */
             position: relative;
@@ -713,13 +713,12 @@
 
         .timer-text {
             font-size: 4rem;
-            font-family: 'Bitcount Grid Single';
-            font-weight: bold;
+            font-family: sans-serif;
+            font-weight: 600;
             fill: #333;
-
             position: absolute;
-            top: 42px;
-            left: 2px;
+            top: 53px;
+            left: 14px;
             width: 180px;
             text-align: center;
         }
@@ -927,13 +926,13 @@
 
                 <div style="height: auto">
                     <div class="quiz-timer" id="quizTimer">
-                        <svg class="timer-svg" viewBox="0 0 180 180" width="180" height="180">
+                        <svg class="timer-svg" viewBox="0 0 180 180" width="120" height="120">
                             <!-- Background circle -->
-                            <circle class="timer-bg" cx="90" cy="90" r="60" stroke="#ddd"
+                            <circle class="timer-bg" cx="90" cy="90" r="80" stroke="#ddd"
                                 stroke-width="10" fill="none" />
 
                             <!-- Progress circle -->
-                            <circle class="timer-progress" cx="90" cy="90" r="60"
+                            <circle class="timer-progress" cx="90" cy="90" r="80"
                                 stroke="rgb(220, 53, 69)" stroke-width="10" fill="none" stroke-dasharray="376.991"
                                 stroke-dashoffset="376.991" transform="rotate(-90 90 90)" />
                         </svg>
@@ -1139,7 +1138,7 @@
                     <div class="mb-3">
                         <span class="badge bg-success" style="font-size: 1rem;">
                             <i class="fas fa-star me-1"></i>
-                            {{ Auth::guard('web')->user()->points ?? 0 }} pts
+                            <span id="user-points"></span> pts
                         </span>
                     </div>
                     <form method="POST" action="{{ route('livestream.logout', [$liveShow->id]) }}">
@@ -1188,9 +1187,7 @@
         let quizMode = false;
         let timer = 5;
         let currentCountdownSeconds = 0;
-
         let isCurrentAnswerCorrect = null;
-
         let isEliminated = {{ $isEliminated ? 'true' : 'false' }};
 
         const VAPID_PUBLIC_KEY = "{{ env('VAPID_PUBLIC_KEY') }}";
@@ -1242,6 +1239,27 @@
                 // showQuestionBtn.style.display = 'block';
                 // showQuestionBtn.classList.remove('active');
             }
+            hideAllModals();
+        }
+
+        function hideAllModals() {
+            const modals = document.querySelectorAll('.modal:not(#winnerDialog)');
+            modals.forEach(modal => {
+                modal.style.display = 'none';
+                //hide backdrop
+                document.querySelector('.modal-backdrop').style.display = 'none';
+            });
+            //also hide all tab-panes
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            tabPanes.forEach(tabPane => {
+                tabPane.classList.remove('active');
+
+            });
+            //inactive all tabs
+            const tabs = document.querySelectorAll('.nav-link');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
         }
 
 
@@ -1476,16 +1494,16 @@
                     // Optionally handle error or fallback
                 });
         }
+
+
         updateViewerCount();
 
 
         @if ($liveShow->status == 'live')
-            // setInterval(
-            //     function() {
-            //         updateViewerCount();
-            //         updatePlayersLeaderboard();
-
-            //     }, 10000);
+            setInterval(
+                function() {
+                    updateViewerCount();
+                }, 10000);
         @endif
 
         // Prevent quiz overlay from closing when clicking inside
@@ -1549,7 +1567,7 @@
                         console.log('User registered successfully:', data, 'isEliminated:', isEliminated,
                             'isLoggedIn:', isLoggedIn, 'userId:', userId);
 
-                        playerAsWinnerEventTrigger();
+                        // playerAsWinnerEventTrigger();
                     } else {
                         let errorMessages = data.messages || ['Registration failed. Please try again.'];
 
@@ -1726,6 +1744,7 @@
                 if (isCurrentAnswerCorrect === true) {
                     appendQuestionResponseStatus('success');
                     fireConfetti();
+                    updateUserPoints();
                 } else {
                     appendQuestionResponseStatus('fail');
                 }
@@ -1738,6 +1757,8 @@
             document.querySelector('#quizTimer').style.display = "none";
 
             console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
+            updateUserPoints();
+
             if (!isEliminated && isLoggedIn) {
                 if (isCurrentAnswerCorrect === true) {
                     fireConfetti();
@@ -1757,6 +1778,16 @@
             // Reset for next question
             // isCurrentAnswerCorrect = null;
             //uncheckAndEnableOptions();
+        }
+
+        function updateUserPoints() {
+            console.log('Updating user points...');
+            fetch('{{ url('/live-show/get-my-points/' . $liveShow->id) }}')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('User points response:', data);
+                    document.getElementById('user-points').innerHTML = data.points;
+                });
         }
 
 
@@ -2110,7 +2141,7 @@
                        
                                     <div >
                                 <span style="margin-right: 20px;">${index + 1}</span>
-                                        <strong>${user.name}</strong>
+                                        <strong>${user.name} ${user.id == userId ? '(You)' : ''}</strong>
                                     
                                         <span class="ms-2">${user.is_winner ? '<i class="fas fa-trophy text-warning ms-2" title="Winner"></i>' : ''}</span>
                                     </div>

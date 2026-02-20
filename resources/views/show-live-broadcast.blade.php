@@ -22,7 +22,7 @@
             height: 100%;
         }
 
-      
+
 
         .zg_autoplay_mask {
             background: rgba(0, 0, 0, 0.7) !important;
@@ -102,7 +102,9 @@
                 showAudioVideoSettingsButton: false,
                 showScreenSharingButton: false,
                 showPreJoinView: false,
-               
+                showMemberJoinNotice: false,
+                showMessageNotification: false,
+
                 showUserJoinAndLeave: false
 
             }
@@ -144,7 +146,10 @@
             executed = true;
             callback();
         } else {
-            observer.observe(document.body, { childList: true, subtree: true });
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
         }
     }
 
