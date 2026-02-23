@@ -95,10 +95,7 @@
             const zp = ZegoUIKitPrebuilt.create(TOKEN);
             zp.joinRoom({
                 container: document.querySelector("#root"),
-                videoViewConfig: {
-                    showMirror: true,
-                    fillMode: "cover", // This ensures the video covers the entire block
-                },
+               
                 scenario: {
                     mode: ZegoUIKitPrebuilt.LiveStreaming,
                     config: {
