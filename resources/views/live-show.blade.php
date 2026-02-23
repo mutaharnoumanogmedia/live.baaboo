@@ -533,7 +533,7 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             overflow-y: auto;
 
-            padding: 10px;
+            padding: 6px 0px;
 
         }
 
@@ -545,7 +545,7 @@
 
         .quiz-content {
             position: relative;
-            padding: 0px;
+            padding: 9px;
             height: 100%;
             background: var(--primary-color) !important;
             border-radius: 20px;
@@ -576,7 +576,7 @@
 
         .quiz-section {
             position: absolute;
-            width: 100%;
+            width: 96%;
             bottom: 20px;
             background: white;
             border-radius: 15px;
