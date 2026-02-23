@@ -548,7 +548,7 @@
             padding: 9px;
             height: 100%;
             background: var(--primary-color) !important;
-            border-radius: 20px;
+            border-radius: 0px;
         }
 
         .quiz-header {
