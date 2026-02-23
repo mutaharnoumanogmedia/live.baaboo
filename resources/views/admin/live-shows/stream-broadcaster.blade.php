@@ -72,7 +72,9 @@
                     showTextChat: false,
                     showUserList: false,
                     showPreJoinView: false,
-                    showUserJoinAndLeave: false
+                    showUserJoinAndLeave: false,
+                    showMirror: true,
+                    fillMode: "cover",
 
                 };
             } else {
@@ -84,7 +86,9 @@
                     showTextChat: false,
                     showUserList: false,
                     showPreJoinView: false,
-                    showUserJoinAndLeave: false
+                    showUserJoinAndLeave: false,
+                    showMirror: true,
+                    fillMode: "cover",
                 };
             }
 
