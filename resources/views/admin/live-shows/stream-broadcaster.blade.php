@@ -6,6 +6,10 @@
             width: 100vw;
             height: 100vh;
         }
+
+        #root video {
+            object-fit: cover !important;
+        }
     </style>
 </head>
 
@@ -95,7 +99,7 @@
             const zp = ZegoUIKitPrebuilt.create(TOKEN);
             zp.joinRoom({
                 container: document.querySelector("#root"),
-               
+
                 scenario: {
                     mode: ZegoUIKitPrebuilt.LiveStreaming,
                     config: {
