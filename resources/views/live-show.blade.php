@@ -184,7 +184,7 @@
         }
 
         .main-container.quiz-mode {
-            height: (calc(100vh - 54px));
+            height: calc(100vh - 54px);
             transform: scale(0.3) translateY(-150px);
             border-radius: 0px;
             overflow: hidden;
