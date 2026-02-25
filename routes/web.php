@@ -53,6 +53,6 @@ Route::get('/test-message-event', function () {
     return 'Event has been sent!';
 });
 Route::get('/live-show/get-my-points/{liveShowId}', [GamePlayController::class, 'getLiveShowUserPoints'])->name('api.get-my-points');
-
+Route::get('/live-show/{id}/user-prize', [GamePlayController::class, 'getUserPrize'])->name('api.get-user-prize');
 require __DIR__.'/admin.php';
 require __DIR__.'/auth.php';

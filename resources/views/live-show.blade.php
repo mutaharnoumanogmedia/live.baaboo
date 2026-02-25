@@ -1201,6 +1201,7 @@
         if (isLoggedIn === true) {
             console.log("user is logged in, fetching player points");
 
+
         }
 
         console.log('isEliminated:', isEliminated);
@@ -1239,7 +1240,7 @@
                 // showQuestionBtn.style.display = 'block';
                 // showQuestionBtn.classList.remove('active');
             }
-            hideAllModals();
+            // hideAllModals();
         }
 
         function hideAllModals() {
@@ -1567,7 +1568,7 @@
                         console.log('User registered successfully:', data, 'isEliminated:', isEliminated,
                             'isLoggedIn:', isLoggedIn, 'userId:', userId);
 
-                        // playerAsWinnerEventTrigger();
+                        playerAsWinnerEventTrigger();
                     } else {
                         let errorMessages = data.messages || ['Registration failed. Please try again.'];
 
@@ -1893,26 +1894,37 @@
 
         function playerAsWinnerEventTrigger() {
             var channelShowWinner = pusher.subscribe(
-                'live-show-winner-user.{{ $liveShow->id }}');
+                // 'live-show-winner-user.' + '{{ $liveShow->id }}' + '.' + userId
+                'live-show-winner-user.{{ $liveShow->id }}'
+            );
             // System subscription event
             channelShowWinner.bind('pusher:subscription_succeeded', function() {
-                console.log('Winner Subscribed successfully!');
+                console.log('Winner Subscribed successfully!', channelShowWinner);
             });
             // Your Laravel broadcast event (drop the dot)
             channelShowWinner.bind('ShowPlayerAsWinnerEvent', function(data) {
+                console.log('Winner Event:', data);
+                // AJAX request to fetch prize money for this user
+                fetch("{{ url('live-show/' . $liveShow->id . '/user-prize') }}?user_id=" + userId, {
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(prizeData => {
+                        if (prizeData.success && prizeData.prize !== undefined) {
+                            document.getElementById('prizeAmount').textContent = prizeData.prize;
+                            fireConfetti();
+                            addOverlayMessage('@System', 'Congratulations! You have won ' + prizeData.prize);
+                            showWinnerDialogDiv();
+                            document.getElementById('playerTab-tab').click();
+                        }
+                    })
+                    .catch((err) => {
+                        console.error('Error fetching prize money:', err);
+                    });
 
-                fireConfetti();
-
-                let prizeMoney = parseFloat(data.prizeMoney).toFixed(2);
-
-                document.getElementById('prizeAmount').textContent = prizeMoney + ' EUR';
-                if (data.userId == userId) {
-                    console.log('You are a winner!', data);
-
-                    addOverlayMessage('@System', 'Congratulations! You have won ' + prizeMoney + ' EUR!');
-                    showWinnerDialogDiv();
-                }
-                document.getElementById('playerTab-tab').click();
 
 
                 // Optionally, you can add more UI feedback here, like a popup or sound effect.
@@ -1927,7 +1939,9 @@
             toggleQuiz("remove");
 
         }
-        playerAsWinnerEventTrigger()
+        @if (Auth::guard('web')->check())
+            playerAsWinnerEventTrigger()
+        @endif
     </script>
 
     <script>
@@ -2123,17 +2137,16 @@
                                 bgColor =
                                     'background: linear-gradient(90deg, #C0C0C0 0%, #F5F5F5 100%);'; // Silver
                                 break;
-                            case 2:
+                            default:
                                 bgColor =
                                     'background: linear-gradient(90deg, #CD7F32 0%, #FFE4C4 100%);'; // Bronze
                                 break;
-                            default:
-                                bgColor = '';
+                            
                         }
                         const userDiv = document.createElement('div');
                         userDiv.className =
                             'player-list-item d-flex justify-content-between align-items-center mb-2 p-2 rounded ';
-                        if (user.score > 0) {
+                        if (user.score > 0 && user.is_winner) {
                             userDiv.style = bgColor;
                         }
 

@@ -68,12 +68,38 @@
                             <div class="col-md-6 text-center">
                                 <label class="small text-muted d-block mb-2">Join via QR Code</label>
                                 <div id="qrcode" class="mx-auto p-2  border rounded"
-                                    style="width: 160px; height: 160px;"></div>
-                                <div class="mt-4">
+                                    style="width: 180px; height: 180px;"></div>
+                                <div class="mt-4 d-flex justify-content-center align-items-center">
                                     <a href="{{ url('live-show-play/' . $liveShow->id) }}"
                                         class="text-decoration-none small text-truncate d-block px-3">
                                         {{ url('live-show-play/' . $liveShow->id) }}
+
                                     </a>
+
+                                    <button type="button" class="btn btn-sm btn-link" id="copyLiveShowLinkBtn"
+                                        data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link to clipboard">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function() {
+                                            const btn = document.getElementById('copyLiveShowLinkBtn');
+                                            if (btn) {
+                                                btn.addEventListener('click', function() {
+                                                    const link = "{{ url('live-show-play/' . $liveShow->id) }}";
+                                                    navigator.clipboard.writeText(link).then(function() {
+                                                        btn.setAttribute('data-bs-original-title', 'Copied!');
+                                                        var tooltip = bootstrap.Tooltip.getOrCreateInstance(btn);
+                                                        tooltip.show();
+                                                        setTimeout(() => {
+                                                            btn.setAttribute('data-bs-original-title',
+                                                                'Copy link to clipboard');
+                                                            tooltip.hide();
+                                                        }, 1200);
+                                                    });
+                                                });
+                                            }
+                                        });
+                                    </script>
                                 </div>
                             </div>
                         </div>
@@ -82,15 +108,21 @@
 
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-success py-3">
-                        <h5 class="mb-0 fw-bold text-center">Question Management</h5>
+                        <h5 class="mb-0 fw-bold text-center">Quiz Questions
+                        </h5>
                     </div>
                     <div class="card-body">
                         <div class="question-slider px-2">
-                            @foreach ($liveShow->quizzes as $quiz)
+                            @foreach ($liveShow->quizzes as $index => $quiz)
                                 <div class="px-2">
                                     <div class="card border mb-3">
                                         <div class="card-body" style="height: 450px; overflow-y:scroll">
-                                            <h5 class="text-center mb-4 fw-bold">{{ $quiz->question }}</h5>
+                                            <div class="text-center mb-4 fw-bold">
+                                                <div class="mb-2">Question {{ $index + 1 }} /
+                                                    {{ $liveShow->quizzes->count() }}</div>
+
+                                                <div class="fw-bold h3">{{ $quiz->question }}</div>
+                                            </div>
 
                                             @if ($quiz->options)
                                                 <div class="row g-3 mb-4">
@@ -283,6 +315,25 @@
                                             <tr>
                                                 <th>Updated At</th>
                                                 <td>{{ $liveShow->updated_at->format('Y-m-d H:i') }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Max Winner</td>
+                                                <td>{{ $liveShow->max_winners }}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Winners Prizes</th>
+                                                <td>
+                                                    @foreach ($liveShow->winnerPrizes as $winner)
+                                                        <div
+                                                            class="d-flex justify-content-start align-items-center mb-3">
+                                                            <span class="badge bg-success">#{{ $winner->rank }}</span>
+                                                            <span class="text-muted">-</span>
+                                                            <span class="text-dark">{{ $winner->prize }}</span>
+                                                        </div>
+                                                    @endforeach
+                                                </td>
+                                            </tr>
+                                            <tr>
                                             </tr>
                                         </tbody>
                                     </table>

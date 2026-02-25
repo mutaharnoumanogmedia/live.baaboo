@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('no action');
             $table->foreignId('live_show_id')->constrained('live_shows')->onDelete('no action');
             $table->float('score')->default(0)->nullable();
-            $table->float('prize_won')->unsigned()->default(0);
+            $table->string('prize_won')->nullable()->default('no prize defined');
 
             $table->string('status')->nullable()->default('registered');
             $table->boolean('is_winner')->default(false);

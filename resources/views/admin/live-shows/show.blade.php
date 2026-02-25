@@ -40,7 +40,27 @@
                                 <span class="text-muted">No link yet</span>
                             @endif
                         </p>
+                        <div class="col-md-12">
+                            <p><strong>Winner Prizes:</strong></p>
+                            <table class="table table-bordered table-dark">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Prize</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($liveShow->winnerPrizes as $winnerPrize)
+                                        <tr>
+                                            <td>{{ $winnerPrize->rank }}</td>
+                                            <td>{{ $winnerPrize->prize }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+
                 </div>
 
                 <div class="d-flex gap-3 mt-3">
@@ -107,8 +127,8 @@
                 <i class="fas fa-arrow-left me-1"></i> Back
             </a>
             <div>
-                  <a href="{{ route('admin.live-shows.stream-management', $liveShow->id) }}" class="btn btn-primary">
-                     Manage
+                <a href="{{ route('admin.live-shows.stream-management', $liveShow->id) }}" class="btn btn-primary">
+                    Manage
                 </a>
                 <a href="{{ route('admin.live-shows.edit', $liveShow->id) }}" class="btn btn-warning">
                     <i class="fas fa-edit me-1"></i> Edit

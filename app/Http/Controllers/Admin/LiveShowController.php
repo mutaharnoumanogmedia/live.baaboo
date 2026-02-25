@@ -11,18 +11,15 @@ use App\Events\ShowLiveShowQuizQuestionEvent;
 use App\Events\ShowPlayerAsWinnerEvent;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendWinnerEmailJob;
-use Illuminate\Http\Request;
 use App\Models\LiveShow;
-use App\Models\LiveShowMessages;
+use App\Models\LiveShowWinnerPrize;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\DB;
-use App\Services\LiveShowService;
 use App\Services\LiveShowQuizService;
 use Illuminate\Http\JsonResponse;
-
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class LiveShowController extends Controller
 {
@@ -39,6 +36,7 @@ class LiveShowController extends Controller
     {
         //
         $liveShows = LiveShow::orderBy('id', 'desc')->get();
+
         return view('admin.live-shows.index', compact('liveShows'));
     }
 
@@ -56,39 +54,31 @@ class LiveShowController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title'        => 'required|string|max:255',
-            'description'  => 'nullable|string',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'scheduled_at' => 'required|date',
-            
-            'status'       => 'required|in:scheduled,live,completed',
-            'host_name'    => 'nullable|string|max:255',
+
+            'status' => 'required|in:scheduled,live,completed',
+            'host_name' => 'nullable|string|max:255',
             'prize_amount' => 'required|numeric|min:0',
-            'currency'     => 'required|string|max:5',
-            // 'thumbnail'    => 'nullable|file|image',
-            // 'banner'       => 'nullable|file|image',
+            'currency' => 'required|string|max:5',
+            'max_winners' => 'required|integer|min:1|max:10',
+            'winner_prizes' => 'nullable|array',
+            'winner_prizes.*' => 'nullable|string|max:255',
         ]);
 
-        // if ($request->hasFile('thumbnail')) {
-        //     $path = $request->file('thumbnail')->store('thumbnails', 'public');
-        //     $validated['thumbnail'] = asset('storage/' . $path);
-        // }
-        // if ($request->hasFile('banner')) {
-        //     $path = $request->file('banner')->store('banners', 'public');
-        //     $validated['banner'] = asset('storage/' . $path);
-        // }
-
         $validated['created_by'] = Auth::id();
-        
-
-
+        $maxWinners = (int) $validated['max_winners'];
+        $prizes = $request->input('winner_prizes', []);
 
         $show = LiveShow::create($validated);
+
+        $this->syncWinnerPrizes($show->id, $maxWinners, $prizes);
 
         return redirect()->route('admin.live-shows.show', $show->id)->with('success', 'Live Show created successfully!');
     }
@@ -102,9 +92,10 @@ class LiveShowController extends Controller
     public function show(LiveShow $liveShow)
     {
         // eager-load users from pivot table
-        $liveShow->load(['creator', 'users' => function ($query) {
-            $query->withPivot(['score', 'status', 'created_at']);
+        $liveShow->load(['creator', 'winnerPrizes', 'users' => function ($query) {
+            $query->withPivot(['score', 'status', 'created_at', 'prize_won', 'is_winner', 'is_online', 'created_at']);
         }]);
+
         return view('admin.live-shows.show', compact('liveShow'));
     }
 
@@ -123,30 +114,67 @@ class LiveShowController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, LiveShow $live_show)
     {
         $validated = $request->validate([
-            'title'        => 'required|string|max:255',
-            'description'  => 'nullable|string',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'scheduled_at' => 'required|date',
-            'status'       => 'required|in:scheduled,live,completed',
-            'host_name'    => 'nullable|string|max:255',
+            'status' => 'required|in:scheduled,live,completed',
+            'host_name' => 'nullable|string|max:255',
             'prize_amount' => 'required|numeric|min:0',
-            'currency'     => 'required|string|max:5',
-
+            'currency' => 'required|string|max:5',
+            'max_winners' => 'required|integer|min:1|max:10',
+            'winner_prizes' => 'nullable|array',
+            'winner_prizes.*' => 'nullable|string|max:255',
         ]);
 
         $validated['created_by'] = Auth::id();
-       
-
+        $maxWinners = (int) $validated['max_winners'];
+        $prizes = $request->input('winner_prizes', []);
 
         $live_show->update($validated);
 
+        $this->syncWinnerPrizes($live_show->id, $maxWinners, $prizes);
+
         return redirect()->route('admin.live-shows.show', $live_show->id)->with('success', 'Live Show updated successfully!');
+    }
+
+    /**
+     * Validate that the first max_winners percentages sum to 100.
+     */
+    protected function validateWinnerPrizes(int $maxWinners, array $prizes): void
+    {
+        $sum = 0;
+        for ($r = 1; $r <= $maxWinners; $r++) {
+            $sum += (float) ($prizes[$r] ?? 0);
+        }
+        if (abs($sum - 100) > 0.01) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'winner_prizes' => ['The prize percentages for the first '.$maxWinners.' winner(s) must total 100%. Current total: '.round($sum, 1).'%.'],
+            ]);
+        }
+    }
+
+    /**
+     * Sync winner percentage rows for a live show.
+     */
+    protected function syncWinnerPrizes(int $liveShowId, int $maxWinners, array $prizes): void
+    {
+        LiveShowWinnerPrize::where('live_show_id', $liveShowId)->delete();
+        for ($rank = 1; $rank <= $maxWinners; $rank++) {
+            $prize = (string) ($prizes[$rank] ?? 0);
+            if ($prize) {
+                LiveShowWinnerPrize::create([
+                    'live_show_id' => $liveShowId,
+                    'rank' => $rank,
+                    'prize' => $prize,
+                ]);
+            }
+        }
     }
 
     /**
@@ -166,13 +194,14 @@ class LiveShowController extends Controller
             $bannerPath = str_replace(asset('storage/'), '', $live_show->banner);
             Storage::disk('public')->delete($bannerPath);
         }
+
         return redirect()->route('admin.live-shows.index')->with('success', 'Live Show deleted!');
     }
 
-
     public function streamManagement($id)
     {
-        $liveShow = LiveShow::with(['quizzes.options'])->findOrFail($id);
+        $liveShow = LiveShow::with(['quizzes.options','users','winnerPrizes'])->findOrFail($id);
+
         return view('admin.live-shows.stream-management', compact('liveShow'));
     }
 
@@ -191,118 +220,116 @@ class LiveShowController extends Controller
             ->where('id', $quizId)
             ->first();
 
-        if (!$quiz) {
+        if (! $quiz) {
             return response()->json(['message' => 'Quiz not found for this live show.'], 404);
         }
 
         // Broadcast the quiz question to users
-        ShowLiveShowQuizQuestionEvent::dispatch($quiz, (string)$liveShow->id, $request->seconds, $request->is_last ?? false);
-
+        ShowLiveShowQuizQuestionEvent::dispatch($quiz, (string) $liveShow->id, $request->seconds, $request->is_last ?? false);
 
         return response()->json(['message' => 'Quiz question sent successfully!']);
     }
-
 
     public function removeQuizQuestion(Request $request, $id, $quizId)
     {
         $liveShow = LiveShow::findOrFail($id);
         $quiz = $liveShow->quizzes()->where('id', $quizId)->first();
 
-        if (!$quiz) {
+        if (! $quiz) {
             return response()->json(['message' => 'Quiz not found for this live show.'], 404);
         }
 
         // Broadcast an event to remove the quiz question from users
-        RemoveLiveShowQuizQuestionEvent::dispatch($quiz->id, (string)$liveShow->id);
+        RemoveLiveShowQuizQuestionEvent::dispatch($quiz->id, (string) $liveShow->id);
 
         return response()->json(['message' => 'Quiz question removed successfully!']);
     }
 
-
-
     public function updateWinners(Request $request, $liveShowId)
     {
         $user = Auth::user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::check()], 401);
         }
 
         $liveShow = LiveShow::find($liveShowId);
-        if (!$liveShow) {
+        if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
-        $topThreeUsersByScore =
-            $topThreeUsersByScore = $liveShow->users()
-            ->with(['quizResponses' => function ($query) use ($liveShowId) {
-                $query->whereHas('userQuiz.quiz', function ($q) use ($liveShowId) {
-                    $q->where('live_show_id', $liveShowId);
-                });
-            }])
-            ->wherePivot('status', 'registered')
-            ->get()
-            ->map(function ($user) use ($liveShowId) {
-                // Calculate total score
-                $score = $user->pivot->score ?? 0;
-                // Find the user's quiz responses for this live show and calculate total seconds_to_submit
-                $userQuizResponses = $user->quizResponses()
-                    ->whereHas('userQuiz', function ($q) use ($liveShowId) {
+        $maxWinners = (int) $liveShow->max_winners;
+        $topMaxWinnersByScore =
+            $topMaxWinnersByScore = $liveShow->users()
+                ->with(['quizResponses' => function ($query) use ($liveShowId) {
+                    $query->whereHas('userQuiz.quiz', function ($q) use ($liveShowId) {
                         $q->where('live_show_id', $liveShowId);
-                    })
-                    ->get();
+                    });
+                }])
+                ->wherePivot('status', 'registered')
+                ->get()
+                ->map(function ($user) use ($liveShowId) {
 
-                $totalSecondsToSubmit = $userQuizResponses->sum('seconds_to_submit');
-                $firstResponseTime = $userQuizResponses->min('created_at') ?? now();
+                    // Calculate total score
+                    $score = $user->pivot->score ?? 0;
+                    // Find the user's quiz responses for this live show and calculate total seconds_to_submit
+                    $userQuizResponses = $user->quizResponses()
+                        ->whereHas('userQuiz', function ($q) use ($liveShowId) {
+                            $q->where('live_show_id', $liveShowId);
+                        })
+                        ->get();
 
-                return [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'score' => $score,
-                    'total_seconds_to_submit' => $totalSecondsToSubmit,
-                    'first_response_time' => $firstResponseTime,
-                ];
-            })
-            ->sort(function ($a, $b) {
-                // Sort by score descending, then by total_seconds_to_submit ascending
-                if ($a['score'] === $b['score']) {
-                    return $a['total_seconds_to_submit'] <=> $b['total_seconds_to_submit'];
-                }
-                return $b['score'] <=> $a['score'];
-            })
-            ->values()
-            ->take(3);
+                    $totalSecondsToSubmit = $userQuizResponses->sum('seconds_to_submit');
+                    $firstResponseTime = $userQuizResponses->min('created_at') ?? now();
+
+                    return [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'score' => $score,
+
+                        'total_seconds_to_submit' => $totalSecondsToSubmit,
+                        'first_response_time' => $firstResponseTime,
+                    ];
+                })
+                ->sort(function ($a, $b) {
+                    // Sort by score descending, then by total_seconds_to_submit ascending
+                    if ($a['score'] === $b['score']) {
+                        return $a['total_seconds_to_submit'] <=> $b['total_seconds_to_submit'];
+                    }
+
+                    return $b['score'] <=> $a['score'];
+                })
+                ->values()
+                ->take($maxWinners);
 
         // Update pivot table to set is_winner = true for top three users
-        foreach ($topThreeUsersByScore as $winner) {
+        foreach ($topMaxWinnersByScore as $winner) {
             $liveShow->users()->updateExistingPivot($winner['id'], ['is_winner' => true]);
         }
 
+        // update each winner prize won
+        foreach ($topMaxWinnersByScore as $index => $winner) {
+            $prizeWon = $liveShow->winnerPrizes()->where('rank', $index + 1)->first()->prize ?? 'no prize defined';
+            \Log::info("Winner {$winner['id']} prize won: {$prizeWon}");
 
-
-        $prizeWon = $this->calculateEachWinnerPrize($liveShow);
-        //update each winner prize won
-        foreach ($topThreeUsersByScore as $winner) {
             $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon]);
-            ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string)$liveShowId, $prizeWon);
+            ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string) $liveShowId);
+            \Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
             // Dispatch job to send winner email
-            try{
-            SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow);
-            }catch (\Exception $e){
-                //log the error
-                \Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: " . $e->getMessage());
-            }
+            // try {
+            //     SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow);
+            // } catch (\Exception $e) {
+            //     // log the error
+            //     \Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage());
+            // }
         }
 
-
-
-
-        return response()->json(['success' => true, 'message' => 'Users winner status updated.', 'winnerUsers' => $topThreeUsersByScore]);
+        return response()->json(['success' => true, 'message' => 'Users winner status updated.', 'winnerUsers' => $topMaxWinnersByScore]);
     }
-
 
     public function apiGetLiveShowMessages($id)
     {
         $liveShow = LiveShow::findOrFail($id);
         $messages = $liveShow->messages()->with('user')->orderBy('created_at', 'desc')->get()->reverse()->values();
+
         return response()->json($messages);
     }
 
@@ -314,11 +341,10 @@ class LiveShowController extends Controller
 
         $liveShow = LiveShow::findOrFail($id);
         $user = Auth::guard('admin')->user();
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::check()], 401);
         }
         $messageText = $request->input('message');
-
 
         // saving the message to the database
         $message = $liveShow->messages()->create([
@@ -327,7 +353,6 @@ class LiveShowController extends Controller
         ]);
 
         // Broadcast the new message to users
-
 
         // Broadcast the message to other users (you can implement this using events and broadcasting)
         $event = LiveShowMessageEvent::dispatch([
@@ -355,28 +380,22 @@ class LiveShowController extends Controller
             'created_at' => $message->created_at,
             'time_ago' => $message->time_ago,
         ];
+
         // For simplicity, we'll just return the message in the response
         return response()->json([
             'success' => true,
             'message' => 'Message sent successfully.',
             'data' => $messageResponse,
             'user' => $user,
-            'event' => $event
+            'event' => $event,
         ], 200);
     }
-
-
-
-
-
-
 
     public function apiGetLiveShowUsers($id)
     {
         $liveShow = LiveShow::with(['users' => function ($query) {
             $query->withPivot(['score', 'status', 'is_winner', 'created_at', 'last_active', 'is_online']);
         }])->findOrFail($id);
-
 
         $liveShow->users = $liveShow->users->map(function ($user) {
             return [
@@ -389,14 +408,13 @@ class LiveShowController extends Controller
                 'score' => $user->pivot->score ?? null,
             ];
         })
-        ->sortByDesc('score')
-        ->values();
+            ->sortByDesc('score')
+            ->values();
 
         return response()->json($liveShow->users);
     }
 
-
-    function extractYouTubeId(string $url): ?string
+    public function extractYouTubeId(string $url): ?string
     {
         // Handle HTML entities like &amp; in the URL
         $url = html_entity_decode($url);
@@ -411,27 +429,24 @@ class LiveShowController extends Controller
         return null;
     }
 
-
-    function calculateEachWinnerPrize(LiveShow $liveShow)
+    public function calculateEachWinnerPrize(LiveShow $liveShow)
     {
         $winnersCount = $liveShow->users()->wherePivot('status', 'registered')->wherePivot('is_winner', true)->count();
         if ($winnersCount > 0) {
             return $liveShow->prize_amount / $winnersCount;
         }
+
         return 0;
     }
 
-
-    function blockUser(Request $request, $id, $userId)
+    public function blockUser(Request $request, $id, $userId)
     {
         $liveShow = LiveShow::findOrFail($id);
         $user = $liveShow->users()->where('user_id', $userId)->first();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'User not found in this live show.'], 404);
         }
-
-
 
         return response()->json(['message' => 'User has been blocked from the live show.']);
     }
@@ -448,13 +463,10 @@ class LiveShowController extends Controller
         $liveShow->save();
 
         // Broadcast the update live show event
-        \App\Events\UpdateLiveShowEvent::dispatch((string)$liveShow->id, $liveShow->status);
+        \App\Events\UpdateLiveShowEvent::dispatch((string) $liveShow->id, $liveShow->status);
 
         return response()->json(['message' => 'Live show has been updated successfully.']);
     }
-
-
-
 
     public function getUsersQuizResponses(
         Request $request,
@@ -465,16 +477,15 @@ class LiveShowController extends Controller
 
         // 1. VALIDATION & DATA FETCHING
         $liveShow = LiveShow::find($id);
-        if (!$liveShow) {
+        if (! $liveShow) {
             return response()->json(['success' => false, 'message' => 'Live show not found.'], 404);
         }
 
         // Find the quiz and eager-load its options, as the service needs them
         $quiz = $liveShow->quizzes()->with('options')->find($quiz_id);
-        if (!$quiz) {
+        if (! $quiz) {
             return response()->json(['success' => false, 'message' => 'Quiz not found for this live show.'], 404);
         }
-
 
         // Delegate the complex calculation logic to the service
         $statistics = $quizService->calculateResponseStatistics($quiz);
@@ -486,9 +497,7 @@ class LiveShowController extends Controller
         $correctOptionId = $correctOption ? $correctOption->id : null;
 
         // 2. BROADCASTING
-        LiveShowQuizUserResponses::dispatch((string)$liveShow->id, (string)$quiz->id, $statistics, $correctOptionId);
-
-
+        LiveShowQuizUserResponses::dispatch((string) $liveShow->id, (string) $quiz->id, $statistics, $correctOptionId);
 
         // The controller's job is to format the final JSON response
         return response()->json([
@@ -498,16 +507,13 @@ class LiveShowController extends Controller
         ]);
     }
 
-
-
-
     public function resetGame(Request $request, $liveShowId)
     {
         $liveShow = LiveShow::find($liveShowId);
-        if (!$liveShow) {
+        if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
-        //remove all user quiz responses
+        // remove all user quiz responses
 
         UserQuizResponse::whereIn('user_quiz_id', function ($query) use ($liveShowId) {
             $query->select('id')
@@ -520,14 +526,13 @@ class LiveShowController extends Controller
 
         event(new GameResetEvent($liveShowId));
 
-
         return response()->json(['success' => true, 'message' => 'Game has been reset successfully.']);
     }
-
 
     public function streamBroadcaster($id)
     {
         $liveShow = LiveShow::with(['quizzes.options'])->findOrFail($id);
+
         return view('admin.live-shows.stream-broadcaster', compact('liveShow'));
     }
 
@@ -541,7 +546,7 @@ class LiveShowController extends Controller
         $liveShow->stream_id = $request->input('room_id');
         $liveShow->save();
 
-        //call event set broadcast room id
+        // call event set broadcast room id
         event(new SetBroadcastRoomIdEvent($liveShow->id, $liveShow->stream_id));
 
         return response()->json(['message' => 'Room ID saved successfully!', 'room_id' => $liveShow->stream_id]);

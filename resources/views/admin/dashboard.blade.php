@@ -130,10 +130,10 @@
                 </div>
             </div> --}}
             <div class="col-xl-2 col-md-4 col-6">
-                <a href="{{ route('admin.password.form') }}" class="text-decoration-none">
+                <a href="{{ route('admin.settings.index') }}" class="text-decoration-none">
                     <div class="quick-action">
-                        <i class="bi bi-gear-fill"></i>
-                        <div style="color: var(--text-primary); font-weight: 600;">Settings</div>
+                        <i class="bi bi-sliders"></i>
+                        <div style="color: var(--text-primary); font-weight: 600;">App Settings</div>
                     </div>
                 </a>
             </div>

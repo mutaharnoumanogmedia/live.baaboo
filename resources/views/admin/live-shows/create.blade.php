@@ -87,6 +87,78 @@
                 </div>
             </div>
 
+            <!-- Winners & Prize Split Card -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-trophy me-2"></i>Winners & Prize Split
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label required-field">Max winners per show</label>
+                            <input type="number" name="max_winners" id="maxWinners" class="form-control" min="1"
+                                max="10" required value="{{ old('max_winners', 3) }}">
+                            <div class="form-text">Number of top winners (1–10) who share the prize</div>
+                        </div>
+                    </div>
+                    @error('winner_prizes')
+                        <div class="alert alert-danger py-2">{{ $message }}</div>
+                    @enderror
+                    <p class="text-muted small mb-2">Prize percentage per rank (must total 100% for the first <span
+                            id="maxWinnersLabel">3</span> winner(s):</p>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Prize</th>
+                                </tr>
+                            </thead>
+                            <tbody id="winnerPrizesBody">
+                                @for ($r = 1; $r <= 10; $r++)
+                                    <tr class="winner-percent-row" data-rank="{{ $r }}"
+                                        style="{{ $r > 3 ? 'display:none' : '' }}">
+                                        <td class="text-white">
+                                            {{ $r }}{{ $r === 1 ? 'st' : ($r === 2 ? 'nd' : ($r === 3 ? 'rd' : 'th')) }}
+                                            place</td>
+                                        <td style="max-width: 120px;">
+                                            <input type="text" name="winner_prizes[{{ $r }}]"
+                                                class="form-control winner-pct-input" placeholder="Dailixir Starterset, 50€, 10€ baaboo Voucher"
+                                                value="{{ old('winner_prizes.' . $r) }}">
+                                        </td>
+                                    </tr>
+                                @endfor
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            @push('scripts')
+                <script>
+                    (function() {
+                        var maxWinnersEl = document.getElementById('maxWinners');
+                        var labelEl = document.getElementById('maxWinnersLabel');
+                        var rows = document.querySelectorAll('.winner-percent-row');
+
+                        function update() {
+                            var n = parseInt(maxWinnersEl.value, 10) || 1;
+                            n = Math.min(10, Math.max(1, n));
+                            if (labelEl) labelEl.textContent = n;
+                            rows.forEach(function(tr) {
+                                var rank = parseInt(tr.getAttribute('data-rank'), 10);
+                                tr.style.display = rank <= n ? '' : 'none';
+                            });
+                        }
+                        if (maxWinnersEl) {
+                            maxWinnersEl.addEventListener('change', update);
+                            maxWinnersEl.addEventListener('input', update);
+                            update();
+                        }
+                    })();
+                </script>
+            @endpush
+
             <!-- Media Uploads Card -->
             {{-- <div class="card">
                 <div class="card-header">

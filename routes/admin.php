@@ -7,9 +7,13 @@ use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\PushNotificationController;
+use App\Http\Controllers\Admin\AppSettingsController;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminHomeController::class, 'home'])->name('dashboard');
+
+    Route::get('/settings', [AppSettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [AppSettingsController::class, 'update'])->name('settings.update');
     Route::resource('users', AdminUserController::class);
 
     Route::resource('live-shows', \App\Http\Controllers\Admin\LiveShowController::class);

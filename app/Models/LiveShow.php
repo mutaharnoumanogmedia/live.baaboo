@@ -20,6 +20,7 @@ class LiveShow extends Model
         'host_name',
         'prize_amount',
         'currency',
+        'max_winners',
         'created_by'
 
     ];
@@ -69,6 +70,10 @@ class LiveShow extends Model
         return $this->hasMany(LiveShowQuiz::class, 'live_show_id');
     }
 
+    public function winnerPrizes()
+    {
+        return $this->hasMany(LiveShowWinnerPrize::class)->orderBy('rank');
+    }
 
     public function creator()
     {

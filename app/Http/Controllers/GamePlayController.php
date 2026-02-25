@@ -8,6 +8,7 @@ use App\Models\LiveShow;
 use App\Models\LiveShowMessages;
 use App\Models\QuizOption;
 use App\Models\User;
+use App\Models\UserLiveShow;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use App\Models\Viewer;
@@ -63,10 +64,10 @@ class GamePlayController extends Controller
                             [
                                 $existingUser->id => [
                                     'is_online' => 1,
-                                    'is_winner' => 0,
+
                                     'created_at' => now(),
                                     'updated_at' => now(),
-                                    'score' => 0,
+
                                     'status' => 'registered',
                                     'last_active_at' => now(),
                                 ],
@@ -564,5 +565,21 @@ class GamePlayController extends Controller
 
         return response()->json(['success' => true, 'points' => $userPoints, 'user' => $user, 'liveShow' => $liveShow], 200);
 
+    }
+
+    public function getUserPrize($liveShowId)
+    {
+        $user = Auth::guard('web')->user();
+        if (! $user) {
+            return response()->json(['message' => 'Unauthorized.'], 401);
+        }
+        $liveShow = LiveShow::find($liveShowId);
+        if (! $liveShow) {
+            return response()->json(['message' => 'Live show not found.'], 404);
+        }
+        $userPrize =
+        UserLiveShow::where('user_id', $user->id)->where('live_show_id', $liveShowId)->first()->prize_won ?? 'no prize defined';
+
+        return response()->json(['success' => true, 'prize' => $userPrize, 'user' => $user, 'liveShow' => $liveShow], 200);
     }
 }

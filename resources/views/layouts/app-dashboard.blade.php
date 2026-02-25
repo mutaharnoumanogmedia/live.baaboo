@@ -45,7 +45,8 @@
                     {{ Auth::user()->name }}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item" href="{{ route('admin.password.form') }}">Settings</a></li>
+                    <li><a class="dropdown-item" href="{{ route('admin.settings.index') }}">App Settings</a></li>
+                    <li><a class="dropdown-item" href="{{ route('admin.password.form') }}">Change Password</a></li>
                     <li>
                         <hr class="dropdown-divider" />
                     </li>
@@ -88,9 +89,13 @@
                             Analytics
                         </a>
 
+                        <a class="nav-link" href="{{ route('admin.settings.index') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-sliders"></i></div>
+                            App Settings
+                        </a>
                         <a class="nav-link" href="{{ route('admin.password.form') }}">
                             <div class="sb-nav-link-icon"><i class="bi bi-gear-fill"></i></div>
-                            Settings
+                            Change Password
                         </a>
                         <a class="nav-link" href="{{ route('admin.push-notifications.index') }}">
                             <div class="sb-nav-link-icon"><i class="bi bi-bell-fill"></i></div>
