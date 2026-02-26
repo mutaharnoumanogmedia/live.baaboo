@@ -40,8 +40,7 @@
                     <div class="card-header d-flex justify-content-between align-items-center py-3">
                         <div>
                             <h4 class="mb-0 fw-bold  ">{{ $liveShow->title }}</h4>
-                            <span class="badge bg-soft-info text-primary mt-1">Prize: {{ $liveShow->currency }}
-                                {{ number_format($liveShow->prize_amount, 2) }}</span>
+
                         </div>
                         <div class="btn-group shadow-sm">
                             <a target="_blank" class="btn btn-outline-primary"
@@ -60,11 +59,7 @@
 
                     <div class="card-body ">
                         <div class="row align-items-center">
-                            <div class="col-md-6 border-end text-center">
-                                <label class="small text-muted d-block mb-2">Stream Thumbnail</label>
-                                <img src="{{ $liveShow->thumbnail }}" class="rounded shadow-sm img-fluid"
-                                    style="max-height: 180px; width: 100%; object-fit: cover;" alt="Thumbnail">
-                            </div>
+
                             <div class="col-md-6 text-center">
                                 <label class="small text-muted d-block mb-2">Join via QR Code</label>
                                 <div id="qrcode" class="mx-auto p-2  border rounded"
@@ -100,6 +95,49 @@
                                             }
                                         });
                                     </script>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6">
+                                <div class="row ">
+                                    <div class="col-md-12 mb-3">
+                                        <div class="card border-0 shadow-sm">
+                                            <div class="card-body">
+                                                <h6 class="text-muted small text-uppercase fw-bold mb-3">Winners
+                                                    Ceremony</h6>
+                                                <button type="button"
+                                                    class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm"
+                                                    onclick="updateWinners()">
+                                                    <i class="fas fa-trophy me-2"></i> Announce Winners
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <div class="card border-0 shadow-sm">
+                                            <div class="card-body">
+                                                <h6 class="text-muted small text-uppercase fw-bold mb-3">Show Status
+                                                </h6>
+                                                <form action="" method="post" id="live-show-status-form"
+                                                    class="d-flex gap-2">
+                                                    <select class="form-select fw-bold" id="liveShowStatusSelect">
+                                                        <option value="scheduled"
+                                                            {{ $liveShow->status == 'scheduled' ? 'selected' : '' }}>⏳
+                                                            Scheduled</option>
+                                                        <option value="live"
+                                                            {{ $liveShow->status == 'live' ? 'selected' : '' }}>🟢
+                                                            Live</option>
+                                                        <option value="completed"
+                                                            {{ $liveShow->status == 'completed' ? 'selected' : '' }}>🔴
+                                                            Completed
+                                                        </option>
+                                                    </select>
+                                                    <button type="submit"
+                                                        class="btn btn-dark text-nowrap px-3">Update</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -194,48 +232,36 @@
                     </div>
                 </div>
 
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body">
-                                <h6 class="text-muted small text-uppercase fw-bold mb-3">Winners Ceremony</h6>
-                                <button type="button" class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm"
-                                    onclick="updateWinners()">
-                                    <i class="fas fa-trophy me-2"></i> Announce Winners
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body">
-                                <h6 class="text-muted small text-uppercase fw-bold mb-3">Show Status</h6>
-                                <form action="" method="post" id="live-show-status-form" class="d-flex gap-2">
-                                    <select class="form-select fw-bold" id="liveShowStatusSelect">
-                                        <option value="scheduled"
-                                            {{ $liveShow->status == 'scheduled' ? 'selected' : '' }}>⏳
-                                            Scheduled</option>
-                                        <option value="live" {{ $liveShow->status == 'live' ? 'selected' : '' }}>🟢
-                                            Live</option>
-                                        <option value="completed"
-                                            {{ $liveShow->status == 'completed' ? 'selected' : '' }}>🔴 Completed
-                                        </option>
-                                    </select>
-                                    <button type="submit" class="btn btn-dark text-nowrap px-3">Update</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
             </main>
 
             <div class="col-lg-3">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header p-0">
                         <ul class="nav nav-tabs nav-fill border-0" id="rightPanelTabs">
-                            <li class="nav-item">
-                                <a href="#chat-tab" class="nav-link active py-3 border-0 border-bottom fw-bold"
-                                    data-bs-toggle="tab">Chat</a>
+                            <li class="nav-item position-relative d-flex align-items-center">
+                                <a href="#chat-tab"
+                                    class="nav-link active py-3 border-0 border-bottom fw-bold d-flex text-center"
+                                    data-bs-toggle="tab">Live Chat
+                                    <div id="chatTabActions" class="ms-auto  pe-2">
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-link text-muted p-0 border-0" type="button"
+                                                id="chatTabActionsDropdown" data-bs-toggle="dropdown"
+                                                aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end"
+                                                aria-labelledby="chatTabActionsDropdown">
+                                                <li>
+                                                    <button type="button" class="dropdown-item" id="resetChatBtn">
+                                                        <i class="fas fa-eraser me-2"></i> Reset Chat
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </a>
+
                             </li>
                             <li class="nav-item">
                                 <a href="#live-show-preview" class="nav-link py-3 border-0 border-bottom fw-bold"
@@ -435,6 +461,12 @@
                 fetchChatMessages().then(messages => {
                     appendChatMessages(messages);
                 });
+
+                document.getElementById('resetChatBtn').addEventListener('click', function() {
+                    if (confirm('Are you sure you want to reset the chat? All messages will be removed.')) {
+                        resetChat();
+                    }
+                });
             });
 
             function fetchChatMessages() {
@@ -505,10 +537,68 @@
                 const messageDiv =
                     ` <div class="message alert ${bgClass} d-flex justify-content-between">
                                 <div><strong>${message.user.name}:</strong> ${message.message}</div>
-                                    <div class='px-2'> <button class="btn btn-sm btn-outline-danger rounded-circle" style=''> <i class="fas fa-ban"></i> </button> </div>
+                                   
                             </div>`;
 
                 chatContainer.insertAdjacentHTML('beforeend', messageDiv);
+            }
+
+            function toggleBlockStatusForPlayer(userId, action) {
+                if (!confirm('Are you sure you want to ' + action + ' this player?')) {
+                    return;
+                }
+                fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/toggle-block-status-for-player/${userId}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            action: action
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Player block status updated:', data);
+                        if (data.success) {
+                            alert(data.message);
+                            fetchActivePlayers().then(activePlayers => {
+                                appendPlayerList(activePlayers);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating player block status:', error);
+                        alert('Error updating player block status: ' + error.message);
+                    });
+            }
+
+            function resetChat() {
+                fetch(`{{ route('admin.live-shows.stream-management.reset-chat', ['id' => $liveShow->id]) }}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            updateChatAfterReset();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error resetting chat:', error);
+                    });
+            }
+
+            function updateChatAfterReset() {
+                const chatContainer = document.querySelector('#live-chat-messages');
+                if (chatContainer) {
+                    chatContainer.innerHTML = '<p class="text-muted">No messages yet.</p>';
+                }
             }
 
 
@@ -524,13 +614,15 @@
                         data = data.map(player => {
                             return {
                                 name: player.name,
+                                id: player.id,
                                 is_online: player.is_online,
                                 is_winner: player.is_winner,
                                 status: player.status,
-                                score: player.score
+                                score: player.score,
+                                is_blocked: player.is_blocked
                             }
                         });
-                        console.log(data);
+
 
                         return data;
                     })
@@ -559,6 +651,41 @@
                                 ${player.score !== null ? ` ${player.score}` : ''}
                                 </span>
                             ${player.is_winner ? '<i class="bi bi-trophy-fill text-warning"></i>' : ''}
+                        </div>
+
+                        <div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="playerDropdownMenuButton${player.id}" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end"
+                                id="playerDropdownMenu${player.id}"
+                                aria-labelledby="playerDropdownMenuButton">
+                                    <li>
+                                        <a class="dropdown-item" target="_blank" href="#">
+                                            <i class="fas fa-eye"></i>
+                                            View Details
+                                        </a>
+                                    </li>
+                                    <li id="dd_option_toggleBlockStatusForPlayer${player.id}">
+                                        <a  class="dropdown-item" href="javascript:void(0)"
+                                        onclick="toggleBlockStatusForPlayer('${player.id}', '${player.is_blocked ? 'unblock' : 'block'}')"
+                                        > 
+                                        <i class="fas fa-ban"></i>
+                                        ${player.is_blocked ? 'Unblock Player' : 'Block Player'}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item"
+                                        href="javascript:void(0)"
+                                        onclick="resetScore('${player.id}')"
+                                        > 
+                                        <i class="fas fa-sync"></i>
+                                        Reset Score
+                                        </a>
+                                    </li>  
+                                </ul>
+                            </div>
                         </div>
                     </li>`;
                     activePlayersList.innerHTML += li;
@@ -628,6 +755,18 @@
                 appendSingleMessage(data.data);
                 // You can also update DOM here:
                 // document.getElementById('onlineUsers').innerHTML = JSON.stringify(data.activeUsers);
+            });
+
+            var channelResetChat = pusher.subscribe('reset-chat.{{ $liveShow->id }}');
+            channelResetChat.bind('pusher:subscription_succeeded', function() {
+                console.log('Reset chat channel subscribed successfully!');
+            });
+            channelResetChat.bind('ResetChatEvent', function() {
+                console.log('Chat reset event received');
+                const chatContainer = document.querySelector('#live-chat-messages');
+                if (chatContainer) {
+                    chatContainer.innerHTML = '<p class="text-muted">No messages yet.</p>';
+                }
             });
 
 

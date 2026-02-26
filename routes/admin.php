@@ -1,13 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminProfileController;
+use App\Http\Controllers\Admin\AppSettingsController;
 use App\Http\Controllers\Admin\HomeController as AdminHomeController;
 use App\Http\Controllers\Admin\LiveShowController;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\HomeController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\PushNotificationController;
-use App\Http\Controllers\Admin\AppSettingsController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminHomeController::class, 'home'])->name('dashboard');
@@ -19,35 +18,33 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('live-shows', \App\Http\Controllers\Admin\LiveShowController::class);
     Route::resource('live-show-quizzes', \App\Http\Controllers\Admin\LiveShowQuizController::class);
 
-    Route::get("live-shows/stream-management/{id}", [\App\Http\Controllers\Admin\LiveShowController::class, 'streamManagement'])->name('live-shows.stream-management');
-    Route::get("live-shows/stream-broadcaster/{id}", [\App\Http\Controllers\Admin\LiveShowController::class, 'streamBroadcaster'])->name('live-shows.stream-management.broadcaster');
+    Route::get('live-shows/stream-management/{id}', [\App\Http\Controllers\Admin\LiveShowController::class, 'streamManagement'])->name('live-shows.stream-management');
+    Route::get('live-shows/stream-broadcaster/{id}', [\App\Http\Controllers\Admin\LiveShowController::class, 'streamBroadcaster'])->name('live-shows.stream-management.broadcaster');
 
-    Route::post("live-shows/stream-management/{id}/save-room-id", [\App\Http\Controllers\Admin\LiveShowController::class, 'saveRoomID'])->name('live-shows.stream-management.save-room-id');
+    Route::post('live-shows/stream-management/{id}/save-room-id', [\App\Http\Controllers\Admin\LiveShowController::class, 'saveRoomID'])->name('live-shows.stream-management.save-room-id');
 
-    Route::post("live-shows/stream-management/{id}/quizzes/{quizId}/send-quiz-question", [\App\Http\Controllers\Admin\LiveShowController::class, 'sendQuizQuestion'])->name('live-shows.stream-management.send-quiz-question');
+    Route::post('live-shows/stream-management/{id}/quizzes/{quizId}/send-quiz-question', [\App\Http\Controllers\Admin\LiveShowController::class, 'sendQuizQuestion'])->name('live-shows.stream-management.send-quiz-question');
 
-    Route::post("live-shows/stream-management/{id}/quizzes/{quizId}/remove-quiz-question", [\App\Http\Controllers\Admin\LiveShowController::class, 'removeQuizQuestion'])->name('live-shows.stream-management.remove-quiz-question');
+    Route::post('live-shows/stream-management/{id}/quizzes/{quizId}/remove-quiz-question', [\App\Http\Controllers\Admin\LiveShowController::class, 'removeQuizQuestion'])->name('live-shows.stream-management.remove-quiz-question');
 
-    Route::get("live-shows/stream-management/{id}/fetch-messages", [\App\Http\Controllers\Admin\LiveShowController::class, 'fetchChatMessages'])->name('live-shows.stream-management.fetch-chat-messages');
-    Route::post("live-shows/stream-management/{id}/send-message", [\App\Http\Controllers\Admin\LiveShowController::class, 'sendMessage'])->name('live-shows.stream-management.send-message');
+    Route::get('live-shows/stream-management/{id}/fetch-messages', [\App\Http\Controllers\Admin\LiveShowController::class, 'fetchChatMessages'])->name('live-shows.stream-management.fetch-chat-messages');
+    Route::post('live-shows/stream-management/{id}/send-message', [\App\Http\Controllers\Admin\LiveShowController::class, 'sendMessage'])->name('live-shows.stream-management.send-message');
+    Route::post('live-shows/stream-management/{id}/reset-chat', [\App\Http\Controllers\Admin\LiveShowController::class, 'resetChat'])->name('live-shows.stream-management.reset-chat');
 
-    //updateWinners
-    Route::post("live-shows/stream-management/{liveShowId}/update-winners", [\App\Http\Controllers\Admin\LiveShowController::class, 'updateWinners'])->name('live-shows.update-winners');
+    // updateWinners
+    Route::post('live-shows/stream-management/{liveShowId}/update-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'updateWinners'])->name('live-shows.update-winners');
 
+    Route::post('live-shows/{id}/block-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'blockUser'])->name('live-shows.block-user');
+    Route::post('live-shows/{id}/unblock-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'unblockUser'])->name('live-shows.unblock-user');
 
-    Route::post("live-shows/{id}/block-user/{userId}", [\App\Http\Controllers\Admin\LiveShowController::class, 'blockUser'])->name('live-shows.block-user');
-    Route::post("live-shows/{id}/unblock-user/{userId}", [\App\Http\Controllers\Admin\LiveShowController::class, 'unblockUser'])->name('live-shows.unblock-user');
+    Route::get('players', [\App\Http\Controllers\Admin\PlayerController::class, 'index'])->name('players.index');
+    Route::get('players/{id}', [\App\Http\Controllers\Admin\PlayerController::class, 'show'])->name('players.show');
 
-    Route::get("players", [\App\Http\Controllers\Admin\PlayerController::class, 'index'])->name('players.index');
-    Route::get("players/{id}", [\App\Http\Controllers\Admin\PlayerController::class, 'show'])->name('players.show');
+    Route::get('live-shows/{id}/get-users-quiz-responses/{quiz_id}', [\App\Http\Controllers\Admin\LiveShowController::class, 'getUsersQuizResponses'])->name('live-shows.get-users-quiz-responses');
 
-    Route::get("live-shows/{id}/get-users-quiz-responses/{quiz_id}", [\App\Http\Controllers\Admin\LiveShowController::class, 'getUsersQuizResponses'])->name('live-shows.get-users-quiz-responses');
-
-
-    Route::post("live-shows/{id}/update-live-show", [\App\Http\Controllers\Admin\LiveShowController::class, 'updateLiveShow'])->name('live-shows.update-live-show');
+    Route::post('live-shows/{id}/update-live-show', [\App\Http\Controllers\Admin\LiveShowController::class, 'updateLiveShow'])->name('live-shows.update-live-show');
 
     Route::post('live-show/{id}/admin/reset-game', [LiveShowController::class, 'resetGame'])->name('live-shows.reset-game');
-
 
     Route::get('/profile/password', [AdminProfileController::class, 'showChangePasswordForm'])
         ->name('password.form');
@@ -55,13 +52,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/profile/password', [AdminProfileController::class, 'updatePassword'])
         ->name('password.update');
 
-
     Route::get('/test-notification', [PushNotificationController::class, 'testNotifcation'])->name('test-notification');
 
     Route::post('announcement', function () {
-        event(new \App\Events\AnnouncementEvent("This is a test announcement @ " . date('Y-m-d H:i:s')));
+        event(new \App\Events\AnnouncementEvent('This is a test announcement @ '.date('Y-m-d H:i:s')));
+
         return response()->json(['success' => true, 'message' => 'Announcement sent successfully']);
     })->name('announcement.send');
+
+    Route::post('live-shows/stream-management/{liveShowId}/block-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'blockUser'])->name('live-shows.block-user');
+    Route::post('live-shows/stream-management/{liveShowId}/toggle-block-status-for-player/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'toggleBlockStatusForPlayer'])->name('live-shows.toggle-block-status-for-player');
 
     Route::resource(
         'push-notifications',

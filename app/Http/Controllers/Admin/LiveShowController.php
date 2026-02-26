@@ -6,9 +6,11 @@ use App\Events\GameResetEvent;
 use App\Events\LiveShowMessageEvent;
 use App\Events\LiveShowQuizUserResponses;
 use App\Events\RemoveLiveShowQuizQuestionEvent;
+use App\Events\ResetChatEvent;
 use App\Events\SetBroadcastRoomIdEvent;
 use App\Events\ShowLiveShowQuizQuestionEvent;
 use App\Events\ShowPlayerAsWinnerEvent;
+use App\Events\UserBlockFromLiveShowEvent;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendWinnerEmailJob;
 use App\Models\LiveShow;
@@ -200,7 +202,7 @@ class LiveShowController extends Controller
 
     public function streamManagement($id)
     {
-        $liveShow = LiveShow::with(['quizzes.options','users','winnerPrizes'])->findOrFail($id);
+        $liveShow = LiveShow::with(['quizzes.options', 'users', 'winnerPrizes'])->findOrFail($id);
 
         return view('admin.live-shows.stream-management', compact('liveShow'));
     }
@@ -391,13 +393,25 @@ class LiveShowController extends Controller
         ], 200);
     }
 
+    public function resetChat($id): JsonResponse
+    {
+        $liveShow = LiveShow::findOrFail($id);
+        $liveShow->messages()->delete();
+        ResetChatEvent::dispatch((string) $liveShow->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Chat reset successfully.',
+        ]);
+    }
+
     public function apiGetLiveShowUsers($id)
     {
         $liveShow = LiveShow::with(['users' => function ($query) {
             $query->withPivot(['score', 'status', 'is_winner', 'created_at', 'last_active', 'is_online']);
         }])->findOrFail($id);
 
-        $liveShow->users = $liveShow->users->map(function ($user) {
+        $liveShow->users = $liveShow->users->map(function ($user) use ($id) {
             return [
                 'id' => $user->id,
                 'name' => $user->name,
@@ -406,6 +420,8 @@ class LiveShowController extends Controller
                 'is_winner' => $user->pivot->is_winner ?? null,
                 'status' => $user->pivot->status ?? null,
                 'score' => $user->pivot->score ?? null,
+                'prize_won' => $user->pivot->prize_won ?? null,
+                'is_blocked' => $user->blockedLiveShows()->where('live_show_id', $id)->exists() ? true : false,
             ];
         })
             ->sortByDesc('score')
@@ -439,16 +455,31 @@ class LiveShowController extends Controller
         return 0;
     }
 
-    public function blockUser(Request $request, $id, $userId)
+    public function toggleBlockStatusForPlayer(Request $request, $liveShowId, $userId)
     {
-        $liveShow = LiveShow::findOrFail($id);
+        $request->validate([
+            'action' => 'required|string|in:block,unblock',
+        ]);
+
+        $action = $request->input('action');
+        $liveShow = LiveShow::findOrFail($liveShowId);
         $user = $liveShow->users()->where('user_id', $userId)->first();
 
         if (! $user) {
-            return response()->json(['message' => 'User not found in this live show.'], 404);
+            return response()->json(['success' => false, 'message' => 'User not found in this live show.'], 404);
         }
 
-        return response()->json(['message' => 'User has been blocked from the live show.']);
+        if ($action === 'block') {
+            $liveShow->blockedUsers()->syncWithoutDetaching($userId);
+        } else {
+            $liveShow->blockedUsers()->detach($userId);
+        }
+
+        // event to update the player block status
+        $isBlocked = $action === 'block' ? true : false;
+        UserBlockFromLiveShowEvent::dispatch($liveShowId, $userId, $isBlocked);
+
+        return response()->json(['success' => true, 'message' => 'Player block status updated to '.($isBlocked ? 'blocked' : 'unblocked').'.', 'user' => $user]);
     }
 
     public function updateLiveShow(Request $request, $id)

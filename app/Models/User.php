@@ -11,7 +11,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -43,7 +43,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    //append custom fields
+    // append custom fields
     protected $appends = ['role'];
 
     public function getRoleAttribute()
@@ -69,8 +69,9 @@ class User extends Authenticatable
     public function blockedLiveShows()
     {
         return $this->belongsToMany(LiveShow::class, 'live_show_block_users')
-            ->using(LiveShowBlockUser::class)
-            ->withTimestamps();
+            ->withPivot(['live_show_id'])
+            ->withTimestamps()
+            ->orderBy('live_show_block_users.created_at', 'desc');
     }
 
     public function messages()

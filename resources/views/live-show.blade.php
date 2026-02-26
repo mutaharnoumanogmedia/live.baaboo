@@ -1217,6 +1217,7 @@
             // Initialize Pusher
             fetchMessages();
             updatePlayersLeaderboard();
+            checkIfUserBlockedFromLiveShow();
         });
         // Toggle quiz mode
         function toggleQuiz(action) {
@@ -1295,6 +1296,22 @@
             });
 
 
+        }
+
+        function checkIfUserBlockedFromLiveShow() {
+            fetch('{{ url('live-show/' . $liveShow->id . '/check-if-user-blocked-from-live-show') }}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.blocked) {
+                        console.log('User blocked from live show:', data);
+                        alert('You have been blocked from live chat participation.');
+                        //disable message input and send button
+                        disableMessageInputAndSendButton();
+
+
+                    }
+                })
+                .catch(error => console.error('Error checking if user blocked from live show:', error));
         }
 
         // Quiz functionality
@@ -1569,6 +1586,7 @@
                             'isLoggedIn:', isLoggedIn, 'userId:', userId);
 
                         playerAsWinnerEventTrigger();
+                        userBlockedFromLiveShowEventTrigger();
                     } else {
                         let errorMessages = data.messages || ['Registration failed. Please try again.'];
 
@@ -1932,6 +1950,7 @@
 
         }
 
+
         function showWinnerDialogDiv() {
             // Show the winner dialog
             document.querySelector('#winnerDialog').style.display = 'block';
@@ -1939,51 +1958,37 @@
             toggleQuiz("remove");
 
         }
+
+        function userBlockedFromLiveShowEventTrigger() {
+            var channelUserBlockFromLiveShow = pusher.subscribe('user-block-from-live-show.{{ $liveShow->id }}');
+            channelUserBlockFromLiveShow.bind('pusher:subscription_succeeded', function() {
+                console.log('User block from live show channel subscribed successfully!');
+            });
+            channelUserBlockFromLiveShow.bind('UserBlockFromLiveShowEvent', function(data) {
+
+
+                if (data.userId == userId) {
+                    console.log('User block from live show event received:', data);
+                    if (data.isBlocked) {
+                        alert('You have been blocked from live chat participation.');
+                        disableMessageInputAndSendButton();
+                    } else {
+                        alert('You have been unblocked from live chat participation.');
+                        enableMessageInputAndSendButton();
+                    }
+                }
+            });
+        }
         @if (Auth::guard('web')->check())
             playerAsWinnerEventTrigger()
+            userBlockedFromLiveShowEventTrigger()
         @endif
     </script>
 
     <script>
-        // 1. Load the IFrame Player API
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        var player;
-
-        // 2. Create player
-        // function onYouTubeIframeAPIReady() {
-        //     player = new YT.Player('player', {
-        //         height: '315',
-        //         width: '560',
-        //         videoId: '{{ $liveShow->stream_id ?? 0 }}',
-        //         playerVars: {
-        //             autoplay: 1,
-        //             controls: 0, // Hide play/pause bar
-        //             disablekb: 1, // Disable keyboard shortcuts (e.g. spacebar)
-        //             modestbranding: 1,
-        //             rel: 0,
-        //             playsinline: 1
-        //         }
-        //     });
-        // }
-
-        // 3. Play with sound after user click
-        function playWithSoundAfterDelay() {
-            setTimeout(function() {
-                if (player && typeof player.unMute === 'function' && typeof player.playVideo === 'function') {
-                    player.unMute();
-                    player.playVideo();
-                }
-            }, 100);
-        }
-
         // Example: call after user interaction
         document.getElementById('playButton').onclick = function() {
             document.getElementById('playButtonOverlay').style.display = 'none';
-            playWithSoundAfterDelay();
         };
 
         var channelUpdateLiveShow = pusher.subscribe('update-live-show.{{ $liveShow->id }}');
@@ -2141,7 +2146,7 @@
                                 bgColor =
                                     'background: linear-gradient(90deg, #CD7F32 0%, #FFE4C4 100%);'; // Bronze
                                 break;
-                            
+
                         }
                         const userDiv = document.createElement('div');
                         userDiv.className =
@@ -2238,6 +2243,52 @@
         channelTest.bind('AnnouncementEvent', function(data) {
             console.log('Received AnnouncementEvent:', data);
             alert('Pusher AnnouncementEvent received: ' + JSON.stringify(data));
+        });
+
+
+
+
+
+
+        function disableMessageInputAndSendButton() {
+
+
+            document.getElementById('chatInput').disabled = true;
+            document.getElementById('send-btn-overlay').disabled = true;
+            document.querySelector('#chatInput').style.opacity = '0.5';
+            document.querySelector('#send-btn-overlay').style.opacity = '0.5';
+            document.querySelector('#chatInput').style.cursor = 'not-allowed';
+            document.querySelector('#send-btn-overlay').style.cursor = 'not-allowed';
+            document.querySelector('#chatInput').style.pointerEvents = 'none';
+            document.querySelector('#send-btn-overlay').style.pointerEvents = 'none';
+        }
+
+        function enableMessageInputAndSendButton() {
+            document.getElementById('chatInput').disabled = false;
+            document.getElementById('send-btn-overlay').disabled = false;
+            document.querySelector('#chatInput').style.opacity = '1';
+            document.querySelector('#send-btn-overlay').style.opacity = '1';
+            document.querySelector('#chatInput').style.cursor = 'pointer';
+            document.querySelector('#send-btn-overlay').style.cursor = 'pointer';
+            document.querySelector('#chatInput').style.pointerEvents = 'auto';
+            document.querySelector('#send-btn-overlay').style.pointerEvents = 'auto';
+        }
+
+
+
+
+
+
+        var channelResetChat = pusher.subscribe('reset-chat.{{ $liveShow->id }}');
+        channelResetChat.bind('pusher:subscription_succeeded', function() {
+            console.log('Reset chat channel subscribed successfully!');
+        });
+        channelResetChat.bind('ResetChatEvent', function(data) {
+            console.log('Reset chat event received:', data);
+            const chatContainer = document.querySelector('#overlayChat');
+            if (chatContainer) {
+                chatContainer.innerHTML = '<p class="text-muted">No messages yet.</p>';
+            }
         });
     </script>
 

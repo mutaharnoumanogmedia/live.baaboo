@@ -43,6 +43,8 @@ Route::middleware(['auth:web'])->group(function () {
 Route::get('live-show/{id}/get-live-show-users-with-scores', [GamePlayController::class, 'getLiveShowUsersWithScores']);
 Route::get('show-live-broadcast/{id}', [GamePlayController::class, 'showLiveBroadcast'])->name('show-live-broadcast');
 
+
+
 Route::get('/test-message-event', function () {
     event(new \App\Events\LiveShowMessageEvent([
         'live_show_id' => 1,
@@ -54,5 +56,6 @@ Route::get('/test-message-event', function () {
 });
 Route::get('/live-show/get-my-points/{liveShowId}', [GamePlayController::class, 'getLiveShowUserPoints'])->name('api.get-my-points');
 Route::get('/live-show/{id}/user-prize', [GamePlayController::class, 'getUserPrize'])->name('api.get-user-prize');
+Route::get('/live-show/{id}/check-if-user-blocked-from-live-show', [GamePlayController::class, 'checkIfUserBlockedFromLiveShow'])->name('api.check-if-user-blocked-from-live-show');
 require __DIR__.'/admin.php';
 require __DIR__.'/auth.php';

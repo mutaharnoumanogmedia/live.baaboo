@@ -83,8 +83,9 @@ class LiveShow extends Model
     public function blockedUsers()
     {
         return $this->belongsToMany(User::class, 'live_show_block_users')
-            ->using(LiveShowBlockUser::class)
-            ->withTimestamps();
+            ->withPivot(['user_id'])
+            ->withTimestamps()
+            ->orderBy('live_show_block_users.created_at', 'desc');
     }
 
 

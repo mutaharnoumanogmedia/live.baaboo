@@ -339,6 +339,11 @@ class GamePlayController extends Controller
         if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
+        // check if user is blocked from the live show
+        $isBlocked = $liveShow->blockedUsers()->where('user_id', $user->id)->first();
+        if ($isBlocked) {
+            return response()->json(['message' => 'You have been blocked from the live show.'], 403);
+        }
 
         $messageText = $request->message;
 
@@ -581,5 +586,22 @@ class GamePlayController extends Controller
         UserLiveShow::where('user_id', $user->id)->where('live_show_id', $liveShowId)->first()->prize_won ?? 'no prize defined';
 
         return response()->json(['success' => true, 'prize' => $userPrize, 'user' => $user, 'liveShow' => $liveShow], 200);
+    }
+
+    public function checkIfUserBlockedFromLiveShow($liveShowId)
+    {
+        $user = Auth::guard('web')->user();
+        if (! $user) {
+            return response()->json(['message' => 'Unauthorized.'], 401);
+        }
+        $liveShow = LiveShow::find($liveShowId);
+        if (! $liveShow) {
+            return response()->json(['message' => 'Live show not found.'], 404);
+        }
+        $isBlocked = $liveShow->blockedUsers()->where('user_id', $user->id)->first();
+        if ($isBlocked) {
+            return response()->json(['blocked' => true], 200);
+        }
+        return response()->json(['blocked' => false], 200);
     }
 }

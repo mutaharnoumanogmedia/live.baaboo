@@ -44,6 +44,10 @@
         .zg_autoplay_mask {
             display: none !important;
         }
+
+        .IoC1lj0UQIKqG1pNh5vE{
+            display: none !important;
+        }
     </style>
 </head>
 
