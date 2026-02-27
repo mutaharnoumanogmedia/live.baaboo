@@ -60,7 +60,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         return response()->json(['success' => true, 'message' => 'Announcement sent successfully']);
     })->name('announcement.send');
 
-    Route::post('live-shows/stream-management/{liveShowId}/block-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'blockUser'])->name('live-shows.block-user');
+    // Route::post('live-shows/stream-management/{liveShowId}/block-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'blockUser'])->name('live-shows.block-user');
     Route::post('live-shows/stream-management/{liveShowId}/toggle-block-status-for-player/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'toggleBlockStatusForPlayer'])->name('live-shows.toggle-block-status-for-player');
 
     Route::resource(
