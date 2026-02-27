@@ -45,7 +45,7 @@
             display: none !important;
         }
 
-        .IoC1lj0UQIKqG1pNh5vE, #zego_left_notify_wrapper, #zego_right_notify_wrapper {
+        .IoC1lj0UQIKqG1pNh5vE, #zego_left_notify_wrapper, #zego_right_notify_wrapper,#ZegoRoomMobileLeaveButton,#ZegoRoomHeader,#ZegoRoomCssMobileMore,#ZegoRoomFooter {
             display: none !important;
         }
 
