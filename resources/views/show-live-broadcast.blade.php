@@ -45,9 +45,10 @@
             display: none !important;
         }
 
-        .IoC1lj0UQIKqG1pNh5vE {
+        .IoC1lj0UQIKqG1pNh5vE, #zego_left_notify_wrapper, #zego_right_notify_wrapper {
             display: none !important;
         }
+
     </style>
 </head>
 
