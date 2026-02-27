@@ -9,7 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --youtube-red: #ff0000;
+
             --baaboo-orange: #ff5f00;
             --dark-bg: #0F0F0F;
             --darker-bg: #0A0A0A;
@@ -24,11 +24,7 @@
             --info: #0078D4;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+
 
         body {
             background: var(--dark-bg);
@@ -52,7 +48,7 @@
 
         /* Live Show Banner */
         .live-show-banner {
-            background: linear-gradient(135deg, var(--youtube-red) 0%, var(--baaboo-orange) 100%);
+            background: linear-gradient(135deg, var(--baaboo-orange) 0%, var(--baaboo-orange) 100%);
             padding: 3.5rem 0;
             box-shadow: 0 4px 20px rgba(255, 0, 0, 0.3);
             position: relative;
@@ -70,6 +66,30 @@
             animation: shine 3s infinite;
         }
 
+        .btn-primary {
+            background-color: var(--baaboo-orange);
+            color: var(--text-primary);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #e55400;
+        }
+
+        .btn-primary:focus {
+            background-color: #e55400;
+            outline: none;
+            box-shadow: none;
+        }
+
+        .text-primary {
+            color: var(--baaboo-orange) !important;
+        }
+
         @keyframes shine {
             0% {
                 left: -100%;
@@ -82,7 +102,7 @@
 
         .live-badge {
             background: var(--text-primary);
-            color: var(--youtube-red);
+            color: var(--baaboo-orange);
             padding: 0.3rem 0.8rem;
             border-radius: 20px;
             font-weight: bold;
@@ -108,7 +128,7 @@
         .live-dot {
             width: 8px;
             height: 8px;
-            background: var(--youtube-red);
+            background: var(--baaboo-orange);
             border-radius: 50%;
             animation: blink 1.5s infinite;
         }
@@ -135,7 +155,7 @@
         .logo {
             font-size: 2rem;
             font-weight: bold;
-            background: linear-gradient(135deg, var(--youtube-red) 0%, #FF6B6B 100%);
+            background: linear-gradient(135deg, var(--baaboo-orange) 0%, #FF6B6B 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -144,7 +164,7 @@
         /* Hero Section */
         .hero {
             padding: 5rem 0;
-            text-align: center;
+            text-align: left;
             position: relative;
         }
 
@@ -157,6 +177,7 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             line-height: 1.2;
+            text-align: left;
         }
 
         .hero p {
@@ -166,7 +187,7 @@
         }
 
         .cta-button {
-            background: linear-gradient(135deg, var(--youtube-red) 0%, var(--baaboo-orange) 100%);
+            background: linear-gradient(135deg, var(--baaboo-orange) 0%, var(--baaboo-orange) 100%);
             color: var(--text-primary);
             padding: 1rem 3rem;
             font-size: 1.25rem;
@@ -207,7 +228,7 @@
         .feature-icon {
             width: 70px;
             height: 70px;
-            background: linear-gradient(135deg, var(--youtube-red) 0%, var(--baaboo-orange) 100%);
+            background: linear-gradient(135deg, var(--baaboo-orange) 0%, var(--baaboo-orange) 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -310,7 +331,7 @@
                 </div>
                 <nav>
                     <a href="#" class="btn btn-outline-dark me-2">How It Works</a>
-                    <a href="#" class="btn btn-danger">Download App</a>
+                    <a href="#" class="btn btn-primary">Download App</a>
                 </nav>
             </div>
         </div>
@@ -319,16 +340,57 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="container">
-            <h1>Play Live. Win Real Money.</h1>
-            <p>Join thousands of players in live trivia game shows</p>
-            <button class="cta-button">
-                <i class="fas fa-rocket me-2"></i>Get Started Free
-            </button>
-            <div class="mt-5 text-secondary">
-                <i class="fas fa-users me-2"></i>500K+ Active Players
-                <span class="mx-3">|</span>
-                <i class="fas fa-trophy me-2"></i>$2M+ Won This Month
+            <div class="row">
+                <div class="col-md-6">
+
+                    <h1>Play Live. Win Real Money.</h1>
+                    <p>Join thousands of players in live trivia game shows</p>
+                    <button class="cta-button">
+                        <i class="fas fa-rocket me-2"></i>Get Started Free
+                    </button>
+                    <div class="mt-5 text-secondary">
+                        <i class="fas fa-users me-2"></i>500K+ Active Players
+                        <span class="mx-3">|</span>
+                        <i class="fas fa-trophy me-2"></i>$2M+ Won This Month
+                    </div>
+
+                </div>
+                <div class="col-lg-6">
+                    <div class="card shadow rounded p-4 bg-light" style="max-width: 480px; margin: 2rem auto;">
+                        <h3 class="mb-3 text-dark fw-bold"><i class="fas fa-user-plus me-2 text-primary"></i>
+                            Register to Play</h3>
+                        <form method="POST" action="{{ route('live-show.user.register', $currentLiveShow->id ?? 1) }}">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="name" class="form-label text-dark fw-semibold">Full Name</label>
+                                <input type="text" class="form-control" id="name" name="name"
+                                    placeholder="John Doe" required autocomplete="off">
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label text-dark fw-semibold">Email address</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    placeholder="you@email.com" required autocomplete="off">
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="agree" required>
+                                <label class="form-check-label" for="agree">I agree to the <a href="#"
+                                        class="text-danger text-decoration-underline">Terms & Conditions</a></label>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary fw-bold btn-lg">
+                                    <i class="fas fa-arrow-right"></i> Register & Join Now
+                                </button>
+                            </div>
+                        </form>
+                        <div class="mt-3 text-center text-secondary">
+                            Already have an account? <a href="#"
+                                class="text-danger text-decoration-underline">Login</a>
+                        </div>
+                    </div>
+                </div>
             </div>
+
         </div>
     </section>
 

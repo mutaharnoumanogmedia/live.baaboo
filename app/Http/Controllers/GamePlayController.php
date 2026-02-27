@@ -54,6 +54,7 @@ class GamePlayController extends Controller
                 // update pivot table
                 $liveShow = LiveShow::live()->find($liveShowId);
 
+                // check if live show and user is attached to it
                 if ($liveShow) {
                     $userPivot = $liveShow->users()->where('user_id', $existingUser->id)->first();
                     if ($userPivot && $userPivot->pivot->status === 'eliminated') {
@@ -163,17 +164,16 @@ class GamePlayController extends Controller
 
         $this->triggerOnlineUsersEvent($liveShow->id);
 
-        $user = Auth::user();
         if ($user) {
             $user->forceFill(['current_session_id' => null])->save();
         }
-        \DB::table('sessions')->where('user_id', Auth::id())->delete();
+        \DB::table('sessions')->where('user_id', Auth::guard('web')->id())->delete();
 
-        Auth::logout();
+        Auth::guard('web')->logout();
 
         // remove session from sessions table
 
-        return redirect(route('live-show', [$liveShow->id]))->with('success', 'You have been logged out successfully.');
+        return back()->with('success', 'You have been logged out successfully.');
     }
 
     private function triggerOnlineUsersEvent($liveShowId)
@@ -487,7 +487,7 @@ class GamePlayController extends Controller
                 ->exists();
 
             if ($hasOtherActiveSession) {
-                Auth::logout();
+                Auth::guard('web')->logout();
 
                 return [
                     'success' => false,
@@ -582,10 +582,17 @@ class GamePlayController extends Controller
         if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
-        $userPrize =
-        UserLiveShow::where('user_id', $user->id)->where('live_show_id', $liveShowId)->first()->prize_won ?? 'no prize defined';
+        $userLiveShow = UserLiveShow::where('user_id', $user->id)->where('live_show_id', $liveShowId)->first();
+        if (! $userLiveShow) {
+            return response()->json(['message' => 'User not found in this live show.'], 404);
+        }
+        $userPrize = $userLiveShow->prize_won ?? null;
+        $isUserWinner = $userLiveShow->is_winner ?? false;
+        if (! $isUserWinner) {
+            return response()->json(['success' => false, 'message' => 'User is not a winner.'], 404);
+        }
 
-        return response()->json(['success' => true, 'prize' => $userPrize, 'user' => $user, 'liveShow' => $liveShow], 200);
+        return response()->json(['success' => true, 'prize' => $userPrize, 'user' => $user, 'liveShow' => $liveShow, 'is_winner' => $isUserWinner], 200);
     }
 
     public function checkIfUserBlockedFromLiveShow($liveShowId)
@@ -602,6 +609,7 @@ class GamePlayController extends Controller
         if ($isBlocked) {
             return response()->json(['blocked' => true], 200);
         }
+
         return response()->json(['blocked' => false], 200);
     }
 }

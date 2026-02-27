@@ -1241,6 +1241,11 @@
                 // showQuestionBtn.style.display = 'block';
                 // showQuestionBtn.classList.remove('active');
             }
+            //uncheck all options
+            document.querySelectorAll('input[name="option"]').forEach(option => {
+                option.checked = false;
+                option.disabled = false;
+            });
             // hideAllModals();
         }
 
@@ -1931,7 +1936,8 @@
                     })
                     .then(response => response.json())
                     .then(prizeData => {
-                        if (prizeData.success && prizeData.prize !== undefined) {
+                        console.log('Prize data:', prizeData);
+                        if (prizeData.success && prizeData.prize !== undefined && prizeData.prize != 'no prize defined' && prizeData.is_winner == true) {
                             document.getElementById('prizeAmount').textContent = prizeData.prize;
                             fireConfetti();
                             addOverlayMessage('@System', 'Congratulations! You have won ' + prizeData.prize);
