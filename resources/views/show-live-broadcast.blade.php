@@ -45,7 +45,7 @@
             display: none !important;
         }
 
-        .IoC1lj0UQIKqG1pNh5vE{
+        .IoC1lj0UQIKqG1pNh5vE {
             display: none !important;
         }
     </style>
@@ -93,31 +93,39 @@
 
         // You can assign different roles based on url parameters.
         let role = ZegoUIKitPrebuilt.Audience;
-      
-        
 
 
-       
-            config = {
-                showTextChat: false,
-                showUserList: false,
-                turnOnCameraWhenJoining: false,
-                showMyCameraToggleButton: false,
-                showAudioVideoSettingsButton: false,
-                showScreenSharingButton: false,
-                showPreJoinView: false,
-                showMemberJoinNotice: false,
-                showMessageNotification: false,
-                showUserJoinAndLeave: false
-            }
-       
+
+
+
+        config = {
+            showTextChat: false,
+            showUserList: false,
+            turnOnCameraWhenJoining: false,
+            showMyCameraToggleButton: false,
+            showAudioVideoSettingsButton: false,
+            showScreenSharingButton: false,
+            showPreJoinView: false,
+            showMemberJoinNotice: false,
+            showMessageNotification: false,
+            showUserJoinAndLeave: false,
+            showMyCameraToggleButton: false,
+            showMyMicrophoneToggleButton: false,
+            showAudioVideoSettingsButton: false,
+            showScreenSharingButton: false,
+            showTextChat: false, // Disables the chat/message input
+            showInRoomMessageButton: false, // Hides the chat icon
+            showUserList: false, // Hides the viewer count/list
+        }
+
         const zp = ZegoUIKitPrebuilt.create(TOKEN);
         zp.joinRoom({
             container: document.querySelector("#root"),
+
             scenario: {
                 mode: ZegoUIKitPrebuilt.LiveStreaming,
                 config: {
-                    role,
+                    role: ZegoUIKitPrebuilt.Audience,
                 },
             },
             sharedLinks: [{
@@ -128,7 +136,25 @@
                     roomID +
                     '&role=Audience',
             }],
-            ...config
+            // --- Disable All Notifications ---
+            showMemberJoinNotice: false, // Hides "User joined" alerts
+            showUserJoinAndLeave: false, // Hides join/leave messages in chat
+            showMessageNotification: false, // Hides floating message popups
+
+            // --- Disable All Controls & UI ---
+            showTextChat: false, // Disables the chat system entirely
+            showInRoomMessageButton: false, // Removes the chat icon/button
+            showUserList: false, // Hides the viewer count/list
+            showPreJoinView: false, // Skips the "Enter Name" preview screen
+
+            // --- Device Controls (Audience shouldn't have these anyway) ---
+            turnOnCameraWhenJoining: false,
+            turnOnMicrophoneWhenJoining: false,
+            showMyCameraToggleButton: false,
+            showMyMicrophoneToggleButton: false,
+            showAudioVideoSettingsButton: false,
+            showScreenSharingButton: false,
+            showLeaveRoomConfirmDialog: false, // Exit immediately without popup
         });
     }
 
