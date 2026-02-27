@@ -92,8 +92,8 @@
 
 
         // You can assign different roles based on url parameters.
-        let role = 'Audience';
-        // role = role === 'Host' ? ZegoUIKitPrebuilt.Host : ZegoUIKitPrebuilt.Audience;
+        let role = ZegoUIKitPrebuilt.Audience;
+      
         
 
 
@@ -108,9 +108,7 @@
                 showPreJoinView: false,
                 showMemberJoinNotice: false,
                 showMessageNotification: false,
-
                 showUserJoinAndLeave: false
-
             }
        
         const zp = ZegoUIKitPrebuilt.create(TOKEN);
