@@ -10,6 +10,10 @@
         #root video {
             object-fit: cover !important;
         }
+
+        #zego_left_notify_wrapper, #zego_right_notify_wrapper {
+            display: none !important;
+        }
     </style>
 </head>
 

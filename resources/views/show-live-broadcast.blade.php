@@ -93,11 +93,11 @@
 
         // You can assign different roles based on url parameters.
         let role = 'Audience';
-        role = role === 'Host' ? ZegoUIKitPrebuilt.Host : ZegoUIKitPrebuilt.Audience;
-        let config = {}
+        // role = role === 'Host' ? ZegoUIKitPrebuilt.Host : ZegoUIKitPrebuilt.Audience;
+        
 
 
-        if (role === 'Audience') {
+       
             config = {
                 showTextChat: false,
                 showUserList: false,
@@ -112,7 +112,7 @@
                 showUserJoinAndLeave: false
 
             }
-        }
+       
         const zp = ZegoUIKitPrebuilt.create(TOKEN);
         zp.joinRoom({
             container: document.querySelector("#root"),

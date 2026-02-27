@@ -257,11 +257,11 @@
         .video-container.question-activated .video-placeholder {
             background: linear-gradient(45deg, #764ba2, #667eea);
             transition: background 0.5s ease;
-            height: 170px;
-            width: 170px;
-            z-index: 50;
+            height: 175px;
+            width: 175px;
+            z-index: 1;
             position: absolute;
-            top: 115px;
+            top: 120px;
             left: 50%;
             transform: translate(-50%, -50%);
             border-radius: 100%;
@@ -1937,7 +1937,8 @@
                     .then(response => response.json())
                     .then(prizeData => {
                         console.log('Prize data:', prizeData);
-                        if (prizeData.success && prizeData.prize !== undefined && prizeData.prize != 'no prize defined' && prizeData.is_winner == true) {
+                        if (prizeData.success && prizeData.prize !== undefined && prizeData.prize !=
+                            'no prize defined' && prizeData.is_winner == true) {
                             document.getElementById('prizeAmount').textContent = prizeData.prize;
                             fireConfetti();
                             addOverlayMessage('@System', 'Congratulations! You have won ' + prizeData.prize);
