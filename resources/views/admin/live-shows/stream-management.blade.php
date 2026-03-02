@@ -231,9 +231,9 @@
                         </div>
 
                         <div id="quizTimer"
-                            style=" position: absolute; bottom: 120px; right: 100px;   padding: 10px; border: 1px solid #ccc; border-radius: 50%; z-index: 1000;width: 100px;height: 100px;display: none;align-items: center;justify-content: center; font-size: 3rem;font-weight: bold; text-align: center; background: url('{{ asset('assets/images/clock.png') }}') no-repeat center center; background-size: contain;">
+                            style=" position: absolute; bottom: 120px; right: 100px;   padding: 10px; border: 1px solid transparent; border-radius: 50%; z-index: 1000;width: 100px;height: 100px;display: none;align-items: center;justify-content: center; font-size: 3rem;font-weight: bold; text-align: center; background: url('{{ asset('assets/images/clock.png') }}') no-repeat center center; background-size: contain;">
                             
-                            <span id="quizTimerText">0</span>
+                            <span id="quizTimerText" style="color: #000;margin-top: 10px;">0</span>
                         </div>
 
                     </div>
