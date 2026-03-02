@@ -149,7 +149,7 @@
                         <h5 class="mb-0 fw-bold text-center">Quiz Questions
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body position-relative">
                         <div class="question-slider px-2">
                             @foreach ($liveShow->quizzes as $index => $quiz)
                                 <div class="px-2">
@@ -229,6 +229,13 @@
                                 </div>
                             @endforeach
                         </div>
+
+                        <div id="quizTimer"
+                            style=" position: absolute; bottom: 120px; right: 100px;   padding: 10px; border: 1px solid #ccc; border-radius: 50%; z-index: 1000;width: 100px;height: 100px;display: none;align-items: center;justify-content: center; font-size: 3rem;font-weight: bold; text-align: center; background: url('{{ asset('assets/images/clock.png') }}') no-repeat center center; background-size: contain;">
+                            
+                            <span id="quizTimerText">0</span>
+                        </div>
+
                     </div>
                 </div>
 
@@ -371,6 +378,7 @@
             </div>
         </div>
     </div>
+
 
     <style>
         /* Custom Styling for the Admin Dashboard */
@@ -694,6 +702,34 @@
                 document.getElementById('total-users-count').innerText = `(${players.length})`;
             }
 
+            // Function to display a countdown timer in the div#quizTimer and hide it after countdown finishes
+            function showQuizTimer(seconds) {
+                const timerDiv = document.querySelector('#quizTimer');
+                if (!timerDiv) return;
+
+                let timeLeft = parseInt(seconds, 10);
+                timerDiv.style.display = 'flex';
+                timerDiv.querySelector('#quizTimerText').innerText = timeLeft;
+
+                // Clear any previous timer to avoid stacking
+                if (timerDiv._quizTimerInterval) {
+                    clearInterval(timerDiv._quizTimerInterval);
+                }
+
+                timerDiv._quizTimerInterval = setInterval(function() {
+                    timeLeft--;
+                    if (timeLeft > 0) {
+                        timerDiv.querySelector('#quizTimerText').innerText = timeLeft;
+                    } else {
+                        timerDiv.querySelector('#quizTimerText').innerText = '0';
+                        clearInterval(timerDiv._quizTimerInterval);
+                        setTimeout(() => {
+                            timerDiv.style.display = 'none';
+                        }, 500); // Give a short delay before hiding
+                    }
+                }, 1000);
+            }
+
 
             function submitQuizTimerForm(event, quizId) {
                 event.preventDefault();
@@ -717,6 +753,7 @@
                     .catch(error => {
                         console.error('Error sending quiz question:', error);
                     });
+                showQuizTimer(seconds);
             }
         </script>
 
