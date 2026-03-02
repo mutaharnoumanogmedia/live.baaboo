@@ -209,17 +209,18 @@
                                                     <div class="col-auto">
                                                         <div class="btn-group shadow-sm">
                                                             <button type="submit" class="btn btn-success px-3">
-                                                                <i class="fas fa-play me-1"></i> Start
-                                                            </button>
-                                                            <button class="btn btn-danger px-3" type="button"
-                                                                onclick="removeQuiz({{ $quiz->id }})">
-                                                                <i class="fas fa-times me-1"></i> Hide
+                                                                <i class="fas fa-play me-2"></i> Start
                                                             </button>
                                                             <button type="button"
                                                                 onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }})"
                                                                 class="btn btn-info px-3 text-white">
-                                                                <i class="fas fa-chart-bar me-1"></i> Show Responses
+                                                                <i class="fas fa-chart-bar me-2"></i> Show Responses
                                                             </button>
+                                                            <button class="btn btn-danger px-3" type="button"
+                                                                onclick="removeQuiz({{ $quiz->id }})">
+                                                                <i class="fas fa-times me-2"></i> Hide
+                                                            </button>
+                                                            
                                                         </div>
                                                     </div>
                                                 </form>
