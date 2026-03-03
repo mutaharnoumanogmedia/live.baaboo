@@ -920,6 +920,14 @@
         </div>
     </div>
     <div class="main-container" id="mainContainer">
+
+        <div class="video-container" id="videoContainer">
+            <div class="video-placeholder" id="videoPlaceholder">
+                {{-- <div id="player"></div> --}}
+                <iframe id="live-broadcast-iframe" src="{{ route('show-live-broadcast', [$liveShow->id]) }}"
+                    frameborder="0"></iframe>
+            </div>
+        </div>
         <!-- Quiz Overlay -->
         <div class="quiz-overlay" id="quizOverlay">
             <div class="quiz-content">
@@ -966,14 +974,7 @@
 
 
         <!-- Video Container -->
-        <div class="video-container" id="videoContainer">
-            <div class="video-placeholder" id="videoPlaceholder">
-                {{-- <div id="player"></div> --}}
-                <iframe id="live-broadcast-iframe" src="{{ route('show-live-broadcast', [$liveShow->id]) }}"
-                    frameborder="0"></iframe>
-            </div>
 
-        </div>
     </div>
 
     <div class="fixed-bottom">
@@ -1664,11 +1665,11 @@
             timer = data.timer;
 
             let quizQuestion = data.quizQuestion;
-            
-            currentQuizQuestionIndex ++;
+
+            currentQuizQuestionIndex++;
             // add them to quizQuestion
             quizQuestion.index = currentQuizQuestionIndex;
-        
+
 
             showQuestionAndSetTimer(quizQuestion, timer);
             quizMode = false;
@@ -1711,7 +1712,7 @@
 
             console.log('Showing quiz question:', quiz, 'with timer:', timer);
             appendQuizQuestion(quiz);
-          
+
             startTimer(timer, evaluateAnswerWithTimeToSubmit);
             quizMode = false;
             toggleQuiz("show");
@@ -2307,12 +2308,13 @@
             }
         });
 
-    // Function to convert number (0,1,2,3) to corresponding letter (A,B,C,D)
-    function numberToLetter(index) {
-        const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'   ];
-        return letters[index];
-    }
-    
+        // Function to convert number (0,1,2,3) to corresponding letter (A,B,C,D)
+        function numberToLetter(index) {
+            const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+                'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+            ];
+            return letters[index];
+        }
     </script>
 
     <!-- Safari: show "Touch to unmute" overlay and unmute videos inside broadcast iframe -->
