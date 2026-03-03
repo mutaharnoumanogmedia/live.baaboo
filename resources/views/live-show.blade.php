@@ -528,7 +528,7 @@
             right: 0;
             bottom: 0;
 
-            z-index: 20;
+            z-index: 0;
             transform: translateY(100%);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             overflow-y: auto;
@@ -1285,12 +1285,12 @@
             <div>
                 <input type="hidden" id="quizId" value="${quiz.id}">
                     <div class="quiz-question">
-                        <i class="fas fa-question-circle text-primary me-2"></i>
-                        ${quiz.question}
+                       <div class="text-center quiz-question-index me-1" style="font-size: 14px; font-weight: bold;">${quiz.index  } of ${quiz.totalQuizQuestions}.</div>
+                       <div class="quiz-question-text">${quiz.question}</div>
                     </div>
                     <div class="quiz-options row">
                         ${quiz.options.map((option, index) =>
-                        `<div class="quiz-option col-md-6 position-relative mb-3">  <div class="option-result-container " style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}">${option.option_text}</label>  </div> `).join('')}
+                        `<div class="quiz-option col-md-6 position-relative mb-3">  <div class="option-result-container " style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}">${numberToLetter(index)}. ${option.option_text}</label>  </div> `).join('')}
                     </div>
              </div>
             `;
@@ -1647,6 +1647,8 @@
     </script>
     <script>
         // Enable Pusher logging - disable in production
+        let totalQuizQuestions = 0;
+        let currentQuizQuestionIndex = 0;
 
 
         var channel = pusher.subscribe('live-show-quiz.{{ $liveShow->id }}');
@@ -1662,6 +1664,12 @@
             timer = data.timer;
 
             let quizQuestion = data.quizQuestion;
+            
+            currentQuizQuestionIndex ++;
+            // add them to quizQuestion
+            quizQuestion.index = currentQuizQuestionIndex;
+        
+
             showQuestionAndSetTimer(quizQuestion, timer);
             quizMode = false;
             toggleQuiz("show");
@@ -1703,6 +1711,7 @@
 
             console.log('Showing quiz question:', quiz, 'with timer:', timer);
             appendQuizQuestion(quiz);
+          
             startTimer(timer, evaluateAnswerWithTimeToSubmit);
             quizMode = false;
             toggleQuiz("show");
@@ -2297,6 +2306,13 @@
                 chatContainer.innerHTML = '<p class="text-muted">No messages yet.</p>';
             }
         });
+
+    // Function to convert number (0,1,2,3) to corresponding letter (A,B,C,D)
+    function numberToLetter(index) {
+        const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'   ];
+        return letters[index];
+    }
+    
     </script>
 
     <!-- Safari: show "Touch to unmute" overlay and unmute videos inside broadcast iframe -->

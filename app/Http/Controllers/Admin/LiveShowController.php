@@ -14,7 +14,9 @@ use App\Events\UserBlockFromLiveShowEvent;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendWinnerEmailJob;
 use App\Models\LiveShow;
+use App\Models\LiveShowQuiz;
 use App\Models\LiveShowWinnerPrize;
+use App\Models\QuizOption;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use App\Services\LiveShowQuizService;
@@ -215,16 +217,27 @@ class LiveShowController extends Controller
         ]);
 
         $liveShow = LiveShow::findOrFail($id);
-        $quiz = $liveShow->quizzes()
-            ->with(['options' => function ($query) {
-                $query->select('id', 'quiz_id', 'option_text'); // exclude is_correct
-            }])
-            ->where('id', $quizId)
-            ->first();
+        // $quiz = $liveShow->quizzes()
+
+        //     ->where('id', $quizId)
+        //     ->with(['options' => function ($query) {
+        //         $query->select('id', 'quiz_id', 'option_text'); // exclude is_correct
+        //     }])
+        //     ->first();
+
+        $quiz = LiveShowQuiz::where('id', $quizId)->first()->toArray();
 
         if (! $quiz) {
             return response()->json(['message' => 'Quiz not found for this live show.'], 404);
         }
+        $quizOptions  = QuizOption::where('quiz_id', $quizId)->select('id', 'quiz_id', 'option_text')->get()->toArray();
+
+        // Attach quiz options directly to $quiz object for broadcasting
+        $quiz['options'] = $quizOptions;
+        
+        // total quiz questions
+        $totalQuizQuestions = $liveShow->quizzes()->count();
+        $quiz['totalQuizQuestions'] = $totalQuizQuestions;
 
         // Broadcast the quiz question to users
         ShowLiveShowQuizQuestionEvent::dispatch($quiz, (string) $liveShow->id, $request->seconds, $request->is_last ?? false);

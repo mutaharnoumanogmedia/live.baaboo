@@ -4,8 +4,7 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
+
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -23,13 +22,16 @@ class ShowLiveShowQuizQuestionEvent implements ShouldBroadcast
     public $live_show_id;
     public $timer;
     public $is_last;
-    public function __construct($quiz_question, $live_show_id, $timer, $is_last = false)
+    
+    
+    public function __construct($quiz_question, $live_show_id, $timer, $is_last = false )
     {
         //
         $this->quiz_question = $quiz_question;
         $this->live_show_id = $live_show_id;
         $this->timer = $timer;
         $this->is_last = $is_last;
+      
     }
 
     /**
@@ -51,9 +53,11 @@ class ShowLiveShowQuizQuestionEvent implements ShouldBroadcast
     {
         return [
             'quizQuestion' => $this->quiz_question,
+           
             'liveShowId' => $this->live_show_id,
             'timer' => $this->timer ?? 15,
-            'isLast' => $this->is_last ?? false
+            'isLast' => $this->is_last ?? false,
+           
         ];
     }
 }

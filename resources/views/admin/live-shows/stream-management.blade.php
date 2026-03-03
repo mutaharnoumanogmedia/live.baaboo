@@ -220,7 +220,7 @@
                                                                 onclick="removeQuiz({{ $quiz->id }})">
                                                                 <i class="fas fa-times me-2"></i> Hide
                                                             </button>
-                                                            
+
                                                         </div>
                                                     </div>
                                                 </form>
@@ -233,7 +233,7 @@
 
                         <div id="quizTimer"
                             style=" position: absolute; bottom: 120px; right: 100px;   padding: 10px; border: 1px solid transparent; border-radius: 50%; z-index: 1000;width: 100px;height: 100px;display: none;align-items: center;justify-content: center; font-size: 3rem;font-weight: bold; text-align: center; background: url('{{ asset('assets/images/clock.png') }}') no-repeat center center; background-size: contain;">
-                            
+
                             <span id="quizTimerText" style="color: #000;margin-top: 10px;">0</span>
                         </div>
 
@@ -703,9 +703,11 @@
                 document.getElementById('total-users-count').innerText = `(${players.length})`;
             }
 
+            const timerDiv = document.querySelector('#quizTimer');
+
+
             // Function to display a countdown timer in the div#quizTimer and hide it after countdown finishes
             function showQuizTimer(seconds) {
-                const timerDiv = document.querySelector('#quizTimer');
                 if (!timerDiv) return;
 
                 let timeLeft = parseInt(seconds, 10);
@@ -716,6 +718,8 @@
                 if (timerDiv._quizTimerInterval) {
                     clearInterval(timerDiv._quizTimerInterval);
                 }
+
+
 
                 timerDiv._quizTimerInterval = setInterval(function() {
                     timeLeft--;
@@ -729,6 +733,14 @@
                         }, 500); // Give a short delay before hiding
                     }
                 }, 1000);
+            }
+
+            function hideQuizTimer() {
+                timerDiv.querySelector('#quizTimerText').innerText = '0';
+                clearInterval(timerDiv._quizTimerInterval);
+                setTimeout(() => {
+                    timerDiv.style.display = 'none';
+                }, 500); // Give a short delay before hiding
             }
 
 
@@ -824,6 +836,7 @@
                     .then(response => response.json())
                     .then(data => {
                         console.log('Quiz question removed:', data);
+                        hideQuizTimer();
                         // Optionally, remove the quiz from the UI
                     })
                     .catch(error => {
