@@ -81,7 +81,7 @@
                     showUserList: false,
                     showPreJoinView: false,
                     showUserJoinAndLeave: false,
-                    showMirror: true,
+                    showMirror: false,
                     fillMode: "cover",
 
                 };
@@ -95,7 +95,7 @@
                     showUserList: false,
                     showPreJoinView: false,
                     showUserJoinAndLeave: false,
-                    showMirror: true,
+                    showMirror: false,
                     fillMode: "cover",
                 };
             }

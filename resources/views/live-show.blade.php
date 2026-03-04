@@ -920,7 +920,7 @@
         </div>
     </div>
     <div class="main-container" id="mainContainer">
-
+        <!-- Video Container -->
         <div class="video-container" id="videoContainer">
             <div class="video-placeholder" id="videoPlaceholder">
                 {{-- <div id="player"></div> --}}
@@ -970,11 +970,6 @@
 
             </div>
         </div>
-
-
-
-        <!-- Video Container -->
-
     </div>
 
     <div class="fixed-bottom">
@@ -1953,8 +1948,9 @@
                             fireConfetti();
                             addOverlayMessage('@System', 'Congratulations! You have won ' + prizeData.prize);
                             showWinnerDialogDiv();
-                            document.getElementById('playerTab-tab').click();
                         }
+                            document.getElementById('playerTab-tab').click();
+
                     })
                     .catch((err) => {
                         console.error('Error fetching prize money:', err);
