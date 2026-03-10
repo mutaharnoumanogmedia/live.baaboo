@@ -12,6 +12,7 @@ use Agence104\LiveKit\AccessTokenOptions;
 use Agence104\LiveKit\VideoGrant;
 use App\Http\Controllers\GamePlayController;
 use App\Http\Controllers\PushNotificationController;
+use App\Http\Controllers\HomeController;
 
 /*
 |--------------------------------------------------------------------------
