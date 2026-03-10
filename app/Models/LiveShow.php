@@ -88,6 +88,14 @@ class LiveShow extends Model
             ->orderBy('live_show_block_users.created_at', 'desc');
     }
 
+    public function galleryMedia()
+    {
+        return $this->belongsToMany(GalleryMedia::class, 'live_show_gallery_media')
+            ->withPivot('sort_order')
+            ->orderBy('live_show_gallery_media.sort_order')
+            ->withTimestamps();
+    }
+
 
     // public function getStreamIdAttribute()
     // {

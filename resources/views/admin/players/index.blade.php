@@ -21,6 +21,7 @@
                                 <th>
                                     Last Game Played
                                 </th>
+                                <th>Referred Users</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -31,7 +32,7 @@
                                     <td>{{ $player->name }}</td>
                                     <td>{{ $player->email }}</td>
                                     <td>{{ $player->created_at }}</td>
-                                    <th>
+                                    <td>
                                         <a href="#" class="btn btn-primary text-center" data-bs-toggle="modal"
                                             data-bs-target="#gamesModal{{ $player->id }}">
                                             {{ $player->liveShows->count() }}
@@ -39,10 +40,17 @@
 
                                         <!-- Modal -->
 
-                                    </th>
-                                    <th>
+                                    </td>
+                                    <td>
                                         {{ $player->liveShows->last()->created_at ?? 'N/A' }}
-                                    </th>
+                                    </td>
+                                    <td>
+                                        {{ $player->referredUsers->count() }}
+                                        <a href="#" class="btn btn-primary text-center" data-bs-toggle="modal"
+                                            data-bs-target="#referredUsersModal{{ $player->id }}">
+                                            <i class="fas fa-users"></i>
+                                        </a>
+                                    </td>
                                     <td>
                                         <div class="dropdown">
                                             <button class="btn btn-secondary btn-sm dropdown-toggle" type="button"
@@ -115,4 +123,39 @@
         </div>
     @endforeach
 
+    @foreach ($players as $player)
+        <div class="modal fade modal-lg" id="referredUsersModal{{ $player->id }}" tabindex="-1"
+            aria-labelledby="referredUsersModalLabel{{ $player->id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark text-light">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="referredUsersModalLabel{{ $player->id }}">
+                            Referred Users by {{ $player->name }}</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-striped table-borderless table-dark">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Registered At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($player->referredUsers as $referredUser)
+                                    <tr>
+                                        <td>{{ $referredUser->name }}</td>
+                                        <td>{{ $referredUser->email }}</td>
+                                        <td>{{ $referredUser->created_at }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
 </x-app-dashboard-layout>

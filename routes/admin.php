@@ -13,10 +13,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/settings', [AppSettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [AppSettingsController::class, 'update'])->name('settings.update');
+
+    Route::get('/gtm', [\App\Http\Controllers\Admin\GtmController::class, 'index'])->name('gtm.index');
+    Route::post('/gtm', [\App\Http\Controllers\Admin\GtmController::class, 'update'])->name('gtm.update');
     Route::resource('users', AdminUserController::class);
 
     Route::resource('live-shows', \App\Http\Controllers\Admin\LiveShowController::class);
+    Route::get('live-shows/{live_show}/gallery-attach', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'liveShowsAttachPage'])->name('live-shows.gallery-attach');
+
     Route::resource('live-show-quizzes', \App\Http\Controllers\Admin\LiveShowQuizController::class);
+
+    Route::get('media-gallery', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'index'])->name('media-gallery.index');
+    Route::get('media-gallery/create', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'create'])->name('media-gallery.create');
+    Route::post('media-gallery/upload', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'upload'])->name('media-gallery.upload');
+    Route::get('media-gallery/{media_gallery}/edit', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'edit'])->name('media-gallery.edit');
+    Route::put('media-gallery/{media_gallery}', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'update'])->name('media-gallery.update');
+    Route::delete('media-gallery/{media_gallery}', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'destroy'])->name('media-gallery.destroy');
+    Route::get('media-gallery/{media_gallery}/attach-show', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'attachShow'])->name('media-gallery.attach-show');
+    Route::post('media-gallery/attach-to-live-show', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'attachToLiveShow'])->name('media-gallery.attach-to-live-show');
+    Route::post('media-gallery/detach-from-live-show', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'detachFromLiveShow'])->name('media-gallery.detach-from-live-show');
 
     Route::get('live-shows/stream-management/{id}', [\App\Http\Controllers\Admin\LiveShowController::class, 'streamManagement'])->name('live-shows.stream-management');
     Route::get('live-shows/stream-broadcaster/{id}', [\App\Http\Controllers\Admin\LiveShowController::class, 'streamBroadcaster'])->name('live-shows.stream-management.broadcaster');
@@ -30,6 +45,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('live-shows/stream-management/{id}/fetch-messages', [\App\Http\Controllers\Admin\LiveShowController::class, 'fetchChatMessages'])->name('live-shows.stream-management.fetch-chat-messages');
     Route::post('live-shows/stream-management/{id}/send-message', [\App\Http\Controllers\Admin\LiveShowController::class, 'sendMessage'])->name('live-shows.stream-management.send-message');
     Route::post('live-shows/stream-management/{id}/reset-chat', [\App\Http\Controllers\Admin\LiveShowController::class, 'resetChat'])->name('live-shows.stream-management.reset-chat');
+    Route::post('live-shows/stream-management/{id}/show-gallery-image', [\App\Http\Controllers\Admin\LiveShowController::class, 'showGalleryImage'])->name('live-shows.stream-management.show-gallery-image');
+    Route::post('live-shows/stream-management/{id}/hide-gallery-image', [\App\Http\Controllers\Admin\LiveShowController::class, 'hideGalleryImage'])->name('live-shows.stream-management.hide-gallery-image');
 
     // updateWinners
     Route::post('live-shows/stream-management/{liveShowId}/update-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'updateWinners'])->name('live-shows.update-winners');
@@ -62,6 +79,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Route::post('live-shows/stream-management/{liveShowId}/block-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'blockUser'])->name('live-shows.block-user');
     Route::post('live-shows/stream-management/{liveShowId}/toggle-block-status-for-player/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'toggleBlockStatusForPlayer'])->name('live-shows.toggle-block-status-for-player');
+
+    Route::get('live-shows/{id}/export-all-chats-as-csv', [\App\Http\Controllers\Admin\LiveShowController::class, 'exportAllChatsOfLiveShowAsCSV'])->name('live-shows.export-all-chats-as-csv');
+    Route::get('live-shows/{id}/export-all-users-as-csv', [\App\Http\Controllers\Admin\LiveShowController::class, 'exportAllUsersOfLiveShowAsCSV'])->name('live-shows.export-all-users-as-csv');
+    Route::get('live-shows/{id}/export-all-quizzes-as-csv', [\App\Http\Controllers\Admin\LiveShowController::class, 'exportAllQuizzesOfLiveShowAsCSV'])->name('live-shows.export-all-quizzes-as-csv');
 
     Route::resource(
         'push-notifications',

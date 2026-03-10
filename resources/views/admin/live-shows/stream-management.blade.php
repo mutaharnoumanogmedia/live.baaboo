@@ -1,14 +1,29 @@
 -- Active: 1764218239848@@127.0.0.1@3306@live_baaboo
 <x-app-dashboard-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Stream Management - {{ $liveShow->title }}
-        </h2>
-    </x-slot>
 
-    <div class="container-fluid  min-vh-100 py-3">
+
+    <div class="container-fluid  min-vh-100">
+        <div class=" d-flex justify-content-between align-items-center py-3 bg-dark rounded mb-1 p-3">
+            <div>
+                <h4 class="mb-0 fw-bold  ">{{ $liveShow->title }}</h4>
+
+            </div>
+            <div class="btn-group shadow-sm">
+                <a target="_blank" class="btn btn-outline-primary"
+                    href="{{ route('admin.live-shows.stream-management.broadcaster', [$liveShow->id]) }}">
+                    <i class="fas fa-video me-1"></i> Broadcaster
+                </a>
+                <a target="_blank" href="{{ route('admin.live-shows.edit', $liveShow->id) }}"
+                    class="btn btn-outline-secondary">
+                    <i class="fas fa-edit me-1"></i> Edit
+                </a>
+                <button class="btn btn-outline-danger" id="resetGameButton">
+                    <i class="fas fa-undo me-1"></i> Reset
+                </button>
+            </div>
+        </div>
         <div class="row g-4">
-            <nav class="col-lg-2">
+            <div class="col-lg-2">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-header  border-bottom py-3">
                         <h6 class="mb-0 fw-bold text-uppercase small text-muted">
@@ -20,8 +35,15 @@
                         </h6>
                     </div>
                     <div class="card-body p-0">
-                        <ul class="list-group list-group-flush" id="activePlayersList"
-                            style="max-height: 80vh; overflow-y: auto;">
+                        <div class="d-flex justify-content-end mb-3 p-1">
+
+                            <a href="{{ route('admin.live-shows.export-all-users-as-csv', $liveShow->id) }}"
+                                title="Export Users" class="btn btn-primary btn-sm" id="exportUsersBtn"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Export Users">
+                                <i class="fas fa-file-export"></i>
+                            </a>
+                        </div>
+                        <ul class="list-group list-group-flush" id="activePlayersList" style=" overflow-y: auto;">
                             <li class="list-group-item d-flex align-items-center border-0 px-3">
                                 <span class="position-relative me-3">
                                     <div class="bg-secondary rounded-circle" style="width: 32px; height: 32px;"></div>
@@ -33,29 +55,11 @@
                         </ul>
                     </div>
                 </div>
-            </nav>
+            </div>
 
             <main class="col-lg-7">
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center py-3">
-                        <div>
-                            <h4 class="mb-0 fw-bold  ">{{ $liveShow->title }}</h4>
 
-                        </div>
-                        <div class="btn-group shadow-sm">
-                            <a target="_blank" class="btn btn-outline-primary"
-                                href="{{ route('admin.live-shows.stream-management.broadcaster', [$liveShow->id]) }}">
-                                <i class="fas fa-video me-1"></i> Broadcaster
-                            </a>
-                            <a target="_blank" href="{{ route('admin.live-shows.edit', $liveShow->id) }}"
-                                class="btn btn-outline-secondary">
-                                <i class="fas fa-edit me-1"></i> Edit
-                            </a>
-                            <button class="btn btn-outline-danger" id="resetGameButton">
-                                <i class="fas fa-undo me-1"></i> Reset
-                            </button>
-                        </div>
-                    </div>
 
                     <div class="card-body ">
                         <div class="row align-items-center">
@@ -65,7 +69,7 @@
                                 <div id="qrcode" class="mx-auto p-2  border rounded"
                                     style="width: 180px; height: 180px;"></div>
                                 <div class="mt-4 d-flex justify-content-center align-items-center">
-                                    <a href="{{ url('live-show-play/' . $liveShow->id) }}"
+                                    <a href="{{ url('live-show-play/' . $liveShow->id) }}" target="_blank"
                                         class="text-decoration-none small text-truncate d-block px-3">
                                         {{ url('live-show-play/' . $liveShow->id) }}
 
@@ -240,6 +244,94 @@
                     </div>
                 </div>
 
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-success py-3">
+                        <h5 class="mb-0 fw-bold text-center">Gallery Media
+                        </h5>
+                    </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                       
+
+                                        <div class=" " id="gallery-media-tab">
+                                <div class="p-3">
+
+                                <div class="row">
+                                <div class="col-lg-6">
+                                 <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="text-muted small text-uppercase fw-bold mb-0">Attached to this stream</h6>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary gallery-hide-on-stream-btn" title="Hide image/video overlay on live stream">
+                                            <i class="fas fa-eye-slash"></i> Hide on stream
+                                        </button>
+                                    </div>
+                                     <div id="gallery-attached-list" class="row g-2 mb-3" style="max-height: 520px; overflow-y: auto;">
+                                        @forelse ($liveShow->galleryMedia as $item)
+                                            <div class="col-12 col-lg-4 gallery-media-card" data-media-id="{{ $item->id }}" data-attached="1">
+                                                <div class="card border shadow-sm">
+                                                    @if ($item->isImage())
+                                                        <img src="{{ $item->url }}" class="card-img-top" style="height: 100px; object-fit: cover;" alt="">
+                                                    @else
+                                                        <video src="{{ $item->url }}" class="card-img-top" style="height: 100px; object-fit: cover;" muted></video>
+                                                    @endif
+                                                    <div class="card-body p-1 text-center">
+                                                        <button type="button" class="btn btn-sm btn-success w-100 mb-1 gallery-show-on-stream-btn" data-media-id="{{ $item->id }}" title="Show on live stream">
+                                                            <i class="fas fa-tv"></i> Show on stream
+                                                        </button>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger w-100 gallery-detach-btn" data-media-id="{{ $item->id }}" title="Remove from stream">
+                                                            <i class="fas fa-times"></i> Remove
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @empty
+                                            <div class="col-12 text-muted small" id="gallery-attached-empty">None attached yet.</div>
+                                        @endforelse
+                                    </div>
+                                    </div>
+                                <div class="col-lg-6">
+                                 <h6 class="text-muted small text-uppercase fw-bold mb-2 mt-3">Add from gallery</h6>
+                                    <div id="gallery-available-list" class="row g-2" style="max-height: 520px; overflow-y: auto;">
+                                        @php $attachedIds = $liveShow->galleryMedia->pluck('id')->toArray(); @endphp
+                                        @foreach ($allGalleryMedia as $item)
+                                            @if (!in_array($item->id, $attachedIds))
+                                                <div class="col-lg-4 col-12 gallery-media-card" data-media-id="{{ $item->id }}" data-attached="0">
+                                                    <div class="card border shadow-sm">
+                                                        @if ($item->isImage())
+                                                            <img src="{{ $item->url }}" class="card-img-top" style="height: 100px; object-fit: cover;" alt="">
+                                                        @else
+                                                            <video src="{{ $item->url }}" class="card-img-top" style="height: 100px; object-fit: cover;" muted></video>
+                                                        @endif
+                                                        <div class="card-body p-1 text-center">
+                                                            <button type="button" class="btn btn-sm btn-outline-primary w-100 gallery-attach-btn" data-media-id="{{ $item->id }}" title="Attach to stream">
+                                                                <i class="fas fa-plus"></i> Attach
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                        @if ($allGalleryMedia->isEmpty() || count($attachedIds) >= $allGalleryMedia->count())
+                                            <div class="col-12 text-muted small" id="gallery-available-empty">No other media in gallery. <a href="{{ route('admin.media-gallery.create') }}" target="_blank">Upload</a></div>
+                                        @endif
+                                    </div>
+                                </div>
+                                
+                                </div>
+
+                                   
+                                   
+                                   
+                                </div>
+                            </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                     
+                </div>
+
 
             </main>
 
@@ -251,23 +343,7 @@
                                 <a href="#chat-tab"
                                     class="nav-link active py-3 border-0 border-bottom fw-bold d-flex text-center"
                                     data-bs-toggle="tab">Live Chat
-                                    <div id="chatTabActions" class="ms-auto  pe-2">
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-link text-muted p-0 border-0" type="button"
-                                                id="chatTabActionsDropdown" data-bs-toggle="dropdown"
-                                                aria-expanded="false">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end"
-                                                aria-labelledby="chatTabActionsDropdown">
-                                                <li>
-                                                    <button type="button" class="dropdown-item" id="resetChatBtn">
-                                                        <i class="fas fa-eraser me-2"></i> Reset Chat
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
+
                                 </a>
 
                             </li>
@@ -275,12 +351,24 @@
                                 <a href="#live-show-preview" class="nav-link py-3 border-0 border-bottom fw-bold"
                                     data-bs-toggle="tab">Live Show Details</a>
                             </li>
+                            
                         </ul>
                     </div>
                     <div class="card-body p-0">
                         <div class="tab-content">
                             <div class="tab-pane fade show active" id="chat-tab">
-                                <div id="live-chat-messages" class="p-3 " style="height: 65vh; overflow-y: auto;">
+                                <div class="p-3">
+                                    <button class="btn btn-primary" id="resetChatBtn" title="Reset Chat"
+                                        data-bs-toggle="tooltip" data-bs-placement="top">
+                                        <i class="fas fa-eraser"></i>
+                                    </button>
+                                    <a href="{{ route('admin.live-shows.export-all-chats-as-csv', $liveShow->id) }}"
+                                        class="btn btn-primary" id="exportChatsBtn" title="Export Chats"
+                                        data-bs-toggle="tooltip" data-bs-placement="top">
+                                        <i class="fas fa-file-export"></i>
+                                    </a>
+                                </div>
+                                <div id="live-chat-messages" class="p-3" style="height: 65vh; overflow-y: auto;">
                                 </div>
                                 <div class="p-3 border-top">
                                     <form onsubmit="event.preventDefault(); sendMessage(event)" class="input-group">
@@ -373,6 +461,8 @@
                                     </table>
                                 </div>
                             </div>
+
+                            
                         </div>
                     </div>
                 </div>
@@ -476,7 +566,145 @@
                         resetChat();
                     }
                 });
+
+                // Gallery media: attach/detach via AJAX (event delegation)
+                document.getElementById('gallery-attached-list')?.addEventListener('click', function(e) {
+                    const detachBtn = e.target.closest('.gallery-detach-btn');
+                    if (detachBtn) {
+                        e.preventDefault();
+                        galleryDetach(detachBtn.getAttribute('data-media-id'), detachBtn);
+                        return;
+                    }
+                    const showBtn = e.target.closest('.gallery-show-on-stream-btn');
+                    if (showBtn) {
+                        e.preventDefault();
+                        galleryShowOnStream(showBtn.getAttribute('data-media-id'), showBtn);
+                    }
+                });
+                document.getElementById('gallery-available-list')?.addEventListener('click', function(e) {
+                    const btn = e.target.closest('.gallery-attach-btn');
+                    if (!btn) return;
+                    e.preventDefault();
+                    const mediaId = btn.getAttribute('data-media-id');
+                    galleryAttach(mediaId, btn);
+                });
+                document.querySelector('.gallery-hide-on-stream-btn')?.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    galleryHideOnStream(e.currentTarget);
+                });
             });
+
+            const liveShowId = {{ $liveShow->id }};
+            const galleryAttachUrl = '{{ route("admin.media-gallery.attach-to-live-show") }}';
+            const galleryDetachUrl = '{{ route("admin.media-gallery.detach-from-live-show") }}';
+            const galleryShowOnStreamUrl = '{{ route("admin.live-shows.stream-management.show-gallery-image", ["id" => $liveShow->id]) }}';
+            const galleryHideOnStreamUrl = '{{ route("admin.live-shows.stream-management.hide-gallery-image", ["id" => $liveShow->id]) }}';
+            const galleryCsrf = '{{ csrf_token() }}';
+
+            function galleryShowOnStream(mediaId, btn) {
+                if (!btn) return;
+                btn.disabled = true;
+                fetch(galleryShowOnStreamUrl, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': galleryCsrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ gallery_media_id: parseInt(mediaId, 10) })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        const label = btn.querySelector('i');
+                        if (label) { const orig = label.className; label.className = 'fas fa-check'; setTimeout(() => { label.className = orig; }, 800); }
+                    }
+                })
+                .catch(err => console.error('Show on stream error:', err))
+                .finally(() => { btn.disabled = false; });
+            }
+
+            function galleryHideOnStream(btn) {
+                if (!btn) return;
+                btn.disabled = true;
+                fetch(galleryHideOnStreamUrl, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': galleryCsrf, 'Accept': 'application/json', 'Content-Type': 'application/json' }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        const label = btn.querySelector('i');
+                        if (label) { const orig = label.className; label.className = 'fas fa-check'; setTimeout(() => { label.className = orig; }, 800); }
+                    }
+                })
+                .catch(err => console.error('Hide on stream error:', err))
+                .finally(() => { btn.disabled = false; });
+            }
+
+            function galleryAttach(mediaId, btn) {
+                const card = btn.closest('.gallery-media-card');
+                if (!card) return;
+                btn.disabled = true;
+                fetch(galleryAttachUrl, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': galleryCsrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ live_show_id: liveShowId, gallery_media_id: parseInt(mediaId, 10) })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        card.setAttribute('data-attached', '1');
+                        const body = card.querySelector('.card-body');
+                        if (body) {
+                            body.innerHTML = '<button type="button" class="btn btn-sm btn-success w-100 mb-1 gallery-show-on-stream-btn" data-media-id="' + mediaId + '" title="Show on live stream"><i class="fas fa-tv"></i> Show on stream</button><button type="button" class="btn btn-sm btn-outline-danger w-100 gallery-detach-btn" data-media-id="' + mediaId + '" title="Remove from stream"><i class="fas fa-times"></i> Remove</button>';
+                        }
+                        document.getElementById('gallery-attached-list').appendChild(card);
+                        const emptyEl = document.getElementById('gallery-attached-empty');
+                        if (emptyEl) emptyEl.remove();
+                        const availableList = document.getElementById('gallery-available-list');
+                        if (availableList && !availableList.querySelector('.gallery-media-card') && !document.getElementById('gallery-available-empty')) {
+                            const emptyMsg = document.createElement('div');
+                            emptyMsg.className = 'col-12 text-muted small';
+                            emptyMsg.id = 'gallery-available-empty';
+                            emptyMsg.innerHTML = 'No other media in gallery. <a href="{{ route('admin.media-gallery.create') }}" target="_blank">Upload</a>';
+                            availableList.appendChild(emptyMsg);
+                        }
+                    }
+                })
+                .catch(err => console.error('Gallery attach error:', err))
+                .finally(() => { btn.disabled = false; });
+            }
+
+            function galleryDetach(mediaId, btn) {
+                const card = btn.closest('.gallery-media-card');
+                if (!card) return;
+                btn.disabled = true;
+                fetch(galleryDetachUrl, {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': galleryCsrf, 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ live_show_id: liveShowId, gallery_media_id: parseInt(mediaId, 10) })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        card.setAttribute('data-attached', '0');
+                        const body = card.querySelector('.card-body');
+                        if (body) {
+                            body.innerHTML = '<button type="button" class="btn btn-sm btn-outline-primary w-100 gallery-attach-btn" data-media-id="' + mediaId + '" title="Attach to stream"><i class="fas fa-plus"></i> Attach</button>';
+                        }
+                        document.getElementById('gallery-available-list').appendChild(card);
+                        const availableEmpty = document.getElementById('gallery-available-empty');
+                        if (availableEmpty) availableEmpty.remove();
+                        const attachedList = document.getElementById('gallery-attached-list');
+                        if (attachedList && !attachedList.querySelector('.gallery-media-card')) {
+                            const empty = document.createElement('div');
+                            empty.className = 'col-12 text-muted small';
+                            empty.id = 'gallery-attached-empty';
+                            empty.textContent = 'None attached yet.';
+                            attachedList.appendChild(empty);
+                        }
+                    }
+                })
+                .catch(err => console.error('Gallery detach error:', err))
+                .finally(() => { btn.disabled = false; });
+            }
 
             function fetchChatMessages() {
                 // Simulate an API call to fetch chat messages
@@ -619,6 +847,7 @@
                     .then(data => {
                         // Assuming data is an array of player names
                         console.log('Active Players Data:', data);
+
 
                         data = data.map(player => {
                             return {

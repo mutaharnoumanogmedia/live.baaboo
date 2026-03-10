@@ -29,6 +29,27 @@
                             <th>Registered At:</th>
                             <td>{{ $player->created_at }}</td>
                         </tr>
+                        <tr>
+                            <th>Referred Users:</th>
+                            <td>{{ $player->referredUsers->count() }}</td>
+                        </tr>
+                        <tr>
+                            <th>Referral Link:</th>
+                            <td>{{ $player->referral_link ?? 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Referred By:</th>
+                            <td>
+                            @if ($player->referredBy)
+                                <a href="{{ route('admin.players.show', $player->referredBy->id) }}">
+                                    {{ $player->referredBy->name }}
+                                </a>
+                            @else
+                                N/A
+                            @endif
+                            </td>
+                        </tr>
+
                     </table>
 
                     <!-- show player participation in live shows and quizzes -->

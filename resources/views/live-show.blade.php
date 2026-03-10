@@ -21,6 +21,10 @@
     <meta name="twitter:description" content="Join the baaboo Live Game Show and compete for prizes!">
     <meta name="twitter:image" content="{{ asset('og-image.webp') }}">
 
+     <!-- Google Tag Manager --> <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-PSLR7HMJ');</script> <!-- End Google Tag Manager -->         
+     
+     <!-- Google Tag Manager (noscript) --> <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PSLR7HMJ" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript> <!-- End Google Tag Manager (noscript) --> 
+
     <link href='https://fonts.googleapis.com/css?family=Outfit' rel='stylesheet'>
 
     <style>
@@ -905,10 +909,73 @@
         #registerModal+.modal-backdrop {
             z-index: 199000;
         }
+
+        /* Heart reaction: floating overlay (TikTok/Instagram style) */
+        #heartReactionsOverlay {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 76px;
+            pointer-events: none;
+            z-index: 100;
+            overflow: hidden;
+        }
+        .heart-reaction-float {
+            position: absolute;
+            bottom: 25%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: heartFloat 2.2s ease-out forwards;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+        .heart-reaction-float .heart-icon {
+            font-size: 2rem;
+            color: #ff2d55;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+        .heart-reaction-float .heart-username {
+            font-size: 0.7rem;
+            color: #fff;
+            margin-top: 2px;
+            max-width: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        @keyframes heartFloat {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            70% { opacity: 1; }
+            100% { transform: translateY(-140px) scale(0.9); opacity: 0; }
+        }
+        #heartReactionBtn {
+            position: absolute;
+            bottom: 45px;
+            right: 16px;
+            z-index: 99999;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0,0,0,0.4);
+            color: #ff2d55;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #heartReactionBtn:active { transform: scale(0.9); }
+        #heartReactionBtn:hover { background: rgba(0,0,0,0.55); }
     </style>
+    @include('partials.gtm', ['part' => 'head'])
 </head>
 
 <body>
+    @include('partials.gtm', ['part' => 'body'])
 
     <!-- Centered Play Button Overlay -->
     <div id="playButtonOverlay" style="">
@@ -926,8 +993,24 @@
                 {{-- <div id="player"></div> --}}
                 <iframe id="live-broadcast-iframe" src="{{ route('show-live-broadcast', [$liveShow->id]) }}"
                     frameborder="0"></iframe>
-            </div>
+
+
+                      <!-- Gallery image/video overlay (shown via Pusher from admin stream-management) -->
+    <div id="galleryStreamOverlay"
+        style="display:none; position:relative; top:0; left:0; right:0; bottom:0;  background:rgba(0,0,0,0.85); align-items:center; justify-content:center; padding:20px;">
+        <div style="position:relative;width:100%;  height:100%; display:flex; align-items:center; justify-content:center;">
+            <img id="galleryStreamImage" src="" alt="" style="max-width:100%; max-height:90vh; object-fit:contain; border-radius:12px; display:none;">
+            <video id="galleryStreamVideo" src="" autoplay  style="max-width:100%; max-height:90vh; border-radius:12px; display:none;"></video>
+           
         </div>
+    </div>
+            </div>
+            <button type="button" id="heartReactionBtn" title="Send a heart">
+                <i class="fas fa-heart"></i>
+            </button>
+        </div>
+        <!-- Floating heart reactions (TikTok/Instagram style) -->
+        <div id="heartReactionsOverlay"></div>
         <!-- Quiz Overlay -->
         <div class="quiz-overlay" id="quizOverlay">
             <div class="quiz-content">
@@ -1098,6 +1181,12 @@
                             <input type="email" class="form-control" id="registerEmail" name="email" required
                                 placeholder="Enter email">
                         </div>
+                        <div>
+                            <input type="checkbox" class="form-check-input" id="agree" required>
+                            <label class="form-check-label" for="agree">I agree to the <a href="#"
+                                    class="text-danger text-decoration-underline">Terms & Conditions, Conscent for data
+                                    collection</a></label>
+                        </div>
                         <div id="registerError" class="text-danger small" style="display:none;"></div>
                     </div>
                     <div class="modal-footer" style="border-top: none;">
@@ -1164,6 +1253,7 @@
         </div>
     </div>
 
+  
 
 
 
@@ -1949,7 +2039,7 @@
                             addOverlayMessage('@System', 'Congratulations! You have won ' + prizeData.prize);
                             showWinnerDialogDiv();
                         }
-                            document.getElementById('playerTab-tab').click();
+                        document.getElementById('playerTab-tab').click();
 
                     })
                     .catch((err) => {
@@ -2304,6 +2394,101 @@
             }
         });
 
+/* Gallery image/video overlay */
+        var channelGalleryImage = pusher.subscribe('live-show-gallery-image.{{ $liveShow->id }}');
+        channelGalleryImage.bind('pusher:subscription_succeeded', function() {
+            console.log('Gallery image channel subscribed successfully!');
+        });
+        channelGalleryImage.bind('ShowGalleryImageEvent', function(data) {
+            //hide iframe
+            var iframe = document.getElementById('live-broadcast-iframe');
+            if (iframe) iframe.style.display = 'none';
+
+
+            var overlay = document.getElementById('galleryStreamOverlay');
+            var imgEl = document.getElementById('galleryStreamImage');
+            var videoEl = document.getElementById('galleryStreamVideo');
+            if (!overlay || !imgEl || !videoEl) return;
+            imgEl.style.display = 'none';
+            imgEl.removeAttribute('src');
+            videoEl.style.display = 'none';
+            videoEl.removeAttribute('src');
+            videoEl.pause();
+            if (data.type === 'video') {
+                videoEl.src = data.url;
+                videoEl.style.display = 'block';
+                videoEl.play().catch(function() {});
+            } else {
+                imgEl.src = data.url;
+                imgEl.style.display = 'block';
+            }
+            overlay.style.display = 'flex';
+        });
+
+        
+        channelGalleryImage.bind('HideGalleryImageEvent', function() {
+            hideGalleryStreamOverlay();
+        });
+
+        function hideGalleryStreamOverlay() {
+            var overlay = document.getElementById('galleryStreamOverlay');
+            var imgEl = document.getElementById('galleryStreamImage');
+            var videoEl = document.getElementById('galleryStreamVideo');
+            if (overlay) overlay.style.display = 'none';
+            if (imgEl) { imgEl.removeAttribute('src'); imgEl.style.display = 'none'; }
+            if (videoEl) { videoEl.pause(); videoEl.removeAttribute('src'); videoEl.style.display = 'none'; }
+
+            //show iframe
+            var iframe = document.getElementById('live-broadcast-iframe');
+            if (iframe) iframe.style.display = 'block';
+        }
+
+        /* Heart reactions (TikTok/Instagram style) */
+        function spawnHeartReaction(userName) {
+            var overlay = document.getElementById('heartReactionsOverlay');
+            if (!overlay) return;
+            var leftPct = 15 + Math.random() * 70;
+            var el = document.createElement('div');
+            el.className = 'heart-reaction-float';
+            el.style.left = leftPct + '%';
+            el.innerHTML = '<span class="heart-icon"><i class="fas fa-heart"></i></span><span class="heart-username">' + escapeHtml(userName || 'Someone') + '</span>';
+            overlay.appendChild(el);
+            el.addEventListener('animationend', function() {
+                if (el.parentNode) el.parentNode.removeChild(el);
+            });
+        }
+        function escapeHtml(text) {
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        document.getElementById('heartReactionBtn')?.addEventListener('click', function() {
+            fetch('{{ url('live-show/' . $liveShow->id . '/heart-reaction') }}', {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json', 'Content-Type': 'application/json' }
+            })
+            .then(function(r) {
+                if (r.status === 401) {
+                    showRegisterModal();
+                    return;
+                }
+                return r.json();
+            })
+            .then(function(data) {
+                if (data && data.success) { /* reaction sent; will appear via Pusher */ }
+            })
+            .catch(function() {});
+        });
+        var channelHearts = pusher.subscribe('live-show-hearts.{{ $liveShow->id }}');
+        channelHearts.bind('pusher:subscription_succeeded', function() {
+            console.log('Heart reactions channel subscribed');
+        });
+        channelHearts.bind('HeartReactionEvent', function(data) {
+            spawnHeartReaction(data.user_name);
+        });
+
+        /* Gallery image/video overlay */
+
         // Function to convert number (0,1,2,3) to corresponding letter (A,B,C,D)
         function numberToLetter(index) {
             const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
@@ -2313,203 +2498,7 @@
         }
     </script>
 
-    <!-- Safari: show "Touch to unmute" overlay and unmute videos inside broadcast iframe -->
-    {{-- <script>
-        (function() {
-            // Uncomment to limit to Safari only:
-            // var isSafari = /^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent) ||
-            //     /iPhone|iPad|iPod/.test(navigator.userAgent) ||
-            //     (navigator.vendor && navigator.vendor.indexOf('Apple') > -1);
-            // if (!isSafari) return;
-
-            var style = document.createElement('style');
-            style.textContent = [
-                '.safari-unmute-overlay{',
-                '  position:fixed;inset:0;z-index:9999;',
-                '  display:flex;flex-direction:column;align-items:center;justify-content:center;',
-                '  background:rgba(0,0,0,0.6);color:#fff;',
-                '  font-family:-apple-system,system-ui,sans-serif;cursor:pointer;',
-                '  -webkit-tap-highlight-color:transparent;',
-                '}',
-                '.safari-unmute-overlay .icon{',
-                '  width:70px;height:70px;margin-bottom:15px;',
-                '  border:3px solid #fff;border-radius:50%;',
-                '  display:flex;align-items:center;justify-content:center;',
-                '}',
-                '.safari-unmute-overlay .icon svg{width:35px;height:35px;fill:#fff;}',
-                '.safari-unmute-overlay .text{font-size:18px;font-weight:500;}',
-                '.safari-unmute-overlay.hidden{display:none !important;}'
-            ].join('');
-            document.head.appendChild(style);
-
-            var overlay = document.createElement('div');
-            overlay.className = 'safari-unmute-overlay';
-            overlay.innerHTML = [
-                '<div class="icon">',
-                '  <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>',
-                '</div>',
-                '<div class="text">Tap to enable sound</div>'
-            ].join('');
-            document.body.appendChild(overlay);
-
-            var hasUnmuted = false;
-            var retryInterval = null;
-            var observer = null;
-
-            // Get iframe document safely
-            function getIframeDoc() {
-                var iframe = document.getElementById('live-broadcast-iframe');
-                try {
-                    return iframe && iframe.contentDocument;
-                } catch (e) {
-                    return null; // Cross-origin error
-                }
-            }
-
-            // Force unmute all videos in iframe
-            function forceUnmute() {
-                var doc = getIframeDoc();
-                if (!doc) return false;
-
-                var videos = doc.querySelectorAll('#root video');
-                if (videos.length === 0) return false;
-
-                var success = false;
-                videos.forEach(function(v) {
-                    console.log('Attempting unmute on video:', v);
-
-                    // Multiple approaches
-                    if (v.muted) {
-                        v.muted = false;
-                        success = true;
-                    }
-                    v.removeAttribute('muted');
-                    v.volume = 1;
-
-                    // Try to play if paused
-                    if (v.paused) {
-                        v.play().catch(function() {});
-                    }
-                });
-
-                return success;
-            }
-
-            // Check if audio is actually enabled
-            function isAudioWorking() {
-                var doc = getIframeDoc();
-                if (!doc) return false;
-
-                var videos = doc.querySelectorAll('#root video');
-                for (var i = 0; i < videos.length; i++) {
-                    if (!videos[i].muted && videos[i].volume > 0) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            // Hide overlay and cleanup
-            function hideOverlay() {
-                overlay.classList.add('hidden');
-                if (retryInterval) {
-                    clearInterval(retryInterval);
-                    retryInterval = null;
-                }
-                if (observer) {
-                    observer.disconnect();
-                    observer = null;
-                }
-            }
-
-            // Start watching for videos in iframe (after user tap)
-            function watchForVideos() {
-                var doc = getIframeDoc();
-                if (!doc) return;
-
-                var root = doc.querySelector('#root');
-                if (!root) return;
-
-                observer = new MutationObserver(function() {
-                    if (forceUnmute() && isAudioWorking()) {
-                        hasUnmuted = true;
-                        hideOverlay();
-                    }
-                });
-                observer.observe(root, {
-                    childList: true,
-                    subtree: true
-                });
-            }
-
-            // Main unmute handler - called on user tap
-            function onUserTap(e) {
-                if (e) e.preventDefault();
-
-                console.log('User tapped - attempting unmute');
-
-                // Attempt 1: Immediate
-                forceUnmute();
-
-                // Attempt 2-5: Quick retries
-                setTimeout(forceUnmute, 100);
-                setTimeout(forceUnmute, 300);
-                setTimeout(forceUnmute, 600);
-                setTimeout(forceUnmute, 1000);
-
-                // Start polling every 500ms until success (max 30 seconds)
-                var attempts = 0;
-                retryInterval = setInterval(function() {
-                    attempts++;
-                    console.log('Retry attempt', attempts);
-
-                    forceUnmute();
-
-                    if (isAudioWorking()) {
-                        console.log('Audio unmuted successfully!');
-                        hasUnmuted = true;
-                        hideOverlay();
-                    } else if (attempts >= 60) { // 30 seconds max
-                        console.log('Max retries reached');
-                        clearInterval(retryInterval);
-                        retryInterval = null;
-                    }
-                }, 500);
-
-                // Also watch for new videos being added
-                watchForVideos();
-
-                // Remove tap listeners (user already tapped)
-                overlay.removeEventListener('click', onUserTap);
-                overlay.removeEventListener('touchend', onUserTap);
-
-                // Hide overlay after tap regardless (user initiated action)
-                setTimeout(function() {
-                    overlay.classList.add('hidden');
-                }, 500);
-            }
-
-            overlay.addEventListener('click', onUserTap);
-            overlay.addEventListener('touchend', onUserTap, {
-                passive: false
-            });
-
-            // Auto-hide if audio works without user tap (desktop browsers)
-            var autoCheckInterval = setInterval(function() {
-                if (isAudioWorking()) {
-                    console.log('Audio already working - hiding overlay');
-                    hideOverlay();
-                    clearInterval(autoCheckInterval);
-                }
-            }, 1000);
-
-            // Stop auto-check after 30 seconds
-            setTimeout(function() {
-                clearInterval(autoCheckInterval);
-            }, 30000);
-
-        })();
-    </script> --}}
+   
 </body>
 
 </html>

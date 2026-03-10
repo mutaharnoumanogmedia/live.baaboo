@@ -8,11 +8,14 @@ use App\Events\LiveShowQuizUserResponses;
 use App\Events\RemoveLiveShowQuizQuestionEvent;
 use App\Events\ResetChatEvent;
 use App\Events\SetBroadcastRoomIdEvent;
+use App\Events\ShowGalleryImageEvent;
+use App\Events\HideGalleryImageEvent;
 use App\Events\ShowLiveShowQuizQuestionEvent;
 use App\Events\ShowPlayerAsWinnerEvent;
 use App\Events\UserBlockFromLiveShowEvent;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendWinnerEmailJob;
+use App\Models\GalleryMedia;
 use App\Models\LiveShow;
 use App\Models\LiveShowQuiz;
 use App\Models\LiveShowWinnerPrize;
@@ -204,9 +207,10 @@ class LiveShowController extends Controller
 
     public function streamManagement($id)
     {
-        $liveShow = LiveShow::with(['quizzes.options', 'users', 'winnerPrizes'])->findOrFail($id);
+        $liveShow = LiveShow::with(['quizzes.options', 'users', 'winnerPrizes', 'galleryMedia'])->findOrFail($id);
+        $allGalleryMedia = \App\Models\GalleryMedia::orderBy('created_at', 'desc')->get();
 
-        return view('admin.live-shows.stream-management', compact('liveShow'));
+        return view('admin.live-shows.stream-management', compact('liveShow', 'allGalleryMedia'));
     }
 
     public function sendQuizQuestion(Request $request, $id, $quizId)
@@ -230,11 +234,11 @@ class LiveShowController extends Controller
         if (! $quiz) {
             return response()->json(['message' => 'Quiz not found for this live show.'], 404);
         }
-        $quizOptions  = QuizOption::where('quiz_id', $quizId)->select('id', 'quiz_id', 'option_text')->get()->toArray();
+        $quizOptions = QuizOption::where('quiz_id', $quizId)->select('id', 'quiz_id', 'option_text')->get()->toArray();
 
         // Attach quiz options directly to $quiz object for broadcasting
         $quiz['options'] = $quizOptions;
-        
+
         // total quiz questions
         $totalQuizQuestions = $liveShow->quizzes()->count();
         $quiz['totalQuizQuestions'] = $totalQuizQuestions;
@@ -328,13 +332,13 @@ class LiveShowController extends Controller
             $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon]);
             ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string) $liveShowId);
             \Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
-            // Dispatch job to send winner email
-            // try {
-            //     SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow);
-            // } catch (\Exception $e) {
-            //     // log the error
-            //     \Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage());
-            // }
+            // Dispatch job to send winner email after 30 minutes
+            try {
+                SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now()->addMinutes(30));
+            } catch (\Exception $e) {
+                // log the error
+                \Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage());
+            }
         }
 
         return response()->json(['success' => true, 'message' => 'Users winner status updated.', 'winnerUsers' => $topMaxWinnersByScore]);
@@ -415,6 +419,45 @@ class LiveShowController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Chat reset successfully.',
+        ]);
+    }
+
+    public function showGalleryImage(Request $request, $id): JsonResponse
+    {
+        $request->validate([
+            'gallery_media_id' => 'required|integer|exists:gallery_media,id',
+        ]);
+
+        $liveShow = LiveShow::findOrFail($id);
+        $media = GalleryMedia::findOrFail($request->input('gallery_media_id'));
+
+        if (! $liveShow->galleryMedia()->where('gallery_media.id', $media->id)->exists()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This media is not attached to this stream.',
+            ], 422);
+        }
+
+        ShowGalleryImageEvent::dispatch(
+            (string) $liveShow->id,
+            $media->url,
+            $media->type
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Image shown on stream.',
+        ]);
+    }
+
+    public function hideGalleryImage($id): JsonResponse
+    {
+        $liveShow = LiveShow::findOrFail($id);
+        HideGalleryImageEvent::dispatch((string) $liveShow->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Gallery overlay hidden on stream.',
         ]);
     }
 
@@ -594,5 +637,67 @@ class LiveShowController extends Controller
         event(new SetBroadcastRoomIdEvent($liveShow->id, $liveShow->stream_id));
 
         return response()->json(['message' => 'Room ID saved successfully!', 'room_id' => $liveShow->stream_id]);
+    }
+
+    public function exportAllChatsOfLiveShowAsCSV($id)
+    {
+        $liveShow = LiveShow::findOrFail($id);
+        $chats = $liveShow->messages()->get();
+        $csv = fopen('php://temp', 'w');
+        fputcsv($csv, ['User', 'Message', 'Created At']);
+        foreach ($chats as $chat) {
+            fputcsv($csv, [$chat->user->name, $chat->message, $chat->created_at]);
+        }
+
+        rewind($csv);
+        $csvContents = stream_get_contents($csv);
+        $filename = 'chats_'.$liveShow->title.'.csv';
+        fclose($csv);
+
+        return response($csvContents)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    }
+
+    public function exportAllUsersOfLiveShowAsCSV($id)
+    {
+        $liveShow = LiveShow::findOrFail($id);
+        // Fetch users with their UserQuiz results
+        $users = $liveShow->users()->with(['quizzes' => function ($query) use ($id) {
+            $query->where('live_show_id', $id);
+        }])->get();
+        $csv = fopen('php://temp', 'w');
+        // Header: User info + summary of quizzes
+        fputcsv($csv, ['User', 'Email', 'Created At', 'Total Quizzes', 'Total Correct Answers', 'Total Score']);
+        foreach ($users as $user) {
+            $userQuizzes = $user->quizzes;
+            $totalQuizzes = $userQuizzes->count();
+            fputcsv($csv, [$user->name, $user->email, $user->created_at, $totalQuizzes, $user->pivot->score, $user->pivot->is_winner ? 'Yes' : 'No', $user->pivot->prize_won]);
+        }
+
+        // download the csv file
+        rewind($csv);
+        $csvContents = stream_get_contents($csv);
+        $filename = 'users_'.$liveShow->title.'.csv';
+        fclose($csv);
+
+        return response($csvContents)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    }
+
+    public function exportAllQuizzesOfLiveShowAsCSV($id)
+    {
+        $liveShow = LiveShow::findOrFail($id);
+        $quizzes = $liveShow->quizzes()->get();
+        $csv = fopen('php://temp', 'w');
+        fputcsv($csv, ['Quiz', 'Question', 'Created At']);
+        foreach ($quizzes as $quiz) {
+            fputcsv($csv, [$quiz->question, $quiz->created_at]);
+        }
+        fclose($csv);
+
+        // download the csv file
+        return response()->download($csv, 'quizzes'.$liveShow->title.'.csv');
     }
 }

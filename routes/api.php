@@ -80,3 +80,5 @@ Route::post('/push/subscribe', [PushNotificationController::class, 'subscribe'])
 
 Route::get('/get-latest-live-or-scheduled-show', [GamePlayController::class, 'getLatestLiveOrScheduledShow'])->name('api.get-latest-live-or-scheduled-show');
 
+Route::post('/register-affiliate-user', [HomeController::class, 'registerAffiliateUserViaAPI'])->name('api.register-affiliate-user');
+Route::get('/get-affiliate-user/{userName}', [HomeController::class, 'getAffiliateUserViaAPI'])->name('api.get-affiliate-user');

@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [HomeController::class, 'index']);
+Route::get('/', [HomeController::class, 'index'])->name('index');
 
 // Route::middleware(['auth:admin', 'role:admin'])->group(function () {
 //     Route::get("dashboard", [HomeController::class, 'dashboard_redirect'])->name('dashboard');
@@ -29,6 +29,7 @@ Route::middleware(['auth:web'])->group(function () {
     Route::post('live-show/{id}/user/updateOnlineStatus', [GamePlayController::class, 'updateOnlineStatus'])->name('live-show.user.updateOnlineStatus');
 
     Route::post('live-show/{id}/send-message', [GamePlayController::class, 'postMessage'])->name('live-show.post-message');
+    Route::post('live-show/{id}/heart-reaction', [GamePlayController::class, 'heartReaction'])->name('live-show.heart-reaction');
 
     // report user message
     Route::post('live-show/{id}/report-message', [GamePlayController::class, 'reportUserMessage'])->name('live-show.report-message');
@@ -55,7 +56,14 @@ Route::get('/test-message-event', function () {
     return 'Event has been sent!';
 });
 Route::get('/live-show/get-my-points/{liveShowId}', [GamePlayController::class, 'getLiveShowUserPoints'])->name('api.get-my-points');
+Route::get('/live-show/get-my-referral-link', [GamePlayController::class, 'getMyReferralLink'])->name('api.get-my-referral-link')->middleware('auth:web');
 Route::get('/live-show/{id}/user-prize', [GamePlayController::class, 'getUserPrize'])->name('api.get-user-prize');
 Route::get('/live-show/{id}/check-if-user-blocked-from-live-show', [GamePlayController::class, 'checkIfUserBlockedFromLiveShow'])->name('api.check-if-user-blocked-from-live-show');
-require __DIR__.'/admin.php';
-require __DIR__.'/auth.php';
+
+
+Route::post("register-user-via-form-submit", [HomeController::class, 'registerUserViaFormSubmit'])->name('register-user-via-form-submit');
+
+Route::get('register-user-via-form/{name}', [HomeController::class, 'registerUserViaForm'])->name('register-user-via-form');
+Route::get('/live-show-magic-link/{name}', [HomeController::class, 'liveShowMagicLink'])->name('live-show-magic-link');
+require __DIR__ . '/admin.php';
+require __DIR__ . '/auth.php';

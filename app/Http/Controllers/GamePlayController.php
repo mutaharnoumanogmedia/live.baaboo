@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\HeartReactionEvent;
 use App\Events\LiveShowMessageEvent;
 use App\Events\LiveShowOnlineUsersEvent;
 use App\Models\LiveShow;
@@ -46,8 +47,11 @@ class GamePlayController extends Controller
                 // }
 
                 // update username if different
-                if ($existingUser->name !== $request->name) {
+                if ($existingUser->user_name !== $request->name) {
+                    $existingUser->user_name = $request->name;
+                    //set the name same as user_name
                     $existingUser->name = $request->name;
+
                     $existingUser->save();
                 }
 
@@ -94,7 +98,7 @@ class GamePlayController extends Controller
             // end of existing user login
 
             $validator = Validator::make($request->all(), [
-                'name' => 'required|alpha_num|string|max:255|unique:users,name',
+                'name' => 'required|alpha_num|string|max:255|unique:users,user_name',
                 'email' => 'required|email|max:255|unique:users,email',
             ], [
                 'name.unique' => 'The username has already been taken. Please choose a different one.',
@@ -108,6 +112,7 @@ class GamePlayController extends Controller
             $validated = $validator->validated();
             // add rand password
             $validated['password'] = bcrypt(\Str::random(8));
+            $validated['user_name'] = $validated['name'];
 
             $liveShow = LiveShow::live()->find($liveShowId);
             if (! $liveShow) {
@@ -115,8 +120,19 @@ class GamePlayController extends Controller
             }
 
             // Create the user
-            $user = \App\Models\User::create($validated);
+            $user = User::create($validated);
+            
+            
+            $user->save();
             $user->assignRole('user');
+
+            // Set user's own referral_link so they can share it (slug + id for uniqueness)
+            if (empty($user->referral_link)) {
+                // $latestLiveShow = LiveShow::live()->orderBy('id', 'desc')->first();
+                $user->forceFill(['referral_link' => $user->referralLink(),'magic_link' => $user->magicLink(),
+                
+                ])->save();
+            }
 
             // Attach the user to the live show with default values
             $liveShow->users()->attach(
@@ -384,6 +400,28 @@ class GamePlayController extends Controller
         ], 200);
     }
 
+    public function heartReaction($liveShowId)
+    {
+        $user = Auth::guard('web')->user();
+        if (! $user) {
+            return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::guard('web')->check()], 401);
+        }
+
+        $liveShow = LiveShow::find($liveShowId);
+        if (! $liveShow) {
+            return response()->json(['message' => 'Live show not found.'], 404);
+        }
+
+        $isBlocked = $liveShow->blockedUsers()->where('user_id', $user->id)->first();
+        if ($isBlocked) {
+            return response()->json(['message' => 'You have been blocked from the live show.'], 403);
+        }
+
+        HeartReactionEvent::dispatch((string) $liveShow->id, $user->id, $user->name);
+
+        return response()->json(['success' => true, 'message' => 'Heart sent.']);
+    }
+
     public function fetchMessages($liveShowId)
     {
         if (! LiveShow::find($liveShowId)) {
@@ -611,5 +649,28 @@ class GamePlayController extends Controller
         }
 
         return response()->json(['blocked' => false], 200);
+    }
+
+    /**
+     * Get the current user's referral link (generates one if missing).
+     */
+    public function getMyReferralLink(Request $request)
+    {
+        $user = Auth::guard('web')->user();
+        if (! $user) {
+            return response()->json(['message' => 'Unauthorized.'], 401);
+        }
+        if (empty($user->referral_link)) {
+            $user->forceFill(['referral_link' => \Str::slug($user->name).'-'.$user->id])->save();
+        }
+
+        $refParam = $user->referral_link;
+        $fullUrl = url('/').'?ref='.$refParam;
+
+        return response()->json([
+            'success' => true,
+            'referral_link' => $user->referral_link,
+            'referral_url' => $fullUrl,
+        ], 200);
     }
 }

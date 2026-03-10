@@ -24,9 +24,12 @@
     @stack('styles')
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
 
+    @include('partials.gtm', ['part' => 'head'])
+
 </head>
 
 <body class="sb-nav-fixed">
+    @include('partials.gtm', ['part' => 'body'])
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <!-- Navbar Brand-->
         <a class="navbar-brand ps-3" href="{{ route('admin.dashboard') }}">
@@ -79,6 +82,11 @@
                             Quiz Questions
                         </a>
 
+                        <a class="nav-link" href="{{ route('admin.media-gallery.index') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-images"></i></div>
+                            Media Gallery
+                        </a>
+
                         <a class="nav-link" href="{{ route('admin.players.index') }}">
                             <div class="sb-nav-link-icon"><i class="bi bi-people-fill"></i></div>
                             Players
@@ -92,6 +100,10 @@
                         <a class="nav-link" href="{{ route('admin.settings.index') }}">
                             <div class="sb-nav-link-icon"><i class="bi bi-sliders"></i></div>
                             App Settings
+                        </a>
+                        <a class="nav-link" href="{{ route('admin.gtm.index') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-google"></i></div>
+                            Google Tag Manager
                         </a>
                         <a class="nav-link" href="{{ route('admin.password.form') }}">
                             <div class="sb-nav-link-icon"><i class="bi bi-gear-fill"></i></div>
@@ -130,10 +142,12 @@
         </div>
         <div id="layoutSidenav_content">
             <div class="container-fluid">
-                <header class="page-header">
-                    {{ $header ?? '' }}
-                </header>
-                <main id="main-content" class="py-4">
+                @if (isset($header))
+                    <header class="page-header">
+                        {{ $header ?? '' }}
+                    </header>
+                @endif
+                <main id="main-content" class="">
                     {{ $slot }}
                 </main>
             </div>

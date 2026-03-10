@@ -62,6 +62,10 @@
                                                         href="{{ route('admin.live-show-quizzes.index', ['live_show_id' => $show->id]) }}">Quiz
                                                         Questions</a>
                                                 </li>
+                                                <li>
+                                                    <a class="dropdown-item"
+                                                        href="{{ route('admin.live-shows.gallery-attach', $show) }}">Gallery Media</a>
+                                                </li>
                                                 <li class="nav-divider mb-3"></li>
                                                 <li>
                                                     <form action="{{ route('admin.live-shows.destroy', $show->id) }}"
