@@ -93,7 +93,7 @@
     </div>
 
     @push('styles')
-        <link rel="stylesheet" href="{{ asset('assets/styles/datatable.css') }}">
+        <link rel="stylesheet" href="{{ asset('/styles/datatable.css') }}">
     @endpush
 
     @push('scripts')

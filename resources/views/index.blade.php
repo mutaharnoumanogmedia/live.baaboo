@@ -679,7 +679,7 @@
         <div class="container">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="logo">
-                    <img src="{{ asset('assets/images/logo.png') }}" class="img-fluid" width="150" alt="">
+                    <img src="{{ asset('/images/logo.png') }}" class="img-fluid" width="150" alt="">
                     live
                 </div>
                 <nav>

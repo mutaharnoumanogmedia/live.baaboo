@@ -214,7 +214,7 @@
     </div>
 
     @push('styles')
-        {{-- <link href="{{ asset('assets/styles/dropzone.css') }}" rel="stylesheet"> --}}
+        {{-- <link href="{{ asset('/styles/dropzone.css') }}" rel="stylesheet"> --}}
         <style>
             .form-container {
                 max-width: 900px;

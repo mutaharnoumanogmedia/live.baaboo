@@ -10,8 +10,8 @@
     <title>
         {{ env('APP_NAME') }} - Dashboard
     </title>
-    <link href="{{ asset('assets/styles/dashboard.css') }}" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('assets/styles/dashboard-style.css') }}">
+    <link href="{{ asset('/styles/dashboard.css') }}" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('/styles/dashboard-style.css') }}">
 
 
 
@@ -172,9 +172,9 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
 
-    <script src="{{ asset('assets/js/scripts.js') }}"></script>
-    {{-- <script src="{{ asset('assets/demo/chart-area-demo.js') }}"></script>
-    <script src="{{ asset('assets/demo/chart-bar-demo.js') }}"></script> --}}
+    <script src="{{ asset('/js/scripts.js') }}"></script>
+    {{-- <script src="{{ asset('/demo/chart-area-demo.js') }}"></script>
+    <script src="{{ asset('/demo/chart-bar-demo.js') }}"></script> --}}
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
         crossorigin="anonymous"></script>
     <!-- Bootstrap 5 JS Bundle -->
