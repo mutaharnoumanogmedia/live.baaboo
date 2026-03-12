@@ -42,18 +42,20 @@ class HomeController extends Controller
         }
     }
 
-    public function registerUserViaForm(Request $request)
+    public function registerUserViaForm($user_name)
     {
-        $user = User::where('user_name', $request->name)->first();
-        if (! $user) {
-            return redirect()->route('index')->with('error', 'User not found');
+
+        $referredByUser = User::where('user_name', $user_name)->first();
+        if (! $referredByUser) {
+            return redirect()->route('index')->with('error', 'Referred by user not found');
         }
 
-        return view('index', compact('user'));
+        return view('index', compact('referredByUser'));
     }
 
     public function registerUserViaFormSubmit(Request $request)
     {
+        // dd($request->all());
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
@@ -94,7 +96,7 @@ class HomeController extends Controller
             ];
             $leadGenerationResponse = $this->leadGeneration($leadGenerationPayload);
             \Log::info('Lead generation request sent successfully', $leadGenerationPayload);
-           
+
             \Log::info('User created successfully', $user->toArray());
         } catch (\Exception $e) {
             \Log::error('Error sending lead generation request: '.$e->getMessage(), $e->getTrace());
