@@ -84,7 +84,7 @@ class HomeController extends Controller
             ];
             $leadGenerationResponse = $this->leadGeneration($leadGenerationPayload);
             \Log::info('Lead generation request sent successfully', $leadGenerationPayload);
-            \Log::info('Lead generation response', $leadGenerationResponse);
+           
             \Log::info('User created successfully', $user->toArray());
         } catch (\Exception $e) {
             \Log::error('Error sending lead generation request: '.$e->getMessage(), $e->getTrace());
