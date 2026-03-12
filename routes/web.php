@@ -62,7 +62,7 @@ Route::get('/live-show/{id}/check-if-user-blocked-from-live-show', [GamePlayCont
 
 Route::post('register-user-via-form-submit', [HomeController::class, 'registerUserViaFormSubmit'])->name('register-user-via-form-submit');
 
-Route::get('/{name}', [HomeController::class, 'registerUserViaForm'])->name('register-user-via-form');
+Route::get('/l/{name}', [HomeController::class, 'registerUserViaForm'])->name('register-user-via-form');
 Route::get('/live-show-magic-link/{name}', [HomeController::class, 'liveShowMagicLink'])->name('live-show-magic-link');
 
 Route::get('/test/registration-welcome-email', function () {
