@@ -110,7 +110,7 @@
        BEREIT FÜR DIE SHOW (CTA strip)
   ══════════════════════════════════════════ -->
     <section class="cta-banner" id="form-section">
-        <div class="container text-center">
+        <div class="container  ">
             <div class="fs-6 fw-bold text-purple" style="text-transform: uppercase;">Sei Dabei</div>
             <h2 class="section-title mb-2">Bereit für die <span class="text-orange">Show?</span></h2>
             <p class="text-muted mb-1" style="">Trag Dich ein und schnapp Dir Dein Ticket zur nächsten
@@ -403,7 +403,7 @@
     <!-- ══════════════════════════════════════════
        HOST
   ══════════════════════════════════════════ -->
-    <section class="host-section">
+    <section class="host-section gradient-bg-reverse">
         <div class="container">
             <div class="row justify-content-center ">
                 <div class="col-lg-6">

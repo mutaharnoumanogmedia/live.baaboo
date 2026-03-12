@@ -65,6 +65,9 @@
             background: linear-gradient(160deg, #eee6fc 0%, #f7f2ff 40%, #fce9d8 100%) !important;
 
         }
+        .gradient-bg-reverse {
+            background: linear-gradient(564deg, #fce9d8 0%, #f7f2ff 60%, #eee6fc 100%) !important;
+        }
 
         .rounded {
             border-radius: 20px !important;
@@ -805,7 +808,7 @@
 ══════════════════════════════════════════ -->
     <footer>
         <div class="container">
-            <p class="mb-1">© 2026 BadaBing Game Show · Impressum · Datenschutz · AGB · Kontakt</p>
+      
             <p class="mb-0" style="font-size:0.72rem">Die BadaBing Game Show ist ein Unterhaltungsangebot. Teilnahme
                 ab 18 Jahren. Alle Angaben ohne Gewähr. Preise können je nach Showformat variieren.</p>
 
