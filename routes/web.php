@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HomeController::class, 'index'])->name('index');
+Route::get('danke-fuer-deine-teilnahme/{user_name}', [HomeController::class, 'thankYouForYourParticipation'])->name('thank-you-for-your-participation');
 
 // Route::middleware(['auth:admin', 'role:admin'])->group(function () {
 //     Route::get("dashboard", [HomeController::class, 'dashboard_redirect'])->name('dashboard');
@@ -44,8 +45,6 @@ Route::middleware(['auth:web'])->group(function () {
 Route::get('live-show/{id}/get-live-show-users-with-scores', [GamePlayController::class, 'getLiveShowUsersWithScores']);
 Route::get('show-live-broadcast/{id}', [GamePlayController::class, 'showLiveBroadcast'])->name('show-live-broadcast');
 
-
-
 Route::get('/test-message-event', function () {
     event(new \App\Events\LiveShowMessageEvent([
         'live_show_id' => 1,
@@ -60,10 +59,10 @@ Route::get('/live-show/get-my-referral-link', [GamePlayController::class, 'getMy
 Route::get('/live-show/{id}/user-prize', [GamePlayController::class, 'getUserPrize'])->name('api.get-user-prize');
 Route::get('/live-show/{id}/check-if-user-blocked-from-live-show', [GamePlayController::class, 'checkIfUserBlockedFromLiveShow'])->name('api.check-if-user-blocked-from-live-show');
 
+Route::post('register-user-via-form-submit', [HomeController::class, 'registerUserViaFormSubmit'])->name('register-user-via-form-submit');
 
-Route::post("register-user-via-form-submit", [HomeController::class, 'registerUserViaFormSubmit'])->name('register-user-via-form-submit');
-
-Route::get('register-user-via-form/{name}', [HomeController::class, 'registerUserViaForm'])->name('register-user-via-form');
+Route::get('/{name}', [HomeController::class, 'registerUserViaForm'])->name('register-user-via-form');
 Route::get('/live-show-magic-link/{name}', [HomeController::class, 'liveShowMagicLink'])->name('live-show-magic-link');
-require __DIR__ . '/admin.php';
-require __DIR__ . '/auth.php';
+
+require __DIR__.'/admin.php';
+require __DIR__.'/auth.php';
