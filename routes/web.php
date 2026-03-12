@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\GamePlayController;
 use App\Http\Controllers\HomeController;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -63,6 +64,12 @@ Route::post('register-user-via-form-submit', [HomeController::class, 'registerUs
 
 Route::get('/{name}', [HomeController::class, 'registerUserViaForm'])->name('register-user-via-form');
 Route::get('/live-show-magic-link/{name}', [HomeController::class, 'liveShowMagicLink'])->name('live-show-magic-link');
+
+Route::get('/test/registration-welcome-email', function () {
+    $user = User::where('user_name', 'mutahar1996')->first();
+
+    return view('emails.registration_welcome', compact('user'));
+});
 
 require __DIR__.'/admin.php';
 require __DIR__.'/auth.php';

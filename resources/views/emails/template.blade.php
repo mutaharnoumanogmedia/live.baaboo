@@ -43,8 +43,8 @@
                             <a href="{{ url('/') }}"
                                 style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; color: #3d4852; font-size: 19px; font-weight: bold; text-decoration: none; display: inline-block;">
 
-                            <img src="{{ asset('assets/images/logo.png') }}"
-                                    class="logo" alt="baaboo Logo"
+                            <img src="{{ asset('images/badabing-logo.webp') }}"
+                                    class="logo" alt="Badabing Game Show Logo"
                                     style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; max-width: 100%; border: none; max-height: 48px; height:auto;">
                             </a>
                         </td>
