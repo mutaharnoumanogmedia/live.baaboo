@@ -40,9 +40,7 @@
             --pink-light: #f73fae1a;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        
 
         body {
             font-family: 'Nunito', sans-serif;
@@ -50,6 +48,8 @@
             color: var(--text-dark);
             margin: 0;
             padding: 0;
+            width: 100%;
+            overflow-x: hidden;
         }
 
         h1,

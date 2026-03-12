@@ -40,14 +40,22 @@
                         <tr>
                             <th>Referred By:</th>
                             <td>
-                            @if ($player->referredBy)
-                                <a href="{{ route('admin.players.show', $player->referredBy->id) }}">
-                                    {{ $player->referredBy->name }}
-                                </a>
-                            @else
-                                N/A
-                            @endif
+                                @if ($player->referredBy)
+                                    <a href="{{ route('admin.players.show', $player->referredBy->id) }}">
+                                        {{ $player->referredBy->name }}
+                                    </a>
+                                @else
+                                    N/A
+                                @endif
                             </td>
+                        </tr>
+                        <tr>
+                            <th>Agree for Terms:</th>
+                            <td>{{ $player->agree_for_terms ? 'Yes' : 'No' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Agree for Email:</th>
+                            <td>{{ $player->agree_for_email ? 'Yes' : 'No' }}</td>
                         </tr>
 
                     </table>

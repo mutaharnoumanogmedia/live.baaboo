@@ -25,6 +25,8 @@ class User extends Authenticatable
         'password',
         'referred_by',
         'referral_link',
+        'agree_for_terms',
+        'agree_for_email',
     ];
 
     /**

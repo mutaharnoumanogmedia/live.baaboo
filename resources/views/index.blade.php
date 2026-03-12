@@ -33,13 +33,14 @@
         <div class="container">
             <!-- Logo placeholder -->
             <div class="text-center row justify-content-center">
-                <div class="col-md-2">
+                <div class="">
                     <a href="{{ route('index') }}">
-                        <img src="{{ asset('images/badabing-logo.webp') }}" alt="BadaBing Game Show"
-                            class="img-fluid hero-logo mb-3">
+                        <img src="{{ asset('images/badabing-logo.webp') }}" alt="BadaBing Game Show" width="200"
+                            class="img-fluid hero-logo mb-3 mx-auto">
                     </a>
                 </div>
             </div>
+
             <p class="hero-eyebrow">Die erste interaktive Online-Game-Show Deutschlands </p>
             <h1 class="hero-title">
                 Zuschauen war gestern.
@@ -390,7 +391,7 @@
                     <div class="testi-card">
                         <div class="stars">★★★★★</div>
                         <p class="testi-text">„Ich hab die Show meinen Freunden empfohlen und jetzt spielen wir jeden
-                            Dienstag zusammen. Beste gemeinsame Aktivität am Abend!"</p>
+                            Donnerstag zusammen. Beste gemeinsame Aktivität am Abend!"</p>
                         <div class="testi-author">Sandra K.</div>
                         <div class="testi-date">Spielt mit Freunden</div>
                     </div>
@@ -403,51 +404,57 @@
        HOST
   ══════════════════════════════════════════ -->
     <section class="host-section">
-        <div class="row justify-content-center">
-            <div class="col-lg-6">
-                <div class="row align-items-center g-5">
+        <div class="container">
+            <div class="row justify-content-center ">
+                <div class="col-lg-6">
+                    <div class="row align-items-center g-5">
 
-                    <div class="col-12 text-center">
-                        <div class="host-eyebrow fs-6 text-orange">DEINE GASTGEBERIN</div>
-                        <h1 class="fs-1 fw-bold">Die Stimme der Show: <span class="text-purple">Tanja Müller</span>
-                        </h1>
-                    </div>
-                    <div class="col-12 bg-white p-2 p-lg-5 rounded border border-light">
-                        <div class="row">
-                            <div class="col-md-4 text-center">
+                        <div class="col-12 text-center">
+                            <div class="host-eyebrow fs-6 text-orange">DEINE GASTGEBERIN</div>
+                            <h1 class="fs-1 fw-bold">Die Stimme der Show: <span class="text-purple">Tanja
+                                    Müller</span>
+                            </h1>
+                        </div>
+                        <div class="col-12 bg-white p-2 p-lg-5 rounded border border-light">
+                            <div class="row">
+                                <div class="col-md-4 text-center">
 
-                                <img src="{{ asset('images/tanjamueller_portrait.webp') }}" alt="Tanja Müller"
-                                    class="img-fluid circle" width="100%" style="border-radius: 50%;">
-                                <div class="fs-4 text-pink">
-                                    <i class="bi bi-instagram"></i>
-                                    tanja__mueller
+                                    <img src="{{ asset('images/tanjamueller_portrait.webp') }}" alt="Tanja Müller"
+                                        class="img-fluid circle"
+                                        style="border-radius: 50%; max-width: 200px; width: 100%;">
+                                    <div class="fs-4 text-pink">
+                                        <i class="bi bi-instagram"></i>
+                                        tanja__mueller
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-8">
+                                <div class="col-md-8 d-flex   justify-content-center align-items-center">
 
-                                <p class="text-dark fw-bold">
-                                    Live-Shows leben von Persönlichkeit – und genau die bringt Tanja Müller mit auf die
-                                    Badabing Bühne.
-                                    <br><br>
-
-
-                                    Als erfahrene Moderatorin war sie bereits Teil verschiedener TV-Produktionen und
-                                    weiß genau, wie man Spannung aufbaut und Zuschauer mitreißt.
-                                    <br><br>
+                                    <p class="text-dark fw-bold">
+                                        Live-Shows leben von Persönlichkeit – und genau die bringt Tanja Müller mit auf
+                                        die
+                                        Badabing Bühne.
+                                        <br><br>
 
 
-                                    Mit ihrer Energie, ihrem Gespür für Unterhaltung und ihrer spontanen Art macht sie
-                                    aus jeder Sendung ein Erlebnis – und sorgt dafür, dass aus Zuschauern echte
-                                    Mitspieler werden.
-                                    <br><br>
+                                        Als erfahrene Moderatorin war sie bereits Teil verschiedener TV-Produktionen und
+                                        weiß genau, wie man Spannung aufbaut und Zuschauer mitreißt.
+                                        <br><br>
 
 
-                                    Denn bei Badabing gilt:
-                                    Du schaust nicht nur zu – du spielst mit.
+                                        Mit ihrer Energie, ihrem Gespür für Unterhaltung und ihrer spontanen Art macht
+                                        sie
+                                        aus jeder Sendung ein Erlebnis – und sorgt dafür, dass aus Zuschauern echte
+                                        Mitspieler werden.
+                                        <br><br>
 
 
-                                </p>
+                                        Denn bei Badabing gilt:
+                                        Du schaust nicht nur zu – du spielst mit.
 
+
+                                    </p>
+
+                                </div>
                             </div>
                         </div>
                     </div>

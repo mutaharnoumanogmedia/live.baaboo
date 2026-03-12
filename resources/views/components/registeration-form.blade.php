@@ -25,9 +25,22 @@
         @endif
 
         <div class="mb-3 form-check   mx-auto" style="max-width: 400px;">
-            <input type="checkbox" class="form-check-input" id="agree" required>
-            <label class="form-check-label" for="agree">Ich stimme den <a href="#"
-                    class="text-danger text-decoration-underline">Teilnahmebedingungen</a> zu *</label>
+            <input type="checkbox" class="form-check-input" name="agree_for_terms" id="agree" value="1" required>
+            <label class="form-check-label" for="agree">
+                Ich bestätige, dass ich mindestens 18 Jahre alt bin und die Allgemeinen <a href="#"
+                    class="text-danger text-decoration-underline">Geschäftsbedingungen</a> akzeptiere.
+
+            </label>
+            @error('agree_for_terms')
+                <span class="text-danger">{{ $message }}</span>
+            @enderror
+        </div>
+        <div class="mb-3 form-check   mx-auto" style="max-width: 400px;">
+            <input type="checkbox" name="agree_for_email" class="form-check-input" id="optional" value="1">
+            <label class="form-check-label" for="optional">
+                Ich bin damit einverstanden, Informationen zu Angeboten, Aktionen und Neuigkeiten per E-Mail zu
+                erhalten.
+            </label>
         </div>
         <div class="d-grid gap-2">
             <button type="submit" class="btn bg-purple text-white fw-bold btn-lg"
@@ -46,13 +59,13 @@
 
 
 <script>
-document.getElementById('registerationForm').addEventListener('submit', function (e) {
-    const submitBtn = this.querySelector('button[type="submit"]');
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Wird gesendet...';
-    }
-});
+    document.getElementById('registerationForm').addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Wird gesendet...';
+        }
+    });
 </script>
 
 {{-- <script>

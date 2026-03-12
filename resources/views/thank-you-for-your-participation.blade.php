@@ -306,10 +306,10 @@
     ══════════════════════════════════════════ -->
     <section class="hero">
         <div class="text-center row justify-content-center">
-            <div class="col-md-2">
+            <div class="">
                 <a href="{{ route('index') }}">
-                    <img src="{{ asset('images/badabing-logo.webp') }}" alt="BadaBing Game Show"
-                        class="img-fluid hero-logo mb-3">
+                    <img src="{{ asset('images/badabing-logo.webp') }}" alt="BadaBing Game Show" width="200"  
+                        class="img-fluid hero-logo mb-3 mx-auto">
                 </a>
             </div>
         </div>
@@ -324,7 +324,7 @@
             In den nächsten Minuten erhältst Du eine <strong>Bestätigungs-Mail mit allen wichtigen Informationen zur
                 Show.</strong>
         </p>
-        <p>
+        <div class="alert  fs-4 my-4" style="max-width: 600px; margin: 0 auto; background:var(--bg-lavender); border:1px solid var(--purple); border-radius: 10px; padding: 10px;">
             Dein Empfehlungslink:
             <a id="referral-link" href="{{ $user->referral_link }}" target="_blank">{{ $user->referral_link }}</a>
             <button id="copy-referral-link-btn" class="btn btn-link btn-sm    " style="vertical-align: baseline;"
@@ -343,7 +343,7 @@
                     });
                 }
             </script>
-        </p>
+        </div>
 
         <p class="hinweis">
             <strong>Hinweis:</strong> Falls Du keine E-Mail findest, schau bitte auch in Deinem <strong>Spam- oder

@@ -59,11 +59,14 @@ class HomeController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
+            'agree_for_terms' => 'required|in:1,0',
+            'agree_for_email' => 'sometimes',
         ], [
             'name.required' => 'Dein Name ist erforderlich',
             'email.required' => 'Deine E-Mail-Adresse ist erforderlich',
             'email.email' => 'Deine E-Mail-Adresse ist nicht gültig',
             'email.unique' => 'Deine E-Mail-Adresse ist bereits registriert',
+            'agree_for_terms.required' => 'Du musst die Allgemeinen Geschäftsbedigungen akzeptieren',
         ]);
 
         try {
@@ -71,6 +74,8 @@ class HomeController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => bcrypt(\Str::random(8)),
+                'agree_for_terms' => $request->agree_for_terms ? 1 : 0,
+                'agree_for_email' => $request->agree_for_email ? 1 : 0,
             ]);
             // create referral link
             $referredBy = $request->referred_by ?? null;
