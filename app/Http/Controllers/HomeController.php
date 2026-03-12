@@ -42,6 +42,16 @@ class HomeController extends Controller
         }
     }
 
+    public function registerUserViaForm(Request $request)
+    {
+        $user = User::where('user_name', $request->name)->first();
+        if (! $user) {
+            return redirect()->route('index')->with('error', 'User not found');
+        }
+
+        return view('index', compact('user'));
+    }
+
     public function registerUserViaFormSubmit(Request $request)
     {
         $request->validate([
