@@ -210,7 +210,7 @@ class HomeController extends Controller
     {
         $response = Http::withHeaders([
             'Authorization' => 'f0a97e7aaa3291487316d9c3d9e67b96c32dee09ad2c573af6c272341edb70e7',
-            'Origin' => env('AFFILIATE_API_ENDPOINT'),
+            'Origin' => env('FRONTEND_URL'),
 
         ])->asForm()->post(env('AFFILIATE_API_ENDPOINT').'/api/lead-generation', [
             'name' => $requestPayload['name'],
@@ -229,7 +229,7 @@ class HomeController extends Controller
         $username = $request->input('username', 'ogmuth');
         $response = Http::withHeaders([
             'Authorization' => 'f0a97e7aaa3291487316d9c3d9e67b96c32dee09ad2c573af6c272341edb70e7',
-            'Origin' => env('AFFILIATE_API_ENDPOINT'),
+            'Origin' => env('FRONTEND_URL'),
         ])->get(env('AFFILIATE_API_ENDPOINT').'/api/user-status', [
             'username' => $username,
         ]);
