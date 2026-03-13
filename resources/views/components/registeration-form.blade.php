@@ -34,7 +34,7 @@
                     required oninvalid="this.setCustomValidity('Feld für die Anmeldung verpflichtend')"
                     oninput="this.setCustomValidity('')">
                 <label class="form-check-label" for="agree">
-                    Ich bestätige, dass ich mindestens 18 Jahre alt bin und die Allgemeinen <a href="{{ route('agb') }}"
+                    Ich bestätige, dass ich mindestens 18 Jahre alt bin und die Allgemeinen <a href="{{ route('agb') }}" target="_blank"
                         class="text-danger text-decoration-underline">Geschäftsbedingungen</a> akzeptiere. <span
                         class="text-danger">*</span>
 
