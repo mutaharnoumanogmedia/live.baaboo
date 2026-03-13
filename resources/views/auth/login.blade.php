@@ -1,3 +1,4 @@
+<x-guest-layout>
 <div class="container d-flex min-vh-100 align-items-center justify-content-center">
     <div class="row w-100">
         <div class="col-12 col-md-6 col-lg-4 mx-auto">
@@ -63,3 +64,4 @@
         </div>
     </div>
 </div>
+</x-guest-layout>
