@@ -48,10 +48,7 @@ class HomeController extends Controller
 
     public function registerUserViaForm($user_name)
     {
-
         $referredByUser = User::where('user_name', $user_name)->first();
-
-        
 
         if (! $referredByUser) {
             if ($this->getLiveShowDetails($user_name)) {
@@ -64,11 +61,11 @@ class HomeController extends Controller
                 if ($liveShowDetails && isset($liveShowDetails['user'])) {
                     $firstName = trim($liveShowDetails['user']['first_name'] ?? '');
                     $lastName = trim($liveShowDetails['user']['last_name'] ?? '');
-                    $fullName = trim($firstName . ' ' . $lastName);
-                    $email = $liveShowDetails['user']['email'] ?? ($user_name . '@example.com');
+                    $fullName = trim($firstName.' '.$lastName);
+                    $email = $liveShowDetails['user']['email'] ?? ($user_name.'@example.com');
                 } else {
                     $fullName = $user_name;
-                    $email = $user_name . '@example.com';
+                    $email = $user_name.'@example.com';
                 }
 
                 $user = User::create([
@@ -147,12 +144,12 @@ class HomeController extends Controller
             $leadGenerationPayload = [
                 'name' => $user->name,
                 'email' => $user->email,
-                'user_name' => $user->user_name,
+                'partner_username' => User::where('id', $user->referred_by)->first()->user_name ?? null,
                 'magic_link' => $user->magic_link,
                 'referral_link' => $user->referral_link,
             ];
             $leadGenerationResponse = $this->leadGeneration($leadGenerationPayload);
-            \Log::info('Lead generation request sent successfully', $leadGenerationPayload);
+            \Log::info('Lead generation request sent successfully', $leadGenerationResponse);
 
             \Log::info('User created successfully', $user->toArray());
         } catch (\Exception $e) {
@@ -286,7 +283,7 @@ class HomeController extends Controller
         ])->asForm()->post(env('AFFILIATE_API_ENDPOINT').'/api/lead-generation', [
             'name' => $requestPayload['name'],
             'email' => $requestPayload['email'],
-            'partner_username' => $requestPayload['user_name'],
+            'partner_username' => $requestPayload['partner_username'] ?? null,
             'magic_link' => $requestPayload['magic_link'],
             'referral_link' => $requestPayload['referral_link'],
         ]);
