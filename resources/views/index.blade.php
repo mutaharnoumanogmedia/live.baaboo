@@ -1,6 +1,6 @@
 <x-guest-layout>
     <!-- Live Show Banner -->
-    @if (isset($currentLiveShow) && $currentLiveShow)
+    {{-- @if (isset($currentLiveShow) && $currentLiveShow)
         <style>
             /* Non-Bootstrap classes used in this banner */
             .live-show-banner {
@@ -111,7 +111,7 @@
                 </div>
             </div>
         </div>
-    @endif
+    @endif --}}
 
     <!-- ══════════════════════════════════════════
      HERO
