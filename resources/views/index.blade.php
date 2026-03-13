@@ -35,7 +35,7 @@
             <div class="text-center row justify-content-center">
                 <div class="">
                     <a href="{{ route('index') }}">
-                        <img src="{{ asset('images/badabing-logo.webp') }}" alt="BadaBing Game Show" width="200"
+                        <img src="{{ asset('images/badabing-logo.webp') }}" alt="Badabing Game Show" width="200"
                             class="img-fluid hero-logo mb-3 mx-auto">
                     </a>
                 </div>
@@ -289,72 +289,74 @@
     <!-- ══════════════════════════════════════════
        PREISE
   ══════════════════════════════════════════ -->
-    <section class="  row justify-content-center bg-white">
-        <div class="col-lg-8">
-            <div class="container">
-                <div class="text-center mb-5 py-5">
-                    <div class=" fs-6 fw-bold text-pink">Was gibt's zu gewinnen?</div>
-                    <h2 class="section-title">Preise, die sich <span class="accent-orange">lohnen.</span></h2>
-                </div>
-                <div class="row justify-content-center g-4 mb-4">
-                    <div class="col-6 col-md-4">
-                        <center>
-                            <div class="prize-card">
-                                <div class="prize-icon">
-                                    <img src="{{ asset('images/winner.png') }}" alt="Prize 1" class="img-fluid"
-                                        width="50">
+    <section class=" w-100 bg-white">
+        <div class="container d-flex justify-content-center align-items-center">
+            <div class="col-lg-8">
+                <div class="container">
+                    <div class="text-center mb-5 py-5">
+                        <div class=" fs-6 fw-bold text-pink">Was gibt's zu gewinnen?</div>
+                        <h2 class="section-title">Preise, die sich <span class="accent-orange">lohnen.</span></h2>
+                    </div>
+                    <div class="row justify-content-center g-4 mb-4">
+                        <div class="col-6 col-md-4">
+                            <center>
+                                <div class="prize-card">
+                                    <div class="prize-icon">
+                                        <img src="{{ asset('images/winner.png') }}" alt="Prize 1" class="img-fluid"
+                                            width="50">
+                                    </div>
+                                    <div class="prize-place">1. Platz</div>
+                                    <div class="prize-amount">300 € Bargeld</div>
                                 </div>
-                                <div class="prize-place">1. Platz</div>
-                                <div class="prize-amount">300 € Bargeld</div>
-                            </div>
-                        </center>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <center>
-                            <div class="prize-card">
-                                <div class="prize-icon">
-                                    <img src="{{ asset('images/2nd.png') }}" alt="Prize 1" class="img-fluid"
-                                        width="50">
+                            </center>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <center>
+                                <div class="prize-card">
+                                    <div class="prize-icon">
+                                        <img src="{{ asset('images/2nd.png') }}" alt="Prize 1" class="img-fluid"
+                                            width="50">
+                                    </div>
+                                    <div class="prize-place">2. Platz</div>
+                                    <div class="prize-amount">100 € Bargeld</div>
                                 </div>
-                                <div class="prize-place">2. Platz</div>
-                                <div class="prize-amount">100 € Bargeld</div>
-                            </div>
-                        </center>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <center>
-                            <div class="prize-card">
-                                <div class="prize-icon">
-                                    <img src="{{ asset('images/3rd.png') }}" alt="Prize 1" class="img-fluid"
-                                        width="50">
+                            </center>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <center>
+                                <div class="prize-card">
+                                    <div class="prize-icon">
+                                        <img src="{{ asset('images/3rd.png') }}" alt="Prize 1" class="img-fluid"
+                                            width="50">
+                                    </div>
+                                    <div class="prize-place">3. Platz</div>
+                                    <div class="prize-amount">50 € Bargeld</div>
                                 </div>
-                                <div class="prize-place">3. Platz</div>
-                                <div class="prize-amount">50 € Bargeld</div>
-                            </div>
-                        </center>
+                            </center>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <center>
+                                <div class="prize-card">
+                                    <div class="prize-place">4 - 10. Platz</div>
+                                    <p class="text-center fs-4">
+                                        🤫
+                                    </p>
+                                </div>
+                            </center>
+                        </div>
+                        <div class="col-6 col-md-4">
+                            <center>
+                                <div class="prize-card">
+                                    <div class="prize-place">11- 20. Platz</div>
+                                    <p class="text-center fs-4">
+                                        🤫
+                                    </p>
+                                </div>
+                            </center>
+                        </div>
                     </div>
-                    <div class="col-6 col-md-4">
-                        <center>
-                            <div class="prize-card">
-                                <div class="prize-place">4 - 10. Platz</div>
-                                <p class="text-center fs-4">
-                                    🤫
-                                </p>
-                            </div>
-                        </center>
-                    </div>
-                    <div class="col-6 col-md-4">
-                        <center>
-                            <div class="prize-card">
-                                <div class="prize-place">11- 20. Platz</div>
-                                <p class="text-center fs-4">
-                                    🤫
-                                </p>
-                            </div>
-                        </center>
-                    </div>
-                </div>
 
+                </div>
             </div>
         </div>
     </section>
@@ -405,61 +407,57 @@
   ══════════════════════════════════════════ -->
     <section class="host-section gradient-bg-reverse">
         <div class="container">
-            <div class="row justify-content-center ">
-                <div class="col-lg-6">
-                    <div class="row align-items-center g-5">
+            <div class="w-100 text-center">
+                <div class="host-eyebrow fs-6 text-orange">DEINE GASTGEBERIN</div>
+                <h1 class="fs-1 fw-bold">Die Stimme der Show: <span class="text-purple">Tanja
+                        Müller</span>
+                </h1>
+            </div>
 
-                        <div class="col-12 text-center">
-                            <div class="host-eyebrow fs-6 text-orange">DEINE GASTGEBERIN</div>
-                            <h1 class="fs-1 fw-bold">Die Stimme der Show: <span class="text-purple">Tanja
-                                    Müller</span>
-                            </h1>
+
+
+            <div class="col-12 bg-white p-2 p-lg-5 rounded border border-light">
+                <div class="row w-100 align-items-center justify-content-center">
+                    <div class="col-md-4 text-center mb-4">
+
+                        <img src="{{ asset('images/tanjamueller_portrait.webp') }}" alt="Tanja Müller"
+                            class="img-fluid circle" style="border-radius: 50%; max-width: 200px; width: 100%;">
+                        <div class="fs-4 text-pink">
+                            <i class="bi bi-instagram"></i>
+                            tanja__mueller
                         </div>
-                        <div class="col-12 bg-white p-2 p-lg-5 rounded border border-light">
-                            <div class="row">
-                                <div class="col-md-4 text-center">
+                    </div>
+                    <div class="col-md-8 d-flex flex-column justify-content-center align-items-center p-4">
 
-                                    <img src="{{ asset('images/tanjamueller_portrait.webp') }}" alt="Tanja Müller"
-                                        class="img-fluid circle"
-                                        style="border-radius: 50%; max-width: 200px; width: 100%;">
-                                    <div class="fs-4 text-pink">
-                                        <i class="bi bi-instagram"></i>
-                                        tanja__mueller
-                                    </div>
-                                </div>
-                                <div class="col-md-8 d-flex   justify-content-center align-items-center">
-
-                                    <p class="text-dark fw-bold">
-                                        Live-Shows leben von Persönlichkeit – und genau die bringt Tanja Müller mit auf
-                                        die
-                                        Badabing Bühne.
-                                        <br><br>
+                        <p class="text-dark fw-bold fs-5">
+                            Live-Shows leben von Persönlichkeit – und genau die bringt Tanja Müller mit auf
+                            die
+                            Badabing Bühne.
+                            <br><br>
 
 
-                                        Als erfahrene Moderatorin war sie bereits Teil verschiedener TV-Produktionen und
-                                        weiß genau, wie man Spannung aufbaut und Zuschauer mitreißt.
-                                        <br><br>
+                            Als erfahrene Moderatorin war sie bereits Teil verschiedener TV-Produktionen und
+                            weiß genau, wie man Spannung aufbaut und Zuschauer mitreißt.
+                            <br><br>
 
 
-                                        Mit ihrer Energie, ihrem Gespür für Unterhaltung und ihrer spontanen Art macht
-                                        sie
-                                        aus jeder Sendung ein Erlebnis – und sorgt dafür, dass aus Zuschauern echte
-                                        Mitspieler werden.
-                                        <br><br>
+                            Mit ihrer Energie, ihrem Gespür für Unterhaltung und ihrer spontanen Art macht
+                            sie
+                            aus jeder Sendung ein Erlebnis – und sorgt dafür, dass aus Zuschauern echte
+                            Mitspieler werden.
+                            <br><br>
 
 
-                                        Denn bei Badabing gilt:
-                                        Du schaust nicht nur zu – du spielst mit.
+                            Denn bei Badabing gilt:
+                            Du schaust nicht nur zu – du spielst mit.
 
 
-                                    </p>
+                        </p>
 
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
+
         </div>
     </section>
 
@@ -535,7 +533,7 @@
     <!-- ══════════════════════════════════════════
        CTA BANNER (final)
   ══════════════════════════════════════════ -->
-    {{-- <section class="cta-banner gradient-bg">
+    <section class="cta-banner gradient-bg">
         <div class="container text-center">
             <div class="text-banner">
                 Jetzt Ticket sichern
@@ -549,7 +547,7 @@
             </div>
 
         </div>
-    </section> --}}
+    </section>
 
     <!-- ══════════════════════════════════════════
        FAQ
@@ -560,7 +558,7 @@
                 <div class="section-eyebrow">FAQ</div>
                 <h2 class="section-title">Noch Fragen?</h2>
                 <p style=";color:var(--text-muted);max-width:560px;margin:0 auto">Alles, was Du über
-                    die BadaBing Game Show wissen musst – kurz und bündig beantwortet.</p>
+                    die Badabing Game Show wissen musst – kurz und bündig beantwortet.</p>
             </div>
             <div class="accordion" id="faqAccordion" style="max-width:760px;margin:0 auto">
                 <div class="accordion-item">
@@ -674,130 +672,7 @@
     </section>
 
 
-    {{-- <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="logo">
-                    <img src="{{ asset('/images/logo.png') }}" class="img-fluid" width="150" alt="">
-                    live
-                </div>
-                <nav>
-                    <a href="#" class="btn btn-outline-dark me-2">How It Works</a>
-                    <a href="#" class="btn btn-primary">Download App</a>
-                </nav>
-            </div>
-        </div>
-    </header>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-
-                    <h1>Play Live. Win Real Money.</h1>
-                    <p>Join thousands of players in live trivia game shows</p>
-                    <button class="cta-button">
-                        <i class="fas fa-rocket me-2"></i>Get Started Free
-                    </button>
-                    <div class="mt-5 text-secondary">
-                        <i class="fas fa-users me-2"></i>500K+ Active Players
-                        <span class="mx-3">|</span>
-                        <i class="fas fa-trophy me-2"></i>$2M+ Won This Month
-                    </div>
-
-                </div>
-                <div class="col-lg-6">
-                    <x-registeration-form />
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="display-4 fw-bold">How It Works</h2>
-                <p class="lead text-secondary">Three simple steps to winning</p>
-            </div>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                        <h3>Get Notified</h3>
-                        <p>Receive push notifications when live shows are about to start. Never miss a game!</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-gamepad"></i>
-                        </div>
-                        <h3>Play Live</h3>
-                        <p>Answer trivia questions in real-time with players around the world. 12 questions to victory!
-                        </p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fas fa-dollar-sign"></i>
-                        </div>
-                        <h3>Win Cash</h3>
-                        <p>Split the prize pool with winners. Money is deposited directly to your account instantly!</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Prize Section -->
-    <section class="prize-section">
-        <div class="container text-center">
-            <h2 class="display-5 fw-bold mb-4">This Week's Prize Pool</h2>
-            <div class="prize-amount">$50,000</div>
-            <p class="lead text-secondary mb-4">Join the next show and compete for your share!</p>
-            <div class="row justify-content-center mt-5">
-                <div class="col-md-3 col-6 mb-3">
-                    <h3 class="text-warning">Daily</h3>
-                    <p class="text-secondary">2 shows per day</p>
-                </div>
-                <div class="col-md-3 col-6 mb-3">
-                    <h3 class="text-info">12 Questions</h3>
-                    <p class="text-secondary">Answer all correctly</p>
-                </div>
-                <div class="col-md-3 col-6 mb-3">
-                    <h3 class="text-danger">10 Seconds</h3>
-                    <p class="text-secondary">Per question</p>
-                </div>
-                <div class="col-md-3 col-6 mb-3">
-                    <h3 class="text-success">Free</h3>
-                    <p class="text-secondary">Always free to play</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section class="hero py-5">
-        <div class="container text-center">
-            <h2 class="display-4 fw-bold mb-4">Ready to Play?</h2>
-            <p class="lead text-secondary mb-4">Download the app and join the next live show</p>
-            <div class="d-flex justify-content-center gap-3 flex-wrap">
-                <button class="btn btn-light btn-lg">
-                    <i class="fab fa-apple me-2"></i>App Store
-                </button>
-                <button class="btn btn-light btn-lg">
-                    <i class="fab fa-google-play me-2"></i>Google Play
-                </button>
-            </div>
-        </div>
-    </section> --}}
 
     @push('scripts')
         <script>

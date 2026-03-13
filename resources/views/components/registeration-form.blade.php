@@ -8,7 +8,8 @@
         <form method="POST" id="registerationForm" action="{{ route('register-user-via-form-submit') }}">
             @csrf
             <div class="mb-3">
-                <label for="name" class="form-label text-dark fw-semibold">Dein Name <span class="text-danger">*</span></label>
+                <label for="name" class="form-label text-dark fw-semibold">Dein Name <span
+                        class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="name" name="name" placeholder="Max Mustermann"
                     autocomplete="off" value="{{ old('name') }}">
                 @error('name')
@@ -16,7 +17,8 @@
                 @enderror
             </div>
             <div class="mb-3">
-                <label for="email" class="form-label text-dark fw-semibold">Deine E-Mail-Adresse <span class="text-danger">*</span></label>
+                <label for="email" class="form-label text-dark fw-semibold">Deine E-Mail-Adresse <span
+                        class="text-danger">*</span></label>
                 <input type="email" class="form-control" id="email" name="email" placeholder="du@email.com"
                     required autocomplete="off" value="{{ old('email') }}">
                 @error('email')
@@ -29,10 +31,12 @@
 
             <div class="mb-3 form-check   mx-auto" style="max-width: 400px;">
                 <input type="checkbox" class="form-check-input" name="agree_for_terms" id="agree" value="1"
-                    required>
+                    required oninvalid="this.setCustomValidity('Feld für die Anmeldung verpflichtend')"
+                    oninput="this.setCustomValidity('')">
                 <label class="form-check-label" for="agree">
                     Ich bestätige, dass ich mindestens 18 Jahre alt bin und die Allgemeinen <a href="#"
-                        class="text-danger text-decoration-underline">Geschäftsbedingungen</a> akzeptiere. <span class="text-danger">*</span>
+                        class="text-danger text-decoration-underline">Geschäftsbedingungen</a> akzeptiere. <span
+                        class="text-danger">*</span>
 
                 </label>
                 @error('agree_for_terms')
@@ -43,7 +47,7 @@
                 <input type="checkbox" name="agree_for_email" class="form-check-input" id="optional" value="1">
                 <label class="form-check-label" for="optional">
                     Ich bin damit einverstanden, Informationen zu Angeboten, Aktionen und Neuigkeiten per E-Mail zu
-                    erhalten. 
+                    erhalten.
                 </label>
             </div>
             <div class="d-grid gap-2">

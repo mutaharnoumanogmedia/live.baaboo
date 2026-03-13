@@ -25,7 +25,7 @@ class RegistrationWelcomeMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Welcome! Your registration details & links',
+            subject: 'Badabing: Infos zur Teilnahme',
         );
     }
 

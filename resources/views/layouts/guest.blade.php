@@ -48,8 +48,7 @@
             color: var(--text-dark);
             margin: 0;
             padding: 0;
-            width: 100%;
-            overflow-x: hidden;
+            
         }
 
         h1,
@@ -784,10 +783,8 @@
 </head>
 
 <body>
+    {{-- @include('partials.gtm', ['part' => 'body']) --}}
 
-
-
-    @include('partials.gtm', ['part' => 'body'])
     <div class="animated-bg"></div>
 
     @if (session('error'))
