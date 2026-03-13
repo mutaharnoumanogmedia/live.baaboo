@@ -816,7 +816,7 @@
                      >Teilnahmebedingungen</a> ·
                 <a href="{{ route('datenschutz') }}" class="text-white"  >Datenschutz</a> ·
                 <a href="{{ route('agb') }}" class="text-white" >AGB</a> ·
-                <a href="#" class="text-white" target="_blank">Kontakt</a>
+                {{-- <a href="#" class="text-white" target="_blank">Kontakt</a> --}}
             </p>
         </div>
     </footer>

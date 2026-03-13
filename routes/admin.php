@@ -8,6 +8,9 @@ use App\Http\Controllers\Admin\PushNotificationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('admin/login', function () {
+    return view('auth.login');
+})->name('login');
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminHomeController::class, 'home'])->name('dashboard');
 
