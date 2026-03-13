@@ -318,7 +318,7 @@
             <h2 class="section-title mb-2">Die nächste <span class="text-orange">Show</span> startet <span
                     class="text-orange">bald</span>!</h2>
             <p class="text-muted mb-1" style="">Melde dich jetzt kostenlos an und sichere Dir dein Ticket & den Teilnahmelink</p>
-            <p class="text-muted mb-3" style="">Game Show am (Mo) um 20:00 Uhr.</p>
+            {{-- <p class="text-muted mb-3" style="">Game Show am (Mo) um 20:00 Uhr.</p> --}}
             <center>
                 <div class="col-lg-4">
                     <a href="#form-section" class="text-decoration-none d-block">
@@ -454,7 +454,7 @@
         <div class="container">
             <div class="text-center mb-5">
                 <div class="section-eyebrow">DAS SAGEN UNSERE SPIELERINNEN &amp; SPIELER</div>
-                <h2 class="section-title">Echte Spieler, echter <span class="text-orange">Begeisterung.</span></h2>
+                <h2 class="section-title">Echte Spieler, echte <span class="text-orange">Begeisterung.</span></h2>
             </div>
             <div class="row g-4">
                 <div class="col-md-4">
