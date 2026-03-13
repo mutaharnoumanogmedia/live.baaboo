@@ -21,9 +21,26 @@
     <meta name="twitter:description" content="Join the baaboo Live Game Show and compete for prizes!">
     <meta name="twitter:image" content="{{ asset('og-image.webp') }}">
 
-     <!-- Google Tag Manager --> <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-PSLR7HMJ');</script> <!-- End Google Tag Manager -->         
-     
-     <!-- Google Tag Manager (noscript) --> <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PSLR7HMJ" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript> <!-- End Google Tag Manager (noscript) --> 
+    <!-- Google Tag Manager -->
+    <script>
+        (function(w, d, s, l, i) {
+            w[l] = w[l] || [];
+            w[l].push({
+                'gtm.start': new Date().getTime(),
+                event: 'gtm.js'
+            });
+            var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s),
+                dl = l != 'dataLayer' ? '&l=' + l : '';
+            j.async = true;
+            j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+            f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-PSLR7HMJ');
+    </script> <!-- End Google Tag Manager -->
+
+    <!-- Google Tag Manager (noscript) --> <noscript><iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-PSLR7HMJ" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript> <!-- End Google Tag Manager (noscript) -->
 
     <link href='https://fonts.googleapis.com/css?family=Outfit' rel='stylesheet'>
 
@@ -921,6 +938,7 @@
             z-index: 100;
             overflow: hidden;
         }
+
         .heart-reaction-float {
             position: absolute;
             bottom: 25%;
@@ -928,13 +946,15 @@
             flex-direction: column;
             align-items: center;
             animation: heartFloat 2.2s ease-out forwards;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
         }
+
         .heart-reaction-float .heart-icon {
             font-size: 2rem;
             color: #ff2d55;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
         }
+
         .heart-reaction-float .heart-username {
             font-size: 0.7rem;
             color: #fff;
@@ -944,11 +964,23 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
         @keyframes heartFloat {
-            0% { transform: translateY(0) scale(1); opacity: 1; }
-            70% { opacity: 1; }
-            100% { transform: translateY(-140px) scale(0.9); opacity: 0; }
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+
+            70% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-140px) scale(0.9);
+                opacity: 0;
+            }
         }
+
         #heartReactionBtn {
             position: absolute;
             bottom: 45px;
@@ -958,7 +990,7 @@
             height: 48px;
             border-radius: 50%;
             border: none;
-            background: rgba(0,0,0,0.4);
+            background: rgba(0, 0, 0, 0.4);
             color: #ff2d55;
             display: flex;
             align-items: center;
@@ -968,8 +1000,14 @@
             transition: transform 0.15s ease, background 0.2s ease;
             -webkit-tap-highlight-color: transparent;
         }
-        #heartReactionBtn:active { transform: scale(0.9); }
-        #heartReactionBtn:hover { background: rgba(0,0,0,0.55); }
+
+        #heartReactionBtn:active {
+            transform: scale(0.9);
+        }
+
+        #heartReactionBtn:hover {
+            background: rgba(0, 0, 0, 0.55);
+        }
     </style>
     @include('partials.gtm', ['part' => 'head'])
 </head>
@@ -995,15 +1033,18 @@
                     frameborder="0"></iframe>
 
 
-                      <!-- Gallery image/video overlay (shown via Pusher from admin stream-management) -->
-    <div id="galleryStreamOverlay"
-        style="display:none; position:relative; top:0; left:0; right:0; bottom:0;  background:rgba(0,0,0,0.85); align-items:center; justify-content:center; padding:20px;">
-        <div style="position:relative;width:100%;  height:100%; display:flex; align-items:center; justify-content:center;">
-            <img id="galleryStreamImage" src="" alt="" style="max-width:100%; max-height:90vh; object-fit:contain; border-radius:12px; display:none;">
-            <video id="galleryStreamVideo" src="" autoplay  style="max-width:100%; max-height:90vh; border-radius:12px; display:none;"></video>
-           
-        </div>
-    </div>
+                <!-- Gallery image/video overlay (shown via Pusher from admin stream-management) -->
+                <div id="galleryStreamOverlay"
+                    style="display:none; position:relative; top:0; left:0; right:0; bottom:0;  background:rgba(0,0,0,0.85); align-items:center; justify-content:center; padding:20px;">
+                    <div
+                        style="position:relative;width:100%;  height:100%; display:flex; align-items:center; justify-content:center;">
+                        <img id="galleryStreamImage" src="" alt=""
+                            style="max-width:100%; max-height:90vh; object-fit:contain; border-radius:12px; display:none;">
+                        <video id="galleryStreamVideo" src="" autoplay
+                            style="max-width:100%; max-height:90vh; border-radius:12px; display:none;"></video>
+
+                    </div>
+                </div>
             </div>
             <button type="button" id="heartReactionBtn" title="Send a heart">
                 <i class="fas fa-heart"></i>
@@ -1045,7 +1086,8 @@
                         <div class="quiz-options row">
                             ${quiz.options.map((option, index) =>
                             `<div class="quiz-option"> <input type="radio" id="option${option.id}" name="option"
-                                    value="${option.id}"> <label for="option${option.id}">${option.option_text}</label>
+                                    value="${option.id}"> <label
+                                    for="option${option.id}">${option.option_text}</label>
                             </div> `).join('')}
                         </div>
                     </div>
@@ -1253,7 +1295,7 @@
         </div>
     </div>
 
-  
+
 
 
 
@@ -2171,7 +2213,7 @@
 
         @if ($liveShow->status != 'live')
             emptyTheBodyWithEndShow(
-                'The status of this live show is "{{ $liveShow->status }}". You will be redirected shortly.'
+                'This live show is  {{ $liveShow->status }} {{ $liveShow->status == "scheduled" ? "at " . \Carbon\Carbon::parse($liveShow->scheduled_at)->format("d M Y, H:i") : "" }} .  '
             );
         @endif
 
@@ -2394,7 +2436,7 @@
             }
         });
 
-/* Gallery image/video overlay */
+        /* Gallery image/video overlay */
         var channelGalleryImage = pusher.subscribe('live-show-gallery-image.{{ $liveShow->id }}');
         channelGalleryImage.bind('pusher:subscription_succeeded', function() {
             console.log('Gallery image channel subscribed successfully!');
@@ -2425,7 +2467,7 @@
             overlay.style.display = 'flex';
         });
 
-        
+
         channelGalleryImage.bind('HideGalleryImageEvent', function() {
             hideGalleryStreamOverlay();
         });
@@ -2435,8 +2477,15 @@
             var imgEl = document.getElementById('galleryStreamImage');
             var videoEl = document.getElementById('galleryStreamVideo');
             if (overlay) overlay.style.display = 'none';
-            if (imgEl) { imgEl.removeAttribute('src'); imgEl.style.display = 'none'; }
-            if (videoEl) { videoEl.pause(); videoEl.removeAttribute('src'); videoEl.style.display = 'none'; }
+            if (imgEl) {
+                imgEl.removeAttribute('src');
+                imgEl.style.display = 'none';
+            }
+            if (videoEl) {
+                videoEl.pause();
+                videoEl.removeAttribute('src');
+                videoEl.style.display = 'none';
+            }
 
             //show iframe
             var iframe = document.getElementById('live-broadcast-iframe');
@@ -2451,12 +2500,14 @@
             var el = document.createElement('div');
             el.className = 'heart-reaction-float';
             el.style.left = leftPct + '%';
-            el.innerHTML = '<span class="heart-icon"><i class="fas fa-heart"></i></span><span class="heart-username">' + escapeHtml(userName || 'Someone') + '</span>';
+            el.innerHTML = '<span class="heart-icon"><i class="fas fa-heart"></i></span><span class="heart-username">' +
+                escapeHtml(userName || 'Someone') + '</span>';
             overlay.appendChild(el);
             el.addEventListener('animationend', function() {
                 if (el.parentNode) el.parentNode.removeChild(el);
             });
         }
+
         function escapeHtml(text) {
             var div = document.createElement('div');
             div.textContent = text;
@@ -2464,20 +2515,26 @@
         }
         document.getElementById('heartReactionBtn')?.addEventListener('click', function() {
             fetch('{{ url('live-show/' . $liveShow->id . '/heart-reaction') }}', {
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json', 'Content-Type': 'application/json' }
-            })
-            .then(function(r) {
-                if (r.status === 401) {
-                    showRegisterModal();
-                    return;
-                }
-                return r.json();
-            })
-            .then(function(data) {
-                if (data && data.success) { /* reaction sent; will appear via Pusher */ }
-            })
-            .catch(function() {});
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(function(r) {
+                    if (r.status === 401) {
+                        showRegisterModal();
+                        return;
+                    }
+                    return r.json();
+                })
+                .then(function(data) {
+                    if (data && data.success) {
+                        /* reaction sent; will appear via Pusher */
+                    }
+                })
+                .catch(function() {});
         });
         var channelHearts = pusher.subscribe('live-show-hearts.{{ $liveShow->id }}');
         channelHearts.bind('pusher:subscription_succeeded', function() {
@@ -2498,7 +2555,7 @@
         }
     </script>
 
-   
+
 </body>
 
 </html>

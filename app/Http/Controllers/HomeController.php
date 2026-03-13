@@ -17,7 +17,11 @@ class HomeController extends Controller
     public function index()
     {
 
-        $currentLiveShow = LiveShow::where('status', 'live')->with('users')->orderBy('created_at', 'desc')->first();
+        $currentLiveShow = LiveShow::whereIn('status', ['live', 'scheduled'])
+            ->where('scheduled_at', '>=', now())
+            ->orderBy('scheduled_at', 'asc')
+            ->with('users')
+            ->first();
 
         return view('index', compact('currentLiveShow'));
     }
@@ -46,9 +50,55 @@ class HomeController extends Controller
     {
 
         $referredByUser = User::where('user_name', $user_name)->first();
+
+        
+
         if (! $referredByUser) {
-            
-            return redirect()->route('index')->with('error', 'Referred by user not found');
+            if ($this->getLiveShowDetails($user_name)) {
+                // create a new user
+                // Fetch user details from affiliate API (as per provided response structure)
+                $liveShowDetails = $this->getLiveShowDetails($user_name);
+
+                $fullName = '';
+                $email = '';
+                if ($liveShowDetails && isset($liveShowDetails['user'])) {
+                    $firstName = trim($liveShowDetails['user']['first_name'] ?? '');
+                    $lastName = trim($liveShowDetails['user']['last_name'] ?? '');
+                    $fullName = trim($firstName . ' ' . $lastName);
+                    $email = $liveShowDetails['user']['email'] ?? ($user_name . '@example.com');
+                } else {
+                    $fullName = $user_name;
+                    $email = $user_name . '@example.com';
+                }
+
+                $user = User::create([
+                    'name' => $fullName,
+                    'email' => $email,
+                    'password' => bcrypt(\Str::random(8)),
+                    'user_name' => $user_name,
+                    'agree_for_terms' => 1,
+                    'agree_for_email' => 1,
+                ]);
+                $user->referral_link = $user->referralLink();
+                $user->magic_link = $user->magicLink();
+                $user->user_name = $user->getUserName();
+                $user->save();
+                $user->assignRole('user');
+                Mail::to($user->email)->send(new RegistrationWelcomeMail($user));
+                $leadGenerationPayload = [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'user_name' => $user->user_name,
+                    'magic_link' => $user->magic_link,
+                    'referral_link' => $user->referral_link,
+                ];
+                $leadGenerationResponse = $this->leadGeneration($leadGenerationPayload);
+                \Log::info('Lead generation request sent successfully', $leadGenerationPayload);
+
+                $referredByUser = $user;
+            } else {
+                return redirect()->route('index')->with('error', 'User not found');
+            }
         }
 
         return view('index', compact('referredByUser'));
@@ -86,6 +136,7 @@ class HomeController extends Controller
                     $user->referred_by = $referredByUser->id;
                 }
             }
+
             $user->referral_link = $user->referralLink();
             $user->magic_link = $user->magicLink();
             $user->user_name = $user->getUserName();
@@ -122,7 +173,11 @@ class HomeController extends Controller
         Auth::guard('web')->login($user);
 
         // take the lastest live show
-        $liveShow = LiveShow::where('status', 'live')->orderBy('created_at', 'desc')->first();
+        $liveShow = LiveShow::whereIn('status', ['live', 'scheduled'])
+            ->where('scheduled_at', '>=', now())
+            ->orderBy('scheduled_at', 'asc')
+
+            ->first();
         if (! $liveShow) {
             return redirect()->route('index')->with('error', 'No live show found');
         }
@@ -206,15 +261,16 @@ class HomeController extends Controller
         ]);
     }
 
-
     public function agreementTerms()
     {
         return view('agreement-terms');
     }
+
     public function participationTerms()
     {
         return view('participation-terms');
     }
+
     public function privacyPolicy()
     {
         return view('privacy-policy');
@@ -230,7 +286,7 @@ class HomeController extends Controller
         ])->asForm()->post(env('AFFILIATE_API_ENDPOINT').'/api/lead-generation', [
             'name' => $requestPayload['name'],
             'email' => $requestPayload['email'],
-            // 'partner_username' => $requestPayload['user_name'],
+            'partner_username' => $requestPayload['user_name'],
             'magic_link' => $requestPayload['magic_link'],
             'referral_link' => $requestPayload['referral_link'],
         ]);
@@ -251,7 +307,8 @@ class HomeController extends Controller
 
         // if the response has status : treu and affiliated: true, then return the response
         if ($response->json()['status'] == true && $response->json()['affiliated'] == true) {
-            return true;
+            // return respnse as array
+            return $response->json();
         } else {
             return false;
         }

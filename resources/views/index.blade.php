@@ -1,24 +1,111 @@
 <x-guest-layout>
     <!-- Live Show Banner -->
     @if (isset($currentLiveShow) && $currentLiveShow)
-        <div class="live-show-banner">
+        <style>
+            /* Non-Bootstrap classes used in this banner */
+            .live-show-banner {
+                background: linear-gradient(90deg, #fae7ff 0%, #e9e2fe 100%);
+                border-radius: 32px;
+                box-shadow: 0 4px 20px rgba(160, 130, 255, 0.08);
+                margin-bottom: 36px;
+                margin-top: 36px;
+            }
+
+            .live-badge {
+                background: #ffd600;
+                color: #5a189a;
+                padding: 6px 18px;
+                border-radius: 21px 6px 21px 21px;
+                letter-spacing: 1.5px;
+                box-shadow: 0 2px 8px rgba(255,167,38,0.06);
+            }
+
+            .live-dot {
+                display: inline-block;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: radial-gradient(ellipse at center, #ff3358 80%, #ff6347 100%);
+                box-shadow: 0 0 8px 2px #ff335888;
+                margin-right: 7px;
+                vertical-align: middle;
+            }
+
+            .text-gradient {
+                background: linear-gradient(90deg, #a100ff 0%, #ef008f 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                text-fill-color: transparent;
+            }
+
+            .b-highlight {
+                color: #ff3366;
+                font-weight: bold;
+                background: #fff0f6;
+                padding: 0.15em 0.6em;
+                border-radius: 6px;
+            }
+
+            .border-purple {
+                border: 2px solid #bb5ff5 !important;
+            }
+
+            .text-orange {
+                color: #ff8800 !important;
+            }
+        </style>
+        <div class="live-show-banner position-relative" style="overflow:visible;">
+            <div class="position-absolute w-100 text-center" style="top:-30px; left:0;">
+                <span class="badge bg-warning px-4 py-2 fs-5 shadow" style="border-radius:30px; letter-spacing:1px;">
+                    ✨ It's Show Time! Lass dir den Spaß nicht entgehen! ✨
+                </span>
+            </div>
             <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-md-2 text-center text-md-start mb-3 mb-md-0">
-                        <span class="live-badge">
-                            <span class="live-dot"></span>
-                            LIVE NOW
+                <div class="row align-items-center py-3" style="min-height:80px;">
+                    <div class="col-md-2 text-center text-md-start mb-3 mb-md-0 d-flex align-items-center">
+                        <span class="live-badge fs-6 fw-bolder d-inline-flex align-items-center">
+                            <span class="live-dot me-2"></span>
+                            @if (isset($currentLiveShow) && in_array($currentLiveShow->status, ['live', 'scheduled']))
+                                <span class="d-none d-md-inline">
+                                    {{ strtoupper($currentLiveShow->status) }}
+                                    @if ($currentLiveShow->scheduled_at)
+                                        &ndash;
+                                        {{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y H:i') }}
+                                    @endif
+                                </span>
+                                <span class="d-inline d-md-none">
+                                    {{ strtoupper(Str::limit($currentLiveShow->status, 4, '')) }}
+                                    @if ($currentLiveShow->scheduled_at)
+                                        &ndash;
+                                        {{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y H:i') }}
+                                    @endif
+                                </span>
+                            @else
+                                <span class="d-none d-md-inline">LIVE NOW</span>
+                                <span class="d-inline d-md-none">LIVE</span>
+                            @endif
                         </span>
                     </div>
                     <div class="col-md-7 text-center text-md-start mb-3 mb-md-0">
-                        <h5 class="mb-1 fw-bold">{{ $currentLiveShow->title ?? 'Live Show' }} - Win
-                            {{ $currentLiveShow->currency ?? '€' }} {{ $currentLiveShow->prize_amount ?? '10,000' }}!
+                        <h5 class="mb-1 fw-bold text-gradient" style="font-size:1.2rem;">
+                            {{ $currentLiveShow->title ?? 'Live Show' }}
+                            <span class="mx-2">·</span>
+                            
                         </h5>
-                        <p class="mb-0 opacity-75">{{ $currentLiveShow->users->count() ?? 0 }} players competing now</p>
+                        <p class="mb-0 opacity-75 fs-6">
+                            <i class="bi bi-people-fill text-purple"></i>
+                            {{ $currentLiveShow->users->count() ?? 0 }}
+                            {{ $currentLiveShow->users->count() == 1 ? 'Mitspieler ist' : 'Mitspieler sind' }} gerade
+                            dabei
+                        </p>
                     </div>
-                    <div class="col-md-3 text-center text-md-end">
-                        <a href="{{ route('live-show', $currentLiveShow->id) }}" class="btn btn-light btn-lg fw-bold">
-                            <i class="fas fa-play me-2"></i>JOIN NOW
+                    <div
+                        class="col-md-3 text-center text-md-end d-flex justify-content-center justify-content-md-end align-items-center">
+                        <a href="{{ route('live-show', $currentLiveShow->id) }}"
+                            class="btn btn-light btn-lg fw-bold shadow-sm px-4 border-purple"
+                            style="border-radius: 24px;">
+                            <i class="fas fa-play me-2 text-orange"></i>Jetzt mitspielen
                         </a>
                     </div>
                 </div>
