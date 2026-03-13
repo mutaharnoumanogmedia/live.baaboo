@@ -116,7 +116,7 @@
             <p class="text-muted mb-1" style="">Trag Dich ein und schnapp Dir Dein Ticket zur nächsten
             </p>
             <p class="text-muted mb-3" style="">Game Show am 19.03 um 20:00 Uhr. </p>
-            <x-registeration-form />
+            <x-registeration-form :referredByUser="$referredByUser ?? null" />
 
             <p class="text-purple mb-3" style="">
                 Kostenlos & unverbindlich. Du kannst Dich jederzeit abmelden.
@@ -533,7 +533,7 @@
     <!-- ══════════════════════════════════════════
        CTA BANNER (final)
   ══════════════════════════════════════════ -->
-    <section class="cta-banner gradient-bg">
+    {{-- <section class="cta-banner gradient-bg">
         <div class="container text-center">
             <div class="text-banner">
                 Jetzt Ticket sichern
@@ -544,10 +544,12 @@
                 .</p>
             <div id="form-section">
                 <x-registeration-form />
+
+            
             </div>
 
         </div>
-    </section>
+    </section> --}}
 
     <!-- ══════════════════════════════════════════
        FAQ

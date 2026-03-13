@@ -25,7 +25,7 @@
                     <span class="text-danger">{{ $message }}</span>
                 @enderror
             </div>
-            @if (isset($referredByUser))
+             @if (isset($referredByUser))
                 <input type="hidden" name="referred_by" value="{{ $referredByUser->id }}">
             @endif
 

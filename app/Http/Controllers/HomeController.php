@@ -49,6 +49,7 @@ class HomeController extends Controller
         if (! $referredByUser) {
             return redirect()->route('index')->with('error', 'Referred by user not found');
         }
+         
 
         return view('index', compact('referredByUser'));
     }
