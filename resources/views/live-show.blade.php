@@ -975,7 +975,7 @@
 </head>
 
 <body>
-    @include('partials.gtm', ['part' => 'body'])
+    {{-- @include('partials.gtm', ['part' => 'body']) --}}
 
     <!-- Centered Play Button Overlay -->
     <div id="playButtonOverlay" style="">
