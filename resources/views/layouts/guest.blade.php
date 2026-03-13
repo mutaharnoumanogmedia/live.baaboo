@@ -812,11 +812,18 @@
 
             <p class="mb-1">
                 © 2026 Badabing Game Show ·
+                <a class="text-white" target="_blank" href="https://legal.baaboo.com/impressum">
+                    Impressum
+                </a> ·
                 <a href="{{ route('teilnahmebedingungen') }}" class="text-white"
                      >Teilnahmebedingungen</a> ·
                 <a href="{{ route('datenschutz') }}" class="text-white"  >Datenschutz</a> ·
                 <a href="{{ route('agb') }}" class="text-white" >AGB</a> ·
                 {{-- <a href="#" class="text-white" target="_blank">Kontakt</a> --}}
+            </p>
+            <p class="text-white" style="font-size:0.72rem">
+                "je nach Showformat variieren":
+Bei Badabing zählt nur dein Wissen und deine Schnelligkeit. Kein Los, kein Zufall.
             </p>
         </div>
     </footer>

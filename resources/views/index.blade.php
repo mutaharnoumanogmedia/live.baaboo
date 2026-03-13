@@ -152,7 +152,7 @@
                         </a>
                     </div>
                     <div class="col-md-4">
-                        <a href="#" class="text-decoration-none d-block">
+                        <a href="#how-it-works-section" class="text-decoration-none d-block">
                             <button class="btn-outline-purple mt-2 w-100">
                                 So funktioniert's
                                 <i class="bi bi-arrow-up-right"></i></button>
@@ -214,7 +214,7 @@
     <!-- ══════════════════════════════════════════
        3 SCHRITTE ZUM GEWINN
   ══════════════════════════════════════════ -->
-    <section class="steps-section">
+    <section class="steps-section" id="how-it-works-section">
         <div class="container">
             <div class="text-center mb-5">
                 <div class="section-eyebrow" style="text-transform: uppercase;">So funktioniert's</div>
@@ -317,8 +317,7 @@
             </div>
             <h2 class="section-title mb-2">Die nächste <span class="text-orange">Show</span> startet <span
                     class="text-orange">bald</span>!</h2>
-            <p class="text-muted mb-1" style="">Reg Dich jetzt kostenlos an. Dir Ticket &amp;
-                Teilnahmelink</p>
+            <p class="text-muted mb-1" style="">Melde dich jetzt kostenlos an und sichere Dir dein Ticket & den Teilnahmelink</p>
             <p class="text-muted mb-3" style="">Game Show am (Mo) um 20:00 Uhr.</p>
             <center>
                 <div class="col-lg-4">
@@ -516,7 +515,7 @@
                     </div>
                     <div class="col-md-8 d-flex flex-column justify-content-center align-items-center p-4">
 
-                        <p class="text-dark fw-bold fs-5">
+                        <p class="text-dark  fs-5">
                             Live-Shows leben von Persönlichkeit – und genau die bringt Tanja Müller mit auf
                             die
                             Badabing Bühne.
