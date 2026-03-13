@@ -808,7 +808,8 @@
         <div class="container">
 
             <p class="mb-0" style="font-size:0.72rem">Die Badabing Game Show ist ein Unterhaltungsangebot. Teilnahme
-                ab 18 Jahren. Alle Angaben ohne Gewähr. Preise können je nach Showformat variieren.</p>
+                ab 18 Jahren. Alle Angaben ohne Gewähr. Preise können je nach Showformat variieren. Bei Badabing zählt nur dein Wissen und deine Schnelligkeit. Kein Los, kein Zufall.
+            </p>
 
             <p class="mb-1">
                 © 2026 Badabing Game Show ·
@@ -821,10 +822,7 @@
                 <a href="{{ route('agb') }}" class="text-white" >AGB</a> ·
                 {{-- <a href="#" class="text-white" target="_blank">Kontakt</a> --}}
             </p>
-            <p class="text-white" style="font-size:0.72rem">
-                "je nach Showformat variieren":
-Bei Badabing zählt nur dein Wissen und deine Schnelligkeit. Kein Los, kein Zufall.
-            </p>
+         
         </div>
     </footer>
 
