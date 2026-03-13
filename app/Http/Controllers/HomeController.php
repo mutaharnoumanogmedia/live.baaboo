@@ -47,9 +47,9 @@ class HomeController extends Controller
 
         $referredByUser = User::where('user_name', $user_name)->first();
         if (! $referredByUser) {
+            
             return redirect()->route('index')->with('error', 'Referred by user not found');
         }
-         
 
         return view('index', compact('referredByUser'));
     }
@@ -206,6 +206,20 @@ class HomeController extends Controller
         ]);
     }
 
+
+    public function agreementTerms()
+    {
+        return view('agreement-terms');
+    }
+    public function participationTerms()
+    {
+        return view('participation-terms');
+    }
+    public function privacyPolicy()
+    {
+        return view('privacy-policy');
+    }
+
     // Lead Generation (POST)
     public function leadGeneration($requestPayload)
     {
@@ -225,9 +239,9 @@ class HomeController extends Controller
     }
 
     // Get LiveShow Details (GET)
-    public function getLiveShowDetails(Request $request)
+    public function getLiveShowDetails($username)
     {
-        $username = $request->input('username', 'ogmuth');
+
         $response = Http::withHeaders([
             'Authorization' => 'f0a97e7aaa3291487316d9c3d9e67b96c32dee09ad2c573af6c272341edb70e7',
             'Origin' => env('FRONTEND_URL'),
@@ -235,6 +249,11 @@ class HomeController extends Controller
             'username' => $username,
         ]);
 
-        return $response->json();
+        // if the response has status : treu and affiliated: true, then return the response
+        if ($response->json()['status'] == true && $response->json()['affiliated'] == true) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }

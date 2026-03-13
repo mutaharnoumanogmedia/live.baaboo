@@ -40,7 +40,7 @@
             --pink-light: #f73fae1a;
         }
 
-        
+
 
         body {
             font-family: 'Nunito', sans-serif;
@@ -48,7 +48,7 @@
             color: var(--text-dark);
             margin: 0;
             padding: 0;
-            
+
         }
 
         h1,
@@ -64,6 +64,7 @@
             background: linear-gradient(160deg, #eee6fc 0%, #f7f2ff 40%, #fce9d8 100%) !important;
 
         }
+
         .gradient-bg-reverse {
             background: linear-gradient(564deg, #fce9d8 0%, #f7f2ff 60%, #eee6fc 100%) !important;
         }
@@ -805,15 +806,16 @@
 ══════════════════════════════════════════ -->
     <footer>
         <div class="container">
-      
+
             <p class="mb-0" style="font-size:0.72rem">Die Badabing Game Show ist ein Unterhaltungsangebot. Teilnahme
                 ab 18 Jahren. Alle Angaben ohne Gewähr. Preise können je nach Showformat variieren.</p>
 
             <p class="mb-1">
                 © 2026 Badabing Game Show ·
-                <a href="#" class="text-white" target="_blank">Impressum</a> ·
-                <a href="#" class="text-white" target="_blank">Datenschutz</a> ·
-                <a href="#" class="text-white" target="_blank">AGB</a> ·
+                <a href="{{ route('teilnahmebedingungen') }}" class="text-white"
+                     >Teilnahmebedingungen</a> ·
+                <a href="{{ route('datenschutz') }}" class="text-white"  >Datenschutz</a> ·
+                <a href="{{ route('agb') }}" class="text-white" >AGB</a> ·
                 <a href="#" class="text-white" target="_blank">Kontakt</a>
             </p>
         </div>
