@@ -17,12 +17,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HomeController::class, 'index'])->name('index');
+Route::get('/login', function () {
+    return view('auth.login');
+})->name('login');
 Route::get('thank-you/{user_name}', [HomeController::class, 'thankYouForYourParticipation'])->name('thank-you-for-your-participation');
 
 Route::get('agb', [HomeController::class, 'agreementTerms'])->name('agb');
 // Teilnahmebedingungen
 Route::get('teilnahmebedingungen', [HomeController::class, 'participationTerms'])->name('teilnahmebedingungen');
-//Datenschutz
+// Datenschutz
 Route::get('datenschutz', [HomeController::class, 'privacyPolicy'])->name('datenschutz');
 
 Route::get('{name}', [HomeController::class, 'registerUserViaForm'])->name('register-user-via-form');
@@ -70,8 +73,6 @@ Route::get('/live-show/{id}/user-prize', [GamePlayController::class, 'getUserPri
 Route::get('/live-show/{id}/check-if-user-blocked-from-live-show', [GamePlayController::class, 'checkIfUserBlockedFromLiveShow'])->name('api.check-if-user-blocked-from-live-show');
 
 Route::post('register-user-via-form-submit', [HomeController::class, 'registerUserViaFormSubmit'])->name('register-user-via-form-submit');
-
-
 
 Route::get('/test/registration-welcome-email', function () {
     $user = User::where('user_name', 'mutahar1996')->first();
