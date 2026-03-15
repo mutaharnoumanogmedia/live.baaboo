@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Services\AffiliateAPIService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -98,6 +100,7 @@ class User extends Authenticatable
     {
         return $this->belongsTo(User::class, 'referred_by');
     }
+
     public function referredUsers()
     {
         return $this->hasMany(User::class, 'referred_by');
@@ -115,15 +118,24 @@ class User extends Authenticatable
 
     public function getUserName()
     {
-        //take user_name if exists, otherwise generate a new one
+        // take user_name if exists, otherwise generate a new one
         if ($this->user_name) {
             return $this->user_name;
         }
         // logic is take fist part of email, if not unique, then append a 2 digit number to it
-        
+
         $userName = explode('@', $this->email)[0];
+
+        $service = new AffiliateAPIService;
+
+        if ($service->isUserNameExistingInAffiliate($userName)) {
+            $userName = $userName.rand(100, 999);
+
+            return $userName;
+        }
         do {
             $checkUserName = $userName;
+
             if (User::where('user_name', $checkUserName)->exists()) {
                 $userName = $userName.rand(10, 99);
             } else {
