@@ -56,14 +56,14 @@
             }
         </style>
         <div class="live-show-banner position-relative" style="overflow:visible;">
-            <div class="position-absolute w-100 text-center" style="top:-30px; left:0;">
-                <span class="badge bg-warning px-4 py-2 fs-5 shadow" style="border-radius:30px; letter-spacing:1px;">
+            <div class="text-center position-absolute w-100" style="top:-30px; left:0;">
+                <span class="px-4 py-2 shadow badge bg-warning fs-5" style="border-radius:30px; letter-spacing:1px;">
                     ✨ It's Show Time! Lass dir den Spaß nicht entgehen! ✨
                 </span>
             </div>
             <div class="container">
-                <div class="row align-items-center py-3" style="min-height:80px;">
-                    <div class="col-md-2 text-center text-md-start mb-3 mb-md-0 d-flex align-items-center">
+                <div class="py-3 row align-items-center" style="min-height:80px;">
+                    <div class="mb-3 text-center col-md-2 text-md-start mb-md-0 d-flex align-items-center">
                         <span class="live-badge fs-6 fw-bolder d-inline-flex align-items-center">
                             <span class="live-dot me-2"></span>
                             @if (isset($currentLiveShow) && in_array($currentLiveShow->status, ['live', 'scheduled']))
@@ -87,11 +87,11 @@
                             @endif
                         </span>
                     </div>
-                    <div class="col-md-7 text-center text-md-start mb-3 mb-md-0">
+                    <div class="mb-3 text-center col-md-7 text-md-start mb-md-0">
                         <h5 class="mb-1 fw-bold text-gradient" style="font-size:1.2rem;">
                             {{ $currentLiveShow->title ?? 'Live Show' }}
                             <span class="mx-2">·</span>
-                            
+
                         </h5>
                         <p class="mb-0 opacity-75 fs-6">
                             <i class="bi bi-people-fill text-purple"></i>
@@ -101,9 +101,9 @@
                         </p>
                     </div>
                     <div
-                        class="col-md-3 text-center text-md-end d-flex justify-content-center justify-content-md-end align-items-center">
+                        class="text-center col-md-3 text-md-end d-flex justify-content-center justify-content-md-end align-items-center">
                         <a href="{{ route('live-show', $currentLiveShow->id) }}"
-                            class="btn btn-light btn-lg fw-bold shadow-sm px-4 border-purple"
+                            class="px-4 shadow-sm btn btn-light btn-lg fw-bold border-purple"
                             style="border-radius: 24px;">
                             <i class="fas fa-play me-2 text-orange"></i>Jetzt mitspielen
                         </a>
@@ -123,7 +123,7 @@
                 <div class="">
                     <a href="{{ route('index') }}">
                         <img src="{{ asset('images/badabing-logo.webp') }}" alt="Badabing Game Show" width="200"
-                            class="img-fluid hero-logo mb-3 mx-auto">
+                            class="mx-auto mb-3 img-fluid hero-logo">
                     </a>
                 </div>
             </div>
@@ -146,14 +146,14 @@
                 <center>
                     <div class="col-md-4">
                         <a href="#form-section" class="text-decoration-none d-block">
-                            <button class="btn-orange mb-3 w-100">
+                            <button class="mb-3 btn-orange w-100">
                                 Zur nächsten Game Show anmelden <i class="bi bi-bell-fill"></i>
                             </button>
                         </a>
                     </div>
                     <div class="col-md-4">
                         <a href="#how-it-works-section" class="text-decoration-none d-block">
-                            <button class="btn-outline-purple mt-2 w-100">
+                            <button class="mt-2 btn-outline-purple w-100">
                                 So funktioniert's
                                 <i class="bi bi-arrow-up-right"></i></button>
                         </a>
@@ -168,7 +168,7 @@
   ══════════════════════════════════════════ -->
     <section class="stats-bar">
         <div class="container">
-            <div class="row justify-content-center text-center g-3">
+            <div class="text-center row justify-content-center g-3">
                 <div class="col-6 col-md-3">
                     <div class="stat-value text-orange">100%</div>
                     <div class="stat-label">Kostenlose Teilnahme </div>
@@ -197,15 +197,15 @@
        BEREIT FÜR DIE SHOW (CTA strip)
   ══════════════════════════════════════════ -->
     <section class="cta-banner" id="form-section">
-        <div class="container  ">
+        <div class="container ">
             <div class="fs-6 fw-bold text-purple" style="text-transform: uppercase;">Sei Dabei</div>
-            <h2 class="section-title mb-2">Bereit für die <span class="text-orange">Show?</span></h2>
-            <p class="text-muted mb-1" style="">Trag Dich ein und schnapp Dir Dein Ticket zur nächsten
+            <h2 class="mb-2 section-title">Bereit für die <span class="text-orange">Show?</span></h2>
+            <p class="mb-1 text-muted" style="">Trag Dich ein und schnapp Dir Dein Ticket zur nächsten
             </p>
-            <p class="text-muted mb-3" style="">Game Show am 19.03 um 20:00 Uhr. </p>
+            <p class="mb-3 text-muted" style="">Game Show am 19.03 um 20:00 Uhr. </p>
             <x-registeration-form :referredByUser="$referredByUser ?? null" />
 
-            <p class="text-purple mb-3" style="">
+            <p class="mb-3 text-purple" style="">
                 Kostenlos & unverbindlich. Du kannst Dich jederzeit abmelden.
             </p>
         </div>
@@ -216,7 +216,7 @@
   ══════════════════════════════════════════ -->
     <section class="steps-section" id="how-it-works-section">
         <div class="container">
-            <div class="text-center mb-5">
+            <div class="mb-5 text-center">
                 <div class="section-eyebrow" style="text-transform: uppercase;">So funktioniert's</div>
                 <h2 class="section-title">Drei Schritte zum <span class="text-orange">Gewinn.</span></h2>
             </div>
@@ -263,7 +263,7 @@
   ══════════════════════════════════════════ -->
     <section class="features-section gradient-bg">
         <div class="container">
-            <div class="text-center mb-5">
+            <div class="mb-5 text-center">
                 <p class="fs-6 fw-bold text-orange" style="text-transform: uppercase;">
                     Spielmodi
                 </p>
@@ -310,19 +310,19 @@
     <!-- ══════════════════════════════════════════
        NÄCHSTE SHOW (CTA strip 2)
   ══════════════════════════════════════════ -->
-    <section class="cta-banner bg-white">
+    <section class="bg-white cta-banner">
         <div class="container text-center">
             <div class="text-purple fs-6 fw-bold" style="text-transform: uppercase;">Nicht verpassen!
 
             </div>
-            <h2 class="section-title mb-2">Die nächste <span class="text-orange">Show</span> startet <span
+            <h2 class="mb-2 section-title">Die nächste <span class="text-orange">Show</span> startet <span
                     class="text-orange">bald</span>!</h2>
-            <p class="text-muted mb-1" style="">Melde dich jetzt kostenlos an und sichere Dir dein Ticket & den Teilnahmelink</p>
-            {{-- <p class="text-muted mb-3" style="">Game Show am (Mo) um 20:00 Uhr.</p> --}}
+            <p class="mb-1 text-muted" style="">Melde dich jetzt kostenlos an und sichere Dir dein Ticket & den Teilnahmelink</p>
+            {{-- <p class="mb-3 text-muted" style="">Game Show am (Mo) um 20:00 Uhr.</p> --}}
             <center>
                 <div class="col-lg-4">
                     <a href="#form-section" class="text-decoration-none d-block">
-                        <button class="btn-orange mb-3 w-100">
+                        <button class="mb-3 btn-orange w-100">
                             Zur nächsten Game Show anmelden <i class="bi bi-bell-fill"></i>
                         </button>
                     </a>
@@ -336,7 +336,7 @@
   ══════════════════════════════════════════ -->
     <section class="schedule-section gradient-bg">
         <div class="container">
-            <div class="text-center mb-4">
+            <div class="mb-4 text-center">
                 <div class="fs-6 fw-bold text-orange" style="text-transform: uppercase;">Showtime</div>
                 <h2 class="section-title">Was läuft, was <span class="text-purple">kommt</span>.</h2>
             </div>
@@ -348,7 +348,7 @@
         </div>
     </section>
 
-    <section class="bg-whtie p-4 container">
+    <section class="container p-4 bg-whtie">
         <div class="row">
             <div class="col-md-3">
                 <img src="{{ asset('images/money-sack-icon.png') }}" alt="Schedule 1" class="img-fluid"
@@ -375,15 +375,15 @@
     <!-- ══════════════════════════════════════════
        PREISE
   ══════════════════════════════════════════ -->
-    <section class=" w-100 bg-white">
+    <section class="bg-white w-100">
         <div class="container d-flex justify-content-center align-items-center">
             <div class="col-lg-8">
                 <div class="container">
-                    <div class="text-center mb-5 py-5">
+                    <div class="py-5 mb-5 text-center">
                         <div class=" fs-6 fw-bold text-pink">Was gibt's zu gewinnen?</div>
                         <h2 class="section-title">Preise, die sich <span class="accent-orange">lohnen.</span></h2>
                     </div>
-                    <div class="row justify-content-center g-4 mb-4">
+                    <div class="mb-4 row justify-content-center g-4">
                         <div class="col-6 col-md-4">
                             <center>
                                 <div class="prize-card">
@@ -452,7 +452,7 @@
   ══════════════════════════════════════════ -->
     <section class="testimonials-section gradient-bg">
         <div class="container">
-            <div class="text-center mb-5">
+            <div class="mb-5 text-center">
                 <div class="section-eyebrow">DAS SAGEN UNSERE SPIELERINNEN &amp; SPIELER</div>
                 <h2 class="section-title">Echte Spieler, echte <span class="text-orange">Begeisterung.</span></h2>
             </div>
@@ -460,28 +460,25 @@
                 <div class="col-md-4">
                     <div class="testi-card">
                         <div class="stars">★★★★★</div>
-                        <p class="testi-text">„Ich war skeptisch, aber das Konzept hat mich total überzeugt – echte
-                            People, echte Preise. Die Show macht süchtig und man kommt immer wieder!"</p>
-                        <div class="testi-author">Jana S.</div>
-                        <div class="testi-date">Spielerin seit Folge 1</div>
+                        <p class="testi-text">Ich war skeptisch - eine Game Show online, kostenlos, echte Gewinne? Aber dann hab ich mitgemacht und tatsächlich 100€ gewonnen. Bin absolut begeistert!</p>
+                        <div class="testi-author">Lisa M.</div>
+                        <div class="testi-date">Badabing Gewinner</div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="testi-card">
                         <div class="stars">★★★★★</div>
-                        <p class="testi-text">„Das ist genau das, was Fernsehen nie konnte – ich sitze wirklich
-                            mittendrin. Die Energie im Chat und mit den anderen Spielern ist einzigartig."</p>
+                        <p class="testi-text">Endlich eine Show, bei der ich nicht nur zuschaue. Die Quiz-Battles machen mega Spaß und ich freue mich jede Woche auf die nächste Runde. Mein Highlight am Abend!</p>
                         <div class="testi-author">Markus T.</div>
-                        <div class="testi-date">Regelmäßiger Spieler</div>
+                        <div class="testi-date">Quiz-Battle-Fan</div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="testi-card">
                         <div class="stars">★★★★★</div>
-                        <p class="testi-text">„Ich hab die Show meinen Freunden empfohlen und jetzt spielen wir jeden
-                            Donnerstag zusammen. Beste gemeinsame Aktivität am Abend!"</p>
+                        <p class="testi-text">Ich dachte zuerst, ich schaue nur kurz rein – und plötzlich habe ich selbst mitgespielt. Die Show ist super unterhaltsam und man fiebert bei jeder Runde mit. Wirklich ein cooles Konzept.</p>
                         <div class="testi-author">Sandra K.</div>
-                        <div class="testi-date">Spielt mit Freunden</div>
+                        <div class="testi-date">Badabing Player</div>
                     </div>
                 </div>
             </div>
@@ -493,7 +490,7 @@
   ══════════════════════════════════════════ -->
     <section class="host-section gradient-bg-reverse">
         <div class="container">
-            <div class="w-100 text-center">
+            <div class="text-center w-100">
                 <div class="host-eyebrow fs-6 text-orange">DEINE GASTGEBERIN</div>
                 <h1 class="fs-1 fw-bold">Die Stimme der Show: <span class="text-purple">Tanja
                         Müller</span>
@@ -502,9 +499,9 @@
 
 
 
-            <div class="col-12 bg-white p-2 p-lg-5 rounded border border-light">
+            <div class="p-2 bg-white border rounded col-12 p-lg-5 border-light">
                 <div class="row w-100 align-items-center justify-content-center">
-                    <div class="col-md-4 text-center mb-4">
+                    <div class="mb-4 text-center col-md-4">
 
                         <img src="{{ asset('images/tanjamueller_portrait.webp') }}" alt="Tanja Müller"
                             class="img-fluid circle" style="border-radius: 50%; max-width: 200px; width: 100%;">
@@ -513,9 +510,9 @@
                             tanja__mueller
                         </div>
                     </div>
-                    <div class="col-md-8 d-flex flex-column justify-content-center align-items-center p-4">
+                    <div class="p-4 col-md-8 d-flex flex-column justify-content-center align-items-center">
 
-                        <p class="text-dark  fs-5">
+                        <p class="text-dark fs-5">
                             Live-Shows leben von Persönlichkeit – und genau die bringt Tanja Müller mit auf
                             die
                             Badabing Bühne.
@@ -552,11 +549,11 @@
   ══════════════════════════════════════════ -->
     <section class="howitworks-section">
         <div class="container">
-            <div class="text-center mb-5">
+            <div class="mb-5 text-center">
                 <div class="section-eyebrow">DER WEG ZUM ERFOLG</div>
                 <h2 class="section-title">Von der Anmeldung zum <span class="text-orange">Gewinn.</span></h2>
             </div>
-            <div class="row g-4 text-center mb-2">
+            <div class="mb-2 text-center row g-4">
                 <div class="col-6 col-md-3">
                     <div class="hw-step orange">
                         <div class="hw-icon">
@@ -574,13 +571,10 @@
                     <div class="hw-step pink">
                         <div class="hw-icon">
                             <div class="hw-step-counter">2</div>
-
-                            📅
+                            🌐
                         </div>
                         <div class="hw-title">Show öffnen</div>
-                        <div class="hw-text">Gehe in die Show-Übersicht und wähle die nächste Ausgabe, die Du spielen
-                            möchtest.
-                        </div>
+                        <div class="hw-text">Gehe zur Show-Seite auf badabing.show oder klicke den Link in Deiner Erinnerungs-Nachricht.</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
@@ -591,8 +585,7 @@
                             🎮
                         </div>
                         <div class="hw-title">Live mitspielen</div>
-                        <div class="hw-text">Sei pünktlich dabei, wenn die Show startet und spiele live mit tausenden
-                            anderen.
+                        <div class="hw-text">Zur Showtime einfach einschalten und direkt im Browser mitspielen - am Handy. Tablet oder Laptop.
                         </div>
                     </div>
                 </div>
@@ -603,16 +596,15 @@
                             🏆
                         </div>
                         <div class="hw-title">Gewinne kassieren</div>
-                        <div class="hw-text">Deine Gewinne werden direkt nach der Show gutgeschrieben und können
-                            ausgezahlt werden.
+                        <div class="hw-text">Gewonnen? Dann geht alles automatisch. Gutscheine werden direkt verschickt, Geldgewinne zeitnah ausgezahlt.
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="text-center mt-5 alert p-2 rounded col-lg-6 mx-auto fw-bold text-dark "
-                style="background: var(--purple-light);">Was ist mit der Show los?
-                Schau einfach mal rein und teste es selbst – anmelden ist kostenlos, spielen ist kostenlos, gewinnen ist
-                kostenlos.</div>
+            <div class="p-2 mx-auto mt-5 text-center rounded alert col-lg-6 fw-bold text-dark "
+                style="background: var(--purple-light);">Alles passiert auf badabing.show - Du brauchst keine extra App und kein Abo. Einfach registrieren, einschalten, mitspielen. So einfach ist das.
+
+</div>
         </div>
     </section>
 
@@ -624,14 +616,14 @@
             <div class="text-banner">
                 Jetzt Ticket sichern
             </div>
-            <h2 class="section-title mb-2">Bereit für die <span class="text-orange">Show?</span></h2>
-            <p class="text-dark mb-1" style="">Trag Dich ein und schnapp Dir Dein Ticket zur nächsten </p>
-            <p class="text-dark mb-3" style="">Game Show am 19.03 um 20:00 Uhr.
+            <h2 class="mb-2 section-title">Bereit für die <span class="text-orange">Show?</span></h2>
+            <p class="mb-1 text-dark" style="">Trag Dich ein und schnapp Dir Dein Ticket zur nächsten </p>
+            <p class="mb-3 text-dark" style="">Game Show am 19.03 um 20:00 Uhr.
                 .</p>
             <div id="form-section">
                 <x-registeration-form />
 
-            
+
             </div>
 
         </div>
@@ -642,7 +634,7 @@
   ══════════════════════════════════════════ -->
     <section class="faq-section">
         <div class="container">
-            <div class="text-center mb-5">
+            <div class="mb-5 text-center">
                 <div class="section-eyebrow">FAQ</div>
                 <h2 class="section-title">Noch Fragen?</h2>
                 <p style=";color:var(--text-muted);max-width:560px;margin:0 auto">Alles, was Du über
@@ -659,8 +651,7 @@
                     <div id="faqCollapseOne" class="accordion-collapse collapse show" aria-labelledby="faqHeadingOne"
                         data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            Nein, die Teilnahme ist komplett kostenlos. Du kannst direkt über die Website oder einen
-                            Link teilnehmen, ohne eine App herunterzuladen oder ein kostenpflichtiges Abo abzuschließen.
+                            Nein, Du kannst direkt über die Website oder einen Link teilnehmen, ohne eine App herunterzuladen oder ein kostenpflichtiges Abo abzuschließen. Die Teilnahme an der Game Show ist komplett kostenlos.
                         </div>
                     </div>
                 </div>
@@ -674,8 +665,7 @@
                     <div id="faqCollapseTwo" class="accordion-collapse collapse" aria-labelledby="faqHeadingTwo"
                         data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            Von Geld- und Sachpreisen über Traumreisen bis hin zu exklusiven Shopping-Deals ist alles
-                            möglich. Je nach Show gibt es unterschiedliche Belohnungen.
+                            Von Geld- und Sachpreisen über Traumreisen bis hin zu exklusiven Shopping-Deals ist alles möglich. Je nach Show gibt es unterschiedliche Belohnungen!
                         </div>
                     </div>
                 </div>
@@ -705,7 +695,7 @@
                     <div id="faqCollapseFour" class="accordion-collapse collapse" aria-labelledby="faqHeadingFour"
                         data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            Es gibt keine Begrenzung. Du kannst so oft teilnehmen, wie Du möchtest.
+                            Es gibt keine Begrenzung! Du kannst so oft teilnehmen, wie Du möchtest, und deine Gewinnchancen immer wieder aufs Neue nutzen.
                         </div>
                     </div>
                 </div>
@@ -719,8 +709,7 @@
                     <div id="faqCollapseFive" class="accordion-collapse collapse" aria-labelledby="faqHeadingFive"
                         data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            Die Gewinner werden je nach Spielmodus durch Wissen und Schnelligkeit bestimmt. Alle Gewinne
-                            werden fair vergeben und transparent angezeigt.
+                            Die Gewinner werden je nach Spielmodus durch Wissen und Schnelligkeit bestimmt. Alle Gewinne werden fair vergeben und transparent angezeigt.
                         </div>
                     </div>
                 </div>
@@ -750,8 +739,7 @@
                     <div id="faqCollapseSeven" class="accordion-collapse collapse" aria-labelledby="faqHeadingSeven"
                         data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            Du kannst Freunde einladen und gemeinsam mitfiebern, aber die Teilnahme ist aktuell nur als
-                            Einzelspieler möglich. Jeder muss sich einzeln zur Show einloggen.
+                            Ja! Du kannst jeden Deiner Freunde zu Badabing einladen und gemeinsam mitfiebern. Aktuell ist jedoch eine Teilnahme nur als Einzelspieler möglich. Möchtest Du oder Deine Freunde teilnehmen, loggt euch bitte einzeln zur Show ein.
                         </div>
                     </div>
                 </div>
@@ -767,7 +755,7 @@
             var assetPath = "{{ asset('images/') }}";
             var scheduleData = {
                 "carousel_items": [{
-                        "badge": "Bald",
+                        "badge": "BALD",
                         "date": "19.03.2026 um 20:00 Uhr",
                         "title": "Die große Premiere",
                         "description": "Die allererste Badabing Game Show - sei von Anfang an dabei und sichere Dir die ersten Gewinne!",
@@ -782,7 +770,7 @@
                         ]
                     },
                     {
-                        "badge": "Bald",
+                        "badge": "BALD",
                         "date": "02.04.2026 um 20:00 Uhr",
                         "title": "Quiz&Speed Game Show",
                         "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
@@ -797,7 +785,7 @@
                         ]
                     },
                     {
-                        "badge": "Bald",
+                        "badge": "BALD",
                         "date": "09.04.2026 um 20:00 Uhr",
                         "title": "Quiz&Speed Game Show",
                         "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
@@ -812,7 +800,7 @@
                         ]
                     },
                     {
-                        "badge": "Bald",
+                        "badge": "BALD",
                         "date": "16.04.2026 um 20:00 Uhr",
                         "title": "Quiz&Speed Game Show",
                         "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
@@ -827,7 +815,7 @@
                         ]
                     },
                     {
-                        "badge": "Bald",
+                        "badge": "BALD",
                         "date": "23.04.2026 um 20:00 Uhr",
                         "title": "Quiz&Speed Game Show",
                         "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
@@ -855,23 +843,23 @@
                 if (window.scheduleData && Array.isArray(scheduleData.carousel_items)) {
                     scheduleData.carousel_items.forEach(function(show) {
                         var $card = $(
-                            '<div class="show-card-container"> <div class="show-card mb-3"></div></div>');
+                            '<div class="show-card-container"> <div class="mb-3 show-card"></div></div>');
                         // Top: badge and date
-                        var $badge = $('<span class="badge badge-orange mb-2" style="font-size:0.75rem;">' + (
+                        var $badge = $('<span class="mb-2 badge badge-orange" style="font-size:0.75rem;">' + (
                             show.badge || '') + '</span>');
-                        var $date = $('<div class="show-date text-pink mb-1">' + (show.date || '') + '</div>');
+                        var $date = $('<div class="mb-1 show-date text-pink">' + (show.date || '') + '</div>');
 
                         // Title + desc
-                        var $title = $('<div class="show-title  fs-4 my-2 fw-bold">' + (show.title || '') +
+                        var $title = $('<div class="my-2 show-title fs-4 fw-bold">' + (show.title || '') +
                             '</div>');
                         var $desc = $('<div class="show-desc">' + (show.description || '') + '</div>');
 
                         // Meta section
-                        var $meta = $('<div class="show-meta d-flex flex-wrap gap-2 mt-2"></div>');
+                        var $meta = $('<div class="flex-wrap gap-2 mt-2 show-meta d-flex"></div>');
                         if (Array.isArray(show.meta)) {
                             show.meta.forEach(function(meta) {
                                 var $item = $(
-                                    '<span class="d-inline-flex align-items-center gap-1"></span>');
+                                    '<span class="gap-1 d-inline-flex align-items-center"></span>');
                                 if (meta.icon) {
                                     $item.append('<img src="' + assetPath + '/' + meta.icon +
                                         '" alt="" width="16" height="16">');
