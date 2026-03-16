@@ -13,4 +13,8 @@ class QuizOption extends Model
     {
         return $this->belongsTo(LiveShowQuiz::class, 'quiz_id');
     }
+    public function userQuizResponses()
+    {
+        return $this->hasMany(UserQuizResponse::class, 'quiz_option_id');
+    }
 }

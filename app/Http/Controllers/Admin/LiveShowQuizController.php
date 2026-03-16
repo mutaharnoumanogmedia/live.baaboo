@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\LiveShow;
 use App\Models\LiveShowQuiz;
+use App\Models\QuizOption;
+use App\Models\UserQuizResponse;
 use Illuminate\Http\Request;
 
 class LiveShowQuizController extends Controller
@@ -101,17 +103,17 @@ class LiveShowQuizController extends Controller
             'questions.0.options' => 'required|array|min:2',
 
             'questions.0.options.*.option_text' => 'required|string|max:255',
-            'questions.0.correct' => 'nullable|boolean',
+            'questions.0.correct' => 'nullable|integer',
         ]);
 
+        // Remove old options
+        UserQuizResponse::where('quiz_id', $quiz->id)->delete();
+        QuizOption::where('quiz_id', $quiz->id)->delete();
         // Update main quiz fields
         $quiz->update([
             'live_show_id' => $request->live_show_id,
             'question' => $request->question,
         ]);
-
-        // Remove old options
-        $quiz->options()->delete();
 
         // Extract options array
         $options = $request->questions[0]['options'];
@@ -125,7 +127,7 @@ class LiveShowQuizController extends Controller
             ]);
         }
 
-        return redirect()
+        return redirect()   
             ->route('admin.live-show-quizzes.index')
             ->with('success', 'Quiz updated successfully.');
     }
@@ -133,9 +135,11 @@ class LiveShowQuizController extends Controller
     public function destroy($id)
     {
         $quiz = LiveShowQuiz::findOrFail($id);
-        $quiz->options()->delete();
-        $quiz->delete();
+        UserQuizResponse::where('quiz_id', $quiz->id)->delete();
+            QuizOption::where('quiz_id', $quiz->id)->delete();
 
-        return redirect()->back()->with('success', 'Quiz deleted successfully.');
+            LiveShowQuiz::where('id', $id)->delete();
+
+            return   redirect()->back()->with('success', 'Quiz deleted successfully.');
     }
 }

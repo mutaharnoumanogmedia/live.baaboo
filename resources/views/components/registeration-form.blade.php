@@ -8,7 +8,7 @@
         <form method="POST" id="registerationForm" action="{{ route('register-user-via-form-submit') }}">
             @csrf
             <div class="mb-3">
-                <label for="name" class="form-label text-dark fw-semibold">Dein Name <span
+                <label for="name" class="form-label text-dark fw-semibold">Dein Vorname <span
                         class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="name" name="name" placeholder="Max Mustermann"
                     autocomplete="off" value="{{ old('name') }}">
