@@ -16,7 +16,9 @@ class LiveShowQuizController extends Controller
 
     public function index()
     {
-        $quizzes = LiveShowQuiz::when(request('live_show_id'), function ($query) {
+        $quizzes = LiveShowQuiz::
+        with('liveShow')
+        when(request('live_show_id'), function ($query) {
             $query->where('live_show_id', request('live_show_id'));
         })
             ->orderBy('id', 'asc')
