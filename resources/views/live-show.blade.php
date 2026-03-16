@@ -65,7 +65,9 @@
             background: url('{{ asset('images/quiz-bg.png') }}') no-repeat center center;
         }
 
-        .bg-white-radial-top-gradient{
+        .bg-nav-radial-top-gradient{
+            background: radial-gradient(circle at top center, rgba(255, 255, 255, 0.85) 0%, rgba(192, 152, 252, 0.45) 30%, rgba(168, 97, 245, 0.4) 75%, rgba(76, 0, 255, 0.25) 110%) !important;
+        }
             background: radial-gradient(circle at top center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%) !important;
         }
 
@@ -1143,7 +1145,7 @@
                 </div>
             </div>
         </div>
-        <nav class="navbar  mobile-nav bottom-nav bg-white-radial-top-gradient border-top">
+        <nav class="navbar  mobile-nav bottom-nav bg-nav-radial-top-gradient border-top">
             <ul
                 class="nav d-flex flex-row flex-nowrap w-100 justify-content-between align-items-center text-center px-2">
 
