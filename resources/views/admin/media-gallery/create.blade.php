@@ -36,13 +36,13 @@
                 const dz = new Dropzone('#gallery-dropzone', {
                     url: '{{ route("admin.media-gallery.upload") }}',
                     paramName: 'file',
-                    maxFilesize: 5,
+                    maxFilesize: 100,
                     maxFiles: 50,
                     acceptedFiles: 'image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime',
                     headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                     addRemoveLinks: true,
-                    dictDefaultMessage: 'Drop images or videos here (Images 2MB max, Videos 10MB max)',
-                    dictFileTooBig: 'File is too big. Images max 2MB, videos max 10MB.',
+                    dictDefaultMessage: 'Drop images or videos here (Images 2MB max, Videos 100MB max)',
+                    dictFileTooBig: 'File is too big. Images max 2MB, videos max 100MB.',
                     dictInvalidFileType: 'Only images and videos allowed.',
                     init: function() {
                         this.on('success', function(file, res) {

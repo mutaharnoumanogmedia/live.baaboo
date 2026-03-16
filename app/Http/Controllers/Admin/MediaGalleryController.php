@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 class MediaGalleryController extends Controller
 {
     private const IMAGE_MAX_BYTES = 2 * 1024 * 1024;  // 2 MB
-    private const VIDEO_MAX_BYTES = 10 * 1024 * 1024;  // 5 MB
+    private const VIDEO_MAX_BYTES = 100 * 1024 * 1024;  // 100 MB
 
     private const IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     private const VIDEO_MIMES = ['video/mp4', 'video/webm', 'video/quicktime'];
@@ -55,7 +55,7 @@ class MediaGalleryController extends Controller
             $type = 'video';
             if ($size > self::VIDEO_MAX_BYTES) {
                 throw ValidationException::withMessages([
-                    'file' => ['Video must not exceed 5 MB.'],
+                    'file' => ['Video must not exceed 100 MB.'],
                 ]);
             }
         } else {
