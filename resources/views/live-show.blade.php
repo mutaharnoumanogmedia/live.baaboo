@@ -65,10 +65,8 @@
             background: url('{{ asset('images/quiz-bg.png') }}') no-repeat center center;
         }
 
-        .bg-nav-radial-top-gradient{
-            background: radial-gradient(circle at top center, rgba(255, 255, 255, 0.85) 0%, rgba(192, 152, 252, 0.45) 30%, rgba(168, 97, 245, 0.4) 75%, rgba(76, 0, 255, 0.25) 110%) !important;
-        }
-            background: radial-gradient(circle at top center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%) !important;
+        .bg-nav-radial-top-gradient {
+            background: radial-gradient(circle at top center, rgba(255, 255, 255, 1) 0%, rgba(192, 152, 252, 1) 30%, rgba(168, 97, 245, 1) 75%, rgba(76, 0, 255, 1) 110%) !important;
         }
 
         input,
@@ -1153,8 +1151,8 @@
                 <li class="nav-item flex-fill">
                     <a href="#"
                         class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0">
-                        <img src="{{ asset('images/badabing-logo.webp') }}"
-                            alt="Logo" style="height:46px;width:auto;">
+                        <img src="{{ asset('images/badabing-logo.webp') }}" alt="Logo"
+                            style="height:46px;width:auto;">
                     </a>
                 </li>
 
