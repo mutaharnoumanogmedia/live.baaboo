@@ -41,43 +41,18 @@
                                         @endif
                                     </td>
                                     <td class="d-flex gap-2">
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button"
-                                                id="actionsDropdown{{ $show->id }}" data-bs-toggle="dropdown"
-                                                aria-expanded="false">
-                                                Actions
+                                        <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.live-shows.edit', $show->id) }}">Edit</a>
+                                        <a class="btn btn-sm btn-outline-info" href="{{ route('admin.live-shows.show', $show->id) }}">View</a>
+                                        <a class="btn btn-sm btn-outline-warning" href="{{ route('admin.live-show-quizzes.index', ['live_show_id' => $show->id]) }}">Quiz Questions</a>
+                                        <a class="btn btn-sm btn-outline-secondary" href="{{ route('admin.live-shows.gallery-attach', $show) }}">Gallery Media</a>
+                                        <form action="{{ route('admin.live-shows.destroy', $show->id) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Are you sure you want to delete this show?')">
+                                                Delete
                                             </button>
-                                            <ul class="dropdown-menu"
-                                                aria-labelledby="actionsDropdown{{ $show->id }}">
-                                                <li>
-                                                    <a class="dropdown-item"
-                                                        href="{{ route('admin.live-shows.edit', $show->id) }}">Edit</a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item"
-                                                        href="{{ route('admin.live-shows.show', $show->id) }}">View</a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item"
-                                                        href="{{ route('admin.live-show-quizzes.index', ['live_show_id' => $show->id]) }}">Quiz
-                                                        Questions</a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item"
-                                                        href="{{ route('admin.live-shows.gallery-attach', $show) }}">Gallery Media</a>
-                                                </li>
-                                                <li class="nav-divider mb-3"></li>
-                                                <li>
-                                                    <form action="{{ route('admin.live-shows.destroy', $show->id) }}"
-                                                        method="POST" style="display:inline;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="dropdown-item text-danger"
-                                                            onclick="return confirm('Are you sure you want to delete this show?')">Delete</button>
-                                                    </form>
-                                                </li>
-                                            </ul>
-                                        </div>
+                                        </form>
 
                                         <a href="{{ route('admin.live-shows.stream-management', $show->id) }}"
                                             class="btn btn-sm btn-primary ">Stream Management</a>
