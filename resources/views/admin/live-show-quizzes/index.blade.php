@@ -22,6 +22,7 @@
                     @php
 
                         $liveShow = \App\Models\LiveShow::find($quiz->live_show_id);
+                        dd($liveShow , $quiz->live_show_id);
                     @endphp
                     <tr>
                         <td>{{ $quiz->id }}</td>
