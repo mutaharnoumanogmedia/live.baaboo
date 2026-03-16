@@ -21,7 +21,7 @@
                 @foreach ($quizzes as $quiz)
                     @php
 
-                        $liveShow = LiveShow::find($quiz->live_show_id);
+                        $liveShow = \App\Models\LiveShow::find($quiz->live_show_id);
                     @endphp
                     <tr>
                         <td>{{ $quiz->id }}</td>
