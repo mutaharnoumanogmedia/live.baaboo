@@ -19,11 +19,15 @@
             </thead>
             <tbody>
                 @foreach ($quizzes as $quiz)
+                    @php
+
+                        $liveShow = LiveShow::find($quiz->live_show_id);
+                    @endphp
                     <tr>
                         <td>{{ $quiz->id }}</td>
                         <td>
                             <a class="text-warning"
-                                href="{{ route('admin.live-shows.show', $quiz->liveShow->id) }}">{{ $quiz->liveShow->title ?? 'N/A' }}</a>
+                                href="{{ route('admin.live-shows.show', $liveShow->id) }}">{{ $liveShow->title ?? 'N/A' }}</a>
                         </td>
                         <td>{{ $quiz->question }}</td>
                         <td>
