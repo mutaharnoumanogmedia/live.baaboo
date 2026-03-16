@@ -16,8 +16,7 @@ class LiveShowQuizController extends Controller
 
     public function index()
     {
-        $quizzes = LiveShowQuiz::
-        with('liveShow')
+        $quizzes = LiveShowQuiz::with('liveShow')->
         when(request('live_show_id'), function ($query) {
             $query->where('live_show_id', request('live_show_id'));
         })
