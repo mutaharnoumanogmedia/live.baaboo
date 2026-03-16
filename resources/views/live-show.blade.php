@@ -286,7 +286,7 @@
             width: 175px;
             z-index: 1;
             position: absolute;
-            top: 120px;
+            top: 114px;
             left: 50%;
             transform: translate(-50%, -50%);
             border-radius: 100%;
