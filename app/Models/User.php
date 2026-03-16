@@ -29,6 +29,7 @@ class User extends Authenticatable
         'referral_link',
         'agree_for_terms',
         'agree_for_email',
+        'is_affiliate',
     ];
 
     /**

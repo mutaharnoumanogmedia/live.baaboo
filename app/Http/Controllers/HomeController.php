@@ -75,6 +75,7 @@ class HomeController extends Controller
                     'user_name' => $user_name,
                     'agree_for_terms' => 1,
                     'agree_for_email' => 1,
+                    'is_affiliate' => 1,
                 ]);
                 $user->referral_link = $user->referralLink();
                 $user->magic_link = $user->magicLink();
