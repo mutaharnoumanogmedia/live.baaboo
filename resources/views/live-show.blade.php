@@ -62,7 +62,11 @@
             overflow-y: scroll;
 
 
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            background: url('{{ asset('images/quiz-bg.png') }}') no-repeat center center;
+        }
+
+        .bg-white-radial-top-gradient{
+            background: radial-gradient(circle at top center, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 70%) !important;
         }
 
         input,
@@ -512,6 +516,7 @@
             font-size: 16px !important;
             outline: none;
             backdrop-filter: blur(10px);
+            width: 80%;
         }
 
         .chat-input-field::placeholder {
@@ -554,7 +559,7 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             overflow-y: auto;
 
-            padding: 6px 0px;
+            padding: 0px 0px;
 
         }
 
@@ -568,7 +573,8 @@
             position: relative;
             padding: 9px;
             height: 100%;
-            background: var(--primary-color) !important;
+            background: url('{{ asset('images/quiz-bg.png') }}') no-repeat center center;
+            background-size: cover;
             border-radius: 0px;
         }
 
@@ -599,18 +605,22 @@
             position: absolute;
             width: 96%;
             bottom: 20px;
-            background: white;
+            background: rgba(0, 0, 255, 0.2);
             border-radius: 15px;
             padding: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
         .quiz-question {
-            color: var(--text-dark);
+            color: white;
             font-weight: 600;
             margin-bottom: 20px;
             font-size: 1.2rem;
             line-height: 1.4;
+            text-align: center;
+            padding: 10px 0px;
+
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .quiz-option {
@@ -982,20 +992,20 @@
         }
 
         #heartReactionBtn {
-            position: absolute;
-            bottom: 45px;
-            right: 16px;
-            z-index: 99999;
-            width: 48px;
-            height: 48px;
+            position: relative;
+            bottom: 0px;
+            right: 0px;
+            z-index: 7;
+            width: 15px;
+            height: 15px;
             border-radius: 50%;
             border: none;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(255, 95, 0, 0.4);
             color: #ff2d55;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: transform 0.15s ease, background 0.2s ease;
             -webkit-tap-highlight-color: transparent;
@@ -1046,9 +1056,7 @@
                     </div>
                 </div>
             </div>
-            <button type="button" id="heartReactionBtn" title="Send a heart">
-                <i class="fas fa-heart"></i>
-            </button>
+
         </div>
         <!-- Floating heart reactions (TikTok/Instagram style) -->
         <div id="heartReactionsOverlay"></div>
@@ -1109,10 +1117,14 @@
                         <!-- Bottom Chat Input -->
                         <div class="bottom-chat-input">
                             <div class="chat-input-group">
+
                                 <input type="text" class="chat-input-field" maxlength="120"
                                     placeholder="write something..." id="chatInput">
                                 <button class="send-btn-overlay" id="send-btn-overlay" onclick="sendMessage()">
                                     <i class="fas fa-paper-plane"></i>
+                                </button>
+                                <button type="button" id="heartReactionBtn" title="Send a heart">
+                                    <i class="fas fa-heart"></i>
                                 </button>
                             </div>
                         </div>
@@ -1131,7 +1143,7 @@
                 </div>
             </div>
         </div>
-        <nav class="navbar  mobile-nav bottom-nav bg-white border-top">
+        <nav class="navbar  mobile-nav bottom-nav bg-white-radial-top-gradient border-top">
             <ul
                 class="nav d-flex flex-row flex-nowrap w-100 justify-content-between align-items-center text-center px-2">
 
@@ -1139,8 +1151,8 @@
                 <li class="nav-item flex-fill">
                     <a href="#"
                         class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0">
-                        <img src="https://baaboo.com/cdn/shop/files/baaboo-logo_1_256x.svg?v=1745568771"
-                            alt="Logo" style="height:26px;width:auto;">
+                        <img src="{{ asset('images/badabing-logo.webp') }}"
+                            alt="Logo" style="height:46px;width:auto;">
                     </a>
                 </li>
 
@@ -1225,8 +1237,11 @@
                         </div>
                         <div>
                             <input type="checkbox" class="form-check-input" id="agree" required>
-                            <label class="form-check-label" for="agree">I agree to the <a href="#"
-                                    class="text-danger text-decoration-underline">Terms & Conditions, Conscent for data
+                            <label class="form-check-label" for="agree">I agree to the
+
+                                <a target="_blank" href="{{ route('agb') }}"
+                                    class="text-danger text-decoration-underline">Terms &
+                                    Conditions, Conscent for data
                                     collection</a></label>
                         </div>
                         <div id="registerError" class="text-danger small" style="display:none;"></div>
@@ -1349,6 +1364,10 @@
         });
         // Toggle quiz mode
         function toggleQuiz(action) {
+            //scroll to top 
+            window.scrollTo(0, 0);
+
+
             const mainContainer = document.getElementById('mainContainer');
             const quizOverlay = document.getElementById('quizOverlay');
             // const showQuestionBtn = document.getElementById('showQuestionBtn');
@@ -1418,7 +1437,7 @@
                     </div>
                     <div class="quiz-options row">
                         ${quiz.options.map((option, index) =>
-                        `<div class="quiz-option col-md-6 position-relative mb-3">  <div class="option-result-container " style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}">${numberToLetter(index)}. ${option.option_text}</label>  </div> `).join('')}
+                        `<div class="quiz-option col-md-12 position-relative mb-3">  <div class="option-result-container " style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}">${numberToLetter(index)}. ${option.option_text}</label>  </div> `).join('')}
                     </div>
              </div>
             `;
@@ -2213,7 +2232,7 @@
 
         @if ($liveShow->status != 'live')
             emptyTheBodyWithEndShow(
-                'This live show is  {{ $liveShow->status }} {{ $liveShow->status == "scheduled" ? "at " . \Carbon\Carbon::parse($liveShow->scheduled_at)->format("d M Y, H:i") : "" }} .  '
+                'This live show is  {{ $liveShow->status }} {{ $liveShow->status == 'scheduled' ? 'at ' . \Carbon\Carbon::parse($liveShow->scheduled_at)->format('d M Y, H:i') : '' }} .  '
             );
         @endif
 
