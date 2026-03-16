@@ -22,8 +22,11 @@
                     @php
 
                         $liveShow = \App\Models\LiveShow::find($quiz->live_show_id);
-                        dd($liveShow , $quiz->live_show_id);
+
                     @endphp
+                    @if (!$liveShow)
+                        dd($quiz , $liveShow);
+                    @endif
                     <tr>
                         <td>{{ $quiz->id }}</td>
                         <td>
