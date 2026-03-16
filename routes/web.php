@@ -29,7 +29,7 @@ Route::get('teilnahmebedingungen', [HomeController::class, 'participationTerms']
 Route::get('datenschutz', [HomeController::class, 'privacyPolicy'])->name('datenschutz');
 
 Route::get('{name}', [HomeController::class, 'registerUserViaForm'])->name('register-user-via-form');
-Route::get('affiliate/{name}', [HomeController::class, 'registerUserViaForm'])->name('register-user-via-form');
+
 Route::get('/live-show-magic-link/{name}', [HomeController::class, 'liveShowMagicLink'])->name('live-show-magic-link');
 
 // Route::middleware(['auth:admin', 'role:admin'])->group(function () {
