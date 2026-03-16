@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\LiveShowQuiz;
 use App\Models\LiveShow;
+use App\Models\LiveShowQuiz;
+use Illuminate\Http\Request;
 
 class LiveShowQuizController extends Controller
 {
@@ -13,19 +13,24 @@ class LiveShowQuizController extends Controller
     {
         $this->middleware('auth');
     }
+
     public function index()
     {
         $quizzes = LiveShowQuiz::with('liveShow')
             ->when(request('live_show_id'), function ($query) {
                 $query->where('live_show_id', request('live_show_id'));
             })
+            ->orderBy('id', 'asc')
+            ->orderBy('live_show_id', 'desc')
             ->get();
+     dd($quizzes);
         return view('admin.live-show-quizzes.index', compact('quizzes'));
     }
 
     public function create()
     {
         $liveShows = LiveShow::pluck('title', 'id');
+
         return view('admin.live-show-quizzes.create', compact('liveShows'));
     }
 
@@ -47,7 +52,7 @@ class LiveShowQuizController extends Controller
 
             $quiz = LiveShowQuiz::create([
                 'live_show_id' => $request->live_show_id,
-                'question'     => $qData['question'],
+                'question' => $qData['question'],
             ]);
 
             $correctIndex = $qData['correct'] ?? null;
@@ -55,21 +60,20 @@ class LiveShowQuizController extends Controller
             foreach ($qData['options'] as $oIndex => $opt) {
                 $quiz->options()->create([
                     'option_text' => $opt['option_text'],
-                    'is_correct'  => ($oIndex == $correctIndex) ? 1 : 0,
+                    'is_correct' => ($oIndex == $correctIndex) ? 1 : 0,
                 ]);
             }
         }
 
         return redirect()
-            ->route('admin.live-show-quizzes.index')
+            ->route('admin.live-show-quizzes.index', ['live_show_id' => $request->live_show_id])
             ->with('success', 'Quiz created successfully.');
     }
-
-
 
     public function show($id)
     {
         $quiz = LiveShowQuiz::with('options', 'liveShow')->findOrFail($id);
+
         return view('admin.live-show-quizzes.show', compact('quiz'));
     }
 
@@ -77,6 +81,7 @@ class LiveShowQuizController extends Controller
     {
         $quiz = LiveShowQuiz::with('options')->findOrFail($id);
         $liveShows = LiveShow::pluck('title', 'id');
+
         return view('admin.live-show-quizzes.form', compact('quiz', 'liveShows'));
     }
 
@@ -90,19 +95,19 @@ class LiveShowQuizController extends Controller
         // Validate based on nested structure: questions[0][options]
         $request->validate([
             'live_show_id' => 'required|exists:live_shows,id',
-            'question'     => 'required|string|max:255',
+            'question' => 'required|string|max:255',
 
             'questions' => 'required|array',
             'questions.0.options' => 'required|array|min:2',
 
             'questions.0.options.*.option_text' => 'required|string|max:255',
-            'questions.0.correct'  => 'nullable|boolean',
+            'questions.0.correct' => 'nullable|boolean',
         ]);
 
         // Update main quiz fields
         $quiz->update([
             'live_show_id' => $request->live_show_id,
-            'question'     => $request->question,
+            'question' => $request->question,
         ]);
 
         // Remove old options
@@ -116,7 +121,7 @@ class LiveShowQuizController extends Controller
         foreach ($options as $index => $option) {
             $quiz->options()->create([
                 'option_text' => $option['option_text'],
-                'is_correct'  => $index == $correctIndex ? 1 : 0,
+                'is_correct' => $index == $correctIndex ? 1 : 0,
             ]);
         }
 
@@ -125,12 +130,12 @@ class LiveShowQuizController extends Controller
             ->with('success', 'Quiz updated successfully.');
     }
 
-
     public function destroy($id)
     {
         $quiz = LiveShowQuiz::findOrFail($id);
         $quiz->options()->delete();
         $quiz->delete();
+
         return redirect()->back()->with('success', 'Quiz deleted successfully.');
     }
 }
