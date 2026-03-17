@@ -201,6 +201,7 @@ class HomeController extends Controller
             'name' => 'required|string|max:255',
             'user_name' => 'required|string|max:255|unique:users,user_name',
             'email' => 'required|email|max:255|unique:users,email',
+            'is_affiliate' => 'required|in:1,0',
         ]);
 
         if ($validator->fails()) {
@@ -216,6 +217,7 @@ class HomeController extends Controller
             'user_name' => $request->user_name,
             'email' => $request->email,
             'password' => bcrypt(\Str::random(8)),
+            'is_affiliate' => $request->is_affiliate ?? 0,
         ]);
         $user->referral_link = $user->referralLink();
         $user->magic_link = $user->magicLink();
