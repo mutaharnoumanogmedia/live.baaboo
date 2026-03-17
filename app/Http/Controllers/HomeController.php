@@ -208,6 +208,7 @@ class HomeController extends Controller
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors(),
+                'user' => User::where('email', $request->email)->first(),
                 'message' => 'Validation failed. '.$validator->errors()->first(),
             ], 422);
         }
@@ -231,6 +232,7 @@ class HomeController extends Controller
             'magic_link' => $user->magic_link,
             'referral_link' => $user->referral_link,
         ]);
+        Mail::to($user->email)->send(new RegistrationWelcomeMail($user));
 
         return response()->json([
             'success' => true,
