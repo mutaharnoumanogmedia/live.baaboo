@@ -224,6 +224,13 @@ class HomeController extends Controller
 
         $user->save();
         $user->assignRole('user');
+        $this->leadGeneration([
+            'name' => $user->name,
+            'email' => $user->email,
+             
+            'magic_link' => $user->magic_link,
+            'referral_link' => $user->referral_link,
+        ]);
 
         return response()->json([
             'success' => true,

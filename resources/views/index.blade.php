@@ -450,7 +450,7 @@
     <!-- ══════════════════════════════════════════
        TESTIMONIALS
   ══════════════════════════════════════════ -->
-    <section class="testimonials-section gradient-bg">
+    <section class="testimonials-section gradient-bg d-none">
         <div class="container">
             <div class="mb-5 text-center">
                 <div class="section-eyebrow">DAS SAGEN UNSERE SPIELERINNEN &amp; SPIELER</div>
