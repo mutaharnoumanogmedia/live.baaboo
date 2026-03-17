@@ -43,8 +43,8 @@
                             <a href="{{ url('/') }}"
                                 style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; color: #3d4852; font-size: 19px; font-weight: bold; text-decoration: none; display: inline-block;">
 
-                            <img src="{{ asset('images/badabing-logo.webp') }}"
-                                    class="logo" alt="Badabing Game Show Logo"
+                                <img src="{{ asset('images/badabing-logo.webp') }}" class="logo"
+                                    alt="Badabing Game Show Logo"
                                     style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; max-width: 100%; border: none; max-height: 48px; height:auto;">
                             </a>
                         </td>
@@ -79,10 +79,9 @@
                                         style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; max-width: 100vw; padding: 32px;">
                                         <p
                                             style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; line-height: 1.5em; margin-top: 0; color: #b0adc5; font-size: 12px; text-align: center;">
-                                            {{ config('app.email_template.footer.company') }} |
-                                            {{ config('app.email_template.footer.address') }}
-                                            <br>
-                                            {{ config('app.email_template.footer.contact_person') }}
+                                            baaboo Europe OÜ, Järvevana tee 9, 11314 Tallinn, Estland
+                                            <br><br>
+                                            Chairman: Irek Gronert, Director: Agnes Torm
                                         </p>
 
                                     </td>

@@ -82,7 +82,7 @@ class HomeController extends Controller
                 $user->user_name = $user->getUserName();
                 $user->save();
                 $user->assignRole('user');
-                Mail::to($user->email)->send(new RegistrationWelcomeMail($user));
+                // Mail::to($user->email)->send(new RegistrationWelcomeMail($user));
                 $leadGenerationPayload = [
                     'name' => $user->name,
                     'email' => $user->email,
