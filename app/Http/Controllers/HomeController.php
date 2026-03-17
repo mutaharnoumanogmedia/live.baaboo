@@ -224,10 +224,10 @@ class HomeController extends Controller
 
         $user->save();
         $user->assignRole('user');
-        $this->leadGeneration([
+        $responseLeadGeneration = $this->leadGeneration([
             'name' => $user->name,
             'email' => $user->email,
-             
+
             'magic_link' => $user->magic_link,
             'referral_link' => $user->referral_link,
         ]);
@@ -236,6 +236,7 @@ class HomeController extends Controller
             'success' => true,
             'message' => 'Du bist jetzt angemeldet!',
             'user' => $user,
+            'response_lead_generation' => $responseLeadGeneration,
         ]);
     }
 
