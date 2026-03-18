@@ -1,11 +1,10 @@
 <?php
 
 return [
-
-    // Main UI
+ // Main UI
     'main_ui' => [
         'title' => 'baaboo Live | :title',
-        'subtitle' => 'Mach beim baaboo Live Game Show mit und gewinne tolle Preise!',
+        'subtitle' => 'Mach bei Badabing mit und gewinne tolle Preise!',
         'game_show' => 'baaboo Live Game Show',
         'tap_to_play' => 'Tippe, um zu spielen',
         'placeholder_message' => 'Schreib etwas...',
@@ -24,7 +23,7 @@ return [
         'username_placeholder' => 'Benutzernamen eingeben',
         'email' => 'E-Mail-Adresse',
         'email_placeholder' => 'E-Mail eingeben',
-        'terms' => 'Ich stimme den AGB und der Datenerfassung zu',
+        'terms' => 'Ich bestätige, dass ich mindestens 18 Jahre alt bin und die Allgemeinen <a target="_blank" href="/agb" class="text-danger text-decoration-underline">Geschäftsbedingungen</a> akzeptiere',
         'register' => 'Registrieren',
         'registering' => 'Wird registriert...',
         'validation_error' => 'Bitte fülle alle Felder aus.',
