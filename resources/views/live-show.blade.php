@@ -5,20 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-    <title>baaboo Live | {{ $liveShow->title ?? '' }}</title>
+    <title>{{ __('main_ui.title', ['title' => $liveShow->title ?? '']) }}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="baaboo Live | {{ $liveShow->title ?? '' }}">
-    <meta property="og:description" content="Join the baaboo Live Game Show and compete for prizes!">
+    <meta property="og:title" content="{{ __('main_ui.title', ['title' => $liveShow->title ?? '']) }}">
+    <meta property="og:description" content="{{ __('main_ui.subtitle') }}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:image" content="{{ asset('og-image.webp') }}">
-    <meta property="og:site_name" content="baaboo Live Game Show">
+    <meta property="og:site_name" content="{{ __('main_ui.game_show') }}">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="baaboo Live | {{ $liveShow->title ?? '' }}">
-    <meta name="twitter:description" content="Join the baaboo Live Game Show and compete for prizes!">
+    <meta name="twitter:title" content="{{ __('main_ui.title', ['title' => $liveShow->title ?? '']) }}">
+    <meta name="twitter:description" content="{{ __('main_ui.subtitle') }}">
     <meta name="twitter:image" content="{{ asset('og-image.webp') }}">
 
     <!-- Google Tag Manager -->
@@ -1031,7 +1031,7 @@
             <i class="fas fa-play fa-3x" style="color:white;"></i>
         </button>
         <div id="tapToPlayLabel" style="">
-            Tap to Play
+            {{ __('main_ui.tap_to_play') }}
         </div>
     </div>
     <div class="main-container" id="mainContainer">
@@ -1119,11 +1119,11 @@
                             <div class="chat-input-group">
 
                                 <input type="text" class="chat-input-field" maxlength="120"
-                                    placeholder="write something..." id="chatInput">
+                                    placeholder="{{ __('main_ui.placeholder_message') }}" id="chatInput">
                                 <button class="send-btn-overlay" id="send-btn-overlay" onclick="sendMessage()">
                                     <i class="fas fa-paper-plane"></i>
                                 </button>
-                                <button type="button" id="heartReactionBtn" title="Send a heart">
+                                <button type="button" id="heartReactionBtn" title="{{ __('main_ui.send_heart') }}">
                                     <i class="fas fa-heart"></i>
                                 </button>
                             </div>
@@ -1131,11 +1131,11 @@
 
                     </div>
                 </div>
-                <div class="tab-pane fade  " id="playerTab" role="tabpanel" aria-labelledby="playerTab-tab">
+                <div class="tab-pane fade " id="playerTab" role="tabpanel" aria-labelledby="playerTab-tab">
                     <!-- Player List -->
                     <div class="container-fluid ">
                         <div class="players-list-group-container">
-                            <h5 class="mb-3"><i class="fas fa-users me-2 text-primary"></i>Players & Scores</h5>
+                            <h5 class="mb-3"><i class="fas fa-users me-2 text-primary"></i>{{ __('main_ui.players_scores') }}</h5>
                             <ul class="list-group" id="players-leaderbord">
                             </ul>
                         </div>
@@ -1143,14 +1143,14 @@
                 </div>
             </div>
         </div>
-        <nav class="navbar  mobile-nav bottom-nav bg-nav-radial-top-gradient border-top">
+        <nav class="navbar mobile-nav bottom-nav bg-nav-radial-top-gradient border-top">
             <ul
-                class="nav d-flex flex-row flex-nowrap w-100 justify-content-between align-items-center text-center px-2">
+                class="flex-row px-2 text-center nav d-flex flex-nowrap w-100 justify-content-between align-items-center">
 
                 <!-- 1) Logo -->
                 <li class="nav-item flex-fill">
                     <a href="#"
-                        class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0">
+                        class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center">
                         <img src="{{ asset('images/badabing-logo.webp') }}" alt="Logo"
                             style="height:46px;width:auto;">
                     </a>
@@ -1158,24 +1158,24 @@
 
                 <!-- 2) Chat -->
                 <li class="nav-item flex-fill" role="presentation">
-                    <a class="nav-link active d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                    <a class="px-0 py-2 nav-link active d-flex flex-column align-items-center justify-content-center"
                         id="chatTab-tab" data-bs-toggle="tab" href="#chatTab" role="tab"
                         aria-controls="chatTab" aria-selected="true">
                         <i class="fas fa-comments fs-5"></i>
-                        <small class="mt-1">Chat</small>
+                        <small class="mt-1">{{ __('main_ui.chat') }}</small>
                     </a>
                 </li>
 
                 <!-- 3) Players -->
                 <li class="nav-item flex-fill" role="presentation">
-                    <a class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                    <a class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
                         id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
                         aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
                         <div class="d-flex align-items-center">
                             <i class="fas fa-users fs-5 me-1"></i>
                             <span id="user-count" class="fw-semibold small">0</span>
                         </div>
-                        <small class="mt-1">Players</small>
+                        <small class="mt-1">{{ __('main_ui.players') }}</small>
                     </a>
                 </li>
 
@@ -1183,14 +1183,14 @@
                 <li class="nav-item flex-fill" id="register-profile-item">
                     @guest('web')
                         <a href="#"
-                            class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                            class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
                             data-bs-target="#registerModal" data-bs-toggle="modal">
                             <i class="fas fa-user-plus fs-5"></i>
-                            <small class="mt-1">Join</small>
+                            <small class="mt-1">{{ __('main_ui.join') }}</small>
                         </a>
                     @elseauth('web')
                         <a href="#"
-                            class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                            class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
                             data-bs-toggle="modal" data-bs-target="#userInfoModal">
                             <i class="fas fa-user fs-5"></i>
                             <small class="mt-1 text-truncate" style="max-width:70px;">
@@ -1268,13 +1268,13 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body text-center">
+                <div class="text-center modal-body">
                     <div class="mb-3">
                         <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::guard('web')->user()->name ?? 'User') }}&background=ffb380&color=fff&size=96"
-                            alt="Avatar" class="rounded-circle mb-2" width="80" height="80">
+                            alt="Avatar" class="mb-2 rounded-circle" width="80" height="80">
                     </div>
                     <h6 class="mb-1">{{ Auth::guard('web')->user()->name ?? 'Guest' }}</h6>
-                    <div class="text-muted mb-3" style="font-size: 0.95rem;">
+                    <div class="mb-3 text-muted" style="font-size: 0.95rem;">
                         {{ Auth::guard('web')->user()->email ?? '' }}
                     </div>
                     <div class="mb-3">
@@ -1299,7 +1299,7 @@
         style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;max-height:100vh; overflow-y:auto;">
         <div
             style="background:#fff; border-radius:20px; padding:40px 30px; text-align:center; max-width:350px; margin:auto; margin-top: 20%; box-shadow:0 8px 32px rgba(0,0,0,0.2); ">
-            <i class="fas fa-trophy fa-3x text-warning mb-3"></i>
+            <i class="mb-3 fas fa-trophy fa-3x text-warning"></i>
             <h3 class="mb-2" style="color:#ff5f00;">Congratulations!</h3>
             <p class="mb-3" style="font-size:1.1rem;">You are selected as a winner!</p>
             <p class="mb-3" style="font-size:1.1rem;">Your prize money is: </p>
@@ -1364,7 +1364,7 @@
         });
         // Toggle quiz mode
         function toggleQuiz(action) {
-            //scroll to top 
+            //scroll to top
             window.scrollTo(0, 0);
 
 
@@ -1437,7 +1437,7 @@
                     </div>
                     <div class="quiz-options row">
                         ${quiz.options.map((option, index) =>
-                        `<div class="quiz-option col-md-12 position-relative mb-3">  <div class="option-result-container " style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}">${numberToLetter(index)}. ${option.option_text}</label>  </div> `).join('')}
+                        `<div class="mb-3 quiz-option col-md-12 position-relative">  <div class="option-result-container " style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}">${numberToLetter(index)}. ${option.option_text}</label>  </div> `).join('')}
                     </div>
              </div>
             `;
@@ -1782,7 +1782,7 @@
             const registerButtonDiv = document.querySelector('#register-profile-item');
             registerButtonDiv.innerHTML = `
                   <a href="#"
-                        class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                        class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
                         data-bs-toggle="modal" data-bs-target="#userInfoModal">
                         <i class="fas fa-user fs-5"></i>
                         <small class="mt-1 text-truncate" style="max-width:70px;">
@@ -2320,11 +2320,11 @@
                         }
 
                         userDiv.innerHTML = `
-                       
+
                                     <div >
                                 <span style="margin-right: 20px;">${index + 1}</span>
                                         <strong>${user.name} ${user.id == userId ? '(You)' : ''}</strong>
-                                    
+
                                         <span class="ms-2">${user.is_winner ? '<i class="fas fa-trophy text-warning ms-2" title="Winner"></i>' : ''}</span>
                                     </div>
                                     <div>
