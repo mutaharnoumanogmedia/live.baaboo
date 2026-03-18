@@ -310,7 +310,7 @@ class GamePlayController extends Controller
 
             ], 200);
         } else {
-            $newScore = round($currentScore + (1 + 1 / $totalSecondsToSubmit) * 100); // example scoring logic
+            $newScore = round($currentScore + (1 + 1 / $totalSecondsToSubmit) * 1000); // example scoring logic
             $liveShow->users()->updateExistingPivot($user->id, ['score' => $newScore]);
 
             return response()->json([

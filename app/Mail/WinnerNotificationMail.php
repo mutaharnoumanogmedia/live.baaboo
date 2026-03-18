@@ -34,7 +34,7 @@ class WinnerNotificationMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Congratulations! You are a Winner',
+            subject: 'Glückwunsch zu deinem Gewinn bei der Badabing Game Show',
         );
     }
 
@@ -47,6 +47,11 @@ class WinnerNotificationMail extends Mailable
     {
         return new Content(
             view: 'emails.winner_notification',
+            with: [
+                'user' => $this->user,
+                'prizeWon' => $this->prizeWon,
+                'liveShow' => $this->liveShow,
+            ],
         );
     }
 

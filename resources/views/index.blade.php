@@ -17,7 +17,7 @@
                 padding: 6px 18px;
                 border-radius: 21px 6px 21px 21px;
                 letter-spacing: 1.5px;
-                box-shadow: 0 2px 8px rgba(255,167,38,0.06);
+                box-shadow: 0 2px 8px rgba(255, 167, 38, 0.06);
             }
 
             .live-dot {
@@ -134,8 +134,70 @@
                 <br>
                 <span class="highlight">Jetzt spielst Du mit. </span>
             </h1>
+
             <div class="alert-next-show" style="">
-                Nächste Show: 19.03 um 20:00 Uhr</div>
+                Nächste Show: 19.03 um 20:00 Uhr
+            </div>
+
+            <div class="hero-countdown mt-3 mb-2   mx-auto" style="padding: 5px 45px !important; width: fit-content;border: 1px solid #000; background-color: #ffffe9; border-radius: 10px; ">
+                <div id="liveShowCountdown" class="d-flex justify-content-center gap-3 fs-2 fw-bold"></div>
+            </div>
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Get the scheduled time from PHP (format: Y-m-d H:i:s)
+                    @if (isset($currentLiveShow) && $currentLiveShow->scheduled_at)
+                        var scheduledTime =
+                            "{{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('Y-m-d H:i:s') }}";
+                        var scheduledDate = new Date(scheduledTime.replace(' ', 'T') + '+01:00'); // force EU timezone
+                    @else
+                        var scheduledDate = null;
+                    @endif
+
+                    function pad(n) {
+                        return n < 10 ? '0' + n : n;
+                    }
+
+                    function updateCountdown() {
+                        let display = document.getElementById('liveShowCountdown');
+                        if (!display || !scheduledDate) {
+                            return;
+                        }
+
+                        var now = new Date();
+                        var dist = scheduledDate - now;
+
+                        if (dist <= 0) {
+                            display.innerHTML = "<span class='text-success'>Die Show läuft gerade!</span>";
+                            return;
+                        }
+
+                        var days = Math.floor(dist / (1000 * 60 * 60 * 24));
+                        var hours = Math.floor((dist / (1000 * 60 * 60)) % 24);
+                        var minutes = Math.floor((dist / (1000 * 60)) % 60);
+                        var seconds = Math.floor((dist / 1000) % 60);
+
+                        display.innerHTML = `
+                            <div>
+                                <div class="text-orange">${pad(days)}</div> <div class="fs-6">Tg</div>
+                            </div>
+                            <div>
+                                <div class="text-orange">${pad(hours)}</div> <div class="fs-6">Std</div>
+                            </div>
+                            <div>
+                                <div class="text-orange">${pad(minutes)}</div> <div class="fs-6">Min</div>
+                            </div>
+                            <div>
+                                <div class="text-orange">${pad(seconds)}</div>  <div class="fs-6">Sek</div>
+                            </div>
+                        `;
+                    }
+
+                    if (scheduledDate) {
+                        updateCountdown();
+                        setInterval(updateCountdown, 1000);
+                    }
+                });
+            </script>
 
             <p class="hero-subtitle">
                 Quiz, Challenges, Überraschungsspiele – live und interaktiv. Bei der Badabing Game Show wird jeder
@@ -317,7 +379,8 @@
             </div>
             <h2 class="mb-2 section-title">Die nächste <span class="text-orange">Show</span> startet <span
                     class="text-orange">bald</span>!</h2>
-            <p class="mb-1 text-muted" style="">Melde dich jetzt kostenlos an und sichere Dir dein Ticket & den Teilnahmelink</p>
+            <p class="mb-1 text-muted" style="">Melde dich jetzt kostenlos an und sichere Dir dein Ticket & den
+                Teilnahmelink</p>
             {{-- <p class="mb-3 text-muted" style="">Game Show am (Mo) um 20:00 Uhr.</p> --}}
             <center>
                 <div class="col-lg-4">
@@ -460,7 +523,8 @@
                 <div class="col-md-4">
                     <div class="testi-card">
                         <div class="stars">★★★★★</div>
-                        <p class="testi-text">Ich war skeptisch - eine Game Show online, kostenlos, echte Gewinne? Aber dann hab ich mitgemacht und tatsächlich 100€ gewonnen. Bin absolut begeistert!</p>
+                        <p class="testi-text">Ich war skeptisch - eine Game Show online, kostenlos, echte Gewinne? Aber
+                            dann hab ich mitgemacht und tatsächlich 100€ gewonnen. Bin absolut begeistert!</p>
                         <div class="testi-author">Lisa M.</div>
                         <div class="testi-date">Badabing Gewinner</div>
                     </div>
@@ -468,7 +532,9 @@
                 <div class="col-md-4">
                     <div class="testi-card">
                         <div class="stars">★★★★★</div>
-                        <p class="testi-text">Endlich eine Show, bei der ich nicht nur zuschaue. Die Quiz-Battles machen mega Spaß und ich freue mich jede Woche auf die nächste Runde. Mein Highlight am Abend!</p>
+                        <p class="testi-text">Endlich eine Show, bei der ich nicht nur zuschaue. Die Quiz-Battles
+                            machen mega Spaß und ich freue mich jede Woche auf die nächste Runde. Mein Highlight am
+                            Abend!</p>
                         <div class="testi-author">Markus T.</div>
                         <div class="testi-date">Quiz-Battle-Fan</div>
                     </div>
@@ -476,7 +542,9 @@
                 <div class="col-md-4">
                     <div class="testi-card">
                         <div class="stars">★★★★★</div>
-                        <p class="testi-text">Ich dachte zuerst, ich schaue nur kurz rein – und plötzlich habe ich selbst mitgespielt. Die Show ist super unterhaltsam und man fiebert bei jeder Runde mit. Wirklich ein cooles Konzept.</p>
+                        <p class="testi-text">Ich dachte zuerst, ich schaue nur kurz rein – und plötzlich habe ich
+                            selbst mitgespielt. Die Show ist super unterhaltsam und man fiebert bei jeder Runde mit.
+                            Wirklich ein cooles Konzept.</p>
                         <div class="testi-author">Sandra K.</div>
                         <div class="testi-date">Badabing Player</div>
                     </div>
@@ -574,7 +642,8 @@
                             🌐
                         </div>
                         <div class="hw-title">Show öffnen</div>
-                        <div class="hw-text">Gehe zur Show-Seite auf badabing.show oder klicke den Link in Deiner Erinnerungs-Nachricht.</div>
+                        <div class="hw-text">Gehe zur Show-Seite auf badabing.show oder klicke den Link in Deiner
+                            Erinnerungs-Nachricht.</div>
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
@@ -585,7 +654,8 @@
                             🎮
                         </div>
                         <div class="hw-title">Live mitspielen</div>
-                        <div class="hw-text">Zur Showtime einfach einschalten und direkt im Browser mitspielen - am Handy. Tablet oder Laptop.
+                        <div class="hw-text">Zur Showtime einfach einschalten und direkt im Browser mitspielen - am
+                            Handy. Tablet oder Laptop.
                         </div>
                     </div>
                 </div>
@@ -596,15 +666,17 @@
                             🏆
                         </div>
                         <div class="hw-title">Gewinne kassieren</div>
-                        <div class="hw-text">Gewonnen? Dann geht alles automatisch. Gutscheine werden direkt verschickt, Geldgewinne zeitnah ausgezahlt.
+                        <div class="hw-text">Gewonnen? Dann geht alles automatisch. Gutscheine werden direkt
+                            verschickt, Geldgewinne zeitnah ausgezahlt.
                         </div>
                     </div>
                 </div>
             </div>
             <div class="p-2 mx-auto mt-5 text-center rounded alert col-lg-6 fw-bold text-dark "
-                style="background: var(--purple-light);">Alles passiert auf badabing.show - Du brauchst keine extra App und kein Abo. Einfach registrieren, einschalten, mitspielen. So einfach ist das.
+                style="background: var(--purple-light);">Alles passiert auf badabing.show - Du brauchst keine extra App
+                und kein Abo. Einfach registrieren, einschalten, mitspielen. So einfach ist das.
 
-</div>
+            </div>
         </div>
     </section>
 
@@ -651,7 +723,9 @@
                     <div id="faqCollapseOne" class="accordion-collapse collapse show" aria-labelledby="faqHeadingOne"
                         data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            Nein, Du kannst direkt über die Website oder einen Link teilnehmen, ohne eine App herunterzuladen oder ein kostenpflichtiges Abo abzuschließen. Die Teilnahme an der Game Show ist komplett kostenlos.
+                            Nein, Du kannst direkt über die Website oder einen Link teilnehmen, ohne eine App
+                            herunterzuladen oder ein kostenpflichtiges Abo abzuschließen. Die Teilnahme an der Game Show
+                            ist komplett kostenlos.
                         </div>
                     </div>
                 </div>
@@ -665,7 +739,8 @@
                     <div id="faqCollapseTwo" class="accordion-collapse collapse" aria-labelledby="faqHeadingTwo"
                         data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            Von Geld- und Sachpreisen über Traumreisen bis hin zu exklusiven Shopping-Deals ist alles möglich. Je nach Show gibt es unterschiedliche Belohnungen!
+                            Von Geld- und Sachpreisen über Traumreisen bis hin zu exklusiven Shopping-Deals ist alles
+                            möglich. Je nach Show gibt es unterschiedliche Belohnungen!
                         </div>
                     </div>
                 </div>
@@ -695,7 +770,8 @@
                     <div id="faqCollapseFour" class="accordion-collapse collapse" aria-labelledby="faqHeadingFour"
                         data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            Es gibt keine Begrenzung! Du kannst so oft teilnehmen, wie Du möchtest, und deine Gewinnchancen immer wieder aufs Neue nutzen.
+                            Es gibt keine Begrenzung! Du kannst so oft teilnehmen, wie Du möchtest, und deine
+                            Gewinnchancen immer wieder aufs Neue nutzen.
                         </div>
                     </div>
                 </div>
@@ -709,7 +785,8 @@
                     <div id="faqCollapseFive" class="accordion-collapse collapse" aria-labelledby="faqHeadingFive"
                         data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            Die Gewinner werden je nach Spielmodus durch Wissen und Schnelligkeit bestimmt. Alle Gewinne werden fair vergeben und transparent angezeigt.
+                            Die Gewinner werden je nach Spielmodus durch Wissen und Schnelligkeit bestimmt. Alle Gewinne
+                            werden fair vergeben und transparent angezeigt.
                         </div>
                     </div>
                 </div>
@@ -739,7 +816,9 @@
                     <div id="faqCollapseSeven" class="accordion-collapse collapse" aria-labelledby="faqHeadingSeven"
                         data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            Ja! Du kannst jeden Deiner Freunde zu Badabing einladen und gemeinsam mitfiebern. Aktuell ist jedoch eine Teilnahme nur als Einzelspieler möglich. Möchtest Du oder Deine Freunde teilnehmen, loggt euch bitte einzeln zur Show ein.
+                            Ja! Du kannst jeden Deiner Freunde zu Badabing einladen und gemeinsam mitfiebern. Aktuell
+                            ist jedoch eine Teilnahme nur als Einzelspieler möglich. Möchtest Du oder Deine Freunde
+                            teilnehmen, loggt euch bitte einzeln zur Show ein.
                         </div>
                     </div>
                 </div>

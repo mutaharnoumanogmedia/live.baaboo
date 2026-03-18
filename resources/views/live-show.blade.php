@@ -1241,7 +1241,7 @@
 
                                 <a target="_blank" href="{{ route('agb') }}"
                                     class="text-danger text-decoration-underline">Terms &
-                                    Conditions, Conscent for data
+                                    Conditions, Consent for data
                                     collection</a></label>
                         </div>
                         <div id="registerError" class="text-danger small" style="display:none;"></div>
@@ -1329,7 +1329,11 @@
     <script>
         let quizMode = false;
         let timer = 5;
+
         let currentCountdownSeconds = 0;
+        let currentCountdownMilliseconds = 0; // total elapsed ms
+        let countdownStartTime = null; // set when timer starts
+
         let isCurrentAnswerCorrect = null;
         let isEliminated = {{ $isEliminated ? 'true' : 'false' }};
 
@@ -1493,7 +1497,7 @@
                         body: JSON.stringify({
                             option: option,
                             quiz_id: document.getElementById('quizId').value,
-                            seconds_to_submit: currentCountdownSeconds
+                            seconds_to_submit: currentCountdownMilliseconds
                         })
                     })
                     .then(response => response.json())
@@ -1879,6 +1883,7 @@
             circle.style.strokeDasharray = circumference;
 
             let timeLeft = duration;
+            countdownStartTime = Date.now();
 
             function updateTimer() {
                 text.textContent = timeLeft;
@@ -1903,6 +1908,14 @@
                 }
                 timeLeft--;
                 currentCountdownSeconds = duration - timeLeft;
+
+
+                const remainingMs = Math.max(0, duration * 1000 - (Date.now() - countdownStartTime));
+
+                currentCountdownMilliseconds = Math.floor(remainingMs);
+                currentCountdownSeconds = Math.floor(remainingMs / 1000);
+                console.log('currentCountdownMilliseconds:', currentCountdownMilliseconds, 'currentCountdownSeconds:',
+                    currentCountdownSeconds);
             }
 
             updateTimer();
@@ -2094,7 +2107,7 @@
                     .then(prizeData => {
                         console.log('Prize data:', prizeData);
                         if (prizeData.success && prizeData.prize !== undefined && prizeData.prize !=
-                            'no prize defined' && prizeData.is_winner == true) {
+                            'n/a' && prizeData.is_winner == true) {
                             document.getElementById('prizeAmount').textContent = prizeData.prize;
                             fireConfetti();
                             addOverlayMessage('@System', 'Congratulations! You have won ' + prizeData.prize);
