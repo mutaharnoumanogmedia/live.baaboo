@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Events\GameResetEvent;
+use App\Events\HideGalleryImageEvent;
 use App\Events\LiveShowMessageEvent;
 use App\Events\LiveShowQuizUserResponses;
 use App\Events\RemoveLiveShowQuizQuestionEvent;
 use App\Events\ResetChatEvent;
 use App\Events\SetBroadcastRoomIdEvent;
 use App\Events\ShowGalleryImageEvent;
-use App\Events\HideGalleryImageEvent;
 use App\Events\ShowLiveShowQuizQuestionEvent;
 use App\Events\ShowPlayerAsWinnerEvent;
 use App\Events\UserBlockFromLiveShowEvent;
@@ -326,7 +326,7 @@ class LiveShowController extends Controller
 
         // update each winner prize won
         foreach ($topMaxWinnersByScore as $index => $winner) {
-            $prizeWon = $liveShow->winnerPrizes()->where('rank', $index + 1)->first()->prize ?? 'no prize defined';
+            $prizeWon = $liveShow->winnerPrizes()->where('rank', $index + 1)->first()->prize ?? 'n/a';
             \Log::info("Winner {$winner['id']} prize won: {$prizeWon}");
 
             $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon]);
@@ -334,7 +334,7 @@ class LiveShowController extends Controller
             \Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
             // Dispatch job to send winner email after 30 minutes
             try {
-                SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now()->addMinutes(30));
+                SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now()->addMinutes(2));
             } catch (\Exception $e) {
                 // log the error
                 \Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage());
