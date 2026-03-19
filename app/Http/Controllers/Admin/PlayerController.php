@@ -11,9 +11,12 @@ class PlayerController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        if (auth()->guard('admin')->user()->email != 'admin@baaboo.com') {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->middleware(function ($request, $next) {
+            if (!auth()->check() || auth()->user()->email !== 'admin@baaboo.com') {
+                abort(403, 'Unauthorized');
+            }
+            return $next($request);
+        });
     }
 
     public function index()
