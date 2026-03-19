@@ -134,7 +134,7 @@
                                     $maxW = (int) old('max_winners', $liveShow->max_winners ?? 3);
                                     $percentagesByRank = $liveShow->winnerPrizes
                                         ->keyBy('rank')
-                                        ->map(fn($p) => (float) $p->prize)
+                                        ->map(fn($p) =>   $p->prize)
                                         ->toArray();
                                     $defaultPct = [1 => 50, 2 => 30, 3 => 20];
                                 @endphp
