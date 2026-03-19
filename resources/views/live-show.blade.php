@@ -1593,7 +1593,7 @@
             document.body.appendChild(dummy);
             dummy.click();
             dummy.focus();
-            
+
             dummy.remove();
         }
 
@@ -1889,12 +1889,13 @@
             $(".option-result-container").css("display", "none");
 
             console.log('Showing quiz question:', quiz, 'with timer:', timer);
+            toggleQuiz("hide");
             appendQuizQuestion(quiz);
-
             startTimer(timer, evaluateAnswerWithTimeToSubmit);
             quizMode = false;
-            toggleQuiz("show");
-
+            setTimeout(() => {
+                toggleQuiz("show");
+            }, 100);
         }
 
         // showQuestionAndSetTimer(quizDummy, 100);
