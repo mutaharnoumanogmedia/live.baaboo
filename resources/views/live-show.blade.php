@@ -439,11 +439,11 @@
         /* TikTok-style overlay chat */
         .overlay-chat {
             z-index: 5;
-            padding: 10px 00px 40px 0px;
+            padding: 10px 00px 10px 0px;
             opacity: 0.7;
             overflow-y: scroll;
             scrollbar-width: none;
-            height: 25vh;
+            height: 20vh;
         }
 
         .overlay-chat::-webkit-scrollbar {
@@ -473,13 +473,13 @@
         }
 
         .chat-message-overlay .message-user {
-            font-size: 0.8rem;
+            font-size: 0.65rem;
             color: var(--accent-color);
             font-weight: 600;
         }
 
         .chat-message-overlay .message-text {
-            font-size: 1rem;
+            font-size: 0.75rem;
             color: white;
             margin-top: 2px;
         }
