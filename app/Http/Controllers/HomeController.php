@@ -181,14 +181,17 @@ class HomeController extends Controller
         }
       
         // add user to live show users
-        $liveShow->users()->attach($user->id, [
-            'is_online' => 1,
-            'is_winner' => 0,
-            'created_at' => now(),
-            'updated_at' => now(),
-            'status' => 'registered',
-            'last_active_at' => now(),
-        ]);
+        // Attach the user if not already attached
+        if (! $liveShow->users()->where('user_id', $user->id)->exists()) {
+            $liveShow->users()->attach($user->id, [
+                'is_online' => 1,
+                'is_winner' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+                'status' => 'registered',
+                'last_active_at' => now(),
+            ]);
+        }
 
         return redirect()->route('live-show', ['id' => $liveShow->id])->with('success', 'You have been logged in successfully');
     }
