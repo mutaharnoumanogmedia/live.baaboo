@@ -1333,7 +1333,7 @@
 
         let currentCountdownSeconds = 0;
         let currentCountdownMilliseconds = 0; // total elapsed ms
-        let countdownStartTime = null; // set when timer starts
+        let countdownStartTime = new Date().getTime(); // set when timer starts
 
         let isCurrentAnswerCorrect = null;
         let isEliminated = {{ $isEliminated ? 'true' : 'false' }};
@@ -1445,7 +1445,7 @@
             <div>
                 <input type="hidden" id="quizId" value="${quiz.id}">
                     <div class="quiz-question">
-                       <div class="text-center quiz-question-index me-1" style="font-size: 14px; font-weight: bold;">${quiz.index  } of ${quiz.totalQuizQuestions}.</div>
+                       <div class="text-center quiz-question-index me-1" style="font-size: 14px; font-weight: bold;">${quiz.index  } von ${quiz.totalQuizQuestions}.</div>
                        <div class="quiz-question-text">${quiz.question}</div>
                     </div>
                     <div class="quiz-options row">
