@@ -1303,7 +1303,8 @@
             <h3 class="mb-2" style="color:#ff5f00;">{{ __('de.winner.title') }}</h3>
             <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.selected') }}</p>
             <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.prize') }}</p>
-            <div class="text-center mb-3" style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)" id="prizeAmount"></div>
+            <div class="text-center mb-3" style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)" id="prizeAmount">
+            </div>
             <button class="btn btn-success" onclick="document.getElementById('winnerDialog').style.display='none';">
                 <i class="fas fa-check me-2"></i>{{ __('de.profile.close') }}
             </button>
@@ -1393,17 +1394,18 @@
                 // showQuestionBtn.classList.remove('active');
             }
             //uncheck all optionsmove 
-            document.querySelectorAll('input[name="option"]').forEach(option => {
-                option.checked = false;
-                option.disabled = false;
-            });
-            //remove .quiz-option label focus or hover or checked state
-            document.querySelectorAll('.quiz-option label').forEach(label => {
-                // Remove any classes that could represent focus or hover from the quiz option labels
-                label.classList.remove('focus', 'hover', 'active');
-                // Optionally, if you're using Bootstrap or custom styles, also remove classes like 'checked', 'selected' etc.
-                label.classList.remove('checked', 'selected');
-            });
+            // document.querySelectorAll('input[name="option"]').forEach(option => {
+            //     option.checked = false;
+            //     option.disabled = false;
+            // });
+            // //remove .quiz-option label focus or hover or checked state
+            // document.querySelectorAll('.quiz-option label').forEach(label => {
+            //     // Remove any classes that could represent focus or hover from the quiz option labels
+            //     label.classList.remove('focus', 'hover', 'active');
+            //     // Optionally, if you're using Bootstrap or custom styles, also remove classes like 'checked', 'selected' etc.
+            //     label.classList.remove('checked', 'selected');
+            // });
+            uncheckAndEnableOptions();
             // hideAllModals();
         }
 
@@ -1576,6 +1578,21 @@
                 option.disabled = false;
                 option.parentElement.classList.remove('correct', 'incorrect');
             });
+            //blur all the .quiz-option label
+            document.querySelectorAll('.quiz-option label').forEach(label => {
+                label.blur();
+            });
+
+
+            const dummy = document.createElement('input');
+            dummy.style.position = 'fixed';
+            dummy.style.opacity = '0';
+            dummy.style.height = '0';
+
+            // 2. Add it to the body, focus it, then kill it
+            document.body.appendChild(dummy);
+            dummy.focus();
+            dummy.remove();
         }
 
         // Chat functionality

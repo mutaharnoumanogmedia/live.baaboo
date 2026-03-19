@@ -982,7 +982,7 @@
                                 </span>
                             ${player.is_winner ? '<i class="bi bi-trophy-fill text-warning"></i>' : ''}
                             <div class='text-white'>
-                                ${player.prize_won ? `Prize:<br> <span class='badge bg-primary'> ${player.prize_won} </span>` : ''}
+                                ${player.is_winner &&player.prize_won ? `Prize:<br> <span class='badge bg-primary'> ${player.prize_won} </span>` : ''}
                                 </div>
 
                         </div>
