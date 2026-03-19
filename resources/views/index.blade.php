@@ -178,23 +178,23 @@
 
                         display.innerHTML = `
                             <div>
-                                <div class="text-orange">${pad(days)}</div> <div class="fs-6">Tg</div>
+                                <div class="text-orange">${pad(days)}</div> <div class="time-unit">Tage</div>
                             </div>
                             <div>
-                                <div class="text-orange">${pad(hours)}</div> <div class="fs-6">Std</div>
+                                <div class="text-orange">${pad(hours)}</div> <div class="time-unit">Std</div>
                             </div>
                             <div>
-                                <div class="text-orange">${pad(minutes)}</div> <div class="fs-6">Min</div>
+                                <div class="text-orange">${pad(minutes)}</div> <div class="time-unit">Min</div>
                             </div>
                             <div>
-                                <div class="text-orange">${pad(seconds)}</div>  <div class="fs-6">Sek</div>
+                                <div class="text-orange">${pad(seconds)}</div>  <div class="time-unit">Sek</div>
                             </div>
                         `;
                     }
 
                     if (scheduledDate) {
                         updateCountdown();
-                        setInterval(updateCountdown, 1000);
+                        // setInterval(updateCountdown, 1000);
                     }
                 });
             </script>

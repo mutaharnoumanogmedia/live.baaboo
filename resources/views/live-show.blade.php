@@ -1225,11 +1225,11 @@
 
                 <form id="registerForm" autocomplete="off">
                     <div class="modal-body">
-                        <div class="mb-3">
+                        {{-- <div class="mb-3">
                             <label for="registerUsername" class="form-label">Username</label>
                             <input type="text" class="form-control" id="registerUsername" name="name" required
                                 maxlength="32" placeholder="Enter username">
-                        </div>
+                        </div> --}}
                         <div class="mb-3">
                             <label for="registerEmail" class="form-label">Email address</label>
                             <input type="email" class="form-control" id="registerEmail" name="email" required
@@ -1696,15 +1696,15 @@
             const registerButton = this.querySelector('button[type="submit"]');
             registerButton.disabled = true;
             registerButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Registering...';
-            const username = document.getElementById('registerUsername').value.trim();
+            // const username = document.getElementById('registerUsername').value.trim();
             const email = document.getElementById('registerEmail').value.trim();
             const errorDiv = document.getElementById('registerError');
             errorDiv.style.display = 'none';
             errorDiv.innerHTML = '';
 
 
-            if (!username || !email) {
-                errorDiv.textContent = 'Please fill in all fields.';
+            if ( !email) {
+                errorDiv.textContent = 'Please add your email.';
                 errorDiv.style.display = 'block';
                 return;
             }
@@ -1716,13 +1716,15 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
-                        name: username,
+                        // name: username,
                         email: email
                     })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        const username = data.user.user_name;
+                        console.log('username:', username);
 
                         var modal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
                         modal.hide();
@@ -2245,7 +2247,7 @@
 
         @if ($liveShow->status != 'live')
             emptyTheBodyWithEndShow(
-                'This live show is  {{ $liveShow->status }} {{ $liveShow->status == 'scheduled' ? 'at ' . \Carbon\Carbon::parse($liveShow->scheduled_at)->format('d M Y, H:i') : '' }} .  '
+                'Die Game-Show „Badabing“ findet am  {{ $liveShow->status }} {{ $liveShow->status == 'scheduled' ? 'at ' . \Carbon\Carbon::parse($liveShow->scheduled_at)->format('d M Y, H:i') . 'Uhr statt.' : '' }} .  '
             );
         @endif
 

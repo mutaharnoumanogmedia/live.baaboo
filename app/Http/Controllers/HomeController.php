@@ -179,6 +179,16 @@ class HomeController extends Controller
         if (! $liveShow) {
             return redirect()->route('index')->with('error', 'No live show found');
         }
+      
+        // add user to live show users
+        $liveShow->users()->attach($user->id, [
+            'is_online' => 1,
+            'is_winner' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+            'status' => 'registered',
+            'last_active_at' => now(),
+        ]);
 
         return redirect()->route('live-show', ['id' => $liveShow->id])->with('success', 'You have been logged in successfully');
     }
