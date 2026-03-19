@@ -74,7 +74,7 @@ class LiveShowController extends Controller
             'host_name' => 'nullable|string|max:255',
             'prize_amount' => 'required|numeric|min:0',
             'currency' => 'required|string|max:5',
-            'max_winners' => 'required|integer|min:1|max:10',
+            'max_winners' => 'required|integer|min:1|max:50',
             'winner_prizes' => 'nullable|array',
             'winner_prizes.*' => 'nullable|string|max:255',
         ]);
@@ -134,7 +134,7 @@ class LiveShowController extends Controller
             'host_name' => 'nullable|string|max:255',
             'prize_amount' => 'required|numeric|min:0',
             'currency' => 'required|string|max:5',
-            'max_winners' => 'required|integer|min:1|max:10',
+            'max_winners' => 'required|integer|min:1|max:50',
             'winner_prizes' => 'nullable|array',
             'winner_prizes.*' => 'nullable|string|max:255',
         ]);
