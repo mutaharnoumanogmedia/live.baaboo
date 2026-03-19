@@ -31,8 +31,9 @@
     @push('scripts')
         <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
                 Dropzone.autoDiscover = false;
+
+            document.addEventListener('DOMContentLoaded', function() {
                 const dz = new Dropzone('#gallery-dropzone', {
                     url: '{{ route("admin.media-gallery.upload") }}',
                     paramName: 'file',
