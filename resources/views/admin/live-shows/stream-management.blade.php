@@ -1117,7 +1117,9 @@
             channel.bind('LiveShowOnlineUsersEvent', function(data) {
                 console.log('Active Users:', data.activeUsers);
 
-                appendPlayerList(data.activeUsers);
+                fetchActivePlayers().then(activePlayers => {
+                    appendPlayerList(activePlayers);
+                });
                 // You can also update DOM here:
                 // document.getElementById('onlineUsers').innerHTML = JSON.stringify(data.activeUsers);
             });
