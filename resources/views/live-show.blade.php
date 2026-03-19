@@ -1332,8 +1332,8 @@
         let timer = 5;
 
         let currentCountdownSeconds = 0;
-        let currentCountdownMilliseconds = 0; // total elapsed ms
-        let countdownStartTime = new Date().getTime(); // set when timer starts
+        // let currentCountdownMilliseconds = 0; // total elapsed ms
+        let countdownStartTime =null; // set when timer starts
 
         let isCurrentAnswerCorrect = null;
         let isEliminated = {{ $isEliminated ? 'true' : 'false' }};
@@ -1506,7 +1506,7 @@
                         body: JSON.stringify({
                             option: option,
                             quiz_id: document.getElementById('quizId').value,
-                            seconds_to_submit: currentCountdownMilliseconds
+                            seconds_to_submit: currentCountdownSeconds
                         })
                     })
                     .then(response => response.json())
@@ -1939,11 +1939,11 @@
                 currentCountdownSeconds = duration - timeLeft;
 
 
-                const remainingMs = Math.max(0, duration * 1000 - (Date.now() - countdownStartTime));
+                // const remainingMs = Math.max(0, duration * 1000 - (Date.now() - countdownStartTime));
 
-                currentCountdownMilliseconds = Math.floor(remainingMs);
-                currentCountdownSeconds = Math.floor(remainingMs / 1000);
-                console.log('currentCountdownMilliseconds:', currentCountdownMilliseconds, 'currentCountdownSeconds:',
+                // currentCountdownMilliseconds = Math.floor(remainingMs);
+                // currentCountdownSeconds = Math.floor(remainingMs / 1000);
+                console.log( 'currentCountdownSeconds:',
                     currentCountdownSeconds);
             }
 
