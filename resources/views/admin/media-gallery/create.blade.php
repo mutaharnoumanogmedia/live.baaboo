@@ -12,7 +12,7 @@
             </div>
             <div class="card-body">
                 <p class="text-muted small mb-3">
-                    Images: max 2 MB (JPEG, PNG, GIF, WebP). Videos: max 10 MB (MP4, WebM).
+                    Images: max 2 MB (JPEG, PNG, GIF, WebP). Videos: max 250 MB (MP4, WebM).
                 </p>
                 <form action="{{ route('admin.media-gallery.upload') }}" class="dropzone border rounded p-4" id="gallery-dropzone">
                     @csrf
