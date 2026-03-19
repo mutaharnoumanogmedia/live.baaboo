@@ -1043,18 +1043,7 @@
                     frameborder="0"></iframe>
 
 
-                <!-- Gallery image/video overlay (shown via Pusher from admin stream-management) -->
-                <div id="galleryStreamOverlay"
-                    style="display:none; position:relative; top:0; left:0; right:0; bottom:0;  background:rgba(0,0,0,0.85); align-items:center; justify-content:center; padding:20px;">
-                    <div
-                        style="position:relative;width:100%;  height:100%; display:flex; align-items:center; justify-content:center;">
-                        <img id="galleryStreamImage" src="" alt=""
-                            style="max-width:100%; max-height:90vh; object-fit:contain; border-radius:12px; display:none;">
-                        <video id="galleryStreamVideo" src="" autoplay
-                            style="max-width:100%; max-height:90vh; border-radius:12px; display:none;"></video>
 
-                    </div>
-                </div>
             </div>
 
         </div>
@@ -1094,8 +1083,7 @@
                         <div class="quiz-options row">
                             ${quiz.options.map((option, index) =>
                             `<div class="quiz-option"> <input type="radio" id="option${option.id}" name="option"
-                                    value="${option.id}"> <label
-                                    for="option${option.id}">${option.option_text}</label>
+                                    value="${option.id}"> <label for="option${option.id}">${option.option_text}</label>
                             </div> `).join('')}
                         </div>
                     </div>
@@ -1205,6 +1193,18 @@
 
             </ul>
         </nav>
+    </div>
+
+
+    <!-- Full-Screen Overlay Modal (not closable) -->
+    <div id="galleryOverlayModal"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.9); z-index:2000; align-items:center; justify-content:center; flex-direction:column;">
+        <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+            <img id="galleryOverlayImage" src="" alt=""
+                style="max-width:100vw; max-height:90vh; object-fit:contain; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;">
+            <video id="galleryOverlayVideo" src="" autoplay muted playsinline loop
+                style="max-width:100vw; max-height:90vh; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;"></video>
+        </div>
     </div>
 
 
@@ -1333,7 +1333,7 @@
 
         let currentCountdownSeconds = 0;
         // let currentCountdownMilliseconds = 0; // total elapsed ms
-        let countdownStartTime =null; // set when timer starts
+        let countdownStartTime = null; // set when timer starts
 
         let isCurrentAnswerCorrect = null;
         let isEliminated = {{ $isEliminated ? 'true' : 'false' }};
@@ -1667,7 +1667,7 @@
             `;
             overlayChat.appendChild(messageDiv);
             overlayChat.scrollTop = overlayChat.scrollHeight;
-            
+
         }
 
         // Allow Enter key to send message
@@ -1944,7 +1944,7 @@
 
                 // currentCountdownMilliseconds = Math.floor(remainingMs);
                 // currentCountdownSeconds = Math.floor(remainingMs / 1000);
-                console.log( 'currentCountdownSeconds:',
+                console.log('currentCountdownSeconds:',
                     currentCountdownSeconds);
             }
 
@@ -2177,10 +2177,10 @@
                 if (data.userId == userId) {
                     console.log('User block from live show event received:', data);
                     if (data.isBlocked) {
-                        alert('You have been blocked from live chat participation.');
+                        alert('Du wurdest für die Chat Teilnahme blockiert.');
                         disableMessageInputAndSendButton();
                     } else {
-                        alert('You have been unblocked from live chat participation.');
+                        alert('Sie wurden aus der Live-Chat-Teilnahme entblockt.');
                         enableMessageInputAndSendButton();
                     }
                 }
@@ -2208,8 +2208,8 @@
             console.log('Update Live Show:', data);
 
             if (data.status && data.status != 'live') {
-                emptyTheBodyWithEndShow('The live show status has changed to "' + data.status +
-                    '". You will be redirected shortly.');
+                emptyTheBodyWithEndShow('Der Status der Live-Show hat sich geändert zu "' + data.status +
+                    '". Sie werden in Kürze weitergeleitet.');
             } else {
                 //reload the page to reflect the changes
                 location.reload();
@@ -2218,7 +2218,7 @@
         });
 
 
-        function emptyTheBodyWithEndShow(messageText = 'The live show has ended. Thank you for participating!') {
+        function emptyTheBodyWithEndShow(messageText = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme!') {
             document.body.innerHTML = '';
             document.body.style.backgroundColor = '#000';
             const endDiv = document.createElement('div');
@@ -2498,61 +2498,7 @@
             }
         });
 
-        /* Gallery image/video overlay */
-        var channelGalleryImage = pusher.subscribe('live-show-gallery-image.{{ $liveShow->id }}');
-        channelGalleryImage.bind('pusher:subscription_succeeded', function() {
-            console.log('Gallery image channel subscribed successfully!');
-        });
-        channelGalleryImage.bind('ShowGalleryImageEvent', function(data) {
-            //hide iframe
-            var iframe = document.getElementById('live-broadcast-iframe');
-            if (iframe) iframe.style.display = 'none';
 
-
-            var overlay = document.getElementById('galleryStreamOverlay');
-            var imgEl = document.getElementById('galleryStreamImage');
-            var videoEl = document.getElementById('galleryStreamVideo');
-            if (!overlay || !imgEl || !videoEl) return;
-            imgEl.style.display = 'none';
-            imgEl.removeAttribute('src');
-            videoEl.style.display = 'none';
-            videoEl.removeAttribute('src');
-            videoEl.pause();
-            if (data.type === 'video') {
-                videoEl.src = data.url;
-                videoEl.style.display = 'block';
-                videoEl.play().catch(function() {});
-            } else {
-                imgEl.src = data.url;
-                imgEl.style.display = 'block';
-            }
-            overlay.style.display = 'flex';
-        });
-
-
-        channelGalleryImage.bind('HideGalleryImageEvent', function() {
-            hideGalleryStreamOverlay();
-        });
-
-        function hideGalleryStreamOverlay() {
-            var overlay = document.getElementById('galleryStreamOverlay');
-            var imgEl = document.getElementById('galleryStreamImage');
-            var videoEl = document.getElementById('galleryStreamVideo');
-            if (overlay) overlay.style.display = 'none';
-            if (imgEl) {
-                imgEl.removeAttribute('src');
-                imgEl.style.display = 'none';
-            }
-            if (videoEl) {
-                videoEl.pause();
-                videoEl.removeAttribute('src');
-                videoEl.style.display = 'none';
-            }
-
-            //show iframe
-            var iframe = document.getElementById('live-broadcast-iframe');
-            if (iframe) iframe.style.display = 'block';
-        }
 
         /* Heart reactions (TikTok/Instagram style) */
         function spawnHeartReaction(userName) {
@@ -2615,6 +2561,68 @@
             ];
             return letters[index];
         }
+    </script>
+
+    <script>
+        /* Gallery image/video overlay */
+        var channelGalleryImage = pusher.subscribe('live-show-gallery-image.{{ $liveShow->id }}');
+        channelGalleryImage.bind('pusher:subscription_succeeded', function() {
+            console.log('Gallery image channel subscribed successfully!');
+        });
+        channelGalleryImage.bind('ShowGalleryImageEvent', function(data) {
+
+            showGalleryOverlay({
+                type: data.type,
+                src: data.url
+            });
+        });
+
+
+        channelGalleryImage.bind('HideGalleryImageEvent', function() {
+            hideGalleryOverlay();
+        });
+
+
+        // Show the full-screen gallery overlay (not closable)
+        function showGalleryOverlay({
+            type,
+            src
+        }) {
+            const overlay = document.getElementById('galleryOverlayModal');
+            const img = document.getElementById('galleryOverlayImage');
+            const vid = document.getElementById('galleryOverlayVideo');
+            img.style.display = "none";
+            vid.style.display = "none";
+            if (type === "image") {
+                img.src = src;
+                img.style.display = "block";
+                vid.pause();
+                vid.src = "";
+            } else if (type === "video") {
+                vid.src = src;
+                vid.currentTime = 0;
+                vid.load();
+                vid.play();
+                vid.style.display = "block";
+                img.src = "";
+            }
+            overlay.style.display = "flex";
+            // not closable: do not add event to hide overlay on click/esc etc.
+        }
+
+        // Hide the overlay programmatically if needed (not exposed to users)
+        function hideGalleryOverlay() {
+            const overlay = document.getElementById('galleryOverlayModal');
+            const img = document.getElementById('galleryOverlayImage');
+            const vid = document.getElementById('galleryOverlayVideo');
+            overlay.style.display = "none";
+            img.src = "";
+            vid.pause();
+            vid.src = "";
+        }
+
+        // Example usage: showGalleryOverlay({type: "image", src: "/path/to/img.jpg"})
+        // Example usage: showGalleryOverlay({type: "video", src: "/path/to/video.mp4"})
     </script>
 
 

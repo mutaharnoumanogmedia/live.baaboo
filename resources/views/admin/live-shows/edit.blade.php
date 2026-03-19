@@ -112,7 +112,7 @@
                             <label class="form-label required-field">Max winners per show</label>
                             <input type="number" name="max_winners" id="maxWinners" class="form-control" min="1"
                                 max="10" required value="{{ old('max_winners', $liveShow->max_winners ?? 3) }}">
-                            <div class="form-text">Number of top winners (1–10) who share the prize</div>
+                            <div class="form-text">Number of winners who win the prizes</div>
                         </div>
                     </div>
                     @error('winner_prizes')
