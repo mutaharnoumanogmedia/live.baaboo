@@ -25,6 +25,7 @@ return new class extends Migration
             $table->boolean('is_winner')->default(false);
             $table->timestamp('last_active')->nullable();
             $table->boolean('is_online')->default(false);
+            $table->unique(['user_id', 'live_show_id'], 'uq_usr_live');
             $table->timestamps();
         });
     }

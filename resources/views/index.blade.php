@@ -1,10 +1,11 @@
 <x-guest-layout>
     <!-- Live Show Banner -->
-    {{-- @if (isset($currentLiveShow) && $currentLiveShow)
+    @if (isset($currentLiveShow) && $currentLiveShow)
         <style>
-            /* Non-Bootstrap classes used in this banner */
+            /* Updated banner styles */
             .live-show-banner {
-                background: linear-gradient(90deg, #fae7ff 0%, #e9e2fe 100%);
+                background: #fde901;
+                color: #140b63;
                 border-radius: 32px;
                 box-shadow: 0 4px 20px rgba(160, 130, 255, 0.08);
                 margin-bottom: 36px;
@@ -12,12 +13,14 @@
             }
 
             .live-badge {
-                background: #ffd600;
-                color: #5a189a;
+                background: #f73fae;
+                color: #000000;
                 padding: 6px 18px;
                 border-radius: 21px 6px 21px 21px;
                 letter-spacing: 1.5px;
                 box-shadow: 0 2px 8px rgba(255, 167, 38, 0.06);
+                font-weight: bold;
+                font-size: 1rem;
             }
 
             .live-dot {
@@ -32,33 +35,44 @@
             }
 
             .text-gradient {
-                background: linear-gradient(90deg, #a100ff 0%, #ef008f 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-                text-fill-color: transparent;
+                color: #140b63;
             }
 
-            .b-highlight {
-                color: #ff3366;
+            .schedule-highlight {
+                background: #f73fae;
+                color: #00000;
+                padding: 0.20em 0.7em;
+                border-radius: 8px;
                 font-weight: bold;
-                background: #fff0f6;
-                padding: 0.15em 0.6em;
-                border-radius: 6px;
+            }
+
+            .banner-announcement {
+                background:  #f73fae  !important;
+                color: #140b63 !important;
+                border-radius: 30px !important;
+                letter-spacing:1px;
+                display: inline-block;
             }
 
             .border-purple {
                 border: 2px solid #bb5ff5 !important;
             }
 
+            .join-live-btn {
+                background: #f73fae  ;
+                color: #000000 !important;
+                border-radius: 24px !important;
+                font-weight: bold !important;
+                border: 2px solid #bb5ff5 !important;
+            }
             .text-orange {
-                color: #ff8800 !important;
+                color: #f73fae !important;
             }
         </style>
         <div class="live-show-banner position-relative" style="overflow:visible;">
             <div class="text-center position-absolute w-100" style="top:-30px; left:0;">
-                <span class="px-4 py-2 shadow badge bg-warning fs-5" style="border-radius:30px; letter-spacing:1px;">
-                    ✨ It's Show Time! Lass dir den Spaß nicht entgehen! ✨
+                <span class="px-4 py-2 shadow banner-announcement fs-5">
+                    ✨ <span style="color:#fde901;">It's Show Time!</span> Lass dir den Spaß nicht entgehen! ✨
                 </span>
             </div>
             <div class="container">
@@ -67,34 +81,26 @@
                         <span class="live-badge fs-6 fw-bolder d-inline-flex align-items-center">
                             <span class="live-dot me-2"></span>
                             @if (isset($currentLiveShow) && in_array($currentLiveShow->status, ['live', 'scheduled']))
-                                <span class="d-none d-md-inline">
-                                    {{ strtoupper($currentLiveShow->status) }}
-                                    @if ($currentLiveShow->scheduled_at)
-                                        &ndash;
-                                        {{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y H:i') }}
-                                    @endif
-                                </span>
-                                <span class="d-inline d-md-none">
-                                    {{ strtoupper(Str::limit($currentLiveShow->status, 4, '')) }}
-                                    @if ($currentLiveShow->scheduled_at)
-                                        &ndash;
-                                        {{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y H:i') }}
-                                    @endif
-                                </span>
+                                @if ($currentLiveShow->scheduled_at)
+                                    <span class="schedule-highlight">
+                                        {{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H') }} Uhr
+                                    </span>
+                                @endif
                             @else
-                                <span class="d-none d-md-inline">LIVE NOW</span>
-                                <span class="d-inline d-md-none">LIVE</span>
+                                <span class="schedule-highlight">
+                                    LIVE NOW
+                                </span>
                             @endif
                         </span>
                     </div>
                     <div class="mb-3 text-center col-md-7 text-md-start mb-md-0">
                         <h5 class="mb-1 fw-bold text-gradient" style="font-size:1.2rem;">
-                            {{ $currentLiveShow->title ?? 'Live Show' }}
+                            <span style="color:#140b63;">{{ $currentLiveShow->title ?? 'Live Show' }}</span>
                             <span class="mx-2">·</span>
-
                         </h5>
-                        <p class="mb-0 opacity-75 fs-6">
-                            <i class="bi bi-people-fill text-purple"></i>
+                        <p class="mb-0 opacity-75 fs-6"
+                           style="color:#140b63;">
+                            <i class="bi bi-people-fill" style="color:#140b63;"></i>
                             {{ $currentLiveShow->users->count() ?? 0 }}
                             {{ $currentLiveShow->users->count() == 1 ? 'Mitspieler ist' : 'Mitspieler sind' }} gerade
                             dabei
@@ -103,7 +109,7 @@
                     <div
                         class="text-center col-md-3 text-md-end d-flex justify-content-center justify-content-md-end align-items-center">
                         <a href="{{ route('live-show', $currentLiveShow->id) }}"
-                            class="px-4 shadow-sm btn btn-light btn-lg fw-bold border-purple"
+                            class="px-4 shadow-sm btn btn-lg join-live-btn"
                             style="border-radius: 24px;">
                             <i class="fas fa-play me-2 text-orange"></i>Jetzt mitspielen
                         </a>
@@ -111,7 +117,7 @@
                 </div>
             </div>
         </div>
-    @endif --}}
+    @endif
 
     <!-- ══════════════════════════════════════════
      HERO
