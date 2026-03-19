@@ -66,6 +66,7 @@ return [
 
     // Chat / Moderation / Game State
     'chat' => [
+        'joined' => 'has joined the chat!',
         'blocked' => 'You have been blocked from live chat participation.',
         'unblocked' => 'You have been unblocked from live chat participation.',
         'status_changed' => 'The live show status has changed to ":status". You will be redirected shortly.',

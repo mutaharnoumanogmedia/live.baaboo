@@ -65,6 +65,7 @@ return [
 
     // Chat / Moderation / Game State
     'chat' => [
+        'joined' => 'hat den Chat betreten!',
         'blocked' => 'Du wurdest für den Chat gesperrt.',
         'unblocked' => 'Du kannst wieder am Chat teilnehmen.',
         'status_changed' => 'Der Status der Live-Show wurde auf ":status" geändert. Du wirst gleich weitergeleitet.',

@@ -1123,7 +1123,8 @@
                                 <button class="send-btn-overlay" id="send-btn-overlay" onclick="sendMessage()">
                                     <i class="fas fa-paper-plane"></i>
                                 </button>
-                                <button type="button" id="heartReactionBtn" title="{{ __('de.main_ui.send_heart') }}">
+                                <button type="button" id="heartReactionBtn"
+                                    title="{{ __('de.main_ui.send_heart') }}">
                                     <i class="fas fa-heart"></i>
                                 </button>
                             </div>
@@ -1135,7 +1136,9 @@
                     <!-- Player List -->
                     <div class="container-fluid ">
                         <div class="players-list-group-container">
-                            <h5 class="mb-3"><i class="fas fa-users me-2 text-primary"></i>{{ __('de.main_ui.players_scores') }}</h5>
+                            <h5 class="mb-3"><i
+                                    class="fas fa-users me-2 text-primary"></i>{{ __('de.main_ui.players_scores') }}
+                            </h5>
                             <ul class="list-group" id="players-leaderbord">
                             </ul>
                         </div>
@@ -1236,7 +1239,8 @@
                                 placeholder="{{ __('de.registration.email_placeholder') }}">
                         </div>
                         <div class="gap-2 d-flex">
-                            <input type="checkbox" class="form-check-input form-control-color" id="agree" required>
+                            <input type="checkbox" class="form-check-input form-control-color" id="agree"
+                                required>
                             <label class="form-check-label" for="agree">{!! __('de.registration.terms') !!}</label>
                         </div>
                         <div id="registerError" class="text-danger small" style="display:none;"></div>
@@ -1266,7 +1270,8 @@
                 <div class="text-center modal-body">
                     <div class="mb-3">
                         <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::guard('web')->user()->name ?? 'User') }}&background=ffb380&color=fff&size=96"
-                            alt="{{ __('de.profile.avatar') }}" class="mb-2 rounded-circle" width="80" height="80">
+                            alt="{{ __('de.profile.avatar') }}" class="mb-2 rounded-circle" width="80"
+                            height="80">
                     </div>
                     <h6 class="mb-1">{{ Auth::guard('web')->user()->name ?? __('de.profile.guest') }}</h6>
                     <div class="mb-3 text-muted" style="font-size: 0.95rem;">
@@ -1296,9 +1301,9 @@
             style="background:#fff; border-radius:20px; padding:40px 30px; text-align:center; max-width:350px; margin:auto; margin-top: 20%; box-shadow:0 8px 32px rgba(0,0,0,0.2); ">
             <i class="mb-3 fas fa-trophy fa-3x text-warning"></i>
             <h3 class="mb-2" style="color:#ff5f00;">{{ __('de.winner.title') }}</h3>
-            <p class="mb-3" style="font-size:1.1rem;">{{ __('de.winner.selected') }}</p>
-            <p class="mb-3" style="font-size:1.1rem;">{{ __('de.winner.prize') }}</p>
-            <div class="text-center " style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)" id="prizeAmount"></div>
+            <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.selected') }}</p>
+            <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.prize') }}</p>
+            <div class="text-center mb-3" style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)" id="prizeAmount"></div>
             <button class="btn btn-success" onclick="document.getElementById('winnerDialog').style.display='none';">
                 <i class="fas fa-check me-2"></i>{{ __('de.profile.close') }}
             </button>
@@ -1387,10 +1392,17 @@
                 // showQuestionBtn.style.display = 'block';
                 // showQuestionBtn.classList.remove('active');
             }
-            //uncheck all options
+            //uncheck all optionsmove 
             document.querySelectorAll('input[name="option"]').forEach(option => {
                 option.checked = false;
                 option.disabled = false;
+            });
+            //remove .quiz-option label focus or hover or checked state
+            document.querySelectorAll('.quiz-option label').forEach(label => {
+                // Remove any classes that could represent focus or hover from the quiz option labels
+                label.classList.remove('focus', 'hover', 'active');
+                // Optionally, if you're using Bootstrap or custom styles, also remove classes like 'checked', 'selected' etc.
+                label.classList.remove('checked', 'selected');
             });
             // hideAllModals();
         }
@@ -1698,7 +1710,7 @@
             errorDiv.innerHTML = '';
 
 
-            if ( !email) {
+            if (!email) {
                 errorDiv.textContent = 'Please add your email.';
                 errorDiv.style.display = 'block';
                 return;
@@ -1724,7 +1736,7 @@
                         var modal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
                         modal.hide();
                         // Optionally: update UI to reflect logged-in user
-                        addOverlayMessage('@' + username, 'has joined the chat!');
+                        addOverlayMessage('@' + username, ' {{ __('de.chat.joined') }}');
                         replaceRegisterButtonWithUsername(username);
 
                         isLoggedIn = true;
@@ -1989,15 +2001,15 @@
 
             if (type === 'success') {
                 alertClass = 'text-success';
-                message = `<i class="fas fa-check-circle me-2"></i>Hurray!<br>Correct Answer.`;
+                message = `<i class="fas fa-check-circle me-2"></i>Hurray!<br>{{ __('de.quiz.correct') }}`;
             } else if (type === 'fail') {
                 alertClass = 'text-danger';
-                message = `<i class="fas fa-times-circle me-2"></i>Oops!<br>Wrong Answer`;
+                message = `<i class="fas fa-times-circle me-2"></i>Oops!<br>{{ __('de.quiz.wrong') }}`;
                 // updateEliminatedStatus();
 
             } else {
                 alertClass = 'text-warning';
-                message = `<i class="fas fa-exclamation-circle me-2"></i> Wrong Answer!`;
+                message = `<i class="fas fa-exclamation-circle me-2"></i> {{ __('de.quiz.wrong') }}`;
                 // updateEliminatedStatus();
 
             }
