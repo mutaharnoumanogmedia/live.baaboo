@@ -2605,6 +2605,11 @@
                 vid.play();
                 vid.style.display = "block";
                 img.src = "";
+
+                //unmute video
+                vid.muted = false;
+                //click the video
+                vid.click();
             }
             overlay.style.display = "flex";
             // not closable: do not add event to hide overlay on click/esc etc.
