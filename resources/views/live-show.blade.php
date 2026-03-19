@@ -1667,6 +1667,7 @@
             `;
             overlayChat.appendChild(messageDiv);
             overlayChat.scrollTop = overlayChat.scrollHeight;
+            
         }
 
         // Allow Enter key to send message
