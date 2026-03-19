@@ -11,7 +11,7 @@ class PlayerController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        if (auth()->user()->email != 'admin@baaboo.com') {
+        if (auth()->guard('admin')->user()->email != 'admin@baaboo.com') {
             abort(403, 'Unauthorized action.');
         }
     }
