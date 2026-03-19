@@ -643,12 +643,12 @@
             font-weight: 500;
         }
 
-        .quiz-option label:hover {
+        /* .quiz-option label:hover {
             border-color: var(--accent-color);
             background: var(--accent-color);
             color: white;
             transform: translateY(-2px);
-        }
+        } */
 
         .quiz-option input[type="radio"]:checked+label {
 
