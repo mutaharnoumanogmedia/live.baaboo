@@ -2275,7 +2275,7 @@
 
         @if ($liveShow->status != 'live')
             emptyTheBodyWithEndShow(
-                'Die Game-Show „Badabing“ findet am  {{ $liveShow->status == 'scheduled' ? ' ' . \Carbon\Carbon::parse($liveShow->scheduled_at)->format('d F Y, H:i') . 'Uhr statt.' : '' }} .  '
+                'Die Game-Show „Badabing“ findet am  {{ $liveShow->status == 'scheduled' ? ' ' . \Carbon\Carbon::parse($liveShow->scheduled_at)->format('d F Y, H:i')->locale('de')->translatedFormat('d F Y, H:i') . 'Uhr statt.' : '' }} .  '
             );
         @endif
 
