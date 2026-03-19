@@ -1591,7 +1591,9 @@
 
             // 2. Add it to the body, focus it, then kill it
             document.body.appendChild(dummy);
+            dummy.click();
             dummy.focus();
+            
             dummy.remove();
         }
 
