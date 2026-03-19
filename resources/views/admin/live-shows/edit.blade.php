@@ -87,7 +87,7 @@
 
                         <div class="col-md-3 mb-3">
                             <label class="form-label required-field">Prize Amount</label>
-                            <input type="number" name="prize_amount" class="form-control" placeholder="0.00"
+                            <input type="text" name="prize_amount" class="form-control" placeholder="0.00"
                                 step="0.01" required
                                 value="{{ old('prize_amount', $liveShow->prize_amount ?? '') }}">
                         </div>
