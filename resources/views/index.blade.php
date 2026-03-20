@@ -156,7 +156,7 @@
                 Nächste Show: 19.03 um 20:00 Uhr
             </div>
 
-            <div class="hero-countdown mt-3 mb-2   mx-auto"
+            {{-- <div class="hero-countdown mt-3 mb-2   mx-auto"
                 style="padding: 5px 45px !important; width: fit-content;border: 1px solid #000; background-color: #ffffe9; border-radius: 10px; ">
                 <div id="liveShowCountdown" class="d-flex justify-content-center gap-3 fs-2 fw-bold"></div>
             </div>
@@ -215,7 +215,7 @@
                         // setInterval(updateCountdown, 1000);
                     }
                 });
-            </script>
+            </script> --}}
 
             <p class="hero-subtitle">
                 Quiz, Challenges, Überraschungsspiele – live und interaktiv. Bei der Badabing Game Show wird jeder
