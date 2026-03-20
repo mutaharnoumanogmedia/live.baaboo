@@ -152,9 +152,9 @@
                 <span class="highlight">Jetzt spielst Du mit. </span>
             </h1>
 
-            <div class="alert-next-show" style="">
+            {{-- <div class="alert-next-show" style="">
                 Nächste Show: 19.03 um 20:00 Uhr
-            </div>
+            </div> --}}
 
             {{-- <div class="hero-countdown mt-3 mb-2   mx-auto"
                 style="padding: 5px 45px !important; width: fit-content;border: 1px solid #000; background-color: #ffffe9; border-radius: 10px; ">
@@ -282,7 +282,7 @@
             <h2 class="mb-2 section-title">Bereit für die <span class="text-orange">Show?</span></h2>
             <p class="mb-1 text-muted" style="">Trag Dich ein und schnapp Dir Dein Ticket zur nächsten
             </p>
-            <p class="mb-3 text-muted" style="">Game Show am 19.03 um 20:00 Uhr. </p>
+            {{-- <p class="mb-3 text-muted" style="">Game Show am 19.03 um 20:00 Uhr. </p> --}}
             <x-registeration-form :referredByUser="$referredByUser ?? null" />
 
             <p class="mb-3 text-purple" style="">
