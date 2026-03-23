@@ -1352,7 +1352,7 @@
 
         }
 
-        console.log('isEliminated:', isEliminated);
+        // console.log('isEliminated:', isEliminated);
         console.log('isLoggedIn:', isLoggedIn);
 
         Pusher.logToConsole = true;
@@ -1438,7 +1438,7 @@
         function appendQuizQuestion(quiz) {
             //reset current answer status
 
-            console.log('Appending quiz question:', quiz);
+            // console.log('Appending quiz question:', quiz);
 
             const quizSection = document.getElementById('quizSection');
             quizSection.innerHTML = `
@@ -1468,7 +1468,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.blocked) {
-                        console.log('User blocked from live show:', data);
+                        // console.log('User blocked from live show:', data);
                         alert('You have been blocked from live chat participation.');
                         //disable message input and send button
                         disableMessageInputAndSendButton();
@@ -1488,14 +1488,14 @@
 
             const selected = document.querySelector('input[name="option"]:checked');
             if (selected) {
-                console.log('Selected option:', selected.value);
+                // console.log('Selected option:', selected.value);
 
                 //disable all options to prevent multiple submissions
                 document.querySelectorAll('input[name="option"]').forEach(option => {
                     option.disabled = true;
                 });
                 const option = selected.value;
-                console.log('Submitting option:', option);
+                // console.log('Submitting option:', option);
 
                 fetch('{{ url('live-show/' . $liveShow->id . '/submit-quiz') }}', {
                         method: 'POST',
@@ -1511,7 +1511,7 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        console.log('Quiz submission response:', data);
+                        // console.log('Quiz submission response:', data);
                         if (data.success) {
                             console.log('Quiz submitted successfully:', data);
                             // Show correct/incorrect feedback
@@ -1519,14 +1519,14 @@
 
                             [...document.querySelectorAll('.quiz-option')].some(optionDiv => {
                                 const input = optionDiv.querySelectorAll('input')[0];
-                                console.log('data.is_correct:', data.is_correct, 'input.value:', input
-                                    .value,
-                                    'data.correct_option_id:', data.correct_option_id);
+                                // console.log('data.is_correct:', data.is_correct, 'input.value:', input
+                                //     .value,
+                                //     'data.correct_option_id:', data.correct_option_id);
                                 if (data.is_correct && input.value == data.correct_option_id) {
                                     // optionDiv.classList.add('correct');
 
                                     isCurrentAnswerCorrect = true;
-                                    console.log('Current answer is correct.');
+                                    // console.log('Current answer is correct.');
                                     //stop lopping by returning true
                                     return true;
 
@@ -1631,6 +1631,13 @@
                     error: function(xhr) {
                         // Handle error
                         console.error(xhr.responseText);
+                        //if message ==  "Too Many Attempts."
+                        if (xhr.responseJSON?.message == "Too Many Attempts.") {
+                            alert('Du kannst nur 5 Nachrichten pro Minute senden 🙂');
+                            input.disabled = false;
+                            document.querySelector('#send-btn-overlay').disabled = false;
+
+                        }
                         let errorMessage = xhr.responseJSON?.message || 'Failed to send message.';
                         if (errorMessage == "unauthorized") {
                             //open register modal
@@ -1767,8 +1774,8 @@
 
                         isEliminated = data.isEliminated == true ? true : false;
 
-                        console.log('User registered successfully:', data, 'isEliminated:', isEliminated,
-                            'isLoggedIn:', isLoggedIn, 'userId:', userId);
+                        // console.log('User registered successfully:', data, 'isEliminated:', isEliminated,
+                        //     'isLoggedIn:', isLoggedIn, 'userId:', userId);
 
                         playerAsWinnerEventTrigger();
                         userBlockedFromLiveShowEventTrigger();

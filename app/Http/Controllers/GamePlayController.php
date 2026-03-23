@@ -99,33 +99,36 @@ class GamePlayController extends Controller
 
             $userName = explode('@', $validated['email'])[0];
 
-            $service = new AffiliateAPIService;
-            $userEmailStatus = $service->isUserEmailExistingInAffiliate($validated['email']);
-            if ($userEmailStatus) {
-                // If email exists and affiliated, set the username from response
-                if (
-                    isset($userEmailStatus['status']) && $userEmailStatus['status'] === true &&
-                    isset($userEmailStatus['affiliated']) && $userEmailStatus['affiliated'] === true &&
-                    isset($userEmailStatus['user']['username'])
-                ) {
-                    $userName = $userEmailStatus['user']['username'];
-                    // check if user name is already taken, if yes, then change it for the other one
+            if (env('APP_ENV') == 'production') {
+                $service = new AffiliateAPIService;
+                $userEmailStatus = $service->isUserEmailExistingInAffiliate($validated['email']);
+                if ($userEmailStatus) {
+                    // If email exists and affiliated, set the username from response
+                    if (
+                        isset($userEmailStatus['status']) && $userEmailStatus['status'] === true &&
+                        isset($userEmailStatus['affiliated']) && $userEmailStatus['affiliated'] === true &&
+                        isset($userEmailStatus['user']['username'])
+                    ) {
+                        $userName = $userEmailStatus['user']['username'];
+                        // check if user name is already taken, if yes, then change it for the other one
+                        $userWithUserName = User::where('user_name', $userName)->first();
+                        if ($userWithUserName) {
+                            // change for this user
+                            $userWithUserName->user_name = $userName.'_'.rand(1000, 9999);
+                            $userWithUserName->save();
+                        }
+                    }
+                } else {
+                    // first part of email
+                    $userName = explode('@', $validated['email'])[0];
+                    // check if user name is already taken, if yes, then change it for this one by adding a random number
                     $userWithUserName = User::where('user_name', $userName)->first();
                     if ($userWithUserName) {
-                        // change for this user
-                        $userWithUserName->user_name = $userName.'_'.rand(1000, 9999);
-                        $userWithUserName->save();
+                        $userName = $userName.'_'.rand(1000, 9999);
                     }
                 }
-            } else {
-                // first part of email
-                $userName = explode('@', $validated['email'])[0];
-                // check if user name is already taken, if yes, then change it for this one by adding a random number
-                $userWithUserName = User::where('user_name', $userName)->first();
-                if ($userWithUserName) {
-                    $userName = $userName.'_'.rand(1000, 9999);
-                }
             }
+            
             $validated['name'] = $userName;
             $validated['user_name'] = $userName;
 
