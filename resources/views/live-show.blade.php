@@ -2047,7 +2047,7 @@
                 evaluationDiv.innerHTML = '';
                 document.querySelector('#quizTimer').style.display = "none";
                 showVideoContainer();
-                updatePlayersLeaderboard();
+                // updatePlayersLeaderboard();
             }, 3000);
         }
 

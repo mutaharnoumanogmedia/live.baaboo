@@ -1115,7 +1115,7 @@
 
             // Your Laravel broadcast event (drop the dot)
             channel.bind('LiveShowOnlineUsersEvent', function(data) {
-                console.log('Active Users:', data.activeUsers);
+                
 
                 fetchActivePlayers().then(activePlayers => {
                     appendPlayerList(activePlayers);

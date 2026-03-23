@@ -229,7 +229,7 @@ class GamePlayController extends Controller
                 ->sortByDesc('score')
                 ->toArray();
 
-            LiveShowOnlineUsersEvent::dispatch($activeUsers, (string) $liveShowId);
+            LiveShowOnlineUsersEvent::dispatch($liveShowId);
         }
     }
 

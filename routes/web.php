@@ -43,9 +43,8 @@ Route::get('live-show/{id}/messages', [GamePlayController::class, 'fetchMessages
 Route::middleware(['auth:web'])->group(function () {
     Route::post('live-show/{id}/user/updateOnlineStatus', [GamePlayController::class, 'updateOnlineStatus'])->name('live-show.user.updateOnlineStatus');
 
-    Route::post('live-show/{id}/send-message', [GamePlayController::class, 'postMessage'])->name('live-show.post-message');
-    Route::post('live-show/{id}/heart-reaction', [GamePlayController::class, 'heartReaction'])->name('live-show.heart-reaction');
-
+    Route::post('live-show/{id}/send-message', [GamePlayController::class, 'postMessage'])->name('live-show.post-message')->throttle(5, 1);
+    Route::post('live-show/{id}/heart-reaction', [GamePlayController::class, 'heartReaction'])->name('live-show.heart-reaction')->throttle(5, 1);
     // report user message
     Route::post('live-show/{id}/report-message', [GamePlayController::class, 'reportUserMessage'])->name('live-show.report-message');
 
