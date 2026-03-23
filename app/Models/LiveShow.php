@@ -56,7 +56,7 @@ class LiveShow extends Model
     {
         return $this->belongsToMany(User::class, 'user_live_shows')
             ->using(UserLiveShow::class)   // tell Laravel to use pivot model
-            ->withPivot(['score', 'status', 'is_online', 'is_winner']) // include extra fields
+            ->withPivot(['score', 'status', 'is_online', 'is_winner', 'prize_won']) // include extra fields
             ->withTimestamps();
     }
 

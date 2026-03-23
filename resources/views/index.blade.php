@@ -2,9 +2,10 @@
     <!-- Live Show Banner -->
     {{-- @if (isset($currentLiveShow) && $currentLiveShow)
         <style>
-            /* Non-Bootstrap classes used in this banner */
+            /* Updated banner styles */
             .live-show-banner {
-                background: linear-gradient(90deg, #fae7ff 0%, #e9e2fe 100%);
+                background: #fde901;
+                color: #140b63;
                 border-radius: 32px;
                 box-shadow: 0 4px 20px rgba(160, 130, 255, 0.08);
                 margin-bottom: 36px;
@@ -12,12 +13,14 @@
             }
 
             .live-badge {
-                background: #ffd600;
-                color: #5a189a;
+                background: #f73fae;
+                color: #000000;
                 padding: 6px 18px;
                 border-radius: 21px 6px 21px 21px;
                 letter-spacing: 1.5px;
                 box-shadow: 0 2px 8px rgba(255, 167, 38, 0.06);
+                font-weight: bold;
+                font-size: 1rem;
             }
 
             .live-dot {
@@ -32,33 +35,44 @@
             }
 
             .text-gradient {
-                background: linear-gradient(90deg, #a100ff 0%, #ef008f 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-                text-fill-color: transparent;
+                color: #140b63;
             }
 
-            .b-highlight {
-                color: #ff3366;
+            .schedule-highlight {
+                background: #f73fae;
+                color: #00000;
+                padding: 0.20em 0.7em;
+                border-radius: 8px;
                 font-weight: bold;
-                background: #fff0f6;
-                padding: 0.15em 0.6em;
-                border-radius: 6px;
+            }
+
+            .banner-announcement {
+                background:  #f73fae  !important;
+                color: #140b63 !important;
+                border-radius: 30px !important;
+                letter-spacing:1px;
+                display: inline-block;
             }
 
             .border-purple {
                 border: 2px solid #bb5ff5 !important;
             }
 
+            .join-live-btn {
+                background: #f73fae  ;
+                color: #000000 !important;
+                border-radius: 24px !important;
+                font-weight: bold !important;
+                border: 2px solid #bb5ff5 !important;
+            }
             .text-orange {
-                color: #ff8800 !important;
+                color: #f73fae !important;
             }
         </style>
         <div class="live-show-banner position-relative" style="overflow:visible;">
             <div class="text-center position-absolute w-100" style="top:-30px; left:0;">
-                <span class="px-4 py-2 shadow badge bg-warning fs-5" style="border-radius:30px; letter-spacing:1px;">
-                    ✨ It's Show Time! Lass dir den Spaß nicht entgehen! ✨
+                <span class="px-4 py-2 shadow banner-announcement fs-5">
+                    ✨ <span style="color:#fde901;">It's Show Time!</span> Lass dir den Spaß nicht entgehen! ✨
                 </span>
             </div>
             <div class="container">
@@ -67,34 +81,26 @@
                         <span class="live-badge fs-6 fw-bolder d-inline-flex align-items-center">
                             <span class="live-dot me-2"></span>
                             @if (isset($currentLiveShow) && in_array($currentLiveShow->status, ['live', 'scheduled']))
-                                <span class="d-none d-md-inline">
-                                    {{ strtoupper($currentLiveShow->status) }}
-                                    @if ($currentLiveShow->scheduled_at)
-                                        &ndash;
-                                        {{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y H:i') }}
-                                    @endif
-                                </span>
-                                <span class="d-inline d-md-none">
-                                    {{ strtoupper(Str::limit($currentLiveShow->status, 4, '')) }}
-                                    @if ($currentLiveShow->scheduled_at)
-                                        &ndash;
-                                        {{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y H:i') }}
-                                    @endif
-                                </span>
+                                @if ($currentLiveShow->scheduled_at)
+                                    <span class="schedule-highlight">
+                                        {{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H') }} Uhr
+                                    </span>
+                                @endif
                             @else
-                                <span class="d-none d-md-inline">LIVE NOW</span>
-                                <span class="d-inline d-md-none">LIVE</span>
+                                <span class="schedule-highlight">
+                                    LIVE NOW
+                                </span>
                             @endif
                         </span>
                     </div>
                     <div class="mb-3 text-center col-md-7 text-md-start mb-md-0">
                         <h5 class="mb-1 fw-bold text-gradient" style="font-size:1.2rem;">
-                            {{ $currentLiveShow->title ?? 'Live Show' }}
+                            <span style="color:#140b63;">{{ $currentLiveShow->title ?? 'Live Show' }}</span>
                             <span class="mx-2">·</span>
-
                         </h5>
-                        <p class="mb-0 opacity-75 fs-6">
-                            <i class="bi bi-people-fill text-purple"></i>
+                        <p class="mb-0 opacity-75 fs-6"
+                           style="color:#140b63;">
+                            <i class="bi bi-people-fill" style="color:#140b63;"></i>
                             {{ $currentLiveShow->users->count() ?? 0 }}
                             {{ $currentLiveShow->users->count() == 1 ? 'Mitspieler ist' : 'Mitspieler sind' }} gerade
                             dabei
@@ -103,7 +109,7 @@
                     <div
                         class="text-center col-md-3 text-md-end d-flex justify-content-center justify-content-md-end align-items-center">
                         <a href="{{ route('live-show', $currentLiveShow->id) }}"
-                            class="px-4 shadow-sm btn btn-light btn-lg fw-bold border-purple"
+                            class="px-4 shadow-sm btn btn-lg join-live-btn"
                             style="border-radius: 24px;">
                             <i class="fas fa-play me-2 text-orange"></i>Jetzt mitspielen
                         </a>
@@ -112,6 +118,17 @@
             </div>
         </div>
     @endif --}}
+
+    <div class="container text-center m-auto" style="background-color: #fde901; color: #140b63; padding: 20px; border-radius: 10px;">
+        <p class="fs-3"> 🚨 Technische Panne bei Badabing-Premiere – sorry!</p>
+        <br>
+        Ihr wart so viele, dass unsere Server nicht mitgekommen sind. Bestes Problem, das uns passieren konnte – aber
+        trotzdem: Entschuldigung an alle, die live dabei sein wollten.
+        <br>
+
+
+        📅 Den Nachholtermin gibt's bald – wir halten euch auf dem Laufenden!
+    </div>
 
     <!-- ══════════════════════════════════════════
      HERO
@@ -135,11 +152,12 @@
                 <span class="highlight">Jetzt spielst Du mit. </span>
             </h1>
 
-            <div class="alert-next-show" style="">
+            {{-- <div class="alert-next-show" style="">
                 Nächste Show: 19.03 um 20:00 Uhr
-            </div>
+            </div> --}}
 
-            <div class="hero-countdown mt-3 mb-2   mx-auto" style="padding: 5px 45px !important; width: fit-content;border: 1px solid #000; background-color: #ffffe9; border-radius: 10px; ">
+            {{-- <div class="hero-countdown mt-3 mb-2   mx-auto"
+                style="padding: 5px 45px !important; width: fit-content;border: 1px solid #000; background-color: #ffffe9; border-radius: 10px; ">
                 <div id="liveShowCountdown" class="d-flex justify-content-center gap-3 fs-2 fw-bold"></div>
             </div>
             <script>
@@ -178,26 +196,26 @@
 
                         display.innerHTML = `
                             <div>
-                                <div class="text-orange">${pad(days)}</div> <div class="fs-6">Tg</div>
+                                <div class="text-orange">${pad(days)}</div> <div class="time-unit">Tage</div>
                             </div>
                             <div>
-                                <div class="text-orange">${pad(hours)}</div> <div class="fs-6">Std</div>
+                                <div class="text-orange">${pad(hours)}</div> <div class="time-unit">Std</div>
                             </div>
                             <div>
-                                <div class="text-orange">${pad(minutes)}</div> <div class="fs-6">Min</div>
+                                <div class="text-orange">${pad(minutes)}</div> <div class="time-unit">Min</div>
                             </div>
                             <div>
-                                <div class="text-orange">${pad(seconds)}</div>  <div class="fs-6">Sek</div>
+                                <div class="text-orange">${pad(seconds)}</div>  <div class="time-unit">Sek</div>
                             </div>
                         `;
                     }
 
                     if (scheduledDate) {
                         updateCountdown();
-                        setInterval(updateCountdown, 1000);
+                        // setInterval(updateCountdown, 1000);
                     }
                 });
-            </script>
+            </script> --}}
 
             <p class="hero-subtitle">
                 Quiz, Challenges, Überraschungsspiele – live und interaktiv. Bei der Badabing Game Show wird jeder
@@ -264,7 +282,7 @@
             <h2 class="mb-2 section-title">Bereit für die <span class="text-orange">Show?</span></h2>
             <p class="mb-1 text-muted" style="">Trag Dich ein und schnapp Dir Dein Ticket zur nächsten
             </p>
-            <p class="mb-3 text-muted" style="">Game Show am 19.03 um 20:00 Uhr. </p>
+            {{-- <p class="mb-3 text-muted" style="">Game Show am 19.03 um 20:00 Uhr. </p> --}}
             <x-registeration-form :referredByUser="$referredByUser ?? null" />
 
             <p class="mb-3 text-purple" style="">

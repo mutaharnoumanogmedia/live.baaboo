@@ -358,6 +358,11 @@
             color: var(--text-dark);
         }
 
+        .time-unit {
+            line-height: 1;
+            font-size: 1rem;
+        }
+
         .feature-text {
             font-size: 0.85rem;
             color: #000;

@@ -5,20 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
-    <title>baaboo Live | {{ $liveShow->title ?? '' }}</title>
+    <title>{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="baaboo Live | {{ $liveShow->title ?? '' }}">
-    <meta property="og:description" content="Join the baaboo Live Game Show and compete for prizes!">
+    <meta property="og:title" content="{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}">
+    <meta property="og:description" content="{{ __('de.main_ui.subtitle') }}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:image" content="{{ asset('og-image.webp') }}">
-    <meta property="og:site_name" content="baaboo Live Game Show">
+    <meta property="og:site_name" content="{{ __('de.main_ui.game_show') }}">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="baaboo Live | {{ $liveShow->title ?? '' }}">
-    <meta name="twitter:description" content="Join the baaboo Live Game Show and compete for prizes!">
+    <meta name="twitter:title" content="{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}">
+    <meta name="twitter:description" content="{{ __('de.main_ui.subtitle') }}">
     <meta name="twitter:image" content="{{ asset('og-image.webp') }}">
 
     <!-- Google Tag Manager -->
@@ -439,11 +439,11 @@
         /* TikTok-style overlay chat */
         .overlay-chat {
             z-index: 5;
-            padding: 10px 00px 40px 0px;
+            padding: 10px 00px 10px 0px;
             opacity: 0.7;
             overflow-y: scroll;
             scrollbar-width: none;
-            height: 25vh;
+            height: 20vh;
         }
 
         .overlay-chat::-webkit-scrollbar {
@@ -473,13 +473,13 @@
         }
 
         .chat-message-overlay .message-user {
-            font-size: 0.8rem;
+            font-size: 0.65rem;
             color: var(--accent-color);
             font-weight: 600;
         }
 
         .chat-message-overlay .message-text {
-            font-size: 1rem;
+            font-size: 0.75rem;
             color: white;
             margin-top: 2px;
         }
@@ -643,12 +643,12 @@
             font-weight: 500;
         }
 
-        .quiz-option label:hover {
+        /* .quiz-option label:hover {
             border-color: var(--accent-color);
             background: var(--accent-color);
             color: white;
             transform: translateY(-2px);
-        }
+        } */
 
         .quiz-option input[type="radio"]:checked+label {
 
@@ -1031,7 +1031,7 @@
             <i class="fas fa-play fa-3x" style="color:white;"></i>
         </button>
         <div id="tapToPlayLabel" style="">
-            Tap to Play
+            {{ __('de.main_ui.tap_to_play') }}
         </div>
     </div>
     <div class="main-container" id="mainContainer">
@@ -1043,18 +1043,7 @@
                     frameborder="0"></iframe>
 
 
-                <!-- Gallery image/video overlay (shown via Pusher from admin stream-management) -->
-                <div id="galleryStreamOverlay"
-                    style="display:none; position:relative; top:0; left:0; right:0; bottom:0;  background:rgba(0,0,0,0.85); align-items:center; justify-content:center; padding:20px;">
-                    <div
-                        style="position:relative;width:100%;  height:100%; display:flex; align-items:center; justify-content:center;">
-                        <img id="galleryStreamImage" src="" alt=""
-                            style="max-width:100%; max-height:90vh; object-fit:contain; border-radius:12px; display:none;">
-                        <video id="galleryStreamVideo" src="" autoplay
-                            style="max-width:100%; max-height:90vh; border-radius:12px; display:none;"></video>
 
-                    </div>
-                </div>
             </div>
 
         </div>
@@ -1094,8 +1083,7 @@
                         <div class="quiz-options row">
                             ${quiz.options.map((option, index) =>
                             `<div class="quiz-option"> <input type="radio" id="option${option.id}" name="option"
-                                    value="${option.id}"> <label
-                                    for="option${option.id}">${option.option_text}</label>
+                                    value="${option.id}"> <label for="option${option.id}">${option.option_text}</label>
                             </div> `).join('')}
                         </div>
                     </div>
@@ -1119,11 +1107,12 @@
                             <div class="chat-input-group">
 
                                 <input type="text" class="chat-input-field" maxlength="120"
-                                    placeholder="write something..." id="chatInput">
+                                    placeholder="{{ __('de.main_ui.placeholder_message') }}" id="chatInput">
                                 <button class="send-btn-overlay" id="send-btn-overlay" onclick="sendMessage()">
                                     <i class="fas fa-paper-plane"></i>
                                 </button>
-                                <button type="button" id="heartReactionBtn" title="Send a heart">
+                                <button type="button" id="heartReactionBtn"
+                                    title="{{ __('de.main_ui.send_heart') }}">
                                     <i class="fas fa-heart"></i>
                                 </button>
                             </div>
@@ -1131,11 +1120,13 @@
 
                     </div>
                 </div>
-                <div class="tab-pane fade  " id="playerTab" role="tabpanel" aria-labelledby="playerTab-tab">
+                <div class="tab-pane fade " id="playerTab" role="tabpanel" aria-labelledby="playerTab-tab">
                     <!-- Player List -->
                     <div class="container-fluid ">
                         <div class="players-list-group-container">
-                            <h5 class="mb-3"><i class="fas fa-users me-2 text-primary"></i>Players & Scores</h5>
+                            <h5 class="mb-3"><i
+                                    class="fas fa-users me-2 text-primary"></i>{{ __('de.main_ui.players_scores') }}
+                            </h5>
                             <ul class="list-group" id="players-leaderbord">
                             </ul>
                         </div>
@@ -1143,14 +1134,14 @@
                 </div>
             </div>
         </div>
-        <nav class="navbar  mobile-nav bottom-nav bg-nav-radial-top-gradient border-top">
+        <nav class="navbar mobile-nav bottom-nav bg-nav-radial-top-gradient border-top">
             <ul
-                class="nav d-flex flex-row flex-nowrap w-100 justify-content-between align-items-center text-center px-2">
+                class="flex-row px-2 text-center nav d-flex flex-nowrap w-100 justify-content-between align-items-center">
 
                 <!-- 1) Logo -->
                 <li class="nav-item flex-fill">
                     <a href="#"
-                        class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0">
+                        class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center">
                         <img src="{{ asset('images/badabing-logo.webp') }}" alt="Logo"
                             style="height:46px;width:auto;">
                     </a>
@@ -1158,24 +1149,24 @@
 
                 <!-- 2) Chat -->
                 <li class="nav-item flex-fill" role="presentation">
-                    <a class="nav-link active d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                    <a class="px-0 py-2 nav-link active d-flex flex-column align-items-center justify-content-center"
                         id="chatTab-tab" data-bs-toggle="tab" href="#chatTab" role="tab"
                         aria-controls="chatTab" aria-selected="true">
                         <i class="fas fa-comments fs-5"></i>
-                        <small class="mt-1">Chat</small>
+                        <small class="mt-1">{{ __('de.main_ui.chat') }}</small>
                     </a>
                 </li>
 
                 <!-- 3) Players -->
                 <li class="nav-item flex-fill" role="presentation">
-                    <a class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                    <a class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
                         id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
                         aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
                         <div class="d-flex align-items-center">
                             <i class="fas fa-users fs-5 me-1"></i>
                             <span id="user-count" class="fw-semibold small">0</span>
                         </div>
-                        <small class="mt-1">Players</small>
+                        <small class="mt-1">{{ __('de.main_ui.players') }}</small>
                     </a>
                 </li>
 
@@ -1183,14 +1174,14 @@
                 <li class="nav-item flex-fill" id="register-profile-item">
                     @guest('web')
                         <a href="#"
-                            class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                            class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
                             data-bs-target="#registerModal" data-bs-toggle="modal">
                             <i class="fas fa-user-plus fs-5"></i>
-                            <small class="mt-1">Join</small>
+                            <small class="mt-1">{{ __('de.main_ui.join') }}</small>
                         </a>
                     @elseauth('web')
                         <a href="#"
-                            class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                            class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
                             data-bs-toggle="modal" data-bs-target="#userInfoModal">
                             <i class="fas fa-user fs-5"></i>
                             <small class="mt-1 text-truncate" style="max-width:70px;">
@@ -1205,6 +1196,18 @@
     </div>
 
 
+    <!-- Full-Screen Overlay Modal (not closable) -->
+    <div id="galleryOverlayModal"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.9); z-index:2000; align-items:center; justify-content:center; flex-direction:column;">
+        <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+            <img id="galleryOverlayImage" src="" alt=""
+                style="max-width:100vw; max-height:90vh; object-fit:contain; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;">
+            <video id="galleryOverlayVideo" src="" autoplay muted playsinline loop
+                style="max-width:100vw; max-height:90vh; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;"></video>
+        </div>
+    </div>
+
+
 
 
     <!-- Register Modal -->
@@ -1214,9 +1217,9 @@
             <div class="modal-content" style="border-radius: 20px;">
                 <div class="modal-header" style="border-bottom: none;">
                     <h5 class="modal-title" id="registerModalLabel">
-                        <i class="fas fa-user-plus me-2 text-warning"></i>Register to Participate
+                        <i class="fas fa-user-plus me-2 text-warning"></i>{{ __('de.registration.title') }}
                         <div>
-                            <span style="font-size: 12px"> Already have an account? Login to participate.</span>
+                            <span style="font-size: 12px">{{ __('de.registration.already_account') }}</span>
                         </div>
                     </h5>
 
@@ -1225,31 +1228,27 @@
 
                 <form id="registerForm" autocomplete="off">
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="registerUsername" class="form-label">Username</label>
+                        {{-- <div class="mb-3">
+                            <label for="registerUsername" class="form-label">{{ __('de.registration.username') }}</label>
                             <input type="text" class="form-control" id="registerUsername" name="name" required
-                                maxlength="32" placeholder="Enter username">
-                        </div>
+                                maxlength="32" placeholder="{{ __('de.registration.username_placeholder') }}">
+                        </div> --}}
                         <div class="mb-3">
-                            <label for="registerEmail" class="form-label">Email address</label>
+                            <label for="registerEmail" class="form-label">{{ __('de.registration.email') }}</label>
                             <input type="email" class="form-control" id="registerEmail" name="email" required
-                                placeholder="Enter email">
+                                placeholder="{{ __('de.registration.email_placeholder') }}">
                         </div>
-                        <div>
-                            <input type="checkbox" class="form-check-input" id="agree" required>
-                            <label class="form-check-label" for="agree">I agree to the
-
-                                <a target="_blank" href="{{ route('agb') }}"
-                                    class="text-danger text-decoration-underline">Terms &
-                                    Conditions, Consent for data
-                                    collection</a></label>
+                        <div class="gap-2 d-flex">
+                            <input type="checkbox" class="form-check-input form-control-color" id="agree"
+                                required>
+                            <label class="form-check-label" for="agree">{!! __('de.registration.terms') !!}</label>
                         </div>
                         <div id="registerError" class="text-danger small" style="display:none;"></div>
                     </div>
                     <div class="modal-footer" style="border-top: none;">
                         <button type="submit" class="btn btn-warning w-100"
                             style="background-color: #ff5f00; border: none;">
-                            <i class="fas fa-paper-plane me-2"></i>Register
+                            <i class="fas fa-paper-plane me-2"></i>{{ __('de.registration.register') }}
                         </button>
                     </div>
                 </form>
@@ -1264,29 +1263,30 @@
             <div class="modal-content" style="border-radius: 20px;">
                 <div class="modal-header" style="border-bottom: none;">
                     <h5 class="modal-title" id="userInfoModalLabel">
-                        <i class="fas fa-user me-2 text-success"></i>User Profile
+                        <i class="fas fa-user me-2 text-success"></i>{{ __('de.profile.title') }}
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body text-center">
+                <div class="text-center modal-body">
                     <div class="mb-3">
                         <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::guard('web')->user()->name ?? 'User') }}&background=ffb380&color=fff&size=96"
-                            alt="Avatar" class="rounded-circle mb-2" width="80" height="80">
+                            alt="{{ __('de.profile.avatar') }}" class="mb-2 rounded-circle" width="80"
+                            height="80">
                     </div>
-                    <h6 class="mb-1">{{ Auth::guard('web')->user()->name ?? 'Guest' }}</h6>
-                    <div class="text-muted mb-3" style="font-size: 0.95rem;">
+                    <h6 class="mb-1">{{ Auth::guard('web')->user()->name ?? __('de.profile.guest') }}</h6>
+                    <div class="mb-3 text-muted" style="font-size: 0.95rem;">
                         {{ Auth::guard('web')->user()->email ?? '' }}
                     </div>
                     <div class="mb-3">
                         <span class="badge bg-success" style="font-size: 1rem;">
                             <i class="fas fa-star me-1"></i>
-                            <span id="user-points"></span> pts
+                            <span id="user-points"></span> {{ __('de.profile.points') }}
                         </span>
                     </div>
                     <form method="POST" action="{{ route('livestream.logout', [$liveShow->id]) }}">
                         @csrf
                         <button type="submit" class="btn btn-danger w-100">
-                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            <i class="fas fa-sign-out-alt me-2"></i>{{ __('de.profile.logout') }}
                         </button>
                     </form>
                 </div>
@@ -1299,13 +1299,14 @@
         style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;max-height:100vh; overflow-y:auto;">
         <div
             style="background:#fff; border-radius:20px; padding:40px 30px; text-align:center; max-width:350px; margin:auto; margin-top: 20%; box-shadow:0 8px 32px rgba(0,0,0,0.2); ">
-            <i class="fas fa-trophy fa-3x text-warning mb-3"></i>
-            <h3 class="mb-2" style="color:#ff5f00;">Congratulations!</h3>
-            <p class="mb-3" style="font-size:1.1rem;">You are selected as a winner!</p>
-            <p class="mb-3" style="font-size:1.1rem;">Your prize money is: </p>
-            <div class="text-center " style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)" id="prizeAmount"></div>
+            <i class="mb-3 fas fa-trophy fa-3x text-warning"></i>
+            <h3 class="mb-2" style="color:#ff5f00;">{{ __('de.winner.title') }}</h3>
+            <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.selected') }}</p>
+            <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.prize') }}</p>
+            <div class="text-center mb-3" style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)" id="prizeAmount">
+            </div>
             <button class="btn btn-success" onclick="document.getElementById('winnerDialog').style.display='none';">
-                <i class="fas fa-check me-2"></i>Close
+                <i class="fas fa-check me-2"></i>{{ __('de.profile.close') }}
             </button>
         </div>
     </div>
@@ -1331,7 +1332,7 @@
         let timer = 5;
 
         let currentCountdownSeconds = 0;
-        let currentCountdownMilliseconds = 0; // total elapsed ms
+        // let currentCountdownMilliseconds = 0; // total elapsed ms
         let countdownStartTime = null; // set when timer starts
 
         let isCurrentAnswerCorrect = null;
@@ -1368,7 +1369,7 @@
         });
         // Toggle quiz mode
         function toggleQuiz(action) {
-            //scroll to top 
+            //scroll to top
             window.scrollTo(0, 0);
 
 
@@ -1392,11 +1393,19 @@
                 // showQuestionBtn.style.display = 'block';
                 // showQuestionBtn.classList.remove('active');
             }
-            //uncheck all options
-            document.querySelectorAll('input[name="option"]').forEach(option => {
-                option.checked = false;
-                option.disabled = false;
-            });
+            //uncheck all optionsmove 
+            // document.querySelectorAll('input[name="option"]').forEach(option => {
+            //     option.checked = false;
+            //     option.disabled = false;
+            // });
+            // //remove .quiz-option label focus or hover or checked state
+            // document.querySelectorAll('.quiz-option label').forEach(label => {
+            //     // Remove any classes that could represent focus or hover from the quiz option labels
+            //     label.classList.remove('focus', 'hover', 'active');
+            //     // Optionally, if you're using Bootstrap or custom styles, also remove classes like 'checked', 'selected' etc.
+            //     label.classList.remove('checked', 'selected');
+            // });
+            uncheckAndEnableOptions();
             // hideAllModals();
         }
 
@@ -1436,12 +1445,12 @@
             <div>
                 <input type="hidden" id="quizId" value="${quiz.id}">
                     <div class="quiz-question">
-                       <div class="text-center quiz-question-index me-1" style="font-size: 14px; font-weight: bold;">${quiz.index  } of ${quiz.totalQuizQuestions}.</div>
+                       <div class="text-center quiz-question-index me-1" style="font-size: 14px; font-weight: bold;">${quiz.index  } von ${quiz.totalQuizQuestions}.</div>
                        <div class="quiz-question-text">${quiz.question}</div>
                     </div>
                     <div class="quiz-options row">
                         ${quiz.options.map((option, index) =>
-                        `<div class="quiz-option col-md-12 position-relative mb-3">  <div class="option-result-container " style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}">${numberToLetter(index)}. ${option.option_text}</label>  </div> `).join('')}
+                        `<div class="mb-3 quiz-option col-md-12 position-relative">  <div class="option-result-container " style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}">${numberToLetter(index)}. ${option.option_text}</label>  </div> `).join('')}
                     </div>
              </div>
             `;
@@ -1497,7 +1506,7 @@
                         body: JSON.stringify({
                             option: option,
                             quiz_id: document.getElementById('quizId').value,
-                            seconds_to_submit: currentCountdownMilliseconds
+                            seconds_to_submit: currentCountdownSeconds
                         })
                     })
                     .then(response => response.json())
@@ -1569,6 +1578,23 @@
                 option.disabled = false;
                 option.parentElement.classList.remove('correct', 'incorrect');
             });
+            //blur all the .quiz-option label
+            document.querySelectorAll('.quiz-option label').forEach(label => {
+                label.blur();
+            });
+
+
+            const dummy = document.createElement('input');
+            dummy.style.position = 'fixed';
+            dummy.style.opacity = '0';
+            dummy.style.height = '0';
+
+            // 2. Add it to the body, focus it, then kill it
+            document.body.appendChild(dummy);
+            dummy.click();
+            dummy.focus();
+
+            dummy.remove();
         }
 
         // Chat functionality
@@ -1641,6 +1667,7 @@
             `;
             overlayChat.appendChild(messageDiv);
             overlayChat.scrollTop = overlayChat.scrollHeight;
+
         }
 
         // Allow Enter key to send message
@@ -1696,15 +1723,15 @@
             const registerButton = this.querySelector('button[type="submit"]');
             registerButton.disabled = true;
             registerButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Registering...';
-            const username = document.getElementById('registerUsername').value.trim();
+            // const username = document.getElementById('registerUsername').value.trim();
             const email = document.getElementById('registerEmail').value.trim();
             const errorDiv = document.getElementById('registerError');
             errorDiv.style.display = 'none';
             errorDiv.innerHTML = '';
 
 
-            if (!username || !email) {
-                errorDiv.textContent = 'Please fill in all fields.';
+            if (!email) {
+                errorDiv.textContent = 'Please add your email.';
                 errorDiv.style.display = 'block';
                 return;
             }
@@ -1716,18 +1743,20 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     body: JSON.stringify({
-                        name: username,
+                        // name: username,
                         email: email
                     })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
+                        const username = data.user.user_name;
+                        console.log('username:', username);
 
                         var modal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
                         modal.hide();
                         // Optionally: update UI to reflect logged-in user
-                        addOverlayMessage('@' + username, 'has joined the chat!');
+                        addOverlayMessage('@' + username, ' {{ __('de.chat.joined') }}');
                         replaceRegisterButtonWithUsername(username);
 
                         isLoggedIn = true;
@@ -1786,7 +1815,7 @@
             const registerButtonDiv = document.querySelector('#register-profile-item');
             registerButtonDiv.innerHTML = `
                   <a href="#"
-                        class="nav-link d-flex flex-column align-items-center justify-content-center py-2 px-0"
+                        class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
                         data-bs-toggle="modal" data-bs-target="#userInfoModal">
                         <i class="fas fa-user fs-5"></i>
                         <small class="mt-1 text-truncate" style="max-width:70px;">
@@ -1861,12 +1890,13 @@
             $(".option-result-container").css("display", "none");
 
             console.log('Showing quiz question:', quiz, 'with timer:', timer);
+            toggleQuiz("hide");
             appendQuizQuestion(quiz);
-
             startTimer(timer, evaluateAnswerWithTimeToSubmit);
             quizMode = false;
-            toggleQuiz("show");
-
+            setTimeout(() => {
+                toggleQuiz("show");
+            }, 100);
         }
 
         // showQuestionAndSetTimer(quizDummy, 100);
@@ -1910,11 +1940,11 @@
                 currentCountdownSeconds = duration - timeLeft;
 
 
-                const remainingMs = Math.max(0, duration * 1000 - (Date.now() - countdownStartTime));
+                // const remainingMs = Math.max(0, duration * 1000 - (Date.now() - countdownStartTime));
 
-                currentCountdownMilliseconds = Math.floor(remainingMs);
-                currentCountdownSeconds = Math.floor(remainingMs / 1000);
-                console.log('currentCountdownMilliseconds:', currentCountdownMilliseconds, 'currentCountdownSeconds:',
+                // currentCountdownMilliseconds = Math.floor(remainingMs);
+                // currentCountdownSeconds = Math.floor(remainingMs / 1000);
+                console.log('currentCountdownSeconds:',
                     currentCountdownSeconds);
             }
 
@@ -1992,15 +2022,15 @@
 
             if (type === 'success') {
                 alertClass = 'text-success';
-                message = `<i class="fas fa-check-circle me-2"></i>Hurray!<br>Correct Answer.`;
+                message = `<i class="fas fa-check-circle me-2"></i>Hurray!<br>{{ __('de.quiz.correct') }}`;
             } else if (type === 'fail') {
                 alertClass = 'text-danger';
-                message = `<i class="fas fa-times-circle me-2"></i>Oops!<br>Wrong Answer`;
+                message = `<i class="fas fa-times-circle me-2"></i>Oops!<br>{{ __('de.quiz.wrong') }}`;
                 // updateEliminatedStatus();
 
             } else {
                 alertClass = 'text-warning';
-                message = `<i class="fas fa-exclamation-circle me-2"></i> Wrong Answer!`;
+                message = `<i class="fas fa-exclamation-circle me-2"></i> {{ __('de.quiz.wrong') }}`;
                 // updateEliminatedStatus();
 
             }
@@ -2147,10 +2177,10 @@
                 if (data.userId == userId) {
                     console.log('User block from live show event received:', data);
                     if (data.isBlocked) {
-                        alert('You have been blocked from live chat participation.');
+                        alert('Du wurdest für die Chat Teilnahme blockiert.');
                         disableMessageInputAndSendButton();
                     } else {
-                        alert('You have been unblocked from live chat participation.');
+                        alert('Sie wurden aus der Live-Chat-Teilnahme entblockt.');
                         enableMessageInputAndSendButton();
                     }
                 }
@@ -2178,8 +2208,8 @@
             console.log('Update Live Show:', data);
 
             if (data.status && data.status != 'live') {
-                emptyTheBodyWithEndShow('The live show status has changed to "' + data.status +
-                    '". You will be redirected shortly.');
+                emptyTheBodyWithEndShow('Der Status der Live-Show hat sich geändert zu "' + data.status +
+                    '". Sie werden in Kürze weitergeleitet.');
             } else {
                 //reload the page to reflect the changes
                 location.reload();
@@ -2188,7 +2218,7 @@
         });
 
 
-        function emptyTheBodyWithEndShow(messageText = 'The live show has ended. Thank you for participating!') {
+        function emptyTheBodyWithEndShow(messageText = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme!') {
             document.body.innerHTML = '';
             document.body.style.backgroundColor = '#000';
             const endDiv = document.createElement('div');
@@ -2245,7 +2275,7 @@
 
         @if ($liveShow->status != 'live')
             emptyTheBodyWithEndShow(
-                'This live show is  {{ $liveShow->status }} {{ $liveShow->status == 'scheduled' ? 'at ' . \Carbon\Carbon::parse($liveShow->scheduled_at)->format('d M Y, H:i') : '' }} .  '
+                'Die Game-Show „Badabing“ findet am  {{ $liveShow->status == 'scheduled' ? ' ' . \Carbon\Carbon::parse($liveShow->scheduled_at)->format('d F Y, H:i') . 'Uhr statt.' : '' }} .  '
             );
         @endif
 
@@ -2333,11 +2363,11 @@
                         }
 
                         userDiv.innerHTML = `
-                       
+
                                     <div >
                                 <span style="margin-right: 20px;">${index + 1}</span>
                                         <strong>${user.name} ${user.id == userId ? '(You)' : ''}</strong>
-                                    
+
                                         <span class="ms-2">${user.is_winner ? '<i class="fas fa-trophy text-warning ms-2" title="Winner"></i>' : ''}</span>
                                     </div>
                                     <div>
@@ -2468,61 +2498,7 @@
             }
         });
 
-        /* Gallery image/video overlay */
-        var channelGalleryImage = pusher.subscribe('live-show-gallery-image.{{ $liveShow->id }}');
-        channelGalleryImage.bind('pusher:subscription_succeeded', function() {
-            console.log('Gallery image channel subscribed successfully!');
-        });
-        channelGalleryImage.bind('ShowGalleryImageEvent', function(data) {
-            //hide iframe
-            var iframe = document.getElementById('live-broadcast-iframe');
-            if (iframe) iframe.style.display = 'none';
 
-
-            var overlay = document.getElementById('galleryStreamOverlay');
-            var imgEl = document.getElementById('galleryStreamImage');
-            var videoEl = document.getElementById('galleryStreamVideo');
-            if (!overlay || !imgEl || !videoEl) return;
-            imgEl.style.display = 'none';
-            imgEl.removeAttribute('src');
-            videoEl.style.display = 'none';
-            videoEl.removeAttribute('src');
-            videoEl.pause();
-            if (data.type === 'video') {
-                videoEl.src = data.url;
-                videoEl.style.display = 'block';
-                videoEl.play().catch(function() {});
-            } else {
-                imgEl.src = data.url;
-                imgEl.style.display = 'block';
-            }
-            overlay.style.display = 'flex';
-        });
-
-
-        channelGalleryImage.bind('HideGalleryImageEvent', function() {
-            hideGalleryStreamOverlay();
-        });
-
-        function hideGalleryStreamOverlay() {
-            var overlay = document.getElementById('galleryStreamOverlay');
-            var imgEl = document.getElementById('galleryStreamImage');
-            var videoEl = document.getElementById('galleryStreamVideo');
-            if (overlay) overlay.style.display = 'none';
-            if (imgEl) {
-                imgEl.removeAttribute('src');
-                imgEl.style.display = 'none';
-            }
-            if (videoEl) {
-                videoEl.pause();
-                videoEl.removeAttribute('src');
-                videoEl.style.display = 'none';
-            }
-
-            //show iframe
-            var iframe = document.getElementById('live-broadcast-iframe');
-            if (iframe) iframe.style.display = 'block';
-        }
 
         /* Heart reactions (TikTok/Instagram style) */
         function spawnHeartReaction(userName) {
@@ -2585,6 +2561,73 @@
             ];
             return letters[index];
         }
+    </script>
+
+    <script>
+        /* Gallery image/video overlay */
+        var channelGalleryImage = pusher.subscribe('live-show-gallery-image.{{ $liveShow->id }}');
+        channelGalleryImage.bind('pusher:subscription_succeeded', function() {
+            console.log('Gallery image channel subscribed successfully!');
+        });
+        channelGalleryImage.bind('ShowGalleryImageEvent', function(data) {
+
+            showGalleryOverlay({
+                type: data.type,
+                src: data.url
+            });
+        });
+
+
+        channelGalleryImage.bind('HideGalleryImageEvent', function() {
+            hideGalleryOverlay();
+        });
+
+
+        // Show the full-screen gallery overlay (not closable)
+        function showGalleryOverlay({
+            type,
+            src
+        }) {
+            const overlay = document.getElementById('galleryOverlayModal');
+            const img = document.getElementById('galleryOverlayImage');
+            const vid = document.getElementById('galleryOverlayVideo');
+            img.style.display = "none";
+            vid.style.display = "none";
+            if (type === "image") {
+                img.src = src;
+                img.style.display = "block";
+                vid.pause();
+                vid.src = "";
+            } else if (type === "video") {
+                vid.src = src;
+                vid.currentTime = 0;
+                vid.load();
+                vid.play();
+                vid.style.display = "block";
+                img.src = "";
+
+                //unmute video
+                vid.muted = false;
+                //click the video
+                vid.click();
+            }
+            overlay.style.display = "flex";
+            // not closable: do not add event to hide overlay on click/esc etc.
+        }
+
+        // Hide the overlay programmatically if needed (not exposed to users)
+        function hideGalleryOverlay() {
+            const overlay = document.getElementById('galleryOverlayModal');
+            const img = document.getElementById('galleryOverlayImage');
+            const vid = document.getElementById('galleryOverlayVideo');
+            overlay.style.display = "none";
+            img.src = "";
+            vid.pause();
+            vid.src = "";
+        }
+
+        // Example usage: showGalleryOverlay({type: "image", src: "/path/to/img.jpg"})
+        // Example usage: showGalleryOverlay({type: "video", src: "/path/to/video.mp4"})
     </script>
 
 

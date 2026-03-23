@@ -93,12 +93,13 @@
                     <i class="fas fa-trophy me-2"></i>Winners & Prize Split
                 </div>
                 <div class="card-body">
+                    @php $maxWinnerSlots = 50; @endphp
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <label class="form-label required-field">Max winners per show</label>
-                            <input type="number" name="max_winners" id="maxWinners" class="form-control" min="1"
-                                max="10" required value="{{ old('max_winners', 3) }}">
-                            <div class="form-text">Number of top winners (1–10) who share the prize</div>
+                            <input type="text" name="max_winners" id="maxWinners" class="form-control" min="1"
+                                max="{{ $maxWinnerSlots }}" required value="{{ old('max_winners', 3) }}">
+                            <div class="form-text">Number of top winners (1–{{ $maxWinnerSlots }}) who share the prize</div>
                         </div>
                     </div>
                     @error('winner_prizes')
@@ -115,7 +116,7 @@
                                 </tr>
                             </thead>
                             <tbody id="winnerPrizesBody">
-                                @for ($r = 1; $r <= 10; $r++)
+                                @for ($r = 1; $r <= $maxWinnerSlots; $r++)
                                     <tr class="winner-percent-row" data-rank="{{ $r }}"
                                         style="{{ $r > 3 ? 'display:none' : '' }}">
                                         <td class="text-white">
@@ -142,8 +143,9 @@
                         var rows = document.querySelectorAll('.winner-percent-row');
 
                         function update() {
+                            var maxRank = rows.length;
                             var n = parseInt(maxWinnersEl.value, 10) || 1;
-                            n = Math.min(10, Math.max(1, n));
+                            n = Math.max(1, Math.min(maxRank, n));
                             if (labelEl) labelEl.textContent = n;
                             rows.forEach(function(tr) {
                                 var rank = parseInt(tr.getAttribute('data-rank'), 10);

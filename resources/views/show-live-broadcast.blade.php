@@ -45,10 +45,15 @@
             display: none !important;
         }
 
-        .IoC1lj0UQIKqG1pNh5vE, #zego_left_notify_wrapper, #zego_right_notify_wrapper,#ZegoRoomMobileLeaveButton,#ZegoRoomHeader,#ZegoRoomCssMobileMore,#ZegoRoomFooter {
+        .IoC1lj0UQIKqG1pNh5vE,
+        #zego_left_notify_wrapper,
+        #zego_right_notify_wrapper,
+        #ZegoRoomMobileLeaveButton,
+        #ZegoRoomHeader,
+        #ZegoRoomCssMobileMore,
+        #ZegoRoomFooter {
             display: none !important;
         }
-
     </style>
 </head>
 
@@ -95,10 +100,6 @@
         // You can assign different roles based on url parameters.
         let role = ZegoUIKitPrebuilt.Audience;
 
-
-
-
-
         config = {
             showTextChat: false,
             showUserList: false,
@@ -117,6 +118,7 @@
             showTextChat: false, // Disables the chat/message input
             showInRoomMessageButton: false, // Hides the chat icon
             showUserList: false, // Hides the viewer count/list
+            language: 'German'
         }
 
         const zp = ZegoUIKitPrebuilt.create(TOKEN);
@@ -156,6 +158,22 @@
             showAudioVideoSettingsButton: false,
             showScreenSharingButton: false,
             showLeaveRoomConfirmDialog: false, // Exit immediately without popup
+            translateLanguage: 'German',
+            // language: 'German',
+           
+            innerText: {
+                roomLiveNotStarted: "The broadcast hasn't started yet.", // Fixes your specific issue
+                roomEmpty: "The host has left the room.",
+                userJoin: "{userName} joined the stream",
+                userLeave: "{userName} left",
+                send: "Send",
+                inputMessagePlaceholder: "Type a message...",
+                networkNotGood: "Poor network connection",
+                networkDisconnected: "Disconnected. Reconnecting...",
+                // Add more keys as needed from the list below
+            },
+
+
         });
     }
 

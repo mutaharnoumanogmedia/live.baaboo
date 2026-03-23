@@ -62,11 +62,48 @@
                                     <td class="content-cell"
                                         style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative; max-width: 100vw; padding: 32px;">
                                         @yield('content')
+
+                                        <div>
+                                            <p
+                                                style="margin-bottom: 12px; color: #3d4852; font-size: 15px; font-family: inherit; font-weight: 500;">
+                                                Folge uns auch auf Social Media
+                                            </p>
+
+                                            <a href="https://www.facebook.com/profile.php?id=61585035375167"
+                                                target="_blank" rel="noopener" title="Facebook"
+                                                style="display: inline-block; margin-right: 10px;">
+                                                <img src="{{ asset('images/Facebook.png') }}" alt="Facebook"
+                                                    width="32" height="32" style="display: block; border: none;">
+                                            </a>
+
+                                            <a href="https://www.instagram.com/badabing.show/" target="_blank"
+                                                rel="noopener" title="Instagram" style="display: inline-block; margin-right: 10px;">
+                                                <img src="{{ asset('images/Instagram.png') }}" alt="Instagram"
+                                                    width="32" height="32" style="display: block; border: none;">
+                                            </a>
+
+                                            <a href="https://www.tiktok.com/@badabingshow?_r=1&_t=ZG-94ZcmY35Fo1"
+                                                target="_blank" rel="noopener" title="TikTok"
+                                                style="display: inline-block; margin-right: 10px;">
+                                                <img src="{{ asset('images/Tiktok.png') }}" alt="TikTok"
+                                                    width="32" height="32" style="display: block; border: none;">
+                                            </a>
+
+                                            <a href="https://www.youtube.com/channel/UCgi9eIC6WESLgETJsXFPB1g"
+                                                target="_blank" rel="noopener" title="YouTube"
+                                                style="display: inline-block; margin-right: 10px;">
+                                                <img src="{{ asset('images/YouTube.png') }}" alt="YouTube"
+                                                    width="32" height="32" style="display: block; border: none;">
+                                            </a>
+
+                                        </div>
                                     </td>
                                 </tr>
                             </table>
                         </td>
+
                     </tr>
+
 
                     <tr>
                         <td
@@ -91,6 +128,7 @@
                     </tr>
                 </table>
             </td>
+
         </tr>
     </table>
 </body>

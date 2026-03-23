@@ -13,6 +13,7 @@ use App\Models\UserLiveShow;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use App\Models\Viewer;
+use App\Services\AffiliateAPIService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -40,21 +41,6 @@ class GamePlayController extends Controller
             // if user already registered , login it and update pivot table
             $existingUser = \App\Models\User::where('email', $request->email)->first();
             if ($existingUser) {
-
-                // match name also
-                // if ($existingUser->name !== $request->name) {
-                //     return response()->json(['success' => false, 'messages' => ['The email is already registered with a different username. Please use the correct username or register with a different email.'], 'authStatus' => Auth::guard('web')->check()], 422);
-                // }
-
-                // update username if different
-                if ($existingUser->user_name !== $request->name) {
-                    $existingUser->user_name = $request->name;
-                    //set the name same as user_name
-                    $existingUser->name = $request->name;
-
-                    $existingUser->save();
-                }
-
                 // update pivot table
                 $liveShow = LiveShow::live()->find($liveShowId);
 
@@ -69,10 +55,8 @@ class GamePlayController extends Controller
                             [
                                 $existingUser->id => [
                                     'is_online' => 1,
-
                                     'created_at' => now(),
                                     'updated_at' => now(),
-
                                     'status' => 'registered',
                                     'last_active_at' => now(),
                                 ],
@@ -98,10 +82,10 @@ class GamePlayController extends Controller
             // end of existing user login
 
             $validator = Validator::make($request->all(), [
-                'name' => 'required|alpha_num|string|max:255|unique:users,user_name',
+                // 'name' => 'required|alpha_num|string|max:255|unique:users,user_name',
                 'email' => 'required|email|max:255|unique:users,email',
             ], [
-                'name.unique' => 'The username has already been taken. Please choose a different one.',
+                // 'name.unique' => 'The username has already been taken. Please choose a different one.',
                 'email.unique' => 'The email has already been registered. Please use a different email.',
             ]);
 
@@ -112,7 +96,38 @@ class GamePlayController extends Controller
             $validated = $validator->validated();
             // add rand password
             $validated['password'] = bcrypt(\Str::random(8));
-            $validated['user_name'] = $validated['name'];
+
+            $userName = explode('@', $validated['email'])[0];
+
+            $service = new AffiliateAPIService;
+            $userEmailStatus = $service->isUserEmailExistingInAffiliate($validated['email']);
+            if ($userEmailStatus) {
+                // If email exists and affiliated, set the username from response
+                if (
+                    isset($userEmailStatus['status']) && $userEmailStatus['status'] === true &&
+                    isset($userEmailStatus['affiliated']) && $userEmailStatus['affiliated'] === true &&
+                    isset($userEmailStatus['user']['username'])
+                ) {
+                    $userName = $userEmailStatus['user']['username'];
+                    // check if user name is already taken, if yes, then change it for the other one
+                    $userWithUserName = User::where('user_name', $userName)->first();
+                    if ($userWithUserName) {
+                        // change for this user
+                        $userWithUserName->user_name = $userName.'_'.rand(1000, 9999);
+                        $userWithUserName->save();
+                    }
+                }
+            } else {
+                // first part of email
+                $userName = explode('@', $validated['email'])[0];
+                // check if user name is already taken, if yes, then change it for this one by adding a random number
+                $userWithUserName = User::where('user_name', $userName)->first();
+                if ($userWithUserName) {
+                    $userName = $userName.'_'.rand(1000, 9999);
+                }
+            }
+            $validated['name'] = $userName;
+            $validated['user_name'] = $userName;
 
             $liveShow = LiveShow::live()->find($liveShowId);
             if (! $liveShow) {
@@ -121,16 +136,15 @@ class GamePlayController extends Controller
 
             // Create the user
             $user = User::create($validated);
-            
-            
+
             $user->save();
             $user->assignRole('user');
 
             // Set user's own referral_link so they can share it (slug + id for uniqueness)
             if (empty($user->referral_link)) {
                 // $latestLiveShow = LiveShow::live()->orderBy('id', 'desc')->first();
-                $user->forceFill(['referral_link' => $user->referralLink(),'magic_link' => $user->magicLink(),
-                
+                $user->forceFill(['referral_link' => $user->referralLink(), 'magic_link' => $user->magicLink(),
+
                 ])->save();
             }
 

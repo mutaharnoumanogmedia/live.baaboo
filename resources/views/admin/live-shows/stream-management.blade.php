@@ -349,7 +349,8 @@
                                                             <div class="col-12 text-muted small"
                                                                 id="gallery-available-empty">No other media in gallery.
                                                                 <a href="{{ route('admin.media-gallery.create') }}"
-                                                                    target="_blank">Upload</a></div>
+                                                                    target="_blank">Upload</a>
+                                                            </div>
                                                         @endif
                                                     </div>
                                                 </div>
@@ -945,6 +946,7 @@
                                 id: player.id,
                                 is_online: player.is_online,
                                 is_winner: player.is_winner,
+                                prize_won: player.prize_won,
                                 status: player.status,
                                 score: player.score,
                                 is_blocked: player.is_blocked
@@ -979,6 +981,10 @@
                                 ${player.score !== null ? ` ${player.score}` : ''}
                                 </span>
                             ${player.is_winner ? '<i class="bi bi-trophy-fill text-warning"></i>' : ''}
+                            <div class='text-white'>
+                                ${player.is_winner &&player.prize_won ? `Prize:<br> <span class='badge bg-primary'> ${player.prize_won} </span>` : ''}
+                                </div>
+
                         </div>
 
                         <div>
@@ -1111,7 +1117,9 @@
             channel.bind('LiveShowOnlineUsersEvent', function(data) {
                 console.log('Active Users:', data.activeUsers);
 
-                appendPlayerList(data.activeUsers);
+                fetchActivePlayers().then(activePlayers => {
+                    appendPlayerList(activePlayers);
+                });
                 // You can also update DOM here:
                 // document.getElementById('onlineUsers').innerHTML = JSON.stringify(data.activeUsers);
             });
