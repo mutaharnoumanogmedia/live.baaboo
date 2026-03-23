@@ -145,7 +145,7 @@ class HomeController extends Controller
             $leadGenerationPayload = [
                 'name' => $user->name,
                 'email' => $user->email,
-                'partner_username' => User::where('id', $user->referred_by)->first()->user_name ?? null,
+                'partner_username' => User::where('id', $user->referred_by)->where("is_affiliate", 1)->first()->user_name ?? null,
                 'magic_link' => $user->magic_link,
                 'referral_link' => $user->referral_link,
             ];
@@ -184,7 +184,7 @@ class HomeController extends Controller
         $liveShow->users()->syncWithoutDetaching([
             $user->id => [
                 'is_online' => 1,
-                
+
                 'status' => 'registered',
                 'last_active_at' => now(),
             ],
