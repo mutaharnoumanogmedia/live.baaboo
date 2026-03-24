@@ -389,8 +389,12 @@
 
                             </li>
                             <li class="nav-item">
-                                <a href="#live-show-preview" class="nav-link py-3 border-0 border-bottom fw-bold"
+                                <a href="#live-show-details" class="nav-link py-3 border-0 border-bottom fw-bold"
                                     data-bs-toggle="tab">Live Show Details</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#live-show-preview" class="nav-link py-3 border-0 border-bottom fw-bold"
+                                    data-bs-toggle="tab">Preview</a>
                             </li>
 
                         </ul>
@@ -422,7 +426,7 @@
                                 </div>
                             </div>
 
-                            <div class="tab-pane fade" id="live-show-preview">
+                            <div class="tab-pane fade" id="live-show-details">
                                 <div class="p-2">
                                     <table class="table table-success table-bordered">
                                         <tbody>
@@ -500,6 +504,14 @@
                                             </tr>
                                         </tbody>
                                     </table>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="live-show-preview">
+                                <div class="p-2">
+                                    <iframe src="{{ url('live-show-play/' . $liveShow->id) }}?preview=true"
+                                        style="min-width: 100%; min-height: 844px; max-width: 390px; max-height: 844px; pointer-events: none; border-radius: 30px; border: 1px solid #ccc;"
+                                        allowfullscreen="true" allow="autoplay; encrypted-media; picture-in-picture"
+                                        frameborder="0"></iframe>
                                 </div>
                             </div>
 

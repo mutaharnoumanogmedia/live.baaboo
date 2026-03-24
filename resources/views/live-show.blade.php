@@ -2636,6 +2636,12 @@
 
         // Example usage: showGalleryOverlay({type: "image", src: "/path/to/img.jpg"})
         // Example usage: showGalleryOverlay({type: "video", src: "/path/to/video.mp4"})
+
+
+        //if request has ?preview=true, then don't show playButtonOverlay
+        if (window.location.search.includes('preview=true')) {
+            document.getElementById('playButtonOverlay').style.display = 'none';
+        }
     </script>
 
 
