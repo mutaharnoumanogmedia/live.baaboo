@@ -331,7 +331,7 @@
             }
         }
 
-        .user-count {
+        #user-count {
             position: relative;
             background: rgba(0, 0, 0, 0.6);
             color: white;
@@ -1704,13 +1704,14 @@
         }
 
 
-        updateViewerCount();
+        // updateViewerCount();
 
 
         @if ($liveShow->status == 'live')
             setInterval(
                 function() {
-                    updateViewerCount();
+                    updatePlayersLeaderboard();
+
                 }, 10000);
         @endif
 
@@ -2336,16 +2337,14 @@
             fetch('{{ url('live-show/' . $liveShow->id . '/get-live-show-users-with-scores') }}')
                 .then(response => response.json())
                 .then(data => {
-
-
                     const users = data.users;
-                    // console.log('Players with scores:', users);
+                    const totalUsers = data.totalUsers;
+                    console.log('Players with scores:', users, 'totalUsers:', totalUsers);
 
                     const playersListContainer = document.getElementById('players-leaderbord');
                     playersListContainer.innerHTML = '';
 
                     users.forEach((user, index) => {
-
                         let bgColor = '';
                         switch (index) {
                             case 0:
@@ -2383,6 +2382,8 @@
                                 `;
                         playersListContainer.appendChild(userDiv);
                     });
+
+                    document.getElementById('user-count').innerHTML = totalUsers.toLocaleString();
                 })
                 .catch(error => console.error('Error fetching players with scores:', error));
 
