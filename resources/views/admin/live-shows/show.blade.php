@@ -85,7 +85,7 @@
             <div class="card-body p-0">
                 @if ($liveShow->users->count())
                     <div class="table-responsive">
-                        <table class="table table-hover table-dark table-borderless mb-0">
+                        <table class="table table-hover table-dark table-borderless mb-0 data-table">
                             <thead class="">
                                 <tr>
                                     <th>#</th>

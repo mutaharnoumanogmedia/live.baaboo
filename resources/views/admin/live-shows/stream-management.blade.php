@@ -806,6 +806,7 @@
                 return fetch(`{{ url('api/live-show') }}/{{ $liveShow->id }}/get-live-show-messages`)
                     .then(response => response.json())
                     .then(data => {
+                        console.log('Chat messages:', data);
                         // Assuming data is an array of messages
                         return data;
                     })
@@ -861,18 +862,20 @@
             }
 
             function appendSingleMessage(message) {
-                const alertBg = ['alert-primary', 'alert-secondary', 'alert-success', 'alert-danger', 'alert-warning',
-                    'alert-info', 'alert-light', 'alert-dark'
-                ];
-                const chatContainer = document.querySelector('#live-chat-messages');
-                let bgClass = alertBg[Math.floor(Math.random() * alertBg.length)];
-                const messageDiv =
-                    ` <div class="message alert ${bgClass} d-flex justify-content-between">
+                if (message.user !== null) {
+                    const alertBg = ['alert-primary', 'alert-secondary', 'alert-success', 'alert-danger', 'alert-warning',
+                        'alert-info', 'alert-light', 'alert-dark'
+                    ];
+                    const chatContainer = document.querySelector('#live-chat-messages');
+                    let bgClass = alertBg[Math.floor(Math.random() * alertBg.length)];
+                    const messageDiv =
+                        ` <div class="message alert ${bgClass} d-flex justify-content-between">
                                 <div><strong>${message.user.name}:</strong> ${message.message}</div>
                                    
                             </div>`;
 
-                chatContainer.insertAdjacentHTML('beforeend', messageDiv);
+                    chatContainer.insertAdjacentHTML('beforeend', messageDiv);
+                }
             }
 
             function toggleBlockStatusForPlayer(userId, action) {
@@ -906,11 +909,11 @@
                     });
             }
             //every 20 seconds execute fetchActivePlayers and appendPlayerList
-            setInterval(() => {
-                fetchActivePlayers().then(data => {
-                    appendPlayerList(data);
-                });
-            }, 20000);
+            // setInterval(() => {
+            //     fetchActivePlayers().then(data => {
+            //         appendPlayerList(data);
+            //     });
+            // }, 20000);
 
             //onlick #fetchPlayersButton execute fetchActivePlayers and appendPlayerList
             document.getElementById('fetchPlayersButton').addEventListener('click', function() {
@@ -960,7 +963,7 @@
                     .then(data => {
                         // Assuming data is an array of player names
                         console.log('Active Players Data:', data);
-                        data = data.users.map(player => {
+                        users = data.users.map(player => {
                             return {
                                 name: player.name,
                                 id: player.id,
@@ -973,7 +976,7 @@
                             }
                         });
                         return {
-                            users: data,
+                            users: users,
                             totalUsers: data.totalUsers
                         };
                     })
@@ -984,6 +987,7 @@
             }
 
             function appendPlayerList(data) {
+                console.log('Appending player list:', data);
                 const activePlayersList = document.getElementById('activePlayersList');
                 activePlayersList.innerHTML = ''; // Clear existing list
                 if (data.totalUsers === 0) {
@@ -991,12 +995,14 @@
                     return;
                 }
 
-                data.users.forEach(player => {
+                data.users.forEach((player, index) => {
                     const li = `<li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
-                        <div>
+                       
+                        <div class='text-white'>
+                            ${index + 1}.
                             <strong class='${player.status != 'eliminated' ? 'text-white' : 'text-secondary'}'>${player.name}</strong>
                             <span class="ms-2 ${player.is_online == 1 ? 'text-success' : 'text-secondary'}">
-                           <i class="bi bi-circle-fill" style="font-size: 0.75rem;"></i>
+                           <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
                             </span>
                             <span class='ms-2 text-white'>
                                 ${player.score !== null ? ` ${player.score}` : ''}

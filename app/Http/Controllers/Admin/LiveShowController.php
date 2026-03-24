@@ -487,7 +487,7 @@ class LiveShowController extends Controller
         $liveShow = LiveShow::findOrFail($id);
 
         $skip = request()->get('skip', 0);
-        $take = request()->get('take', 500);
+        $take = request()->get('take', 100);
 
         $totalUsers = $liveShow->users()->count();
 
