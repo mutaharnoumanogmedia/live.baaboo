@@ -394,9 +394,13 @@
                             </li>
                             <li class="nav-item">
                                 <a href="#live-show-preview" class="nav-link py-3 border-0 border-bottom fw-bold"
-                                    data-bs-toggle="tab">Preview</a>
+                                    data-bs-toggle="tab">Preview
+                                    <button class="btn btn-sm btn-primary ms-2" id="previewRefreshButton"
+                                        onclick="refreshPreview()">
+                                        <i class="fas fa-refresh"></i>
+                                    </button>
+                                </a>
                             </li>
-
                         </ul>
                     </div>
                     <div class="card-body p-0">
@@ -509,6 +513,7 @@
                             <div class="tab-pane fade" id="live-show-preview">
                                 <div class="p-2">
                                     <iframe src="{{ url('live-show-play/' . $liveShow->id) }}?preview=true"
+                                        class="live-show-preview-iframe"
                                         style="min-width: 100%; min-height: 844px; max-width: 390px; max-height: 844px; pointer-events: none; border-radius: 30px; border: 1px solid #ccc;"
                                         allowfullscreen="true" allow="autoplay; encrypted-media; picture-in-picture"
                                         frameborder="0"></iframe>
@@ -1403,6 +1408,18 @@
                 }).catch(error => {
                     console.error('Error sending announcement:', error);
                 });
+            }
+
+
+
+            function refreshPreview() {
+                const iframe = document.querySelector('.live-show-preview-iframe');
+                iframe.src = '{{ url('live-show-play/' . $liveShow->id) }}?preview=true';
+                iframe.style.display = 'block';
+                iframe.style.opacity = '0';
+                setTimeout(() => {
+                    iframe.style.opacity = '1';
+                }, 100);
             }
         </script>
     @endpush
