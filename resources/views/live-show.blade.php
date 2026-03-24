@@ -1686,25 +1686,25 @@
 
 
 
-        // Update viewer count periodically
-        function updateViewerCount() {
-            //console.log('Updating viewer count...');
+        // // Update viewer count periodically
+        // function updateViewerCount() {
+        //     //console.log('Updating viewer count...');
 
-            const viewerElement = document.querySelector('#user-count');
-            fetch('{{ url('api/live-show/' . $liveShow->id . '/get-live-show-users') }}')
-                .then(response => response.json())
-                .then(data => {
-                    const newCount = data.length;
-                    viewerElement.innerHTML =
-                        `${newCount.toLocaleString()} `;
-                })
-                .catch(() => {
-                    // Optionally handle error or fallback
-                });
-        }
+        //     const viewerElement = document.querySelector('#user-count');
+        //     fetch('{{ url('api/live-show/' . $liveShow->id . '/get-live-show-users') }}')
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             const newCount = data.length;
+        //             viewerElement.innerHTML =
+        //                 `${newCount.toLocaleString()} `;
+        //         })
+        //         .catch(() => {
+        //             // Optionally handle error or fallback
+        //         });
+        // }
 
 
-        // updateViewerCount();
+        // // updateViewerCount();
 
 
         @if ($liveShow->status == 'live')
@@ -2383,7 +2383,7 @@
                         playersListContainer.appendChild(userDiv);
                     });
 
-                    document.getElementById('user-count').innerHTML = totalUsers.toLocaleString();
+                    document.getElementById('user-count').innerHTML = totalUsers;
                 })
                 .catch(error => console.error('Error fetching players with scores:', error));
 
