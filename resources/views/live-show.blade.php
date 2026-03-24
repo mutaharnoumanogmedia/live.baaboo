@@ -1202,7 +1202,7 @@
         <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
             <img id="galleryOverlayImage" src="" alt=""
                 style="max-width:100vw; max-height:90vh; object-fit:contain; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;">
-            <video id="galleryOverlayVideo" src="" autoplay muted playsinline loop
+            <video id="galleryOverlayVideo" src="" autoplay muted playsinline
                 style="max-width:100vw; max-height:90vh; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;"></video>
         </div>
     </div>
@@ -2572,58 +2572,91 @@
     </script>
 
     <script>
-        /* Gallery image/video overlay */
-        var channelGalleryImage = pusher.subscribe('live-show-gallery-image.{{ $liveShow->id }}');
-        channelGalleryImage.bind('pusher:subscription_succeeded', function() {
-            console.log('Gallery image channel subscribed successfully!');
-        });
-        channelGalleryImage.bind('ShowGalleryImageEvent', function(data) {
+        /* Gallery image/video overlay (Pusher + DB stream visibility via initial hydration) */
+        const galleryStreamInitial = @json($galleryStreamInitial ?? ['showing' => false, 'state' => null]);
 
-            showGalleryOverlay({
-                type: data.type,
-                src: data.url
-            });
-        });
+        function galleryPlaybackOffsetSeconds(playbackStartedAtIso, durationSeconds) {
+            if (!playbackStartedAtIso) {
+                return 0;
+            }
+            const startMs = new Date(playbackStartedAtIso).getTime();
+            if (Number.isNaN(startMs)) {
+                return 0;
+            }
+            let elapsed = (Date.now() - startMs) / 1000;
+            if (elapsed < 0) {
+                elapsed = 0;
+            }
+            if (durationSeconds != null && durationSeconds > 0) {
+                elapsed = Math.min(elapsed, durationSeconds);
+            }
+            return elapsed;
+        }
 
+        /**
+         * @param {object} opts
+         * @param {string} opts.type — "image" | "video" (from Pusher) or use opts.media_type from API/state
+         * @param {string} opts.src — media URL
+         * @param {string|null} [opts.playback_started_at] — ISO8601, video sync (late joiners / restarts)
+         * @param {number|null} [opts.video_duration_seconds] — clamp seek
+         */
+        function showGalleryOverlay(opts) {
+            const type = opts.type || opts.media_type;
+            const src = opts.src || opts.url;
+            const playbackAt = opts.playback_started_at ?? null;
+            const durationSec = opts.video_duration_seconds != null ? Number(opts.video_duration_seconds) : null;
 
-        channelGalleryImage.bind('HideGalleryImageEvent', function() {
-            hideGalleryOverlay();
-        });
-
-
-        // Show the full-screen gallery overlay (not closable)
-        function showGalleryOverlay({
-            type,
-            src
-        }) {
             const overlay = document.getElementById('galleryOverlayModal');
             const img = document.getElementById('galleryOverlayImage');
             const vid = document.getElementById('galleryOverlayVideo');
             img.style.display = "none";
             vid.style.display = "none";
+
             if (type === "image") {
                 img.src = src;
                 img.style.display = "block";
                 vid.pause();
                 vid.src = "";
             } else if (type === "video") {
+                const seekTo = galleryPlaybackOffsetSeconds(playbackAt, durationSec);
                 vid.src = src;
-                vid.currentTime = 0;
-                vid.load();
-                vid.play();
                 vid.style.display = "block";
                 img.src = "";
 
-                //unmute video
-                vid.muted = false;
-                //click the video
-                vid.click();
+                const applySeekAndPlay = function() {
+                    if (seekTo > 0 && vid.duration && !Number.isNaN(vid.duration)) {
+                        vid.currentTime = Math.min(seekTo, Math.max(0, vid.duration - 0.05));
+                    } else if (seekTo > 0) {
+                        vid.currentTime = seekTo;
+                    }
+                    vid.muted = true;
+                    vid.play().catch(function() {
+                        console.error('Error playing video:', e);
+                    });
+                    //unnute after 500 ms
+                    setTimeout(() => {
+                        vid.muted = false;
+                    }, 3000);
+                    try {
+                        vid.click();
+                    } catch (e) {
+                        console.error('Error clicking video:', e);
+                        vid.click();
+                    }
+                };
+
+                vid.addEventListener('loadedmetadata', applySeekAndPlay, {
+                    once: true
+                });
+                vid.load();
+                vid.addEventListener('error', function onErr() {
+                    vid.removeEventListener('error', onErr);
+                    console.warn('Gallery overlay video failed to load');
+                });
             }
             overlay.style.display = "flex";
-            // not closable: do not add event to hide overlay on click/esc etc.
         }
 
-        // Hide the overlay programmatically if needed (not exposed to users)
         function hideGalleryOverlay() {
             const overlay = document.getElementById('galleryOverlayModal');
             const img = document.getElementById('galleryOverlayImage');
@@ -2634,9 +2667,43 @@
             vid.src = "";
         }
 
-        // Example usage: showGalleryOverlay({type: "image", src: "/path/to/img.jpg"})
-        // Example usage: showGalleryOverlay({type: "video", src: "/path/to/video.mp4"})
+        function hydrateGalleryOverlayFromServer() {
+            if (!galleryStreamInitial || !galleryStreamInitial.showing || !galleryStreamInitial.state) {
+                hideGalleryOverlay();
+                return;
+            }
+            const s = galleryStreamInitial.state;
+            showGalleryOverlay({
+                media_type: s.media_type,
+                src: s.url,
+                playback_started_at: s.playback_started_at,
+                video_duration_seconds: s.video_duration_seconds
+            });
+        }
 
+        var channelGalleryImage = pusher.subscribe('live-show-gallery-image.{{ $liveShow->id }}');
+        channelGalleryImage.bind('pusher:subscription_succeeded', function() {
+            console.log('Gallery image channel subscribed successfully!');
+        });
+        channelGalleryImage.bind('ShowGalleryImageEvent', function(data) {
+            showGalleryOverlay({
+                type: data.type,
+                src: data.url,
+                playback_started_at: data.playback_started_at ?? null,
+                video_duration_seconds: data.video_duration_seconds != null ? data.video_duration_seconds :
+                    null
+            });
+        });
+
+        channelGalleryImage.bind('HideGalleryImageEvent', function() {
+            hideGalleryOverlay();
+        });
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', hydrateGalleryOverlayFromServer);
+        } else {
+            hydrateGalleryOverlayFromServer();
+        }
 
         //if request has ?preview=true, then don't show playButtonOverlay
         if (window.location.search.includes('preview=true')) {

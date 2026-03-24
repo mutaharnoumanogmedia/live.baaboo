@@ -23,11 +23,25 @@ class GamePlayController extends Controller
     //
     public function liveShow($id)
     {
-        $liveShow = LiveShow::with('quizzes.options')->findOrFail($id);
+        $liveShow = LiveShow::with(['quizzes.options', 'galleryState'])->findOrFail($id);
         $isEliminated = $this->getEliminationStatus($id);
         Viewer::recordView(request());
 
-        return view('live-show', compact('liveShow', 'isEliminated'));
+        $galleryStreamInitial = ['showing' => false, 'state' => null];
+        $gs = $liveShow->galleryState;
+        if ($gs && $gs->is_visible && $gs->url) {
+            $galleryStreamInitial = [
+                'showing' => true,
+                'state' => [
+                    'url' => $gs->url,
+                    'media_type' => $gs->media_type,
+                    'playback_started_at' => $gs->playback_started_at?->toIso8601String(),
+                    'video_duration_seconds' => $gs->video_duration_seconds,
+                ],
+            ];
+        }
+
+        return view('live-show', compact('liveShow', 'isEliminated', 'galleryStreamInitial'));
     }
 
     public function registerUser(Request $request, $liveShowId)
