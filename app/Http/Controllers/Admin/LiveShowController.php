@@ -484,27 +484,37 @@ class LiveShowController extends Controller
 
     public function apiGetLiveShowUsers($id)
     {
-        $liveShow = LiveShow::with(['users' => function ($query) {
-            $query->withPivot(['score', 'status', 'is_winner', 'created_at', 'last_active', 'is_online']);
-        }])->findOrFail($id);
+        $liveShow = LiveShow::findOrFail($id);
 
-        $liveShow->users = $liveShow->users->map(function ($user) use ($id) {
-            return [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'is_online' => $user->pivot->is_online,
-                'is_winner' => $user->pivot->is_winner ?? null,
-                'status' => $user->pivot->status ?? null,
-                'score' => $user->pivot->score ?? null,
-                'prize_won' => $user->pivot->prize_won ?? null,
-                'is_blocked' => $user->blockedLiveShows()->where('live_show_id', $id)->exists() ? true : false,
-            ];
-        })
-            ->sortByDesc('score')
+        $skip = request()->get('skip', 0);
+        $take = request()->get('take', 500);
+
+        $totalUsers = $liveShow->users()->count();
+
+        $users = $liveShow->users()
+            ->withPivot(['score', 'status', 'is_winner', 'created_at', 'last_active', 'is_online', 'prize_won'])
+            ->orderByDesc('user_live_shows.score')
+            ->skip($skip)
+            ->take($take)
+            ->get()
+            ->map(function ($user) use ($id) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'is_online' => $user->pivot->is_online,
+                    'is_winner' => $user->pivot->is_winner ?? null,
+                    'status' => $user->pivot->status ?? null,
+                    'score' => $user->pivot->score ?? null,
+                    'prize_won' => $user->pivot->prize_won ?? null,
+                    'is_blocked' => $user->blockedLiveShows()
+                        ->where('live_show_id', $id)
+                        ->exists(),
+                ];
+            })
             ->values();
 
-        return response()->json($liveShow->users);
+        return response()->json(['users' => $users, 'totalUsers' => $totalUsers]);
     }
 
     public function extractYouTubeId(string $url): ?string

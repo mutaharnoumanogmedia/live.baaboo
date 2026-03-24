@@ -594,8 +594,8 @@
             });
 
             document.addEventListener('DOMContentLoaded', function() {
-                fetchActivePlayers().then(activePlayers => {
-                    appendPlayerList(activePlayers);
+                fetchActivePlayers().then(data => {
+                    appendPlayerList(data);
                 });
 
                 fetchChatMessages().then(messages => {
@@ -895,8 +895,8 @@
                         console.log('Player block status updated:', data);
                         if (data.success) {
                             alert(data.message);
-                            fetchActivePlayers().then(activePlayers => {
-                                appendPlayerList(activePlayers);
+                            fetchActivePlayers().then(data => {
+                                appendPlayerList(data);
                             });
                         }
                     })
@@ -907,16 +907,16 @@
             }
             //every 20 seconds execute fetchActivePlayers and appendPlayerList
             setInterval(() => {
-                fetchActivePlayers().then(activePlayers => {
-                    appendPlayerList(activePlayers);
+                fetchActivePlayers().then(data => {
+                    appendPlayerList(data);
                 });
             }, 20000);
 
             //onlick #fetchPlayersButton execute fetchActivePlayers and appendPlayerList
             document.getElementById('fetchPlayersButton').addEventListener('click', function() {
 
-                fetchActivePlayers().then(activePlayers => {
-                    appendPlayerList(activePlayers);
+                fetchActivePlayers().then(data => {
+                    appendPlayerList(data);
                 });
             });
 
@@ -960,9 +960,7 @@
                     .then(data => {
                         // Assuming data is an array of player names
                         console.log('Active Players Data:', data);
-
-
-                        data = data.map(player => {
+                        data = data.users.map(player => {
                             return {
                                 name: player.name,
                                 id: player.id,
@@ -974,9 +972,10 @@
                                 is_blocked: player.is_blocked
                             }
                         });
-
-
-                        return data;
+                        return {
+                            users: data,
+                            totalUsers: data.totalUsers
+                        };
                     })
                     .catch(error => {
                         console.error('Error fetching active players:', error);
@@ -984,15 +983,15 @@
                     });
             }
 
-            function appendPlayerList(players) {
+            function appendPlayerList(data) {
                 const activePlayersList = document.getElementById('activePlayersList');
                 activePlayersList.innerHTML = ''; // Clear existing list
-                if (players.length === 0) {
+                if (data.totalUsers === 0) {
                     activePlayersList.innerHTML = '<li class="list-group-item bg-dark text-white">No active players</li>';
                     return;
                 }
 
-                players.forEach(player => {
+                data.users.forEach(player => {
                     const li = `<li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
                         <div>
                             <strong class='${player.status != 'eliminated' ? 'text-white' : 'text-secondary'}'>${player.name}</strong>
@@ -1047,7 +1046,7 @@
                     activePlayersList.innerHTML += li;
                 });
 
-                document.getElementById('total-users-count').innerText = `(${players.length})`;
+                document.getElementById('total-users-count').innerText = `(${data.totalUsers})`;
             }
 
             const timerDiv = document.querySelector('#quizTimer');
@@ -1080,8 +1079,8 @@
 
 
 
-                            fetchActivePlayers().then(activePlayers => {
-                                appendPlayerList(activePlayers);
+                            fetchActivePlayers().then(data => {
+                                appendPlayerList(data);
                             });
                         }, 500); // Give a short delay before hiding
                     }
@@ -1216,8 +1215,8 @@
                         console.log('Winners updated:', data);
                         // alert(data.message);
                         // Optionally, refresh the player list to show winners
-                        fetchActivePlayers().then(activePlayers => {
-                            appendPlayerList(activePlayers);
+                        fetchActivePlayers().then(data => {
+                            appendPlayerList(data);
                         });
                     })
                     .catch(error => {
@@ -1327,8 +1326,8 @@
                         console.log('Game reset:', data);
                         alert(data.message);
                         // Optionally, refresh the player list to show all players as active
-                        fetchActivePlayers().then(activePlayers => {
-                            appendPlayerList(activePlayers);
+                        fetchActivePlayers().then(data => {
+                            appendPlayerList(data);
                         });
                     })
                     .catch(error => {
