@@ -36,6 +36,9 @@
                     </div>
                     <div class="card-body p-0">
                         <div class="d-flex justify-content-end mb-3 p-1">
+                            <button type="button" class="btn btn-primary btn-sm me-2" id="fetchPlayersButton">
+                                <i class="fas fa-sync"></i> Refresh Players
+                            </button>
 
                             <a href="{{ route('admin.live-shows.export-all-users-as-csv', $liveShow->id) }}"
                                 title="Export Users" class="btn btn-primary btn-sm" id="exportUsersBtn"
@@ -43,7 +46,8 @@
                                 <i class="fas fa-file-export"></i>
                             </a>
                         </div>
-                        <ul class="list-group list-group-flush" id="activePlayersList" style=" overflow-y: auto;">
+                        <ul class="list-group list-group-flush" id="activePlayersList"
+                            style=" overflow-y: scroll; max-height: 80vh; padding-bottom: 30px;">
                             <li class="list-group-item d-flex align-items-center border-0 px-3">
                                 <span class="position-relative me-3">
                                     <div class="bg-secondary rounded-circle" style="width: 32px; height: 32px;"></div>
@@ -901,6 +905,20 @@
                         alert('Error updating player block status: ' + error.message);
                     });
             }
+            //every 20 seconds execute fetchActivePlayers and appendPlayerList
+            setInterval(() => {
+                fetchActivePlayers().then(activePlayers => {
+                    appendPlayerList(activePlayers);
+                });
+            }, 20000);
+
+            //onlick #fetchPlayersButton execute fetchActivePlayers and appendPlayerList
+            document.getElementById('fetchPlayersButton').addEventListener('click', function() {
+
+                fetchActivePlayers().then(activePlayers => {
+                    appendPlayerList(activePlayers);
+                });
+            });
 
             function resetChat() {
                 fetch(`{{ route('admin.live-shows.stream-management.reset-chat', ['id' => $liveShow->id]) }}`, {
@@ -933,6 +951,10 @@
 
             function fetchActivePlayers() {
                 // Simulate an API call to fetch active players
+                var activePlayerUlElement = document.getElementById('activePlayersList');
+                activePlayerUlElement.innerHTML =
+                    '<li class="list-group-item bg-dark text-white d-flex align-items-center justify-content-center"><i class="fas fa-spinner fa-spin me-2"></i> Loading...</li>';
+
                 return fetch(`{{ url('api/live-show') }}/{{ $liveShow->id }}/get-live-show-users`)
                     .then(response => response.json())
                     .then(data => {
@@ -1106,23 +1128,23 @@
             // Enable Pusher logging - disable in production
 
 
-            var channel = pusher.subscribe('live-show-online-users.{{ $liveShow->id }}');
+            // var channel = pusher.subscribe('live-show-online-users.{{ $liveShow->id }}');
 
-            // System subscription event
-            channel.bind('pusher:subscription_succeeded', function() {
-                console.log('Subscribed successfully!');
-            });
+            // // System subscription event
+            // channel.bind('pusher:subscription_succeeded', function() {
+            //     console.log('Subscribed successfully!');
+            // });
 
-            // Your Laravel broadcast event (drop the dot)
-            channel.bind('LiveShowOnlineUsersEvent', function(data) {
-                
+            // // Your Laravel broadcast event (drop the dot)
+            // channel.bind('LiveShowOnlineUsersEvent', function(data) {
 
-                fetchActivePlayers().then(activePlayers => {
-                    appendPlayerList(activePlayers);
-                });
-                // You can also update DOM here:
-                // document.getElementById('onlineUsers').innerHTML = JSON.stringify(data.activeUsers);
-            });
+
+            //     fetchActivePlayers().then(activePlayers => {
+            //         appendPlayerList(activePlayers);
+            //     });
+            //     // You can also update DOM here:
+            //     // document.getElementById('onlineUsers').innerHTML = JSON.stringify(data.activeUsers);
+            // });
 
             var channel2 = pusher.subscribe('live-show-message.{{ $liveShow->id }}');
 

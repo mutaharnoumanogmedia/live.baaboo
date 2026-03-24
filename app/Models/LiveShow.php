@@ -21,7 +21,7 @@ class LiveShow extends Model
         'prize_amount',
         'currency',
         'max_winners',
-        'created_by'
+        'created_by',
 
     ];
 
@@ -30,18 +30,18 @@ class LiveShow extends Model
         'prize_amount' => 'float',
     ];
 
-    protected $appends = [ 'stream_link'];
-
-
+    protected $appends = ['stream_link'];
 
     public function scopeUpcoming($query)
     {
         return $query->where('scheduled_at', '>', now());
     }
+
     public function scopePast($query)
     {
         return $query->where('scheduled_at', '<=', now());
     }
+
     public function scopeLive($query)
     {
         return $query->where('status', 'live');
@@ -96,26 +96,22 @@ class LiveShow extends Model
             ->withTimestamps();
     }
 
+    public function galleryState()
+    {
+        return $this->hasOne(LiveShowGalleryState::class);
+    }
 
     // public function getStreamIdAttribute()
     // {
     //     return $this->extractYouTubeId($this->stream_link);
     // }
 
-
     public function getStreamLinkAttribute()
     {
         return route('live-show', $this->id);
     }
 
-
-
-
-
-
-
-
-    function extractYouTubeId(string $url): ?string
+    public function extractYouTubeId(string $url): ?string
     {
         // Handle HTML entities like &amp; in the URL
         $url = html_entity_decode($url);
@@ -130,16 +126,13 @@ class LiveShow extends Model
         return null;
     }
 
-
-
     public static function clearGameShowUsers($liveShowId)
     {
         // Clear users from the specified live show
         try {
             $liveShow = LiveShow::with('users')->find($liveShowId);
 
-            $liveShowUsers  =  $liveShow->users()->get();
-
+            $liveShowUsers = $liveShow->users()->get();
 
             foreach ($liveShowUsers as $user) {
                 UserQuiz::where('user_id', $user->id)

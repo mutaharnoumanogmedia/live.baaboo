@@ -15,12 +15,14 @@ class ShowGalleryImageEvent implements ShouldBroadcast
     public function __construct(
         public string $liveShowId,
         public string $url,
-        public string $type
+        public string $type,
+        public ?string $playbackStartedAt = null,
+        public ?int $videoDurationSeconds = null
     ) {}
 
     public function broadcastOn(): Channel
     {
-        return new Channel('live-show-gallery-image.' . $this->liveShowId);
+        return new Channel('live-show-gallery-image.'.$this->liveShowId);
     }
 
     public function broadcastAs(): string
@@ -30,9 +32,17 @@ class ShowGalleryImageEvent implements ShouldBroadcast
 
     public function broadcastWith(): array
     {
-        return [
+        $data = [
             'url' => $this->url,
             'type' => $this->type,
         ];
+        if ($this->playbackStartedAt !== null) {
+            $data['playback_started_at'] = $this->playbackStartedAt;
+        }
+        if ($this->videoDurationSeconds !== null) {
+            $data['video_duration_seconds'] = $this->videoDurationSeconds;
+        }
+
+        return $data;
     }
 }

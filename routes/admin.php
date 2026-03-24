@@ -36,6 +36,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('media-gallery/attach-to-live-show', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'attachToLiveShow'])->name('media-gallery.attach-to-live-show');
     Route::post('media-gallery/detach-from-live-show', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'detachFromLiveShow'])->name('media-gallery.detach-from-live-show');
 
+    Route::get('live-shows/{live_show}/gallery-stream-state', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'galleryStreamState'])->name('live-shows.gallery-stream-state');
+    Route::post('live-shows/{live_show}/gallery-stream/show', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'galleryStreamShow'])->name('live-shows.gallery-stream.show');
+    Route::patch('live-shows/{live_show}/gallery-stream', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'galleryStreamUpdate'])->name('live-shows.gallery-stream.update');
+    Route::post('live-shows/{live_show}/gallery-stream/visibility', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'galleryStreamVisibility'])->name('live-shows.gallery-stream.visibility');
+
     Route::get('live-shows/stream-management/{id}', [\App\Http\Controllers\Admin\LiveShowController::class, 'streamManagement'])->name('live-shows.stream-management');
     Route::get('live-shows/stream-broadcaster/{id}', [\App\Http\Controllers\Admin\LiveShowController::class, 'streamBroadcaster'])->name('live-shows.stream-management.broadcaster');
 

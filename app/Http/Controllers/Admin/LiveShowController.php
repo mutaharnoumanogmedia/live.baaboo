@@ -17,6 +17,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\SendWinnerEmailJob;
 use App\Models\GalleryMedia;
 use App\Models\LiveShow;
+use App\Models\LiveShowGalleryState;
 use App\Models\LiveShowQuiz;
 use App\Models\LiveShowWinnerPrize;
 use App\Models\QuizOption;
@@ -26,6 +27,7 @@ use App\Services\LiveShowQuizService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class LiveShowController extends Controller
@@ -438,10 +440,28 @@ class LiveShowController extends Controller
             ], 422);
         }
 
+        $playbackStartedAt = $media->type === 'video' ? now() : null;
+
+        DB::transaction(function () use ($liveShow, $media, $playbackStartedAt) {
+            LiveShowGalleryState::updateOrCreate(
+                ['live_show_id' => $liveShow->id],
+                [
+                    'is_visible' => true,
+                    'gallery_media_id' => $media->id,
+                    'url' => $media->url,
+                    'media_type' => $media->type,
+                    'playback_started_at' => $playbackStartedAt,
+                    'video_duration_seconds' => null,
+                ]
+            );
+        });
+
         ShowGalleryImageEvent::dispatch(
             (string) $liveShow->id,
             $media->url,
-            $media->type
+            $media->type,
+            $playbackStartedAt?->toIso8601String(),
+            null
         );
 
         return response()->json([
@@ -453,6 +473,7 @@ class LiveShowController extends Controller
     public function hideGalleryImage($id): JsonResponse
     {
         $liveShow = LiveShow::findOrFail($id);
+        $liveShow->galleryState?->update(['is_visible' => false]);
         HideGalleryImageEvent::dispatch((string) $liveShow->id);
 
         return response()->json([

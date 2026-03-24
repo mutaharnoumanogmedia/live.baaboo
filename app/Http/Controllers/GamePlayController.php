@@ -66,20 +66,15 @@ class GamePlayController extends Controller
                 }
 
                 Auth::guard('web')->login($existingUser);
-
                 $sessionResult = $this->sessionGeneration(Auth::guard('web')->user(), $request);
-
                 if (! $sessionResult['success']) {
                     return response()->json(['success' => false, 'messages' => [$sessionResult['message']], 'user' => null, 'authStatus' => Auth::guard('web')->check()], 500);
                 }
-
-                $this->triggerOnlineUsersEvent($liveShowId);
-
-                // Job : send email to user with login details
+                // $this->triggerOnlineUsersEvent($liveShowId);
 
                 return response()->json(['success' => true, 'message' => 'User logged in successfully.', 'user' => $existingUser, 'authStatus' => Auth::guard('web')->check(), 'isEliminated' => $this->getEliminationStatus($liveShowId)]);
             }
-            // end of existing user login
+            
 
             $validator = Validator::make($request->all(), [
                 // 'name' => 'required|alpha_num|string|max:255|unique:users,user_name',
@@ -128,7 +123,7 @@ class GamePlayController extends Controller
                     }
                 }
             }
-            
+
             $validated['name'] = $userName;
             $validated['user_name'] = $userName;
 
@@ -139,7 +134,6 @@ class GamePlayController extends Controller
 
             // Create the user
             $user = User::create($validated);
-
             $user->save();
             $user->assignRole('user');
 
@@ -147,7 +141,6 @@ class GamePlayController extends Controller
             if (empty($user->referral_link)) {
                 // $latestLiveShow = LiveShow::live()->orderBy('id', 'desc')->first();
                 $user->forceFill(['referral_link' => $user->referralLink(), 'magic_link' => $user->magicLink(),
-
                 ])->save();
             }
 
@@ -166,14 +159,13 @@ class GamePlayController extends Controller
             );
 
             Auth::guard('web')->login($user);
-
             $sessionResult = $this->sessionGeneration(Auth::guard('web')->user(), $request);
 
             if (! $sessionResult['success']) {
                 return response()->json(['success' => false, 'messages' => [$sessionResult['message']], 'user' => null, 'authStatus' => Auth::guard('web')->check()], 500);
             }
 
-            $this->triggerOnlineUsersEvent($liveShowId);
+            // $this->triggerOnlineUsersEvent($liveShowId);
 
             return response()->json(['success' => true, 'message' => 'User registered successfully.', 'user' => $user, 'authStatus' => Auth::guard('web')->check()]);
         } catch (\Exception $e) {
@@ -195,7 +187,7 @@ class GamePlayController extends Controller
             $updateResult = $liveShow->users()->updateExistingPivot($user->id, ['is_online' => 0]);
         }
 
-        $this->triggerOnlineUsersEvent($liveShow->id);
+        // $this->triggerOnlineUsersEvent($liveShow->id);
 
         if ($user) {
             $user->forceFill(['current_session_id' => null])->save();
