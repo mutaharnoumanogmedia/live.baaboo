@@ -25,6 +25,7 @@ class UsersByRoleSeeder extends Seeder
             'password' => bcrypt('baaboo123'),
         ]);
         $admin->assignRole('admin');
+        
 
         //create 500 users with role user 
         for ($i = 1; $i <= 50; $i++) {

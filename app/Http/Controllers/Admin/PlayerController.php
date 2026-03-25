@@ -7,16 +7,9 @@ use App\Models\User;
 
 class PlayerController extends Controller
 {
-    //
     public function __construct()
     {
-        $this->middleware('auth');
-        $this->middleware(function ($request, $next) {
-            if (!auth()->check() || auth()->user()->email !== 'admin@baaboo.com') {
-                abort(403, 'Unauthorized');
-            }
-            return $next($request);
-        });
+        $this->middleware('permission:can-manage-players');
     }
 
     public function index()

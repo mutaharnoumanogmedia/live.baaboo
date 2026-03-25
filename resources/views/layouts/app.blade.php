@@ -31,26 +31,35 @@
             </div>
 
             <ul class="list-unstyled components">
+                @can('can-manage-dashboard')
                 <li>
                     <a href="{{ route('admin.dashboard') }}" class="">
                         <i class="bi bi-speedometer2"></i> Dashboard
                     </a>
                 </li>
+                @endcan
+                @can('can-manage-live-shows')
                 <li>
                     <a href="{{ route('admin.live-shows.index') }}">
                         <i class="bi bi-camera-video-fill"></i> Live Streams
                     </a>
                 </li>
+                @endcan
+                @can('can-manage-quiz-questions')
                 <li>
                     <a href="{{ route('admin.live-show-quizzes.index') }}">
                         <i class="bi bi-question-circle-fill"></i> Quiz Questions
                     </a>
                 </li>
+                @endcan
+                @can('can-manage-players')
                 <li>
                     <a href="{{ route('admin.players.index') }}">
                         <i class="bi bi-people-fill"></i> Players
                     </a>
                 </li>
+                @endcan
+                @can('can-manage-analytics')
                 <li>
                     <a href="#">
                         <i class="bi bi-trophy-fill"></i> Winners
@@ -61,26 +70,35 @@
                         <i class="bi bi-graph-up-arrow"></i> Analytics
                     </a>
                 </li>
+                @endcan
+                @can('can-manage-settings')
                 <li>
                     <a href="{{ route('admin.password.form') }}">
                         <i class="bi bi-gear-fill"></i> Settings
                     </a>
                 </li>
+                @endcan
+                @can('can-manage-users')
                 <li>
                     <a href="{{ route('admin.users.index') }}">
                         <i class="bi bi-person-badge-fill"></i> Admin Users
                     </a>
                 </li>
+                @endcan
+                @can('can-manage-roles')
                 <li>
                     <a href="{{ route('admin.roles.index') }}">
                         <i class="bi bi-shield-lock-fill"></i> Roles
                     </a>
                 </li>
+                @endcan
+                @can('can-manage-permissions')
                 <li>
                     <a href="{{ route('admin.permissions.index') }}">
                         <i class="bi bi-key-fill"></i> Permissions
                     </a>
                 </li>
+                @endcan
                 <li class="mt-4">
                     <a href="#"
                         onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

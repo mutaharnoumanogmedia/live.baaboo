@@ -8,6 +8,11 @@ use Illuminate\Http\Request;
 
 class AppSettingsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:can-manage-settings');
+    }
+
     /**
      * Show the app settings form.
      */

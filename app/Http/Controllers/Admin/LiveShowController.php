@@ -32,10 +32,11 @@ use Illuminate\Support\Facades\Storage;
 
 class LiveShowController extends Controller
 {
-    // public function __construct()
-    // {
-    //     $this->middleware('auth');
-    // }
+    public function __construct()
+    {
+        $this->middleware('permission:can-manage-live-shows');
+    }
+
     /**
      * Display a listing of the resource.
      *

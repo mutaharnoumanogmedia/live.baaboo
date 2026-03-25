@@ -6,17 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\LiveShow;
 use App\Models\User;
 use App\Models\Viewer;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
-    //
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
+    // public function __construct()
+    // {
+    //     $this->middleware('permission:can-manage-dashboard');
+    // }
 
     public function home()
     {
@@ -25,7 +23,7 @@ class HomeController extends Controller
             ->where('is_active', 1)
             ->whereBetween('updated_at', [now()->subWeek(), now()])
             ->count();
-        //calculate percentage
+        // calculate percentage
         if ($rocOfPlayersFromLastWeek == 0) {
             $rocOfPlayersFromLastWeekPercentage = $activePlayers * 100;
         } else {
@@ -34,7 +32,7 @@ class HomeController extends Controller
 
         $totalViewers = Viewer::count();
         $rocOfViewersFromLastWeek = Viewer::whereBetween('created_at', [now()->subWeek(), now()])->count();
-        //calculate percentage
+        // calculate percentage
         if ($rocOfViewersFromLastWeek == 0) {
             $rocOfViewersFromLastWeekPercentage = $totalViewers * 100;
         } else {
@@ -43,9 +41,6 @@ class HomeController extends Controller
 
         $totalLiveQuizShows = LiveShow::count();
         $totalScheduledLiveQuizShows = LiveShow::where('status', 'scheduled')->count();
-
-
-
 
         // Extract signups grouped by month for current year
         $year = Carbon::now()->year;
@@ -80,8 +75,7 @@ class HomeController extends Controller
             $monthlyViewerData[$row->month] = $row->total;
         }
 
-
-        $labels =  json_encode([
+        $labels = json_encode([
             'Jan',
             'Feb',
             'Mar',
@@ -93,15 +87,11 @@ class HomeController extends Controller
             'Sep',
             'Oct',
             'Nov',
-            'Dec'
+            'Dec',
         ]);
         $dataUsers = json_encode(array_values($monthlyUserData));
         $dataViewers = json_encode(array_values($monthlyViewerData));
         $year = $year;
-
-
-
-
 
         return view('admin.dashboard', compact('activePlayers', 'rocOfPlayersFromLastWeekPercentage', 'totalViewers', 'rocOfViewersFromLastWeekPercentage', 'totalLiveQuizShows', 'totalScheduledLiveQuizShows', 'labels', 'dataUsers', 'dataViewers', 'year'));
     }

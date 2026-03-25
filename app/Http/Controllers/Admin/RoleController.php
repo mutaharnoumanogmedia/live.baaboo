@@ -9,6 +9,11 @@ use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:can-manage-roles');
+    }
+
     public function index()
     {
         $roles = Role::with('permissions')->orderBy('name')->get();

@@ -67,66 +67,91 @@
                 <div class="sb-sidenav-menu">
                     <div class="nav">
                         <div class="sb-sidenav-menu-heading">Core</div>
+
                         <a class="nav-link" href="{{ route('admin.dashboard') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                             Dashboard
                         </a>
 
-                        <a class="nav-link" href="{{ route('admin.live-shows.index') }}">
-                            <div class="sb-nav-link-icon"><i class="bi bi-camera-video-fill"></i></div>
-                            Live Streams
-                        </a>
+                        @can('can-manage-live-shows')
+                            <a class="nav-link" href="{{ route('admin.live-shows.index') }}">
+                                <div class="sb-nav-link-icon"><i class="bi bi-camera-video-fill"></i></div>
+                                Live Streams
+                            </a>
+                        @endcan
 
-                        <a class="nav-link" href="{{ route('admin.live-show-quizzes.index') }}">
-                            <div class="sb-nav-link-icon"><i class="bi bi-question-circle-fill"></i></div>
-                            Quiz Questions
-                        </a>
+                        @can('can-manage-quiz-questions')
+                            <a class="nav-link" href="{{ route('admin.live-show-quizzes.index') }}">
+                                <div class="sb-nav-link-icon"><i class="bi bi-question-circle-fill"></i></div>
+                                Quiz Questions
+                            </a>
+                        @endcan
 
-                        <a class="nav-link" href="{{ route('admin.media-gallery.index') }}">
-                            <div class="sb-nav-link-icon"><i class="bi bi-images"></i></div>
-                            Media Gallery
-                        </a>
+                        @can('can-manage-media-gallery')
+                            <a class="nav-link" href="{{ route('admin.media-gallery.index') }}">
+                                <div class="sb-nav-link-icon"><i class="bi bi-images"></i></div>
+                                Media Gallery
+                            </a>
+                        @endcan
 
-                        <a class="nav-link" href="{{ route('admin.players.index') }}">
-                            <div class="sb-nav-link-icon"><i class="bi bi-people-fill"></i></div>
-                            Players
-                        </a>
+                        @can('can-manage-players')
+                            <a class="nav-link" href="{{ route('admin.players.index') }}">
+                                <div class="sb-nav-link-icon"><i class="bi bi-people-fill"></i></div>
+                                Players
+                            </a>
+                        @endcan
 
-                        <a class="nav-link" href="#">
-                            <div class="sb-nav-link-icon"><i class="bi bi-graph-up-arrow"></i></div>
-                            Analytics
-                        </a>
+                        @can('can-manage-analytics')
+                            <a class="nav-link" href="#">
+                                <div class="sb-nav-link-icon"><i class="bi bi-graph-up-arrow"></i></div>
+                                Analytics
+                            </a>
+                        @endcan
 
-                        <a class="nav-link" href="{{ route('admin.settings.index') }}">
-                            <div class="sb-nav-link-icon"><i class="bi bi-sliders"></i></div>
-                            App Settings
-                        </a>
-                        <a class="nav-link" href="{{ route('admin.gtm.index') }}">
-                            <div class="sb-nav-link-icon"><i class="bi bi-google"></i></div>
-                            Google Tag Manager
-                        </a>
-                        <a class="nav-link" href="{{ route('admin.password.form') }}">
-                            <div class="sb-nav-link-icon"><i class="bi bi-gear-fill"></i></div>
-                            Change Password
-                        </a>
-                        <a class="nav-link" href="{{ route('admin.push-notifications.index') }}">
-                            <div class="sb-nav-link-icon"><i class="bi bi-bell-fill"></i></div>
-                            Push Notifications
-                        </a>
+                        @can('can-manage-settings')
+                            <a class="nav-link" href="{{ route('admin.settings.index') }}">
+                                <div class="sb-nav-link-icon"><i class="bi bi-sliders"></i></div>
+                                App Settings
+                            </a>
+                        @endcan
+                        @can('can-manage-gtm')
+                            <a class="nav-link" href="{{ route('admin.gtm.index') }}">
+                                <div class="sb-nav-link-icon"><i class="bi bi-google"></i></div>
+                                Google Tag Manager
+                            </a>
+                        @endcan
+                        @can('can-manage-settings')
+                            <a class="nav-link" href="{{ route('admin.password.form') }}">
+                                <div class="sb-nav-link-icon"><i class="bi bi-gear-fill"></i></div>
+                                Change Password
+                            </a>
+                        @endcan
+                        @can('can-manage-push-notifications')
+                            <a class="nav-link" href="{{ route('admin.push-notifications.index') }}">
+                                <div class="sb-nav-link-icon"><i class="bi bi-bell-fill"></i></div>
+                                Push Notifications
+                            </a>
+                        @endcan
 
                         <div class="sb-sidenav-menu-heading">Access Control</div>
-                        <a class="nav-link" href="{{ route('admin.users.index') }}">
-                            <div class="sb-nav-link-icon"><i class="bi bi-person-badge-fill"></i></div>
-                            Admin Users
-                        </a>
-                        <a class="nav-link" href="{{ route('admin.roles.index') }}">
-                            <div class="sb-nav-link-icon"><i class="bi bi-shield-lock-fill"></i></div>
-                            Roles
-                        </a>
-                        <a class="nav-link" href="{{ route('admin.permissions.index') }}">
-                            <div class="sb-nav-link-icon"><i class="bi bi-key-fill"></i></div>
-                            Permissions
-                        </a>
+                        @can('can-manage-users')
+                            <a class="nav-link" href="{{ route('admin.users.index') }}">
+                                <div class="sb-nav-link-icon"><i class="bi bi-person-badge-fill"></i></div>
+                                In App Users
+                            </a>
+                        @endcan
+                        @can('can-manage-roles')
+                            <a class="nav-link" href="{{ route('admin.roles.index') }}">
+                                <div class="sb-nav-link-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                                Roles
+                            </a>
+                        @endcan
+                        @can('can-manage-permissions')
+                            <a class="nav-link" href="{{ route('admin.permissions.index') }}">
+                                <div class="sb-nav-link-icon"><i class="bi bi-key-fill"></i></div>
+                                Permissions
+                            </a>
+                        @endcan
 
                         <a class="nav-link mt-4" href="#"
                             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

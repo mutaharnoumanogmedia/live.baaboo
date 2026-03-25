@@ -8,6 +8,11 @@ use Illuminate\Http\Request;
 
 class GtmController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:can-manage-gtm');
+    }
+
     public function index()
     {
         $gtmEnabled = Setting::get('gtm_enabled', false);

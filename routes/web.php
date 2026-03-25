@@ -81,6 +81,9 @@ Route::get('/test/registration-welcome-email', function () {
     return view('emails.registration_welcome', compact('user'));
 });
 
+Route::get('admin/login', function () {
+    return view('auth.login');
+})->name('admin.login');
 require __DIR__.'/admin.php';
 require __DIR__.'/auth.php';
 

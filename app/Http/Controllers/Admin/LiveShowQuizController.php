@@ -13,7 +13,7 @@ class LiveShowQuizController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('permission:can-manage-quiz-questions');
     }
 
     public function index()
@@ -127,7 +127,7 @@ class LiveShowQuizController extends Controller
             ]);
         }
 
-        return redirect()   
+        return redirect()
             ->route('admin.live-show-quizzes.index')
             ->with('success', 'Quiz updated successfully.');
     }
@@ -136,10 +136,10 @@ class LiveShowQuizController extends Controller
     {
         $quiz = LiveShowQuiz::findOrFail($id);
         UserQuizResponse::where('quiz_id', $quiz->id)->delete();
-            QuizOption::where('quiz_id', $quiz->id)->delete();
+        QuizOption::where('quiz_id', $quiz->id)->delete();
 
-            LiveShowQuiz::where('id', $id)->delete();
+        LiveShowQuiz::where('id', $id)->delete();
 
-            return   redirect()->back()->with('success', 'Quiz deleted successfully.');
+        return redirect()->back()->with('success', 'Quiz deleted successfully.');
     }
 }

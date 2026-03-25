@@ -10,9 +10,16 @@ use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:can-manage-users');
+    }
+
     public function index()
     {
-        $users = User::role('admin')->with('roles')->orderBy('name')->get();
+        $users = User::whereHas('roles', function ($query) {
+            $query->where('name', '!=', 'user');
+        })->with('roles')->orderBy('name')->get();
 
         return view('admin.users.index', compact('users'));
     }

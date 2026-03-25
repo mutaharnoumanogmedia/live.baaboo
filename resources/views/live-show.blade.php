@@ -1661,7 +1661,7 @@
                     //unnute after 500 ms
                     setTimeout(() => {
                         vid.muted = false;
-                    }, 3000);
+                    }, 1500);
                     try {
                         vid.click();
                     } catch (e) {

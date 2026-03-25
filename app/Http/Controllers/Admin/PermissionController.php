@@ -8,6 +8,11 @@ use Spatie\Permission\Models\Permission;
 
 class PermissionController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:can-manage-permissions');
+    }
+
     public function index()
     {
         $permissions = Permission::orderBy('name')->get();

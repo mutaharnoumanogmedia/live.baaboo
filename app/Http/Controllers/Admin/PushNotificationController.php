@@ -3,14 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Services\PushNotificationService;
 use App\Models\PushNotification;
 use App\Models\User;
+use App\Services\PushNotificationService;
+use Illuminate\Http\Request;
 
 class PushNotificationController extends Controller
 {
-    //
+    public function __construct()
+    {
+        $this->middleware('permission:can-manage-push-notifications');
+    }
 
     public function index()
     {
@@ -30,15 +33,15 @@ class PushNotificationController extends Controller
     {
         $data = $request->validate([
             'user_id' => 'nullable|integer|exists:users,id',
-            'title'   => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'message' => 'required|string',
         ]);
 
         $notification = PushNotification::create([
             'user_id' => $data['user_id'] ?? null,
-            'title'   => $data['title'],
+            'title' => $data['title'],
             'message' => $data['message'],
-            'data'    => ['url' => '/'],
+            'data' => ['url' => '/'],
         ]);
 
         PushNotificationService::send(
@@ -69,9 +72,10 @@ class PushNotificationController extends Controller
             title: 'Live Show Started',
             message: 'Join now and win exciting prizes!',
             data: [
-                'url' => '/live-show'
+                'url' => '/live-show',
             ]
         );
+
         return response()->json(['success' => true]);
     }
 }

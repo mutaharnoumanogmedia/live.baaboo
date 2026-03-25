@@ -16,6 +16,11 @@ use Illuminate\Validation\ValidationException;
 
 class MediaGalleryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:can-manage-media-gallery');
+    }
+
     private const IMAGE_MAX_BYTES = 2 * 1024 * 1024;  // 2 MB
 
     private const VIDEO_MAX_BYTES = 250 * 1024 * 1024;  // 100 MB

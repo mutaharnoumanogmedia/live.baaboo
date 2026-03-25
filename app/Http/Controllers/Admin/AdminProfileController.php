@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminProfileController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:can-manage-settings');
+    }
+
     public function showChangePasswordForm()
     {
         return view('admin.profile.change-password');
@@ -23,15 +28,15 @@ class AdminProfileController extends Controller
         $admin = auth()->guard('admin')->user();
 
         // Validate current password
-        if (!Hash::check($request->current_password, $admin->password)) {
+        if (! Hash::check($request->current_password, $admin->password)) {
             return back()->withErrors([
-                'current_password' => 'Current password is incorrect.'
+                'current_password' => 'Current password is incorrect.',
             ]);
         }
 
         // Update password
         $admin->update([
-            'password' => Hash::make($request->password)
+            'password' => Hash::make($request->password),
         ]);
 
         return back()->with('success', 'Password updated successfully.');
