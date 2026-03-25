@@ -26,6 +26,13 @@
                                 {{ ucfirst($liveShow->status) }}
                             </span>
                         </p>
+                        <p><strong>Is Test Show:</strong>
+                            @if ($liveShow->is_test_show)
+                                <span class="badge bg-danger">Yes</span>
+                            @else
+                                <span class="badge bg-success">No</span>
+                            @endif
+                        </p>
                     </div>
                     <div class="col-md-6">
                         <p><strong>Prize:</strong> 💰 {{ number_format($liveShow->prize_amount, 2) }}
