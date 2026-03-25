@@ -16,6 +16,7 @@ class LiveShow extends Model
         'scheduled_at',
         'status',
         'thumbnail',
+        'is_test_show',
 
         'host_name',
         'prize_amount',
@@ -28,7 +29,19 @@ class LiveShow extends Model
     protected $casts = [
         'scheduled_at' => 'datetime',
         'prize_amount' => 'float',
+        'is_test_show' => 'boolean',
     ];
+
+    //scope test show
+    public function scopeTestShow($query)
+    {
+        return $query->where('is_test_show', true);
+    }
+    //scope not test show
+    public function scopeNotTestShow($query)
+    {
+        return $query->where('is_test_show', false);
+    }
 
     protected $appends = ['stream_link'];
 

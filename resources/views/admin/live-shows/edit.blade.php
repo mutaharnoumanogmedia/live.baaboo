@@ -61,6 +61,17 @@
                                     Completed</option>
                             </select>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Is Test Show</label>
+                            <select name="is_test_show" class="form-select">
+                                <option value="0"
+                                    {{ old('is_test_show', $liveShow->is_test_show ?? '') == 0 ? 'selected' : '' }}>No
+                                </option>
+                                <option value="1"
+                                    {{ old('is_test_show', $liveShow->is_test_show ?? '') == 1 ? 'selected' : '' }}>Yes
+                                </option>
+                            </select>
+                        </div>
 
                         {{-- <div class="col-md-12 mb-3">
                             <label class="form-label">Stream Link</label>
@@ -112,8 +123,10 @@
                         <div class="col-md-4">
                             <label class="form-label required-field">Max winners per show</label>
                             <input type="number" name="max_winners" id="maxWinners" class="form-control" min="1"
-                                max="{{ $maxWinnerSlots }}" required value="{{ old('max_winners', $liveShow->max_winners ?? 3) }}">
-                            <div class="form-text">Number of winners (1–{{ $maxWinnerSlots }}) who share the prizes</div>
+                                max="{{ $maxWinnerSlots }}" required
+                                value="{{ old('max_winners', $liveShow->max_winners ?? 3) }}">
+                            <div class="form-text">Number of winners (1–{{ $maxWinnerSlots }}) who share the prizes
+                            </div>
                         </div>
                     </div>
                     @error('winner_prizes')
@@ -134,7 +147,7 @@
                                     $maxW = (int) old('max_winners', $liveShow->max_winners ?? 3);
                                     $percentagesByRank = $liveShow->winnerPrizes
                                         ->keyBy('rank')
-                                        ->map(fn($p) =>   $p->prize)
+                                        ->map(fn($p) => $p->prize)
                                         ->toArray();
                                     $defaultPct = [1 => 50, 2 => 30, 3 => 20];
                                 @endphp

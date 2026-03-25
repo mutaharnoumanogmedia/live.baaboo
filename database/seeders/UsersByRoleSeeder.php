@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Faker\Factory as Faker;
+use Spatie\Permission\Models\Permission;
 
 class UsersByRoleSeeder extends Seeder
 {
@@ -25,14 +24,14 @@ class UsersByRoleSeeder extends Seeder
             'password' => bcrypt('baaboo123'),
         ]);
         $admin->assignRole('admin');
-        
+        // all permission to admin
 
-        //create 500 users with role user 
+        // create 500 users with role user
         for ($i = 1; $i <= 50; $i++) {
 
             $user = User::create([
-                'name'     => "player{$i}",         // username
-                'email'    => "p{$i}@baaboo.com",
+                'name' => "player{$i}",         // username
+                'email' => "p{$i}@baaboo.com",
                 'password' => Hash::make('password123'), // or random: Str::random(10)
             ]);
             $user->assignRole('user');

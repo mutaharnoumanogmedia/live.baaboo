@@ -50,6 +50,13 @@
                                 <option value="completed">Completed</option>
                             </select>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Is Test Show</label>
+                            <select name="is_test_show" class="form-select">
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                        </div>
 
                         {{-- <div class="col-md-12 mb-3">
                             <label class="form-label">Stream Link</label>
@@ -99,7 +106,8 @@
                             <label class="form-label required-field">Max winners per show</label>
                             <input type="text" name="max_winners" id="maxWinners" class="form-control" min="1"
                                 max="{{ $maxWinnerSlots }}" required value="{{ old('max_winners', 3) }}">
-                            <div class="form-text">Number of top winners (1–{{ $maxWinnerSlots }}) who share the prize</div>
+                            <div class="form-text">Number of top winners (1–{{ $maxWinnerSlots }}) who share the prize
+                            </div>
                         </div>
                     </div>
                     @error('winner_prizes')
@@ -124,7 +132,8 @@
                                             place</td>
                                         <td style="max-width: 120px;">
                                             <input type="text" name="winner_prizes[{{ $r }}]"
-                                                class="form-control winner-pct-input" placeholder="Dailixir Starterset, 50€, 10€ baaboo Voucher"
+                                                class="form-control winner-pct-input"
+                                                placeholder="Dailixir Starterset, 50€, 10€ baaboo Voucher"
                                                 value="{{ old('winner_prizes.' . $r) }}">
                                         </td>
                                     </tr>

@@ -2,10 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use App\Models\User;
 
 class RoleSeeder extends Seeder
 {
@@ -21,6 +20,9 @@ class RoleSeeder extends Seeder
         Role::create(['name' => 'manager']);
         Role::create(['name' => 'user']);
 
-      
+        // all permission to admin
+        $admin = Role::where('name', 'admin')->first();
+        $admin->givePermissionTo(Permission::all());
+
     }
 }

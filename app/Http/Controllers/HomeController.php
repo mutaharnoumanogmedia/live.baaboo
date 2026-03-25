@@ -20,6 +20,7 @@ class HomeController extends Controller
         $currentLiveShow = LiveShow::whereIn('status', ['live', 'scheduled'])
             ->where('scheduled_at', '>=', now())
             ->orderBy('scheduled_at', 'asc')
+            ->notTestShow()
             ->with('users')
             ->first();
 
@@ -174,7 +175,8 @@ class HomeController extends Controller
         $liveShow = LiveShow::whereIn('status', ['live', 'scheduled'])
             ->where('scheduled_at', '>=', now())
             ->orderBy('scheduled_at', 'asc')
-            ->whereNot('id', 1001)
+
+            ->notTestShow()
             ->first();
         if (! $liveShow) {
             return redirect()->route('index')->with('error', 'No live show found');

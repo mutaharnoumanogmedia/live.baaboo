@@ -20,6 +20,7 @@
                                 <th>Title</th>
                                 <th>Date</th>
                                 <th>Status</th>
+                                <th>Is Test Show</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -40,12 +41,26 @@
                                             <span class="badge bg-light text-dark">{{ ucfirst($show->status) }}</span>
                                         @endif
                                     </td>
+                                    <td>
+                                        @if ($show->is_test_show)
+                                            <span class="badge bg-danger">Yes</span>
+                                        @else
+                                            <span class="badge bg-success">No</span>
+                                        @endif
+                                    </td>
                                     <td class="d-flex gap-2">
-                                        <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.live-shows.edit', $show->id) }}">Edit</a>
-                                        <a class="btn btn-sm btn-outline-info" href="{{ route('admin.live-shows.show', $show->id) }}">View</a>
-                                        <a class="btn btn-sm btn-outline-warning" href="{{ route('admin.live-show-quizzes.index', ['live_show_id' => $show->id]) }}">Quiz Questions</a>
-                                        <a class="btn btn-sm btn-outline-secondary" href="{{ route('admin.live-shows.gallery-attach', $show) }}">Gallery Media</a>
-                                        <form action="{{ route('admin.live-shows.destroy', $show->id) }}" method="POST" style="display:inline;">
+                                        <a class="btn btn-sm btn-outline-primary"
+                                            href="{{ route('admin.live-shows.edit', $show->id) }}">Edit</a>
+                                        <a class="btn btn-sm btn-outline-info"
+                                            href="{{ route('admin.live-shows.show', $show->id) }}">View</a>
+                                        <a class="btn btn-sm btn-outline-warning"
+                                            href="{{ route('admin.live-show-quizzes.index', ['live_show_id' => $show->id]) }}">Quiz
+                                            Questions</a>
+                                        <a class="btn btn-sm btn-outline-secondary"
+                                            href="{{ route('admin.live-shows.gallery-attach', $show) }}">Gallery
+                                            Media</a>
+                                        <form action="{{ route('admin.live-shows.destroy', $show->id) }}"
+                                            method="POST" style="display:inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger"
