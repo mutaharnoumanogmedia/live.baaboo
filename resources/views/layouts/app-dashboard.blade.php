@@ -114,6 +114,19 @@
                             Push Notifications
                         </a>
 
+                        <div class="sb-sidenav-menu-heading">Access Control</div>
+                        <a class="nav-link" href="{{ route('admin.users.index') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-person-badge-fill"></i></div>
+                            Admin Users
+                        </a>
+                        <a class="nav-link" href="{{ route('admin.roles.index') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                            Roles
+                        </a>
+                        <a class="nav-link" href="{{ route('admin.permissions.index') }}">
+                            <div class="sb-nav-link-icon"><i class="bi bi-key-fill"></i></div>
+                            Permissions
+                        </a>
 
                         <a class="nav-link mt-4" href="#"
                             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

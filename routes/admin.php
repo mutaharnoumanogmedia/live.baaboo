@@ -4,7 +4,9 @@ use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AppSettingsController;
 use App\Http\Controllers\Admin\HomeController as AdminHomeController;
 use App\Http\Controllers\Admin\LiveShowController;
+use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\PushNotificationController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +22,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/gtm', [\App\Http\Controllers\Admin\GtmController::class, 'index'])->name('gtm.index');
     Route::post('/gtm', [\App\Http\Controllers\Admin\GtmController::class, 'update'])->name('gtm.update');
     Route::resource('users', AdminUserController::class);
+
+    Route::resource('roles', RoleController::class)->except(['show']);
+    Route::resource('permissions', PermissionController::class)->only(['index', 'create', 'store', 'destroy']);
 
     Route::resource('live-shows', \App\Http\Controllers\Admin\LiveShowController::class);
     Route::get('live-shows/{live_show}/gallery-attach', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'liveShowsAttachPage'])->name('live-shows.gallery-attach');

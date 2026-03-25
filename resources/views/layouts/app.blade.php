@@ -66,6 +66,21 @@
                         <i class="bi bi-gear-fill"></i> Settings
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('admin.users.index') }}">
+                        <i class="bi bi-person-badge-fill"></i> Admin Users
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.roles.index') }}">
+                        <i class="bi bi-shield-lock-fill"></i> Roles
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.permissions.index') }}">
+                        <i class="bi bi-key-fill"></i> Permissions
+                    </a>
+                </li>
                 <li class="mt-4">
                     <a href="#"
                         onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
