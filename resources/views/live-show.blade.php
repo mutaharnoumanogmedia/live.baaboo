@@ -395,6 +395,7 @@
         // Toggle quiz mode
         function toggleQuiz(action) {
             //scroll to top
+            //for safety, scroll to top of the page
             window.scrollTo(0, 0);
 
 

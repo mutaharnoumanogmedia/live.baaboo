@@ -501,7 +501,7 @@ body .end-show {
 
 /* Quiz overlay */
 .quiz-overlay {
-    position: fixed;
+    position: absolute;
     top: 0px;
     left: 0;
     right: 0;
