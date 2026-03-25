@@ -80,6 +80,7 @@ class LiveShowController extends Controller
             'max_winners' => 'required|integer|min:1|max:50',
             'winner_prizes' => 'nullable|array',
             'winner_prizes.*' => 'nullable|string|max:255',
+            'is_test_show' => 'required|boolean',
         ]);
 
         $validated['created_by'] = Auth::id();
@@ -140,6 +141,7 @@ class LiveShowController extends Controller
             'max_winners' => 'required|integer|min:1|max:50',
             'winner_prizes' => 'nullable|array',
             'winner_prizes.*' => 'nullable|string|max:255',
+            'is_test_show' => 'required|boolean',
         ]);
 
         $validated['created_by'] = Auth::id();
