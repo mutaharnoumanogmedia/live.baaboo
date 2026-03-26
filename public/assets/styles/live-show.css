@@ -14,7 +14,7 @@ body {
     height: 100vh;
     overflow-y: scroll;
 
-    background: url('../images/quiz-bg.png') no-repeat center center;
+    background: url("../images/quiz-bg.png") no-repeat center center;
 }
 
 .bg-nav-radial-top-gradient {
@@ -239,7 +239,7 @@ body .end-show {
     width: 175px;
     z-index: 1;
     position: absolute;
-    top: 114px;
+    top: 130px;
     left: 50%;
     transform: translate(-50%, -50%);
     border-radius: 100%;
@@ -525,7 +525,7 @@ body .end-show {
     position: relative;
     padding: 9px;
     height: 100%;
-    background: url('../images/quiz-bg.png') no-repeat center center;
+    background: url("../images/quiz-bg.png") no-repeat center center;
     background-size: cover;
     border-radius: 0px;
 }
@@ -653,9 +653,18 @@ body .end-show {
 @media (max-width: 767px) {
 }
 
+/* if body has .quiz-mode, fix the position of the main-container to be fixed */
+body .main-container.quiz-mode {
+    position: fixed;
+    top: 0;
+    height: 100%;
+}
 .main-container.quiz-mode {
     transform: scale(1) translateY(-0px);
     z-index: 99999;
+    position: fixed;
+    top: 0;
+    height: 100%;
 }
 
 .quiz-timer {

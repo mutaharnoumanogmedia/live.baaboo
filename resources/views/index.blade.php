@@ -119,7 +119,8 @@
         </div>
     @endif --}}
 
-    <div class="container text-center m-auto" style="background-color: #fde901; color: #140b63; padding: 20px; border-radius: 10px;">
+    <div class="container text-center m-auto"
+        style="background-color: #fde901; color: #140b63; padding: 20px; border-radius: 10px;">
         <p class="fs-3"> 🚨 Technische Panne bei Badabing-Premiere – sorry!</p>
         <br>
         Ihr wart so viele, dass unsere Server nicht mitgekommen sind. Bestes Problem, das uns passieren konnte – aber
@@ -416,7 +417,7 @@
        WAS LÄUFT / SCHEDULE
   ══════════════════════════════════════════ -->
     <section class="schedule-section gradient-bg">
-        <div class="container">
+        <div class="container w-100">
             <div class="mb-4 text-center">
                 <div class="fs-6 fw-bold text-orange" style="text-transform: uppercase;">Showtime</div>
                 <h2 class="section-title">Was läuft, was <span class="text-purple">kommt</span>.</h2>
@@ -432,23 +433,32 @@
     <section class="container p-4 bg-whtie">
         <div class="row">
             <div class="col-md-3">
-                <img src="{{ asset('images/money-sack-icon.png') }}" alt="Schedule 1" class="img-fluid"
-                    width="20">
-                Geldpreise
+                <center>
+                    <img src="{{ asset('images/money-sack-icon.png') }}" alt="Schedule 1" class="img-fluid"
+                        width="20">
+                    Geldpreise
+                </center>
             </div>
             <div class="col-md-3">
-                <img src="{{ asset('images/aero-plane-icon.png') }}" alt="Schedule 2" class="img-fluid"
-                    width="20">
-                Traumreisen
+                <center>
+                    <img src="{{ asset('images/aero-plane-icon.png') }}" alt="Schedule 2" class="img-fluid"
+                        width="20">
+                    Traumreisen
+                </center>
             </div>
             <div class="col-md-3">
-                <img src="{{ asset('images/shop-bag-icon.png') }}" alt="Schedule 3" class="img-fluid"
-                    width="20">
-                Shopping-Gutscheine
+                <center>
+                    <img src="{{ asset('images/shop-bag-icon.png') }}" alt="Schedule 3" class="img-fluid"
+                        width="20">
+                    Shopping-Gutscheine
+                </center>
             </div>
             <div class="col-md-3">
-                <img src="{{ asset('images/gift-icon.png') }}" alt="Schedule 4" class="img-fluid" width="20">
-                Sachpreise
+                <center>
+                    <img src="{{ asset('images/gift-icon.png') }}" alt="Schedule 4" class="img-fluid"
+                        width="20">
+                    Sachpreise
+                </center>
             </div>
         </div>
     </section>
