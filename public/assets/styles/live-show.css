@@ -670,7 +670,7 @@ body .main-container.quiz-mode {
 .quiz-timer {
     width: 210px;
     height: 210px;
-    margin: 0 auto 10px;
+    margin: 16px 16px 10px 16px;
     /* center above question */
     position: relative;
 }
