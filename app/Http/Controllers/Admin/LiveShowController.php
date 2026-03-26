@@ -280,6 +280,9 @@ class LiveShowController extends Controller
         if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
+        // make all users is_winner = false
+        $liveShow->users()->update(['is_winner' => false]);
+        
         $maxWinners = (int) $liveShow->max_winners;
         $topMaxWinnersByScore =
             $topMaxWinnersByScore = $liveShow->users()
