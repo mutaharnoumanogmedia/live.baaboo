@@ -384,6 +384,9 @@ class GamePlayController extends Controller
         }
 
         $messageText = $request->message;
+        $messageText = trim($messageText);
+        $messageText = strip_tags($messageText);
+        $messageText = htmlspecialchars($messageText);
 
         if (! $messageText || strlen(trim($messageText)) == 0) {
             return response()->json(['message' => 'Message cannot be empty.'], 422);
@@ -450,7 +453,8 @@ class GamePlayController extends Controller
             return response()->json(['message' => 'Live show not found.'], 404);
         }
 
-        $messages = LiveShowMessages::with('user')->where('live_show_id', $liveShowId)->where('is_removed', false)->orderBy('created_at', 'asc')->get();
+        $messages = LiveShowMessages::with('user')->where('live_show_id', $liveShowId)->where('is_removed', false)->orderBy('created_at', 'asc')
+            ->skip(0)->take(100)->get();
 
         return response()->json(['messages' => $messages], 200);
     }
@@ -533,7 +537,7 @@ class GamePlayController extends Controller
         // return response()->json(['users' => $usersWithScores], 200);
 
         $skip = request()->get('skip', 0);
-        $take = request()->get('take', 500);
+        $take = request()->get('take', 100);
 
         $totalUsers = $liveShow->users()->count();
 
@@ -560,7 +564,12 @@ class GamePlayController extends Controller
             })
             ->values();
 
-        return response()->json(['users' => $users, 'totalUsers' => $totalUsers]);
+        $you = $users->firstWhere('id', Auth::guard('web')->user()->id);
+        if (! $you) {
+            $you = null;
+        }
+
+        return response()->json(['users' => $users, 'totalUsers' => $totalUsers, 'you' => $you ?? null]);
     }
 
     private function sessionGeneration(User $user, Request $request)

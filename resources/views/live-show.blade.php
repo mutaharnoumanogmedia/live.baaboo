@@ -4,10 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://js.pusher.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
+
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <title>{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="{{ asset('styles/live-show.css?' . time()) }}" rel="stylesheet">
 
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}">
@@ -21,7 +33,7 @@
     <meta name="twitter:description" content="{{ __('de.main_ui.subtitle') }}">
     <meta name="twitter:image" content="{{ asset('og-image.webp') }}">
 
-    <!-- Google Tag Manager -->
+    {{-- <!-- Google Tag Manager -->
     <script>
         (function(w, d, s, l, i) {
             w[l] = w[l] || [];
@@ -40,13 +52,18 @@
 
     <!-- Google Tag Manager (noscript) --> <noscript><iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-PSLR7HMJ" height="0" width="0"
-            style="display:none;visibility:hidden"></iframe></noscript> <!-- End Google Tag Manager (noscript) -->
-
-    <link href='https://fonts.googleapis.com/css?family=Outfit' rel='stylesheet'>
-    <link href="{{ asset('styles/live-show.css?' . time()) }}" rel="stylesheet">
-
-
+            style="display:none;visibility:hidden"></iframe></noscript> <!-- End Google Tag Manager (noscript) --> --}}
     @include('partials.gtm', ['part' => 'head'])
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+
+
+
+
 </head>
 
 <body>
@@ -108,7 +125,8 @@
                         <div class="quiz-options row">
                             ${quiz.options.map((option, index) =>
                             `<div class="quiz-option"> <input type="radio" id="option${option.id}" name="option"
-                                    value="${option.id}"> <label for="option${option.id}">${option.option_text}</label>
+                                    value="${option.id}"> <label
+                                    for="option${option.id}">${option.option_text}</label>
                             </div> `).join('')}
                         </div>
                     </div>
@@ -347,14 +365,18 @@
 
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 
     <script>
         let quizMode = false;
         let timer = 5;
+
+
+        const $chatInput = document.getElementById('chatInput');
+        const $sendBtnOverlay = document.getElementById('send-btn-overlay');
+        const $videoContainer = document.querySelector('#videoContainer');
+        const $quizOverlay = document.getElementById('quizOverlay');
+        const $overlayChat = document.getElementById('overlayChat');
+
 
         let currentCountdownSeconds = 0;
         // let currentCountdownMilliseconds = 0; // total elapsed ms
@@ -400,39 +422,26 @@
 
 
             const mainContainer = document.getElementById('mainContainer');
-            const quizOverlay = document.getElementById('quizOverlay');
-            // const showQuestionBtn = document.getElementById('showQuestionBtn');
-            const videoContainer = document.querySelector('#videoContainer');
+
+
+            // const videoContainer = document.querySelector('#videoContainer');
 
             quizMode = !quizMode;
 
             if (action == "show") {
                 mainContainer.classList.add('quiz-mode');
-                quizOverlay.classList.add('active');
-                videoContainer.classList.add('question-activated');
-                // showQuestionBtn.style.display = 'none';
-                // showQuestionBtn.classList.add('active');
+                $quizOverlay.classList.add('active');
+                $videoContainer.classList.add('question-activated');
+
             } else {
                 mainContainer.classList.remove('quiz-mode');
-                quizOverlay.classList.remove('active');
-                videoContainer.classList.remove('question-activated');
-                // showQuestionBtn.style.display = 'block';
-                // showQuestionBtn.classList.remove('active');
+                $quizOverlay.classList.remove('active');
+                $videoContainer.classList.remove('question-activated');
+
             }
-            //uncheck all optionsmove 
-            // document.querySelectorAll('input[name="option"]').forEach(option => {
-            //     option.checked = false;
-            //     option.disabled = false;
-            // });
-            // //remove .quiz-option label focus or hover or checked state
-            // document.querySelectorAll('.quiz-option label').forEach(label => {
-            //     // Remove any classes that could represent focus or hover from the quiz option labels
-            //     label.classList.remove('focus', 'hover', 'active');
-            //     // Optionally, if you're using Bootstrap or custom styles, also remove classes like 'checked', 'selected' etc.
-            //     label.classList.remove('checked', 'selected');
-            // });
+
             uncheckAndEnableOptions();
-            // hideAllModals();
+
         }
 
         function hideAllModals() {
@@ -630,10 +639,9 @@
                 showRegisterModal();
                 return;
             }
-            const input = document.getElementById('chatInput');
-            const message = input.value.trim();
+            const message = $chatInput.value.trim();
 
-            input.disabled = true;
+            $chatInput.disabled = true;
             document.querySelector('#send-btn-overlay').disabled = true;
 
             if (message) {
@@ -650,8 +658,8 @@
                     success: function(response) {
                         // Handle success
                         // addOverlayMessage('@You', message);
-                        input.value = '';
-                        input.disabled = false;
+                        $chatInput.value = '';
+                        $chatInput.disabled = false;
                         document.querySelector('#send-btn-overlay').disabled = false;
                     },
                     error: function(xhr) {
@@ -660,7 +668,7 @@
                         //if message ==  "Too Many Attempts."
                         if (xhr.responseJSON?.message == "Too Many Attempts.") {
                             alert('Du kannst nur 5 Nachrichten pro Minute senden 🙂');
-                            input.disabled = false;
+                            $chatInput.disabled = false;
                             document.querySelector('#send-btn-overlay').disabled = false;
 
                         }
@@ -678,11 +686,15 @@
             fetch('{{ url('/live-show/' . $liveShow->id . '/messages') }}')
                 .then(response => response.json())
                 .then(data => {
+
                     const overlayChat = document.getElementById('overlayChat');
                     overlayChat.innerHTML = ''; // Clear existing messages
                     data.messages.forEach(msg => {
-                        if (userId != msg.user.id) {
+                        console.log('msg:', msg);
+                        if (msg.user !== null) {
+
                             addOverlayMessage('@' + msg.user.name, msg.message);
+
 
                         }
                     });
@@ -699,12 +711,20 @@
                 <div class="message-text">${text}</div>
             `;
             overlayChat.appendChild(messageDiv);
+            while (overlayChat.children.length > 100) {
+                let firstChild = overlayChat.firstChild;
+                firstChild.remove();
+
+                console.log('removed first child:', firstChild, 'overlayChat children length:', overlayChat.children
+                    .length);
+
+            }
             overlayChat.scrollTop = overlayChat.scrollHeight;
 
         }
 
         // Allow Enter key to send message
-        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+        $chatInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 sendMessage();
             }
@@ -712,37 +732,17 @@
 
 
 
-        // // Update viewer count periodically
-        // function updateViewerCount() {
-        //     //console.log('Updating viewer count...');
-
-        //     const viewerElement = document.querySelector('#user-count');
-        //     fetch('{{ url('api/live-show/' . $liveShow->id . '/get-live-show-users') }}')
-        //         .then(response => response.json())
-        //         .then(data => {
-        //             const newCount = data.length;
-        //             viewerElement.innerHTML =
-        //                 `${newCount.toLocaleString()} `;
-        //         })
-        //         .catch(() => {
-        //             // Optionally handle error or fallback
-        //         });
-        // }
-
-
-        // // updateViewerCount();
-
 
         @if ($liveShow->status == 'live')
             setInterval(
                 function() {
                     updatePlayersLeaderboard();
 
-                }, 10000);
+                }, 30000);
         @endif
 
         // Prevent quiz overlay from closing when clicking inside
-        document.getElementById('quizOverlay').addEventListener('click', function(e) {
+        $quizOverlay.addEventListener('click', function(e) {
             if (e.target === this) {
                 toggleQuiz("show");
             }
@@ -889,8 +889,8 @@
             toggleQuiz("show");
 
             //disable chatInput
-            document.getElementById('chatInput').disabled = true;
-            document.getElementById('send-btn-overlay').disabled = true;
+            $chatInput.disabled = true;
+            $sendBtnOverlay.disabled = true;
 
 
         });
@@ -957,10 +957,10 @@
                 //if 5 seconds left change color to red
                 if (timeLeft <= 5) {
                     circle.style.stroke = "#dc3545"; // Red color
-                    document.querySelector('#videoContainer').style.display = "none";
+                    $videoContainer.style.display = "none";
                 } else {
                     circle.style.stroke = "#007bff"; // Default color
-                    document.querySelector('#videoContainer').style.display = "block";
+                    $videoContainer.style.display = "block";
                 }
 
                 if (timeLeft <= 0) {
@@ -1086,7 +1086,7 @@
         }
 
         function showVideoContainer() {
-            document.querySelector('#videoContainer').style.display = "block";
+            $videoContainer.style.display = "block";
         }
 
 
@@ -1142,8 +1142,8 @@
         channelRemoveQuestion.bind('RemoveLiveShowQuizQuestionEvent', function(data) {
             console.log('Remove Quiz Question:', data);
             toggleQuiz("remove");
-            document.getElementById('chatInput').disabled = false;
-            document.getElementById('send-btn-overlay').disabled = false;
+            $chatInput.disabled = false;
+            $sendBtnOverlay.disabled = false;
         });
 
 
@@ -1365,10 +1365,31 @@
                 .then(data => {
                     const users = data.users;
                     const totalUsers = data.totalUsers;
-                    console.log('Players with scores:', users, 'totalUsers:', totalUsers);
+                    // console.log('Players with scores:', users, 'totalUsers:', totalUsers);
 
                     const playersListContainer = document.getElementById('players-leaderbord');
                     playersListContainer.innerHTML = '';
+                    const you = data.you;
+                    if (you) {
+                        //add a player-list-item on top of the list
+                        const youDiv = document.createElement('div');
+                        youDiv.className =
+                            'player-list-item d-flex justify-content-between align-items-center mb-2 p-2 rounded bg-light border border-1';
+                        youDiv.innerHTML = `
+                            <div>
+                                <span style="margin-right: 20px;">
+                                    <i class="fas fa-user-circle text-primary ms-2" title="You"></i>
+                                    </span>
+                                        <strong>${you.name} (You)</strong>
+
+                                        <span class="ms-2">${you.is_winner ? '<i class="fas fa-trophy text-warning ms-2" title="Winner"></i>' : ''}</span>
+                                    </div>
+                                    <div>
+                                        Score: ${you.score || 0}
+                                    </div>
+                        `;
+                        playersListContainer.appendChild(youDiv);
+                    }
 
                     users.forEach((user, index) => {
                         let bgColor = '';
@@ -1397,7 +1418,7 @@
                         userDiv.innerHTML = `
 
                                     <div >
-                                <span style="margin-right: 20px;">${index + 1}</span>
+                                <span style="margin-right: 20px;">${toOrdinalSup(index + 1)}</span>
                                         <strong>${user.name} ${user.id == userId ? '(You)' : ''}</strong>
 
                                         <span class="ms-2">${user.is_winner ? '<i class="fas fa-trophy text-warning ms-2" title="Winner"></i>' : ''}</span>
@@ -1494,8 +1515,8 @@
         function disableMessageInputAndSendButton() {
 
 
-            document.getElementById('chatInput').disabled = true;
-            document.getElementById('send-btn-overlay').disabled = true;
+            $chatInput.disabled = true;
+            $sendBtnOverlay.disabled = true;
             document.querySelector('#chatInput').style.opacity = '0.5';
             document.querySelector('#send-btn-overlay').style.opacity = '0.5';
             document.querySelector('#chatInput').style.cursor = 'not-allowed';
@@ -1505,8 +1526,8 @@
         }
 
         function enableMessageInputAndSendButton() {
-            document.getElementById('chatInput').disabled = false;
-            document.getElementById('send-btn-overlay').disabled = false;
+            $chatInput.disabled = false;
+            $sendBtnOverlay.disabled = false;
             document.querySelector('#chatInput').style.opacity = '1';
             document.querySelector('#send-btn-overlay').style.opacity = '1';
             document.querySelector('#chatInput').style.cursor = 'pointer';
@@ -1526,15 +1547,17 @@
         });
         channelResetChat.bind('ResetChatEvent', function(data) {
             console.log('Reset chat event received:', data);
-            const chatContainer = document.querySelector('#overlayChat');
-            if (chatContainer) {
-                chatContainer.innerHTML = '<p class="text-muted">No messages yet.</p>';
+
+            if ($overlayChat) {
+                $overlayChat.innerHTML = '<p class="text-muted">No messages yet.</p>';
             }
         });
 
 
 
         /* Heart reactions (TikTok/Instagram style) */
+        const _escapeDiv = document.createElement('div');
+
         function spawnHeartReaction(userName) {
             var overlay = document.getElementById('heartReactionsOverlay');
             if (!overlay) return;
@@ -1551,9 +1574,8 @@
         }
 
         function escapeHtml(text) {
-            var div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+            _escapeDiv.textContent = text;
+            return _escapeDiv.innerHTML;
         }
         document.getElementById('heartReactionBtn')?.addEventListener('click', function() {
             fetch('{{ url('live-show/' . $liveShow->id . '/heart-reaction') }}', {
@@ -1587,14 +1609,6 @@
         });
 
         /* Gallery image/video overlay */
-
-        // Function to convert number (0,1,2,3) to corresponding letter (A,B,C,D)
-        function numberToLetter(index) {
-            const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
-                'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
-            ];
-            return letters[index];
-        }
     </script>
 
     <script>
@@ -1734,6 +1748,34 @@
         //if request has ?preview=true, then don't show playButtonOverlay
         if (window.location.search.includes('preview=true')) {
             document.getElementById('playButtonOverlay').style.display = 'none';
+        }
+
+        //Utility functions
+
+        // Function to convert a number to ordinal with superscript (e.g. 1<sup>st</sup>, 2<sup>nd</sup>)
+        function toOrdinalSup(num) {
+            num = parseInt(num, 10);
+            if (isNaN(num)) return '';
+            let j = num % 10,
+                k = num % 100;
+
+            let suffix = "th";
+            if (j == 1 && k != 11) {
+                suffix = "st";
+            } else if (j == 2 && k != 12) {
+                suffix = "nd";
+            } else if (j == 3 && k != 13) {
+                suffix = "rd";
+            }
+
+            return num + '<sup>' + suffix + '</sup>';
+        }
+        // Function to convert number (0,1,2,3) to corresponding letter (A,B,C,D)
+        function numberToLetter(index) {
+            const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+                'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+            ];
+            return letters[index];
         }
     </script>
 

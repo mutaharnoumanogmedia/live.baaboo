@@ -417,7 +417,7 @@
                                         <i class="fas fa-file-export"></i>
                                     </a>
                                 </div>
-                                <div id="live-chat-messages" class="p-3" style="height: 65vh; overflow-y: auto;">
+                                <div id="live-chat-messages" class="p-3">
                                 </div>
                                 <div class="p-3 border-top">
                                     <form onsubmit="event.preventDefault(); sendMessage(event)" class="input-group">
@@ -579,7 +579,7 @@
                 overflow-y: auto;
                 display: flex;
                 flex-direction: column;
-                justify-content: flex-end;
+                /* justify-content: flex-end; */
 
             }
 
@@ -879,20 +879,24 @@
             }
 
             function appendSingleMessage(message) {
+                const userMessageBgClass = 'bg-primary text-white';
+                const adminMessageBgClass = 'bg-light text-dark';
+                const chatContainer = document.querySelector('#live-chat-messages');
                 if (message.user !== null) {
-                    const alertBg = ['alert-primary', 'alert-secondary', 'alert-success', 'alert-danger', 'alert-warning',
-                        'alert-info', 'alert-light', 'alert-dark'
-                    ];
-                    const chatContainer = document.querySelector('#live-chat-messages');
-                    let bgClass = alertBg[Math.floor(Math.random() * alertBg.length)];
+                    let bgClass = userMessageBgClass;
+                    if (message.user.id == "{{ Auth::guard('admin')->user()->id }}") {
+                        bgClass = adminMessageBgClass;
+                    }
                     const messageDiv =
-                        ` <div class="message alert ${bgClass} d-flex justify-content-between">
+                        ` <div class="message alert ${bgClass} d-flex justify-content-between border border-1 rounded-3 p-2">
                                 <div><strong>${message.user.name}:</strong> ${message.message}</div>
                                    
                             </div>`;
 
                     chatContainer.insertAdjacentHTML('beforeend', messageDiv);
                 }
+                //scroll to bottom of chat container
+                chatContainer.scrollTop = chatContainer.scrollHeight;
             }
 
             function toggleBlockStatusForPlayer(userId, action) {
