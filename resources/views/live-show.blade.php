@@ -43,7 +43,7 @@
             style="display:none;visibility:hidden"></iframe></noscript> <!-- End Google Tag Manager (noscript) -->
 
     <link href='https://fonts.googleapis.com/css?family=Outfit' rel='stylesheet'>
-    <link href="{{ asset('styles/live-show.css') }}" rel="stylesheet">
+    <link href="{{ asset('styles/live-show.css?' . time()) }}" rel="stylesheet">
 
 
     @include('partials.gtm', ['part' => 'head'])
