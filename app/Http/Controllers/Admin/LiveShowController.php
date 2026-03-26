@@ -282,7 +282,7 @@ class LiveShowController extends Controller
         }
         // make all users is_winner = false
         $liveShow->users()->update(['is_winner' => false]);
-        
+
         $maxWinners = (int) $liveShow->max_winners;
         $topMaxWinnersByScore =
             $topMaxWinnersByScore = $liveShow->users()
@@ -464,7 +464,7 @@ class LiveShowController extends Controller
 
         ShowGalleryImageEvent::dispatch(
             (string) $liveShow->id,
-            $media->url,
+            $media->path,
             $media->type,
             $playbackStartedAt?->toIso8601String(),
             null
