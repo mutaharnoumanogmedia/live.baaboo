@@ -75,7 +75,9 @@ class MediaGalleryController extends Controller
             ]);
         }
 
-        $path = $file->store('gallery-media/'.date('Y/m'), 'public');
+        // Store file to S3 in 'gallery-media/YYYY/MM' directory and get the full URL
+        $path = $file->store('gallery-media/' . date('Y/m'), 's3');
+        $fullUrl = Storage::disk('s3')->url($path);
 
         $media = GalleryMedia::create([
             'path' => $path,

@@ -282,14 +282,15 @@
                                                                 data-attached="1">
                                                                 <div class="card border shadow-sm">
                                                                     @if ($item->isImage())
-                                                                        <img src="{{ $item->url }}"
+                                                                        <img src="{{ $item->path }}"
                                                                             class="card-img-top"
                                                                             style="height: 100px; object-fit: cover;"
                                                                             alt="">
                                                                     @else
-                                                                        <video src="{{ $item->url }}"
+                                                                        <video src="{{ $item->path }}"
                                                                             class="card-img-top"
                                                                             style="height: 100px; object-fit: cover;"
+                                                                            poster="{{ $item->path }}"
                                                                             muted></video>
                                                                     @endif
                                                                     <div class="card-body p-1 text-center">
@@ -327,12 +328,12 @@
                                                                     data-attached="0">
                                                                     <div class="card border shadow-sm">
                                                                         @if ($item->isImage())
-                                                                            <img src="{{ $item->url }}"
+                                                                            <img src="{{ $item->path }}"
                                                                                 class="card-img-top"
                                                                                 style="height: 100px; object-fit: cover;"
                                                                                 alt="">
                                                                         @else
-                                                                            <video src="{{ $item->url }}"
+                                                                            <video src="{{ $item->path }}"
                                                                                 class="card-img-top"
                                                                                 style="height: 100px; object-fit: cover;"
                                                                                 muted></video>

@@ -15,9 +15,9 @@
                         <div class="col-6 col-md-4 col-lg-2" data-media-id="{{ $item->id }}">
                             <div class="card">
                                 @if ($item->isImage())
-                                    <img src="{{ $item->url }}" class="card-img-top" style="height: 100px; object-fit: cover;" alt="">
+                                    <img src="{{ $item->path }}" class="card-img-top" style="height: 100px; object-fit: cover;" alt="">
                                 @else
-                                    <video src="{{ $item->url }}" class="card-img-top" style="height: 100px; object-fit: cover;" muted></video>
+                                    <video src="{{ $item->path }}" class="card-img-top" style="height: 100px; object-fit: cover;" poster="{{ $item->path }}" muted></video>
                                 @endif
                                 <div class="card-body p-2 text-center">
                                     <form action="{{ route('admin.media-gallery.detach-from-live-show') }}" method="POST" class="detach-form">
@@ -45,9 +45,9 @@
                         <div class="col-6 col-md-4 col-lg-2">
                             <div class="card">
                                 @if ($item->isImage())
-                                    <img src="{{ $item->url }}" class="card-img-top" style="height: 100px; object-fit: cover;" alt="">
+                                    <img src="{{ $item->path }}" class="card-img-top" style="height: 100px; object-fit: cover;" alt="">
                                 @else
-                                    <video src="{{ $item->url }}" class="card-img-top" style="height: 100px; object-fit: cover;" muted></video>
+                                    <video src="{{ $item->path }}" class="card-img-top" style="height: 100px; object-fit: cover;" poster="{{ $item->path }}" muted></video>
                                 @endif
                                 <div class="card-body p-2 text-center">
                                     @if (in_array($item->id, $attachedIds))

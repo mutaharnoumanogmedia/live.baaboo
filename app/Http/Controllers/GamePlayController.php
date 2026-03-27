@@ -564,7 +564,7 @@ class GamePlayController extends Controller
             })
             ->values();
 
-        $you = $users->firstWhere('id', Auth::guard('web')->user()->id);
+        $you = $users->firstWhere('id', Auth::guard('web')->user()->id ?? null);
         if (! $you) {
             $you = null;
         }

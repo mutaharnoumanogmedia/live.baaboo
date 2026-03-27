@@ -13,7 +13,7 @@
                         @if ($media->isImage())
                             <img src="{{ $media->url }}" alt="{{ $media->title }}" class="img-fluid rounded">
                         @else
-                            <video src="{{ $media->url }}" class="img-fluid rounded" controls style="max-height: 240px;"></video>
+                            <video src="{{ $media->url }}" class="img-fluid rounded" controls style="max-height: 240px;" poster="{{ $media->url }}"></video>
                         @endif
                         <p class="small text-muted mt-2 mb-0">{{ $media->original_name }} · {{ number_format($media->file_size / 1024, 1) }} KB</p>
                     </div>

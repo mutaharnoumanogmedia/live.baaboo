@@ -23,9 +23,9 @@
                         <div class="card h-100">
                             <div class="card-img-top position-relative bg-dark" style="height: 160px; overflow: hidden;">
                                 @if ($item->isImage())
-                                    <img src="{{ $item->url }}" alt="{{ $item->title }}" class="w-100 h-100 object-fit-cover">
+                                    <img src="{{ $item->path }}" alt="{{ $item->title }}" class="w-100 h-100 object-fit-cover">
                                 @else
-                                    <video src="{{ $item->url }}" class="w-100 h-100 object-fit-cover" muted></video>
+                                    <video src="{{ $item->path }}" class="w-100 h-100 object-fit-cover" poster="{{ $item->path }}" muted></video>
                                     <span class="position-absolute bottom-0 end-0 badge bg-dark m-1"><i class="bi bi-play-fill"></i> Video</span>
                                 @endif
                             </div>
