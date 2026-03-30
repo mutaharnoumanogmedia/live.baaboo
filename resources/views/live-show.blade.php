@@ -1814,7 +1814,7 @@
                 const quiz = quizzes[idx];
 
                 // 1. Show the question (simulate admin pressing 'Send')
-                fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/quizzes/${quiz.id}/send-quiz-question`, {
+                fetch(`{{ url('api/live-show') }}/{{ $liveShow->id }}/quizzes/${quiz.id}/send-quiz-question`, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -1829,7 +1829,7 @@
                         // 2. Wait for 10 seconds (quiz visible to users)
                         setTimeout(() => {
                             // 3. Hide the quiz by calling the remove API
-                            fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/quizzes/${quiz.id}/remove-quiz-question`, {
+                            fetch(`{{ url('api/live-show') }}/{{ $liveShow->id }}/quizzes/${quiz.id}/remove-quiz-question`, {
                                     method: 'POST',
                                     headers: {
                                         'X-CSRF-TOKEN': '{{ csrf_token() }}',

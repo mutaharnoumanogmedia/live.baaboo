@@ -738,10 +738,5 @@ class LiveShowController extends Controller
         return response()->download($csv, 'quizzes'.$liveShow->title.'.csv');
     }
 
-    public function getLiveShowQuizzes($id)
-    {
-        $liveShow = LiveShow::findOrFail($id);
-        $quizzes = $liveShow->quizzes()->with('options')->get();
-        return response()->json($quizzes);
-    }
+  
 }

@@ -31,7 +31,6 @@ Route::prefix('live-show')->group(function () {
     Route::get('/{id}/get-live-show-messages', [AdminLiveShowController::class, 'apiGetLiveShowMessages']);
 
     Route::post('/{id}/user/updateOnlineStatus', [UserLiveShowController::class, 'updateOnlineStatus']);
-    Route::get('/{id}/get-live-show-quizzes', [AdminLiveShowController::class, 'getLiveShowQuizzes'])->name('api.get-live-show-quizzes');
 
 });
 
@@ -79,3 +78,56 @@ Route::get('/get-latest-live-or-scheduled-show', [GamePlayController::class, 'ge
 
 Route::post('/register-affiliate-user', [HomeController::class, 'registerAffiliateUserViaAPI'])->name('api.register-affiliate-user');
 Route::get('/get-affiliate-user/{userName}', [HomeController::class, 'getAffiliateUserViaAPI'])->name('api.get-affiliate-user');
+
+// auto test apis
+
+// Convert: sendQuizQuestion
+Route::post('/live-show/{id}/quizzes/{quizId}/send-quiz-question', function (\Illuminate\Http\Request $request, $id, $quizId) {
+    $request->validate([
+        'seconds' => 'integer|min:2|max:120',
+        'is_last' => 'nullable|boolean',
+    ]);
+
+    $liveShow = \App\Models\LiveShow::findOrFail($id);
+
+    $quiz = \App\Models\LiveShowQuiz::where('id', $quizId)->first();
+    if (! $quiz) {
+        return response()->json(['message' => 'Quiz not found for this live show.'], 404);
+    }
+    $quizArr = $quiz->toArray();
+
+    $quizOptions = \App\Models\QuizOption::where('quiz_id', $quizId)->select('id', 'quiz_id', 'option_text')->get()->toArray();
+    $quizArr['options'] = $quizOptions;
+
+    $totalQuizQuestions = $liveShow->quizzes()->count();
+    $quizArr['totalQuizQuestions'] = $totalQuizQuestions;
+
+    \App\Events\ShowLiveShowQuizQuestionEvent::dispatch(
+        $quizArr, (string) $liveShow->id, $request->seconds ?? 10, $request->is_last ?? false
+    );
+
+    return response()->json(['message' => 'Quiz question sent successfully!']);
+});
+
+// Convert: removeQuizQuestion
+Route::post('/live-show/{id}/quizzes/{quizId}/remove-quiz-question', function (\Illuminate\Http\Request $request, $id, $quizId) {
+    $liveShow = \App\Models\LiveShow::findOrFail($id);
+    $quiz = $liveShow->quizzes()->where('id', $quizId)->first();
+
+    if (! $quiz) {
+        return response()->json(['message' => 'Quiz not found for this live show.'], 404);
+    }
+
+    \App\Events\RemoveLiveShowQuizQuestionEvent::dispatch($quiz->id, (string) $liveShow->id);
+
+    return response()->json(['message' => 'Quiz question removed successfully!']);
+});
+
+Route::get('live-show/{id}/get-live-show-quizzes', function ($id) {
+
+    $liveShow = \App\Models\LiveShow::findOrFail($id);
+    $quizzes = $liveShow->quizzes()->with('options')->get();
+
+    return response()->json($quizzes);
+
+})->name('api.get-live-show-quizzes');
