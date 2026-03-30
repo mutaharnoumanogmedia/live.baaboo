@@ -221,7 +221,7 @@ class LiveShowController extends Controller
     public function sendQuizQuestion(Request $request, $id, $quizId)
     {
         $request->validate([
-            'seconds' => 'required|integer|min:2|max:120',
+            'seconds' => 'integer|min:2|max:120',
             'is_last' => 'nullable|boolean',
         ]);
 
@@ -249,7 +249,7 @@ class LiveShowController extends Controller
         $quiz['totalQuizQuestions'] = $totalQuizQuestions;
 
         // Broadcast the quiz question to users
-        ShowLiveShowQuizQuestionEvent::dispatch($quiz, (string) $liveShow->id, $request->seconds, $request->is_last ?? false);
+        ShowLiveShowQuizQuestionEvent::dispatch($quiz, (string) $liveShow->id, $request->seconds ?? 10, $request->is_last ?? false);
 
         return response()->json(['message' => 'Quiz question sent successfully!']);
     }
@@ -736,5 +736,12 @@ class LiveShowController extends Controller
 
         // download the csv file
         return response()->download($csv, 'quizzes'.$liveShow->title.'.csv');
+    }
+
+    public function getLiveShowQuizzes($id)
+    {
+        $liveShow = LiveShow::findOrFail($id);
+        $quizzes = $liveShow->quizzes()->with('options')->get();
+        return response()->json($quizzes);
     }
 }
