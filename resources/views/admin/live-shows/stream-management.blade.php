@@ -153,223 +153,271 @@
                 </div>
 
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-success py-3">
-                        <h5 class="mb-0 fw-bold text-center">Quiz Questions
-                        </h5>
+                    <div class="card-header bg-light py-3">
+                        <ul class="nav nav-tabs card-header-tabs" id="quizGalleryTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="quiz-tab" data-bs-toggle="tab"
+                                    data-bs-target="#quizTabPane" type="button" role="tab"
+                                    aria-controls="quizTabPane" aria-selected="true">
+                                    Quiz Questions
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="gallery-tab" data-bs-toggle="tab"
+                                    data-bs-target="#galleryTabPane" type="button" role="tab"
+                                    aria-controls="galleryTabPane" aria-selected="false">
+                                    Gallery Media
+                                </button>
+                            </li>
+                        </ul>
                     </div>
                     <div class="card-body position-relative">
-                        <div class="question-slider px-2">
-                            @foreach ($liveShow->quizzes as $index => $quiz)
-                                <div class="px-2">
-                                    <div class="card border mb-3">
-                                        <div class="card-body" style="height: 450px; overflow-y:scroll">
-                                            <div class="text-center mb-4 fw-bold">
-                                                <div class="mb-2">Question {{ $index + 1 }} /
-                                                    {{ $liveShow->quizzes->count() }}</div>
-
-                                                <div class="fw-bold h3">{{ $quiz->question }}</div>
-                                            </div>
-
-                                            @if ($quiz->options)
-                                                <div class="row g-3 mb-4">
-                                                    @foreach ($quiz->options as $option)
-                                                        <div class="col-md-6">
-                                                            <div
-                                                                class="p-3 border rounded @if ($option->is_correct) border-success @endif">
-                                                                <div class="d-flex justify-content-between mb-2">
-                                                                    <span
-                                                                        class="fw-bold @if ($option->is_correct) text-success @endif">
-                                                                        {{ $option->option_text }}
-                                                                        @if ($option->is_correct)
-                                                                            <i class="fas fa-check-circle ms-1"></i>
-                                                                        @endif
-                                                                    </span>
-                                                                    <span class="small fw-bold"
-                                                                        id="option-result-label-{{ $option->id }}">0%</span>
-                                                                </div>
-                                                                <div class="progress" style="height: 8px;">
-                                                                    <div id="option-result-bar-{{ $option->id }}"
-                                                                        class="progress-bar @if ($option->is_correct) bg-success @else bg-primary @endif"
-                                                                        role="progressbar" style="width: 0%"></div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-
-                                                <form method="POST" id="quiz-timer-form-{{ $quiz->id }}"
-                                                    onsubmit="submitQuizTimerForm(event, {{ $quiz->id }})"
-                                                    class="row g-2 align-items-center justify-content-center">
-                                                    @csrf
-                                                    <div class="col-auto">
-                                                        <div class="input-group">
-                                                            <span class="input-group-text bg-white"><i
-                                                                    class="fas fa-stopwatch text-muted"></i></span>
-                                                            <input type="number" min="1" name="seconds"
-                                                                id="timer-{{ $quiz->id }}" value="10"
-                                                                class="form-control text-center fw-bold"
-                                                                style="width: 80px;" required>
-                                                        </div>
+                        <div class="tab-content" id="quizGalleryTabsContent">
+                            <div class="tab-pane fade show active" id="quizTabPane" role="tabpanel"
+                                aria-labelledby="quiz-tab">
+                                <div class="question-slider px-2">
+                                    @foreach ($liveShow->quizzes as $index => $quiz)
+                                        <div class="px-2">
+                                            <div class="card border mb-3">
+                                                <div class="card-body" style="height: 450px; overflow-y:scroll">
+                                                    <div class="text-center mb-4 fw-bold">
+                                                        <div class="mb-2">Question {{ $index + 1 }} /
+                                                            {{ $liveShow->quizzes->count() }}</div>
+                                                        <div class="fw-bold h3">{{ $quiz->question }}</div>
                                                     </div>
-                                                    @if ($loop->last)
-                                                        <input type="hidden" name="is_last" value="1">
-                                                    @endif
-                                                    <div class="col-auto">
-                                                        <div class="btn-group shadow-sm">
-                                                            <button type="submit" class="btn btn-success px-3">
-                                                                <i class="fas fa-play me-2"></i> Start
-                                                            </button>
-                                                            <button type="button"
-                                                                onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }})"
-                                                                class="btn btn-info px-3 text-white">
-                                                                <i class="fas fa-chart-bar me-2"></i> Show Responses
-                                                            </button>
-                                                            <button class="btn btn-danger px-3" type="button"
-                                                                onclick="removeQuiz({{ $quiz->id }})">
-                                                                <i class="fas fa-times me-2"></i> Hide
-                                                            </button>
 
-                                                        </div>
-                                                    </div>
-                                                </form>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        <div id="quizTimer"
-                            style=" position: absolute; bottom: 120px; right: 100px;   padding: 10px; border: 1px solid transparent; border-radius: 50%; z-index: 1000;width: 100px;height: 100px;display: none;align-items: center;justify-content: center; font-size: 3rem;font-weight: bold; text-align: center; background: url('{{ asset('/images/clock.png') }}') no-repeat center center; background-size: contain;">
-
-                            <span id="quizTimerText" style="color: #000;margin-top: 10px;">0</span>
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-success py-3">
-                        <h5 class="mb-0 fw-bold text-center">Gallery Media
-                        </h5>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card border-0 shadow-sm">
-                                <div class="card-body">
-
-
-                                    <div class=" " id="gallery-media-tab">
-                                        <div class="p-3">
-
-                                            <div class="row">
-                                                <div class="col-lg-6">
-                                                    <div
-                                                        class="d-flex justify-content-between align-items-center mb-2">
-                                                        <h6 class="text-muted small text-uppercase fw-bold mb-0">
-                                                            Attached to this stream</h6>
-                                                        <button type="button"
-                                                            class="btn btn-sm btn-outline-secondary gallery-hide-on-stream-btn"
-                                                            title="Hide image/video overlay on live stream">
-                                                            <i class="fas fa-eye-slash"></i> Hide on stream
-                                                        </button>
-                                                    </div>
-                                                    <div id="gallery-attached-list" class="row g-2 mb-3"
-                                                        style="max-height: 520px; overflow-y: auto;">
-                                                        @forelse ($liveShow->galleryMedia as $item)
-                                                            <div class="col-12 col-lg-6 gallery-media-card"
-                                                                data-media-id="{{ $item->id }}"
-                                                                data-attached="1">
-                                                                <div class="card border shadow-sm">
-                                                                    {{-- Always show as image, even if type is video --}}
-                                                                    <img src="{{ $item->isImage() ? $item->path : $item->thumbnail ?? $item->path }}"
-                                                                        class="card-img-top"
-                                                                        style="height: 100px; object-fit: cover;"
-                                                                        alt="">
-                                                                    <div class="card-body p-1 text-center">
-                                                                        {{-- Show the type of media --}}
-                                                                        <span class="badge {{ $item->type === 'video' ? 'bg-primary' : 'bg-warning text-dark' }} mb-1">{{ ucfirst($item->type) }}</span>
-                                                                        <button type="button"
-                                                                            class="btn btn-sm btn-success w-100 mb-1 gallery-show-on-stream-btn"
-                                                                            data-media-id="{{ $item->id }}"
-                                                                            title="Show on live stream">
-                                                                            <i class="fas fa-tv"></i> Show on stream
-                                                                        </button>
-                                                                        <button type="button"
-                                                                            class="btn btn-sm btn-outline-danger w-100 gallery-detach-btn"
-                                                                            data-media-id="{{ $item->id }}"
-                                                                            title="Remove from stream">
-                                                                            <i class="fas fa-times"></i> Remove
-                                                                        </button>
-                                                                        {{-- Show video title for video, or for all types --}}
-                                                                        @if($item->type === 'video' && $item->title)
-                                                                            <div class="mt-2 text-muted small">{{ $item->title }}</div>
-                                                                        @elseif($item->type === 'image' && $item->title)
-                                                                            <div class="mt-2 text-muted small">{{ $item->title }}</div>
-                                                                        @endif
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        @empty
-                                                            <div class="col-12 text-muted small"
-                                                                id="gallery-attached-empty">None attached yet.</div>
-                                                        @endforelse
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-6">
-                                                    <h6 class="text-muted small text-uppercase fw-bold mb-2 mt-3">Add
-                                                        from gallery</h6>
-                                                    <div id="gallery-available-list" class="row g-2"
-                                                        style="max-height: 520px; overflow-y: auto;">
-                                                        @php $attachedIds = $liveShow->galleryMedia->pluck('id')->toArray(); @endphp
-                                                        @foreach ($allGalleryMedia as $item)
-                                                            @if (!in_array($item->id, $attachedIds))
-                                                                <div class="col-lg-6 col-12 gallery-media-card"
-                                                                    data-media-id="{{ $item->id }}"
-                                                                    data-attached="0">
-                                                                    <div class="card border shadow-sm">
-                                                                        <img src="{{ $item->isImage() ? $item->path : ($item->thumbnail ?? $item->path) }}"
-                                                                            class="card-img-top"
-                                                                            style="height: 100px; object-fit: cover;"
-                                                                            alt="">
-                                                                        <div class="card-body p-1 text-center">
-                                                                            <span class="badge {{ $item->type === 'video' ? 'bg-primary' : 'bg-warning text-dark' }} mb-1">{{ ucfirst($item->type) }}</span>
-                                                                            @if($item->title)
-                                                                                <div class="mt-2 text-muted small">{{ $item->title }}</div>
-                                                                            @endif
-                                                                            <button type="button"
-                                                                                class="btn btn-sm btn-outline-primary w-100 gallery-attach-btn mt-1"
-                                                                                data-media-id="{{ $item->id }}"
-                                                                                title="Attach to stream">
-                                                                                <i class="fas fa-plus"></i> Attach
-                                                                            </button>
+                                                    @if ($quiz->options)
+                                                        <div class="row g-3 mb-4">
+                                                            @foreach ($quiz->options as $option)
+                                                                <div class="col-md-6">
+                                                                    <div
+                                                                        class="p-3 border rounded @if ($option->is_correct) border-success @endif">
+                                                                        <div
+                                                                            class="d-flex justify-content-between mb-2">
+                                                                            <span
+                                                                                class="fw-bold @if ($option->is_correct) text-success @endif">
+                                                                                {{ $option->option_text }}
+                                                                                @if ($option->is_correct)
+                                                                                    <i
+                                                                                        class="fas fa-check-circle ms-1"></i>
+                                                                                @endif
+                                                                            </span>
+                                                                            <span class="small fw-bold"
+                                                                                id="option-result-label-{{ $option->id }}">0%</span>
+                                                                        </div>
+                                                                        <div class="progress" style="height: 8px;">
+                                                                            <div id="option-result-bar-{{ $option->id }}"
+                                                                                class="progress-bar @if ($option->is_correct) bg-success @else bg-primary @endif"
+                                                                                role="progressbar" style="width: 0%">
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            @endif
-                                                        @endforeach
-                                                        @if ($allGalleryMedia->isEmpty() || count($attachedIds) >= $allGalleryMedia->count())
-                                                            <div class="col-12 text-muted small"
-                                                                id="gallery-available-empty">No other media in gallery.
-                                                                <a href="{{ route('admin.media-gallery.create') }}"
-                                                                    target="_blank">Upload</a>
+                                                            @endforeach
+                                                        </div>
+
+                                                        <form method="POST" id="quiz-timer-form-{{ $quiz->id }}"
+                                                            onsubmit="submitQuizTimerForm(event, {{ $quiz->id }})"
+                                                            class="row g-2 align-items-center justify-content-center">
+                                                            @csrf
+                                                            <div class="col-auto">
+                                                                <div class="input-group">
+                                                                    <span class="input-group-text bg-white"><i
+                                                                            class="fas fa-stopwatch text-muted"></i></span>
+                                                                    <input type="number" min="1"
+                                                                        name="seconds" id="timer-{{ $quiz->id }}"
+                                                                        value="10"
+                                                                        class="form-control text-center fw-bold"
+                                                                        style="width: 80px;" required>
+                                                                </div>
                                                             </div>
-                                                        @endif
+                                                            @if ($loop->last)
+                                                                <input type="hidden" name="is_last" value="1">
+                                                            @endif
+                                                            <div class="col-auto">
+                                                                <div class="btn-group shadow-sm">
+                                                                    <button type="submit"
+                                                                        class="btn btn-success px-3">
+                                                                        <i class="fas fa-play me-2"></i> Start
+                                                                    </button>
+                                                                    <button type="button"
+                                                                        onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }})"
+                                                                        class="btn btn-info px-3 text-white">
+                                                                        <i class="fas fa-chart-bar me-2"></i> Show
+                                                                        Responses
+                                                                    </button>
+                                                                    <button class="btn btn-danger px-3" type="button"
+                                                                        onclick="removeQuiz({{ $quiz->id }})">
+                                                                        <i class="fas fa-times me-2"></i> Hide
+                                                                    </button>
+
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <div id="quizTimer"
+                                    style=" position: absolute; bottom: 120px; right: 100px;   padding: 10px; border: 1px solid transparent; border-radius: 50%; z-index: 1000;width: 100px;height: 100px;display: none;align-items: center;justify-content: center; font-size: 3rem;font-weight: bold; text-align: center; background: url('{{ asset('/images/clock.png') }}') no-repeat center center; background-size: contain;">
+                                    <span id="quizTimerText" style="color: #000;margin-top: 10px;">0</span>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="galleryTabPane" role="tabpanel"
+                                aria-labelledby="gallery-tab">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card border-0 shadow-sm">
+                                            <div class="card-body">
+                                                <div class="" id="gallery-media-tab">
+                                                    <div class="p-3">
+                                                        <div class="row">
+                                                            <div class="col-lg-6">
+                                                                <div
+                                                                    class="d-flex justify-content-between align-items-center mb-2">
+                                                                    <h6
+                                                                        class="text-muted small text-uppercase fw-bold mb-0">
+                                                                        Attached to this stream</h6>
+                                                                    <button type="button"
+                                                                        class="btn btn-sm btn-outline-secondary gallery-hide-on-stream-btn"
+                                                                        title="Hide image/video overlay on live stream">
+                                                                        <i class="fas fa-eye-slash"></i> Hide on stream
+                                                                    </button>
+                                                                </div>
+                                                                <div id="gallery-attached-list" class="table-responsive mb-3" style="max-height: 520px; overflow-y: auto;">
+                                                                    <table class="table table-sm table-dark table-hover align-middle mb-0">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th scope="col" style="width: 40px;">#</th>
+                                                                                <th scope="col" style="width: 45px;">Thumb</th>
+                                                                                <th scope="col">Title</th>
+                                                                                <th scope="col" style="width: 65px;">Type</th>
+                                                                                <th scope="col" style="width: 160px;">Actions</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @forelse ($liveShow->galleryMedia as $idx => $item)
+                                                                                <tr class="gallery-media-card" data-media-id="{{ $item->id }}" data-attached="1">
+                                                                                    <td class="text-muted small">{{ $idx + 1 }}</td>
+                                                                                    <td class="p-1">
+                                                                                        <img src="{{ $item->isImage() ? $item->path : $item->thumbnail ?? $item->path }}"
+                                                                                             alt=""
+                                                                                             style="width: 34px; height: 34px; object-fit: cover; border-radius: 4px; border: 1px solid #555;">
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <span class="text-truncate d-block" style="max-width: 170px;">
+                                                                                            {{ $item->title ?: '—' }}
+                                                                                        </span>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <span class="badge {{ $item->type === 'video' ? 'bg-primary' : 'bg-warning text-dark' }}">{{ ucfirst($item->type) }}</span>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="d-flex gap-2 flex-wrap">
+                                                                                            <button type="button"
+                                                                                                    class="btn btn-sm btn-success gallery-show-on-stream-btn"
+                                                                                                    data-media-id="{{ $item->id }}"
+                                                                                                    title="Show on live stream">
+                                                                                                <i class="fas fa-tv"></i>
+                                                                                            </button>
+                                                                                            <button type="button"
+                                                                                                    class="btn btn-sm btn-outline-danger gallery-detach-btn"
+                                                                                                    data-media-id="{{ $item->id }}"
+                                                                                                    title="Remove from stream">
+                                                                                                <i class="fas fa-times"></i>
+                                                                                            </button>
+                                                                                            <button type="button"
+                                                                                                    class="btn btn-sm btn-secondary"
+                                                                                                    title="Preview"
+                                                                                                    onclick="window.open('{{ $item->isImage() ? $item->path : ($item->thumbnail ?? $item->path) }}', '_blank')">
+                                                                                                <i class="fas fa-eye"></i>
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            @empty
+                                                                                <tr>
+                                                                                    <td colspan="5" class="text-muted small text-center" id="gallery-attached-empty">None attached yet.</td>
+                                                                                </tr>
+                                                                            @endforelse
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-6">
+                                                                <h6
+                                                                    class="text-muted small text-uppercase fw-bold mb-2 mt-3">
+                                                                    Add
+                                                                    from gallery</h6>
+                                                                <div style="max-height: 520px; overflow-y: auto;">
+                                                                    <table class="table table-dark table-striped table-hover mb-0">
+                                                                        <thead>
+                                                                        <tr>
+                                                                            <th style="width: 40px;"></th>
+                                                                            <th>Title</th>
+                                                                            <th>Type</th>
+                                                                            <th style="width: 170px;">Action</th>
+                                                                        </tr>
+                                                                        </thead>
+                                                                        <tbody id="gallery-available-list">
+                                                                        @php $attachedIds = $liveShow->galleryMedia->pluck('id')->toArray(); @endphp
+                                                                        @php $hasAvailable = false; @endphp
+                                                                        @foreach ($allGalleryMedia as $item)
+                                                                            @if (!in_array($item->id, $attachedIds))
+                                                                                @php $hasAvailable = true; @endphp
+                                                                                <tr class="gallery-media-card"
+                                                                                    data-media-id="{{ $item->id }}"
+                                                                                    data-attached="0">
+                                                                                    <td class="p-1">
+                                                                                        <img src="{{ $item->isImage() ? $item->path : $item->thumbnail ?? $item->path }}"
+                                                                                             style="width: 34px; height: 34px; object-fit: cover; border-radius: 4px; border: 1px solid #555;"
+                                                                                             alt="">
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <span class="text-truncate d-block" style="max-width: 170px;">
+                                                                                            {{ $item->title ?: '—' }}
+                                                                                        </span>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <span class="badge {{ $item->type === 'video' ? 'bg-primary' : 'bg-warning text-dark' }}">{{ ucfirst($item->type) }}</span>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <button type="button"
+                                                                                                class="btn btn-sm btn-outline-primary gallery-attach-btn"
+                                                                                                data-media-id="{{ $item->id }}"
+                                                                                                title="Attach to stream">
+                                                                                            <i class="fas fa-plus"></i> Attach
+                                                                                        </button>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            @endif
+                                                                        @endforeach
+                                                                        @if (!$hasAvailable)
+                                                                        <tr>
+                                                                            <td colspan="4" class="text-muted small text-center" id="gallery-available-empty">
+                                                                                No other media in gallery.
+                                                                                <a href="{{ route('admin.media-gallery.create') }}" target="_blank">Upload</a>
+                                                                            </td>
+                                                                        </tr>
+                                                                        @endif
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
                                                     </div>
                                                 </div>
-
                                             </div>
-
-
-
-
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
 
 
@@ -783,8 +831,7 @@
                                     availableList.appendChild(emptyMsg);
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             alert(data.message);
                         }
                     })
@@ -812,7 +859,7 @@
                     })
                     .then(r => r.json())
                     .then(data => {
-                        
+
                         if (data.success) {
                             card.setAttribute('data-attached', '0');
                             const body = card.querySelector('.card-body');

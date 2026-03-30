@@ -1653,7 +1653,7 @@
          */
         function showGalleryOverlay(opts) {
             const type = opts.type || opts.media_type;
-            const src = opts.src || opts.url;
+            const src = opts.src || opts.path;
             const playbackAt = opts.playback_started_at ?? null;
             const durationSec = opts.video_duration_seconds != null ? Number(opts.video_duration_seconds) : null;
 

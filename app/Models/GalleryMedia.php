@@ -26,10 +26,10 @@ class GalleryMedia extends Model
             ->withTimestamps();
     }
 
-    public function getUrlAttribute(): string
-    {
-        return Storage::disk('public')->url($this->path);
-    }
+    // public function getUrlAttribute(): string
+    // {
+    //     return Storage::disk('public')->url($this->path);
+    // }
 
     public function getFullPath(): string
     {
