@@ -412,7 +412,10 @@
             // Initialize Pusher
             fetchMessages();
             updatePlayersLeaderboard();
-            checkIfUserBlockedFromLiveShow();
+
+            if (isLoggedIn) {
+                checkIfUserBlockedFromLiveShow();
+            }
         });
         // Toggle quiz mode
         function toggleQuiz(action) {
@@ -806,6 +809,8 @@
 
                         playerAsWinnerEventTrigger();
                         userBlockedFromLiveShowEventTrigger();
+                        checkIfUserBlockedFromLiveShow();
+
 
                         //if liveshow id is 1004
                         if ("{{ $liveShow->id }}" == 1004 && isLoggedIn) {
@@ -1810,48 +1815,48 @@
 
                 // 1. Show the question (simulate admin pressing 'Send')
                 fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/quizzes/${quiz.id}/send-quiz-question`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        seconds: 10, // always 10s timer
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            seconds: 10, // always 10s timer
+                        })
                     })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    // 2. Wait for 10 seconds (quiz visible to users)
-                    setTimeout(() => {
-                        // 3. Hide the quiz by calling the remove API
-                        fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/quizzes/${quiz.id}/remove-quiz-question`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json'
-                            }
-                        })
-                        .then(res2 => res2.json())
-                        .then(data2 => {
-                            // 4. Wait for 3 seconds before showing next question
-                            setTimeout(() => {
-                                showQuizzesSequentially(quizzes, idx + 1);
-                            }, 3000);
-                        })
-                        .catch(err2 => {
-                            console.error('Error hiding quiz question:', err2);
-                            // Even if error, still wait 3s and continue
-                            setTimeout(() => {
-                                showQuizzesSequentially(quizzes, idx + 1);
-                            }, 3000);
-                        });
-                    }, 10000);
-                })
-                .catch(err => {
-                    console.error('Error sending quiz question:', err);
-                    // Try next question anyway after 2s
-                    setTimeout(() => showQuizzesSequentially(quizzes, idx + 1), 2000);
-                });
+                    .then(res => res.json())
+                    .then(data => {
+                        // 2. Wait for 10 seconds (quiz visible to users)
+                        setTimeout(() => {
+                            // 3. Hide the quiz by calling the remove API
+                            fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/quizzes/${quiz.id}/remove-quiz-question`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        'Accept': 'application/json'
+                                    }
+                                })
+                                .then(res2 => res2.json())
+                                .then(data2 => {
+                                    // 4. Wait for 3 seconds before showing next question
+                                    setTimeout(() => {
+                                        showQuizzesSequentially(quizzes, idx + 1);
+                                    }, 3000);
+                                })
+                                .catch(err2 => {
+                                    console.error('Error hiding quiz question:', err2);
+                                    // Even if error, still wait 3s and continue
+                                    setTimeout(() => {
+                                        showQuizzesSequentially(quizzes, idx + 1);
+                                    }, 3000);
+                                });
+                        }, 10000);
+                    })
+                    .catch(err => {
+                        console.error('Error sending quiz question:', err);
+                        // Try next question anyway after 2s
+                        setTimeout(() => showQuizzesSequentially(quizzes, idx + 1), 2000);
+                    });
             }
         }
         document.addEventListener('DOMContentLoaded', function() {
