@@ -1653,7 +1653,7 @@
          */
         function showGalleryOverlay(opts) {
             const type = opts.type || opts.media_type;
-            const src = opts.src || opts.path;
+            const src = opts.src || opts.url;
             const playbackAt = opts.playback_started_at ?? null;
             const durationSec = opts.video_duration_seconds != null ? Number(opts.video_duration_seconds) : null;
 
@@ -1796,67 +1796,64 @@
         if (typeof {{ $liveShow->id }} !== 'undefined' && {{ $liveShow->id }} == 1004) {
 
             function autoShowQuizQuestions() {
-                // Fetch list of quizzes for this live show
-                fetch(`{{ url('api/live-show') }}/{{ $liveShow->id }}/get-live-show-quizzes`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (!Array.isArray(data) || data.length === 0) return;
-                        // Start showing each question in sequence, 5s after login
-                        setTimeout(() => {
-                            showQuizzesSequentially(data, 0);
-                        }, 5000);
-                    })
-                    .catch(err => console.error('Error fetching quizzes:', err));
-            }
+                setTimeout(() => {
+                    // Fetch quizzes with options (quizzes = questions)
+                    fetch('{{ url('api/live-show/' . $liveShow->id . '/get-live-show-quizzes') }}')
+                        .then(response => response.json())
+                        .then(quizzes => {
+                            if (!Array.isArray(quizzes) || quizzes.length === 0) {
+                                console.log("No quiz questions received");
+                                return;
+                            }
+                            let idx = 0;
 
-            function showQuizzesSequentially(quizzes, idx) {
-                if (idx >= quizzes.length) return;
-                const quiz = quizzes[idx];
+                            function showNextQuestion() {
+                                if (idx >= quizzes.length) {
+                                    return;
+                                }
+                                const quiz = quizzes[idx];
 
-                // 1. Show the question (simulate admin pressing 'Send')
-                fetch(`{{ url('api/live-show') }}/{{ $liveShow->id }}/quizzes/${quiz.id}/send-quiz-question`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            seconds: 10, // always 10s timer
+                                // 1. Show the quiz by hitting send-quiz-question API
+                                fetch('{{ url('api/live-show/' . $liveShow->id) }}/quizzes/' + quiz.id +
+                                        '/send-quiz-question', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                            },
+                                            body: JSON.stringify({
+                                                seconds: 10,
+                                                is_last: (idx === quizzes.length - 1)
+                                            })
+                                        })
+                                    .then(() => {
+                                        // 2. After 10 seconds, hide/remove question
+                                        setTimeout(() => {
+                                            fetch('{{ url('api/live-show/' . $liveShow->id) }}/quizzes/' +
+                                                    quiz.id + '/remove-quiz-question', {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'Content-Type': 'application/json',
+                                                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                                        }
+                                                    })
+                                                .then(() => {
+                                                    // 3. Wait 5 seconds before next
+                                                    setTimeout(() => {
+                                                        idx++;
+                                                        showNextQuestion();
+                                                    }, 5000);
+                                                });
+                                        }, 10000);
+                                    });
+                            }
+
+                            showNextQuestion();
                         })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        // 2. Wait for 10 seconds (quiz visible to users)
-                        setTimeout(() => {
-                            // 3. Hide the quiz by calling the remove API
-                            fetch(`{{ url('api/live-show') }}/{{ $liveShow->id }}/quizzes/${quiz.id}/remove-quiz-question`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                        'Accept': 'application/json'
-                                    }
-                                })
-                                .then(res2 => res2.json())
-                                .then(data2 => {
-                                    // 4. Wait for 3 seconds before showing next question
-                                    setTimeout(() => {
-                                        showQuizzesSequentially(quizzes, idx + 1);
-                                    }, 3000);
-                                })
-                                .catch(err2 => {
-                                    console.error('Error hiding quiz question:', err2);
-                                    // Even if error, still wait 3s and continue
-                                    setTimeout(() => {
-                                        showQuizzesSequentially(quizzes, idx + 1);
-                                    }, 3000);
-                                });
-                        }, 10000);
-                    })
-                    .catch(err => {
-                        console.error('Error sending quiz question:', err);
-                        // Try next question anyway after 2s
-                        setTimeout(() => showQuizzesSequentially(quizzes, idx + 1), 2000);
-                    });
+                        .catch(err => {
+                            console.error('Failed to fetch quiz questions:', err);
+                        });
+                }, 5000);
             }
         }
         document.addEventListener('DOMContentLoaded', function() {
