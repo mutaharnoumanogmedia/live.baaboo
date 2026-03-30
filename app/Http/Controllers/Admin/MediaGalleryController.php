@@ -48,9 +48,11 @@ class MediaGalleryController extends Controller
     {
         $request->validate([
             'file' => 'required|file',
+            'custom_name' => 'nullable|string|max:255',
         ]);
 
         $file = $request->file('file');
+        $custom_name = $request->input('custom_name');
         $mime = $file->getMimeType();
         $size = $file->getSize();
 
@@ -76,7 +78,7 @@ class MediaGalleryController extends Controller
         }
 
         // Store file to S3 in 'gallery-media/YYYY/MM' directory and get the full URL
-        $path = $file->store('gallery-media/' . date('Y/m'), 's3');
+        $path = $file->store('gallery-media/'.date('Y/m'), 's3');
         $fullUrl = Storage::disk('s3')->url($path);
 
         $media = GalleryMedia::create([
@@ -85,7 +87,7 @@ class MediaGalleryController extends Controller
             'original_name' => $file->getClientOriginalName(),
             'file_size' => $size,
             'mime_type' => $mime,
-            'title' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
+            'title' => $request->input('custom_name'),
         ]);
 
         return response()->json([

@@ -277,23 +277,18 @@
                                                     <div id="gallery-attached-list" class="row g-2 mb-3"
                                                         style="max-height: 520px; overflow-y: auto;">
                                                         @forelse ($liveShow->galleryMedia as $item)
-                                                            <div class="col-12 col-lg-4 gallery-media-card"
+                                                            <div class="col-12 col-lg-6 gallery-media-card"
                                                                 data-media-id="{{ $item->id }}"
                                                                 data-attached="1">
                                                                 <div class="card border shadow-sm">
-                                                                    @if ($item->isImage())
-                                                                        <img src="{{ $item->path }}"
-                                                                            class="card-img-top"
-                                                                            style="height: 100px; object-fit: cover;"
-                                                                            alt="">
-                                                                    @else
-                                                                        <video src="{{ $item->path }}"
-                                                                            class="card-img-top"
-                                                                            style="height: 100px; object-fit: cover;"
-                                                                            poster="{{ $item->path }}"
-                                                                            muted></video>
-                                                                    @endif
+                                                                    {{-- Always show as image, even if type is video --}}
+                                                                    <img src="{{ $item->isImage() ? $item->path : $item->thumbnail ?? $item->path }}"
+                                                                        class="card-img-top"
+                                                                        style="height: 100px; object-fit: cover;"
+                                                                        alt="">
                                                                     <div class="card-body p-1 text-center">
+                                                                        {{-- Show the type of media --}}
+                                                                        <span class="badge {{ $item->type === 'video' ? 'bg-primary' : 'bg-warning text-dark' }} mb-1">{{ ucfirst($item->type) }}</span>
                                                                         <button type="button"
                                                                             class="btn btn-sm btn-success w-100 mb-1 gallery-show-on-stream-btn"
                                                                             data-media-id="{{ $item->id }}"
@@ -306,6 +301,12 @@
                                                                             title="Remove from stream">
                                                                             <i class="fas fa-times"></i> Remove
                                                                         </button>
+                                                                        {{-- Show video title for video, or for all types --}}
+                                                                        @if($item->type === 'video' && $item->title)
+                                                                            <div class="mt-2 text-muted small">{{ $item->title }}</div>
+                                                                        @elseif($item->type === 'image' && $item->title)
+                                                                            <div class="mt-2 text-muted small">{{ $item->title }}</div>
+                                                                        @endif
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -323,24 +324,21 @@
                                                         @php $attachedIds = $liveShow->galleryMedia->pluck('id')->toArray(); @endphp
                                                         @foreach ($allGalleryMedia as $item)
                                                             @if (!in_array($item->id, $attachedIds))
-                                                                <div class="col-lg-4 col-12 gallery-media-card"
+                                                                <div class="col-lg-6 col-12 gallery-media-card"
                                                                     data-media-id="{{ $item->id }}"
                                                                     data-attached="0">
                                                                     <div class="card border shadow-sm">
-                                                                        @if ($item->isImage())
-                                                                            <img src="{{ $item->path }}"
-                                                                                class="card-img-top"
-                                                                                style="height: 100px; object-fit: cover;"
-                                                                                alt="">
-                                                                        @else
-                                                                            <video src="{{ $item->path }}"
-                                                                                class="card-img-top"
-                                                                                style="height: 100px; object-fit: cover;"
-                                                                                muted></video>
-                                                                        @endif
+                                                                        <img src="{{ $item->isImage() ? $item->path : ($item->thumbnail ?? $item->path) }}"
+                                                                            class="card-img-top"
+                                                                            style="height: 100px; object-fit: cover;"
+                                                                            alt="">
                                                                         <div class="card-body p-1 text-center">
+                                                                            <span class="badge {{ $item->type === 'video' ? 'bg-primary' : 'bg-warning text-dark' }} mb-1">{{ ucfirst($item->type) }}</span>
+                                                                            @if($item->title)
+                                                                                <div class="mt-2 text-muted small">{{ $item->title }}</div>
+                                                                            @endif
                                                                             <button type="button"
-                                                                                class="btn btn-sm btn-outline-primary w-100 gallery-attach-btn"
+                                                                                class="btn btn-sm btn-outline-primary w-100 gallery-attach-btn mt-1"
                                                                                 data-media-id="{{ $item->id }}"
                                                                                 title="Attach to stream">
                                                                                 <i class="fas fa-plus"></i> Attach
@@ -747,25 +745,47 @@
                             card.setAttribute('data-attached', '1');
                             const body = card.querySelector('.card-body');
                             if (body) {
+                                // With title for video or image
+                                let typeTag = '';
+                                if (data.media && data.media.type) {
+                                    if (data.media && data.media.type) {
+                                        let badgeClass = 'bg-info';
+                                        if (data.media.type === 'video') badgeClass = 'bg-primary';
+                                        else if (data.media.type === 'image') badgeClass = 'bg-warning text-dark';
+                                        typeTag = '<span class="badge ' + badgeClass + ' mb-1">' +
+                                            data.media.type.charAt(0).toUpperCase() + data.media.type.slice(1) +
+                                            '</span>';
+                                    }
+                                }
+                                let titleHtml = '';
+                                if (data.media && data.media.title) {
+                                    titleHtml = '<div class="mt-2 text-muted small">' + data.media.title + '</div>';
+                                }
                                 body.innerHTML =
+                                    typeTag +
                                     '<button type="button" class="btn btn-sm btn-success w-100 mb-1 gallery-show-on-stream-btn" data-media-id="' +
                                     mediaId +
-                                    '" title="Show on live stream"><i class="fas fa-tv"></i> Show on stream</button><button type="button" class="btn btn-sm btn-outline-danger w-100 gallery-detach-btn" data-media-id="' +
-                                    mediaId + '" title="Remove from stream"><i class="fas fa-times"></i> Remove</button>';
+                                    '" title="Show on live stream"><i class="fas fa-tv"></i> Show on stream</button>' +
+                                    '<button type="button" class="btn btn-sm btn-outline-danger w-100 gallery-detach-btn" data-media-id="' +
+                                    mediaId + '" title="Remove from stream"><i class="fas fa-times"></i> Remove</button>' +
+                                    titleHtml;
+                                document.getElementById('gallery-attached-list').appendChild(card);
+                                const emptyEl = document.getElementById('gallery-attached-empty');
+                                if (emptyEl) emptyEl.remove();
+                                const availableList = document.getElementById('gallery-available-list');
+                                if (availableList && !availableList.querySelector('.gallery-media-card') && !document
+                                    .getElementById('gallery-available-empty')) {
+                                    const emptyMsg = document.createElement('div');
+                                    emptyMsg.className = 'col-12 text-muted small';
+                                    emptyMsg.id = 'gallery-available-empty';
+                                    emptyMsg.innerHTML =
+                                        'No other media in gallery. <a href="{{ route('admin.media-gallery.create') }}" target="_blank">Upload</a>';
+                                    availableList.appendChild(emptyMsg);
+                                }
                             }
-                            document.getElementById('gallery-attached-list').appendChild(card);
-                            const emptyEl = document.getElementById('gallery-attached-empty');
-                            if (emptyEl) emptyEl.remove();
-                            const availableList = document.getElementById('gallery-available-list');
-                            if (availableList && !availableList.querySelector('.gallery-media-card') && !document
-                                .getElementById('gallery-available-empty')) {
-                                const emptyMsg = document.createElement('div');
-                                emptyMsg.className = 'col-12 text-muted small';
-                                emptyMsg.id = 'gallery-available-empty';
-                                emptyMsg.innerHTML =
-                                    'No other media in gallery. <a href="{{ route('admin.media-gallery.create') }}" target="_blank">Upload</a>';
-                                availableList.appendChild(emptyMsg);
-                            }
+                        }
+                        else {
+                            alert(data.message);
                         }
                     })
                     .catch(err => console.error('Gallery attach error:', err))
@@ -792,13 +812,36 @@
                     })
                     .then(r => r.json())
                     .then(data => {
+                        
                         if (data.success) {
                             card.setAttribute('data-attached', '0');
                             const body = card.querySelector('.card-body');
                             if (body) {
+                                let typeTag = '';
+                                if (data.media && data.media.type) {
+                                    if (data.media.type === 'video') {
+                                        typeTag = '<span class="badge bg-primary mb-1">' +
+                                            data.media.type.charAt(0).toUpperCase() + data.media.type.slice(1) +
+                                            '</span>';
+                                    } else if (data.media.type === 'image') {
+                                        typeTag = '<span class="badge bg-warning text-dark mb-1">' +
+                                            data.media.type.charAt(0).toUpperCase() + data.media.type.slice(1) +
+                                            '</span>';
+                                    } else {
+                                        typeTag = '<span class="badge bg-info mb-1">' +
+                                            data.media.type.charAt(0).toUpperCase() + data.media.type.slice(1) +
+                                            '</span>';
+                                    }
+                                }
+                                let titleHtml = '';
+                                if (data.media && data.media.title) {
+                                    titleHtml = '<div class="mt-2 text-muted small">' + data.media.title + '</div>';
+                                }
                                 body.innerHTML =
+                                    typeTag +
                                     '<button type="button" class="btn btn-sm btn-outline-primary w-100 gallery-attach-btn" data-media-id="' +
-                                    mediaId + '" title="Attach to stream"><i class="fas fa-plus"></i> Attach</button>';
+                                    mediaId + '" title="Attach to stream"><i class="fas fa-plus"></i> Attach</button>' +
+                                    titleHtml;
                             }
                             document.getElementById('gallery-available-list').appendChild(card);
                             const availableEmpty = document.getElementById('gallery-available-empty');
@@ -808,7 +851,7 @@
                                 const empty = document.createElement('div');
                                 empty.className = 'col-12 text-muted small';
                                 empty.id = 'gallery-attached-empty';
-                                empty.textContent = 'None attached yet.';
+                                empty.innerHTML = 'None attached yet.'; // changed to innerHTML for consistency, here too
                                 attachedList.appendChild(empty);
                             }
                         }
