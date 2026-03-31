@@ -146,7 +146,7 @@
                             aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <table class="table table-striped table-borderless table-dark">
+                        <table class="table table-striped table-borderless data-table table-dark">
                             <thead>
                                 <tr>
                                     <th>Name</th>
