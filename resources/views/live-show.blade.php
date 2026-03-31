@@ -1589,6 +1589,10 @@
             return _escapeDiv.innerHTML;
         }
         document.getElementById('heartReactionBtn')?.addEventListener('click', function() {
+            if (!isLoggedIn) {
+
+                return;
+            }
             fetch('{{ url('live-show/' . $liveShow->id . '/heart-reaction') }}', {
                     method: 'POST',
                     headers: {

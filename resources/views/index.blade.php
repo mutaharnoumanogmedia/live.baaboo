@@ -119,7 +119,7 @@
         </div>
     @endif --}}
 
-    <div class="container text-center m-auto"
+    {{-- <div class="container text-center m-auto"
         style="background-color: #fde901; color: #140b63; padding: 20px; border-radius: 10px;">
         <p class="fs-3"> 🚨 Technische Panne bei Badabing-Premiere – sorry!</p>
         <br>
@@ -129,6 +129,40 @@
 
 
         📅 Den Nachholtermin gibt's bald – wir halten euch auf dem Laufenden!
+    </div> --}}
+    <style>
+        .marquee-text {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 20s linear infinite;
+        }
+    </style>
+
+    <div class="w-100 py-2" style="background: #fde901; color: #140b63; font-weight: bold;">
+        <div style="white-space: nowrap; overflow: hidden; width: 100%;">
+            <div class="marquee-text d-flex gap-5">
+                @for ($i = 0; $i < 10; $i++)
+                    <div>
+                        Nächste Show:
+                        {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H:i') . ' Uhr' : 'Nicht festgelegt' }}
+                    </div>
+                @endfor
+
+            </div>
+            
+
+        </div>
+        <style>
+            @keyframes marquee {
+                0% {
+                    transform: translateX(0);
+                }
+
+                100% {
+                    transform: translateX(-100%);
+                }
+            }
+        </style>
     </div>
 
     <!-- ══════════════════════════════════════════
@@ -153,11 +187,12 @@
                 <span class="highlight">Jetzt spielst Du mit. </span>
             </h1>
 
-            {{-- <div class="alert-next-show" style="">
-                Nächste Show: 19.03 um 20:00 Uhr
-            </div> --}}
+            <div class="alert-next-show" style="">
+                Nächste Show:
+                {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H') . ' Uhr' : 'Nicht festgelegt' }}
+            </div>
 
-            {{-- <div class="hero-countdown mt-3 mb-2   mx-auto"
+            <div class="hero-countdown mt-3 mb-2   mx-auto"
                 style="padding: 5px 45px !important; width: fit-content;border: 1px solid #000; background-color: #ffffe9; border-radius: 10px; ">
                 <div id="liveShowCountdown" class="d-flex justify-content-center gap-3 fs-2 fw-bold"></div>
             </div>
@@ -216,7 +251,7 @@
                         // setInterval(updateCountdown, 1000);
                     }
                 });
-            </script> --}}
+            </script>
 
             <p class="hero-subtitle">
                 Quiz, Challenges, Überraschungsspiele – live und interaktiv. Bei der Badabing Game Show wird jeder
