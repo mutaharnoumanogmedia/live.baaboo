@@ -100,7 +100,14 @@ class HomeController extends Controller
             }
         }
 
-        return view('index', compact('referredByUser'));
+        $currentLiveShow = LiveShow::whereIn('status', ['live', 'scheduled'])
+        ->where('scheduled_at', '>=', now())
+        ->orderBy('scheduled_at', 'asc')
+        ->notTestShow()
+        ->with('users')
+        ->first();
+
+        return view('index', compact('referredByUser', 'currentLiveShow'));
     }
 
     public function registerUserViaFormSubmit(Request $request)
