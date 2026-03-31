@@ -136,6 +136,11 @@
             padding-left: 100%;
             animation: marquee 15s linear infinite;
         }
+        @media (max-width: 768px) {
+            .marquee-text {
+                animation: marquee 10s linear infinite;
+            }
+        }
     </style>
 
     <div class="w-100 py-2" style="background: #fde901; color: #140b63; font-weight: bold;">

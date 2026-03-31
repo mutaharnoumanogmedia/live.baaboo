@@ -87,7 +87,7 @@ class HomeController extends Controller
                 $leadGenerationPayload = [
                     'name' => $user->name,
                     'email' => $user->email,
-                    'user_name' => $user->user_name,
+                    'partner_username' => $user->user_name,
                     'magic_link' => $user->magic_link,
                     'referral_link' => $user->referral_link,
                 ];
