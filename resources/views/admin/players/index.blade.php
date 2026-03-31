@@ -10,7 +10,7 @@
         <div class="container-fluid">
             <div class="card">
                 <div class="card-body bg-dark text-light">
-                    <table id="playersTable" class="table table-striped table-borderless table-dark data-table">
+                    <table id="playersTable" class="table table-striped table-borderless table-dark ">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -73,6 +73,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    {{ $players->links() }}
                 </div>
             </div>
         </div>

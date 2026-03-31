@@ -16,7 +16,8 @@ class PlayerController extends Controller
     {
         $players = User::role('user')->where('is_active', 1)
             ->with('liveShows')
-            ->get();
+            ->with('referredBy')
+            ->paginate(100);
 
         return view('admin.players.index', compact('players'));
     }
