@@ -134,7 +134,7 @@
         .marquee-text {
             display: inline-block;
             padding-left: 100%;
-            animation: marquee 20s linear infinite;
+            animation: marquee 10s linear infinite;
         }
     </style>
 
@@ -149,7 +149,7 @@
                 @endfor
 
             </div>
-            
+
 
         </div>
         <style>
@@ -898,8 +898,8 @@
             var scheduleData = {
                 "carousel_items": [{
                         "badge": "BALD",
-                        "date": "19.03.2026 um 20:00 Uhr",
-                        "title": "Die große Premiere",
+                        "date": "09.04.2026 um 20:00 Uhr",
+                        "title": "Die große Premiere 2.0",
                         "description": "Die allererste Badabing Game Show - sei von Anfang an dabei und sichere Dir die ersten Gewinne!",
                         "meta": [{
                                 "icon": "bulls-eye-icon.png",
@@ -913,7 +913,7 @@
                     },
                     {
                         "badge": "BALD",
-                        "date": "02.04.2026 um 20:00 Uhr",
+                        "date": "30.04.2026 um 20:00 Uhr",
                         "title": "Quiz&Speed Game Show",
                         "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
                         "meta": [{
@@ -928,7 +928,7 @@
                     },
                     {
                         "badge": "BALD",
-                        "date": "09.04.2026 um 20:00 Uhr",
+                        "date": "07.05.2026 um 20:00 Uhr",
                         "title": "Quiz&Speed Game Show",
                         "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
                         "meta": [{
@@ -941,36 +941,36 @@
                             }
                         ]
                     },
-                    {
-                        "badge": "BALD",
-                        "date": "16.04.2026 um 20:00 Uhr",
-                        "title": "Quiz&Speed Game Show",
-                        "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
-                        "meta": [{
-                                "icon": "bulls-eye-icon.png",
-                                "label": "Wissen + Speed"
-                            },
-                            {
-                                "icon": "gift-icon.png",
-                                "label": "Geldpreise & Gutscheine"
-                            }
-                        ]
-                    },
-                    {
-                        "badge": "BALD",
-                        "date": "23.04.2026 um 20:00 Uhr",
-                        "title": "Quiz&Speed Game Show",
-                        "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
-                        "meta": [{
-                                "icon": "bulls-eye-icon.png",
-                                "label": "Wissen + Speed"
-                            },
-                            {
-                                "icon": "gift-icon.png",
-                                "label": "Geldpreise & Gutscheine"
-                            }
-                        ]
-                    }
+                    // {
+                    //     "badge": "BALD",
+                    //     "date": "16.04.2026 um 20:00 Uhr",
+                    //     "title": "Quiz&Speed Game Show",
+                    //     "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
+                    //     "meta": [{
+                    //             "icon": "bulls-eye-icon.png",
+                    //             "label": "Wissen + Speed"
+                    //         },
+                    //         {
+                    //             "icon": "gift-icon.png",
+                    //             "label": "Geldpreise & Gutscheine"
+                    //         }
+                    //     ]
+                    // },
+                    // {
+                    //     "badge": "BALD",
+                    //     "date": "23.04.2026 um 20:00 Uhr",
+                    //     "title": "Quiz&Speed Game Show",
+                    //     "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
+                    //     "meta": [{
+                    //             "icon": "bulls-eye-icon.png",
+                    //             "label": "Wissen + Speed"
+                    //         },
+                    //         {
+                    //             "icon": "gift-icon.png",
+                    //             "label": "Geldpreise & Gutscheine"
+                    //         }
+                    //     ]
+                    // }
                 ]
             }
 

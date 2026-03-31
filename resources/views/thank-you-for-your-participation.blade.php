@@ -298,6 +298,63 @@
                 justify-content: center;
             }
         }
+
+        .steps-flex-group {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .next-step-box {
+            display: flex;
+            align-items: center;
+            background: #f3edfd;
+            border-radius: 8px;
+            padding: 16px 22px;
+            box-shadow: 0 1px 6px 0 #ede6f5;
+        }
+
+        .next-step-num {
+            display: inline-block;
+            font-weight: 700;
+            font-size: 1.3em;
+            width: 36px;
+            height: 36px;
+            border-radius: 20px;
+            text-align: center;
+            line-height: 36px;
+            margin-right: 13px;
+            flex-shrink: 0;
+            background: #e2d6fa;
+            color: var(--purple);
+        }
+
+        .next-step-num.orange {
+            background: #feefd7;
+            color: var(--orange);
+        }
+
+        .next-step-num.pink {
+            background: #fde4eb;
+            color: var(--pink);
+        }
+
+        .next-step-desc {
+            font-size: 1em;
+        }
+
+        .next-step-desc.purple {
+            color: #401e79;
+        }
+
+        .next-step-desc.orange {
+            color: #8f4401;
+        }
+
+        .next-step-desc.pink {
+            color: #ba1664;
+        }
     </style>
 
 
@@ -308,7 +365,7 @@
         <div class="text-center row justify-content-center">
             <div class="">
                 <a href="{{ route('index') }}">
-                    <img src="{{ asset('images/badabing-logo.webp') }}" alt="Badabing Game Show" width="200"  
+                    <img src="{{ asset('images/badabing-logo.webp') }}" alt="Badabing Game Show" width="200"
                         class="img-fluid hero-logo mb-3 mx-auto">
                 </a>
             </div>
@@ -318,13 +375,16 @@
             Deine <span class="accent">Anmeldung</span> war<br>erfolgreich!
         </h1>
 
-        <p>
+        <p style="font-size: 0.8rem;">
             Danke für Deine Anmeldung zur <strong>Badabing Game Show</strong> – wir freuen uns riesig, dass Du dabei
             bist!<br>
             In den nächsten Minuten erhältst Du eine <strong>Bestätigungs-Mail mit allen wichtigen Informationen zur
                 Show.</strong>
         </p>
-        <div class="  my-4" style="width: fit-content; margin: 0 auto; background:var(--bg-lavender); border:1px solid var(--purple); border-radius: 10px; padding: 5px 30px">
+
+
+        <div class="  my-4"
+            style="min-width: 300px; max-width: 100%; margin: 0 auto; background:var(--bg-lavender); border:1px solid var(--purple); border-radius: 10px; padding: 5px 30px">
             Zur Show einladen: <br>
             <a id="referral-link" href="{{ $user->referral_link }}" target="_blank">{{ $user->referral_link }}</a>
             <button id="copy-referral-link-btn" class="btn btn-link btn-sm    " style="vertical-align: baseline;"
@@ -345,10 +405,32 @@
             </script>
         </div>
 
-        <p class="hinweis">
+        <p class="hinweis" style="font-size: 0.8rem;">
             <strong>Hinweis:</strong> Falls Du keine E-Mail findest, schau bitte auch in Deinem <strong>Spam- oder
                 Werbeordner</strong> nach.
         </p>
+    </section>
+
+    <section class="bg-light py-4">
+        <div class=" px-3 px-md-5 mb-5" style="max-width: 550px; margin: 0 auto;">
+            <h4 class="">Wie geht es jetzt weiter?</h4>
+        </div>
+
+        <div class="steps-flex-group">
+            <div class="next-step-box">
+                <span class="next-step-num">1</span>
+                <span class="next-step-desc purple">Check&nbsp;deine&nbsp;E-Mails&nbsp;– da wartet dein persönlicher
+                    Login-Link</span>
+            </div>
+            <div class="next-step-box">
+                <span class="next-step-num orange">2</span>
+                <span class="next-step-desc orange">Am&nbsp;Show-Tag einfach klicken&nbsp;&amp;&nbsp;einloggen</span>
+            </div>
+            <div class="next-step-box">
+                <span class="next-step-num pink">3</span>
+                <span class="next-step-desc pink">Live dabei sein, Fragen knacken, Gewinne absahnen!</span>
+            </div>
+        </div>
     </section>
 
     <!-- ══════════════════════════════════════════
