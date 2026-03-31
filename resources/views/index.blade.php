@@ -911,21 +911,7 @@
                             }
                         ]
                     },
-                    {
-                        "badge": "BALD",
-                        "date": "30.04.2026 um 20:00 Uhr",
-                        "title": "Quiz&Speed Game Show",
-                        "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
-                        "meta": [{
-                                "icon": "bulls-eye-icon.png",
-                                "label": "Wissen + Speed"
-                            },
-                            {
-                                "icon": "gift-icon.png",
-                                "label": "Geldpreise & Gutscheine"
-                            }
-                        ]
-                    },
+
                     {
                         "badge": "BALD",
                         "date": "07.05.2026 um 20:00 Uhr",
@@ -941,36 +927,51 @@
                             }
                         ]
                     },
-                    // {
-                    //     "badge": "BALD",
-                    //     "date": "16.04.2026 um 20:00 Uhr",
-                    //     "title": "Quiz&Speed Game Show",
-                    //     "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
-                    //     "meta": [{
-                    //             "icon": "bulls-eye-icon.png",
-                    //             "label": "Wissen + Speed"
-                    //         },
-                    //         {
-                    //             "icon": "gift-icon.png",
-                    //             "label": "Geldpreise & Gutscheine"
-                    //         }
-                    //     ]
-                    // },
-                    // {
-                    //     "badge": "BALD",
-                    //     "date": "23.04.2026 um 20:00 Uhr",
-                    //     "title": "Quiz&Speed Game Show",
-                    //     "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
-                    //     "meta": [{
-                    //             "icon": "bulls-eye-icon.png",
-                    //             "label": "Wissen + Speed"
-                    //         },
-                    //         {
-                    //             "icon": "gift-icon.png",
-                    //             "label": "Geldpreise & Gutscheine"
-                    //         }
-                    //     ]
-                    // }
+                    {
+                        "badge": "BALD",
+                        "date": "16.04.2026 um 20:00 Uhr",
+                        "title": "Quiz&Speed Game Show",
+                        "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
+                        "meta": [{
+                                "icon": "bulls-eye-icon.png",
+                                "label": "Wissen + Speed"
+                            },
+                            {
+                                "icon": "gift-icon.png",
+                                "label": "Geldpreise & Gutscheine"
+                            }
+                        ]
+                    },
+                    {
+                        "badge": "BALD",
+                        "date": "23.04.2026 um 20:00 Uhr",
+                        "title": "Quiz&Speed Game Show",
+                        "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
+                        "meta": [{
+                                "icon": "bulls-eye-icon.png",
+                                "label": "Wissen + Speed"
+                            },
+                            {
+                                "icon": "gift-icon.png",
+                                "label": "Geldpreise & Gutscheine"
+                            }
+                        ]
+                    },
+                    {
+                        "badge": "BALD",
+                        "date": "30.04.2026 um 20:00 Uhr",
+                        "title": "Quiz&Speed Game Show",
+                        "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
+                        "meta": [{
+                                "icon": "bulls-eye-icon.png",
+                                "label": "Wissen + Speed"
+                            },
+                            {
+                                "icon": "gift-icon.png",
+                                "label": "Geldpreise & Gutscheine"
+                            }
+                        ]
+                    }
                 ]
             }
 
