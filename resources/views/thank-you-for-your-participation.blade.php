@@ -384,7 +384,7 @@
 
 
         <div class="  my-4"
-            style="min-width: 300px; max-width: 100%; margin: 0 auto; background:var(--bg-lavender); border:1px solid var(--purple); border-radius: 10px; padding: 5px 30px">
+            style="width: fit-content; max-width: 100%; margin: 0 auto; background:var(--bg-lavender); border:1px solid var(--purple); border-radius: 10px; padding: 5px 30px">
             Zur Show einladen: <br>
             <a id="referral-link" href="{{ $user->referral_link }}" target="_blank">{{ $user->referral_link }}</a>
             <button id="copy-referral-link-btn" class="btn btn-link btn-sm    " style="vertical-align: baseline;"
