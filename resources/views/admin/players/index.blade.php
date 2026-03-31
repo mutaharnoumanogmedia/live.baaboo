@@ -1,4 +1,3 @@
-
 <x-app-dashboard-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -9,6 +8,15 @@
     <div class="py-6">
         <div class="container-fluid">
             <div class="card">
+                <div class="card-header">
+                    <form action="{{ route('admin.players.index') }}" method="get">
+                        <div class="input-group">
+                            <input type="text" name="search" class="form-control"
+                                placeholder="Search by name, email, or username">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </form>
+                </div>
                 <div class="card-body bg-dark text-light">
                     <table id="playersTable" class="table table-striped table-borderless table-dark ">
                         <thead>
@@ -16,6 +24,7 @@
                                 <th>ID</th>
                                 <th>Name</th>
                                 <th>Email</th>
+                                <th>Username</th>
                                 <th>Registered At</th>
                                 <th>Live Games Played</th>
                                 <th>
@@ -31,6 +40,7 @@
                                     <td>{{ $player->id }}</td>
                                     <td>{{ $player->name }}</td>
                                     <td>{{ $player->email }}</td>
+                                    <td>{{ $player->user_name }}</td>
                                     <td>{{ $player->created_at }}</td>
                                     <td>
                                         <a href="#" class="btn btn-primary text-center" data-bs-toggle="modal"
