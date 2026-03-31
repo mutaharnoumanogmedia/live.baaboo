@@ -82,6 +82,9 @@ Route::get('/test/registration-welcome-email', function () {
 });
 
 Route::get('admin/login', function () {
+    if (Auth::guard('admin')->check()) {
+        return redirect()->route('admin.dashboard');
+    }
     return view('auth.login');
 })->name('admin.login');
 require __DIR__.'/admin.php';
