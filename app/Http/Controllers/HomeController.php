@@ -63,10 +63,10 @@ class HomeController extends Controller
                     $firstName = trim($liveShowDetails['user']['first_name'] ?? '');
                     $lastName = trim($liveShowDetails['user']['last_name'] ?? '');
                     $fullName = trim($firstName.' '.$lastName);
-                    $email = $liveShowDetails['user']['email'] ?? ($user_name.'@example.com');
+                    $email = $liveShowDetails['user']['email'] ?? ($user_name.'@partner.baaboo.com');
                 } else {
                     $fullName = $user_name;
-                    $email = $user_name.'@example.com';
+                    $email = $user_name.'@partner.baaboo.com';
                 }
 
                 $user = User::create([
