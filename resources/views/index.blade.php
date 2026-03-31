@@ -140,12 +140,17 @@
 
     <div class="w-100 py-2" style="background: #fde901; color: #140b63; font-weight: bold;">
         <div style="white-space: nowrap; overflow: hidden; width: 100%;">
-            <div class="marquee-text d-flex gap-5">
+            <div class="marquee-text d-flex gap-2">
                 @for ($i = 0; $i < 10; $i++)
                     <div>
                         Nächste Show:
                         {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H:i') . ' Uhr' : 'Nicht festgelegt' }}
                     </div>
+                    <div> | </div>
+                    <div> Jetzt kostenlos mitspielen </div>
+                    <div style="width: 100px;">  </div>
+                    <div style="width: 100px;">  </div>
+                    <div style="width: 100px;">  </div>
                 @endfor
 
             </div>
@@ -896,7 +901,9 @@
         <script>
             var assetPath = "{{ asset('images/') }}";
             var scheduleData = {
-                "carousel_items": [{
+                "carousel_items": [
+
+                    {
                         "badge": "BALD",
                         "date": "09.04.2026 um 20:00 Uhr",
                         "title": "Die große Premiere 2.0",
@@ -908,22 +915,6 @@
                             {
                                 "icon": "gift-icon.png",
                                 "label": "Premieren-Preise"
-                            }
-                        ]
-                    },
-
-                    {
-                        "badge": "BALD",
-                        "date": "07.05.2026 um 20:00 Uhr",
-                        "title": "Quiz&Speed Game Show",
-                        "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
-                        "meta": [{
-                                "icon": "bulls-eye-icon.png",
-                                "label": "Wissen + Speed"
-                            },
-                            {
-                                "icon": "gift-icon.png",
-                                "label": "Geldpreise & Gutscheine"
                             }
                         ]
                     },
@@ -960,6 +951,23 @@
                     {
                         "badge": "BALD",
                         "date": "30.04.2026 um 20:00 Uhr",
+                        "title": "Quiz&Speed Game Show",
+                        "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
+                        "meta": [{
+                                "icon": "bulls-eye-icon.png",
+                                "label": "Wissen + Speed"
+                            },
+                            {
+                                "icon": "gift-icon.png",
+                                "label": "Geldpreise & Gutscheine"
+                            }
+                        ]
+                    },
+
+
+                    {
+                        "badge": "BALD",
+                        "date": "07.05.2026 um 20:00 Uhr",
                         "title": "Quiz&Speed Game Show",
                         "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
                         "meta": [{
