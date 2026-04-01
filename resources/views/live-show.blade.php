@@ -1588,8 +1588,9 @@
             _escapeDiv.textContent = text;
             return _escapeDiv.innerHTML;
         }
+
         document.getElementById('heartReactionBtn')?.addEventListener('click', function() {
-            if (!isLoggedIn) {
+            if (!isLoggedIn || "{{ $liveShow->id }}" == 1004) {
 
                 return;
             }
