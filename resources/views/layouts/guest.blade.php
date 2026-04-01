@@ -121,9 +121,9 @@
         }
 
         .alert-next-show {
-            color: #F73FAE;
+            color: #9e0f65;
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 1.3rem;
             margin-bottom: 10px;
             background: var(--pink-light);
             border-radius: 20px;
@@ -131,6 +131,7 @@
             border: 1px solid #F73FAE;
             width: fit-content;
             margin: 20px auto;
+        box-shadow: 0 6px 24px 0 rgba(247, 63, 174, 0.18), 0 1.5px 7px 0 rgba(20, 11, 99, 0.07);
         }
 
         .hero-sub-small {

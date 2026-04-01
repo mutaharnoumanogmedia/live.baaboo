@@ -136,9 +136,20 @@
             padding-left: 100%;
             animation: marquee 15s linear infinite;
         }
+
         @media (max-width: 768px) {
             .marquee-text {
                 animation: marquee 10s linear infinite;
+            }
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-100%);
             }
         }
     </style>
@@ -153,26 +164,16 @@
                     </div>
                     <div> | </div>
                     <div> Jetzt kostenlos mitspielen </div>
-                    <div style="width: 100px;">  </div>
-                    <div style="width: 100px;">  </div>
-                    <div style="width: 100px;">  </div>
+                    <div style="width: 100px;"> </div>
+                    <div style="width: 100px;"> </div>
+                    <div style="width: 100px;"> </div>
                 @endfor
 
             </div>
 
 
         </div>
-        <style>
-            @keyframes marquee {
-                0% {
-                    transform: translateX(0);
-                }
 
-                100% {
-                    transform: translateX(-100%);
-                }
-            }
-        </style>
     </div>
 
     <!-- ══════════════════════════════════════════
@@ -191,7 +192,7 @@
             </div>
 
             <p class="hero-eyebrow">Die erste interaktive Online-Game-Show Deutschlands </p>
-            <h1 class="hero-title">
+            <h1 class="hero-title mb-5">
                 Zuschauen war gestern.
                 <br>
                 <span class="highlight">Jetzt spielst Du mit. </span>
@@ -206,62 +207,7 @@
                 style="padding: 5px 45px !important; width: fit-content;border: 1px solid #000; background-color: #ffffe9; border-radius: 10px; ">
                 <div id="liveShowCountdown" class="d-flex justify-content-center gap-3 fs-2 fw-bold"></div>
             </div>
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Get the scheduled time from PHP (format: Y-m-d H:i:s)
-                    @if (isset($currentLiveShow) && $currentLiveShow->scheduled_at)
-                        var scheduledTime =
-                            "{{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('Y-m-d H:i:s') }}";
-                        var scheduledDate = new Date(scheduledTime.replace(' ', 'T') + '+01:00'); // force EU timezone
-                    @else
-                        var scheduledDate = null;
-                    @endif
 
-                    function pad(n) {
-                        return n < 10 ? '0' + n : n;
-                    }
-
-                    function updateCountdown() {
-                        let display = document.getElementById('liveShowCountdown');
-                        if (!display || !scheduledDate) {
-                            return;
-                        }
-
-                        var now = new Date();
-                        var dist = scheduledDate - now;
-
-                        if (dist <= 0) {
-                            display.innerHTML = "<span class='text-success'>Die Show läuft gerade!</span>";
-                            return;
-                        }
-
-                        var days = Math.floor(dist / (1000 * 60 * 60 * 24));
-                        var hours = Math.floor((dist / (1000 * 60 * 60)) % 24);
-                        var minutes = Math.floor((dist / (1000 * 60)) % 60);
-                        var seconds = Math.floor((dist / 1000) % 60);
-
-                        display.innerHTML = `
-                            <div>
-                                <div class="text-orange">${pad(days)}</div> <div class="time-unit">Tage</div>
-                            </div>
-                            <div>
-                                <div class="text-orange">${pad(hours)}</div> <div class="time-unit">Std</div>
-                            </div>
-                            <div>
-                                <div class="text-orange">${pad(minutes)}</div> <div class="time-unit">Min</div>
-                            </div>
-                            <div>
-                                <div class="text-orange">${pad(seconds)}</div>  <div class="time-unit">Sek</div>
-                            </div>
-                        `;
-                    }
-
-                    if (scheduledDate) {
-                        updateCountdown();
-                        // setInterval(updateCountdown, 1000);
-                    }
-                });
-            </script>
 
             <p class="hero-subtitle">
                 Quiz, Challenges, Überraschungsspiele – live und interaktiv. Bei der Badabing Game Show wird jeder
@@ -1057,6 +1003,63 @@
                             }
                         ]
                     });
+                }
+            });
+        </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Get the scheduled time from PHP (format: Y-m-d H:i:s)
+                @if (isset($currentLiveShow) && $currentLiveShow->scheduled_at)
+                    var scheduledTime =
+                        "{{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('Y-m-d H:i:s') }}";
+                    var scheduledDate = new Date(scheduledTime.replace(' ', 'T') + '+01:00'); // force EU timezone
+                @else
+                    var scheduledDate = null;
+                @endif
+
+                function pad(n) {
+                    return n < 10 ? '0' + n : n;
+                }
+
+                function updateCountdown() {
+                    let display = document.getElementById('liveShowCountdown');
+                    if (!display || !scheduledDate) {
+                        return;
+                    }
+
+                    var now = new Date();
+                    var dist = scheduledDate - now;
+
+                    if (dist <= 0) {
+                        display.innerHTML = "<span class='text-success'>Die Show läuft gerade!</span>";
+                        return;
+                    }
+
+                    var days = Math.floor(dist / (1000 * 60 * 60 * 24));
+                    var hours = Math.floor((dist / (1000 * 60 * 60)) % 24);
+                    var minutes = Math.floor((dist / (1000 * 60)) % 60);
+                    var seconds = Math.floor((dist / 1000) % 60);
+
+                    display.innerHTML = `
+                <div>
+                    <div class="text-orange">${pad(days)}</div> <div class="time-unit">Tage</div>
+                </div>
+                <div>
+                    <div class="text-orange">${pad(hours)}</div> <div class="time-unit">Std</div>
+                </div>
+                <div>
+                    <div class="text-orange">${pad(minutes)}</div> <div class="time-unit">Min</div>
+                </div>
+                <div>
+                    <div class="text-orange">${pad(seconds)}</div>  <div class="time-unit">Sek</div>
+                </div>
+            `;
+                }
+
+                if (scheduledDate) {
+                    updateCountdown();
+                    // setInterval(updateCountdown, 1000);
                 }
             });
         </script>
