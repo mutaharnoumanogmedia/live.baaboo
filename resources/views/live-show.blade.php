@@ -1683,7 +1683,7 @@
                         vid.currentTime = Math.min(seekTo, Math.max(0, vid.duration - 0.05));
                     } else if (seekTo > 0) {
                         vid.currentTime = seekTo;
-                    }else{
+                    } else {
                         vid.currentTime = 0;
                         vid.play();
                     }
@@ -1691,7 +1691,7 @@
                     vid.play().catch(function() {
                         console.error('Error playing video:', e);
                     });
-                   
+
                     // setTimeout(() => {
                     //     vid.click();
                     //     vid.muted = false;
@@ -1700,14 +1700,16 @@
                     //     });
                     // }, 1500);
 
-                    
-                setTimeout(() => {
-                    if (vid.paused) {
-                        vid.play().catch(function(e) {
-                            console.error('Error playing video after timeout:', e);
-                        });
-                    }
-                }, 3000);
+
+
+
+                    // setTimeout(() => {
+                    //     if (vid.paused) {
+                    //         vid.play().catch(function(e) {
+                    //             console.error('Error playing video after timeout:', e);
+                    //         });
+                    //     }
+                    // }, 3000);
 
 
                 };
@@ -1716,15 +1718,74 @@
                     once: true
                 });
                 vid.load();
-                vid.play().catch(function(e) {
-                    console.error('Error playing video:', e);
-                });
+
                 vid.addEventListener('error', function onErr() {
                     vid.removeEventListener('error', onErr);
                     console.warn('Gallery overlay video failed to load');
                 });
+
+                //mute = false , if not then show unmute icon via function
+                vid.muted = false;
+
+                if (vid.muted) {
+                    appendUnmuteIcon(vid);
+                }
             }
             overlay.style.display = "flex";
+        }
+
+        function appendUnmuteIcon(videoEl) {
+            // Keep only one icon at a time
+            let existing = videoEl.parentNode.querySelector('.unmute-center-icon');
+            if (existing) existing.remove();
+
+            const btn = document.createElement('div');
+            btn.className = 'unmute-center-icon';
+            btn.innerHTML = `
+                <div style="
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    transform: translate(-50%, -50%);
+                    z-index: 10000;
+                    background: rgba(0,0,0,0.65);
+                    border-radius: 100px;
+                    padding: 18px 24px;
+                    cursor: pointer;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    box-shadow: 0 2px 24px 0 rgba(0,0,0,0.38);
+                ">
+                    <i class="fas fa-volume-mute" style="font-size:2.7rem;color:white;"></i>
+                    <div style="color:white;font-size:1rem;font-weight:500;margin-top:7px;">Unmute</div>
+                </div>
+            `;
+            // Position must be relative/absolute container
+            let relParent = videoEl.parentElement;
+            if (getComputedStyle(relParent).position === 'static') {
+                relParent.style.position = 'relative';
+            }
+            btn.style.position = 'absolute';
+            btn.style.left = '0';
+            btn.style.top = '0';
+            btn.style.width = '100%';
+            btn.style.height = '100%';
+            btn.style.pointerEvents = 'auto';
+            btn.style.display = 'flex';
+            btn.style.alignItems = 'center';
+            btn.style.justifyContent = 'center';
+
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                videoEl.muted = false;
+                // Optionally attempt to play in case browser requires "gesture"
+                videoEl.play().catch(() => {});
+                btn.remove();
+            });
+
+            btn.classList.add('unmute-center-icon');
+            relParent.appendChild(btn);
         }
 
         function hideGalleryOverlay() {
