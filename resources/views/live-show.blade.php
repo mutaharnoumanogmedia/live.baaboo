@@ -1712,6 +1712,9 @@
                     once: true
                 });
                 vid.load();
+                vid.play().catch(function(e) {
+                    console.error('Error playing video:', e);
+                });
                 vid.addEventListener('error', function onErr() {
                     vid.removeEventListener('error', onErr);
                     console.warn('Gallery overlay video failed to load');
