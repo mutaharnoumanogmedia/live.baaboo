@@ -1695,12 +1695,15 @@
                     setTimeout(() => {
                         vid.muted = false;
                     }, 1500);
-                    try {
-                        vid.play();
-                    } catch (e) {
-                        console.error('Error clicking video:', e);
-                        vid.play();
+
+                    
+                setTimeout(() => {
+                    if (vid.paused) {
+                        vid.play().catch(function(e) {
+                            console.error('Error playing video after timeout:', e);
+                        });
                     }
+                }, 3000);
 
 
                 };
