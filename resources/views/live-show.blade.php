@@ -377,6 +377,10 @@
         const $quizOverlay = document.getElementById('quizOverlay');
         const $overlayChat = document.getElementById('overlayChat');
 
+        const overlay = document.getElementById('galleryOverlayModal');
+        const img = document.getElementById('galleryOverlayImage');
+        const vid = document.getElementById('galleryOverlayVideo');
+
 
         let currentCountdownSeconds = 0;
         // let currentCountdownMilliseconds = 0; // total elapsed ms
@@ -1662,9 +1666,7 @@
             const playbackAt = opts.playback_started_at ?? null;
             const durationSec = opts.video_duration_seconds != null ? Number(opts.video_duration_seconds) : null;
 
-            const overlay = document.getElementById('galleryOverlayModal');
-            const img = document.getElementById('galleryOverlayImage');
-            const vid = document.getElementById('galleryOverlayVideo');
+
             img.style.display = "none";
             vid.style.display = "none";
 
@@ -1693,13 +1695,13 @@
                         console.error('Error playing video:', e);
                     });
 
-                    // setTimeout(() => {
-                    //     vid.click();
-                    //     vid.muted = false;
-                    //     vid.play().catch(function(e) {
-                    //         console.error('Error playing video:', e);
-                    //     });
-                    // }, 1500);
+                    setTimeout(() => {
+                        vid.click();
+                        vid.muted = false;
+                        vid.play().catch(function(e) {
+                            console.error('Error playing video:', e);
+                        });
+                    }, 1500);
 
 
 
