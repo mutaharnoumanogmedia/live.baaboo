@@ -51,7 +51,7 @@ class MediaGalleryController extends Controller
     {
         // 1. Validation for both Images and Videos
         $request->validate([
-            'file' => 'required|file|mimetypes:video/mp4,video/mpeg,video/quicktime,image/jpeg,image/png,image/webp|max:15360', // 150MB limit
+            'file' => 'required|file|mimetypes:video/mp4,video/mpeg,video/quicktime,image/jpeg,image/png,image/webp|max:204800', // 200 MB limit
             'custom_name' => 'nullable|string|max:255',
         ]);
 

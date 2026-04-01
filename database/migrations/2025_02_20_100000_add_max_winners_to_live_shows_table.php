@@ -13,6 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
+        if (! Schema::hasTable('live_shows') || Schema::hasColumn('live_shows', 'max_winners')) {
+            return;
+        }
+
         Schema::table('live_shows', function (Blueprint $table) {
             $table->unsignedTinyInteger('max_winners')->default(3)->after('currency');
         });
@@ -25,6 +29,10 @@ return new class extends Migration
      */
     public function down()
     {
+        if (! Schema::hasTable('live_shows') || ! Schema::hasColumn('live_shows', 'max_winners')) {
+            return;
+        }
+
         Schema::table('live_shows', function (Blueprint $table) {
             $table->dropColumn('max_winners');
         });

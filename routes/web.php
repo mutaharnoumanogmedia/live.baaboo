@@ -4,6 +4,7 @@ use App\Http\Controllers\GamePlayController;
 use App\Http\Controllers\HomeController;
 use App\Models\LiveShow;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,8 +29,6 @@ Route::get('agb', [HomeController::class, 'agreementTerms'])->name('agb');
 Route::get('teilnahmebedingungen', [HomeController::class, 'participationTerms'])->name('teilnahmebedingungen');
 // Datenschutz
 Route::get('datenschutz', [HomeController::class, 'privacyPolicy'])->name('datenschutz');
-
-Route::get('{name}', [HomeController::class, 'registerUserViaForm'])->name('register-user-via-form');
 
 Route::get('/live-show-magic-link/{name}', [HomeController::class, 'liveShowMagicLink'])->name('live-show-magic-link');
 
@@ -87,8 +86,8 @@ Route::get('admin/login', function () {
     }
     return view('auth.login');
 })->name('admin.login');
-require __DIR__.'/admin.php';
 require __DIR__.'/auth.php';
+Route::get('{name}', [HomeController::class, 'registerUserViaForm'])->name('register-user-via-form');
 
 // a route to add 1000 users to given live show id
 // Route::get('/test/live-show/{id}/add-1000-users', function ($id) {

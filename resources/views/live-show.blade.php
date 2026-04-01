@@ -1243,9 +1243,7 @@
 
     <script>
         // Example: call after user interaction
-        document.getElementById('playButton').onclick = function() {
-            document.getElementById('playButtonOverlay').style.display = 'none';
-        };
+
 
         var channelUpdateLiveShow = pusher.subscribe('update-live-show.{{ $liveShow->id }}');
         // System subscription event
@@ -1506,9 +1504,14 @@
         document.getElementById("playButton").addEventListener("click", function() {
             console.log('Tap to play clicked');
             // enablePush();
+
+            document.getElementById('playButtonOverlay').style.display = 'none';
+
             if (isLoggedIn == false)
                 showRegisterModal();
 
+            vid.play();
+            vid.muted = false;
         });
         /**
          * Pusher test event subscription for debugging

@@ -16,11 +16,11 @@ class AuthenticationTest extends TestCase
 
         $response = $this->post('/login', [
             'email' => $user->email,
-            'password' => 'password',
+            'password' => 'baaboo123',
         ]);
 
-        $this->assertAuthenticated();
-        $response->assertNoContent();
+        $this->assertAuthenticated('admin');
+        $response->assertRedirect(route('admin.dashboard'));
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void
