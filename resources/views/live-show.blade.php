@@ -1692,13 +1692,13 @@
                         console.error('Error playing video:', e);
                     });
                    
-                    setTimeout(() => {
-                        vid.click();
-                        vid.muted = false;
-                        vid.play().catch(function(e) {
-                            console.error('Error playing video:', e);
-                        });
-                    }, 1500);
+                    // setTimeout(() => {
+                    //     vid.click();
+                    //     vid.muted = false;
+                    //     vid.play().catch(function(e) {
+                    //         console.error('Error playing video:', e);
+                    //     });
+                    // }, 1500);
 
                     
                 setTimeout(() => {
