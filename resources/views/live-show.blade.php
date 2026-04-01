@@ -1683,6 +1683,9 @@
                         vid.currentTime = Math.min(seekTo, Math.max(0, vid.duration - 0.05));
                     } else if (seekTo > 0) {
                         vid.currentTime = seekTo;
+                    }else{
+                        vid.currentTime = 0;
+                        vid.play();
                     }
                     vid.muted = true;
                     vid.play().catch(function() {
