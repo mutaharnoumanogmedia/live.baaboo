@@ -1695,12 +1695,14 @@
                     setTimeout(() => {
                         vid.muted = false;
                     }, 1500);
-                    // try {
-                    //     vid.click();
-                    // } catch (e) {
-                    //     console.error('Error clicking video:', e);
-                    //     vid.click();
-                    // }
+                    try {
+                        vid.play();
+                    } catch (e) {
+                        console.error('Error clicking video:', e);
+                        vid.play();
+                    }
+
+
                 };
 
                 vid.addEventListener('loadedmetadata', applySeekAndPlay, {
