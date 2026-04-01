@@ -275,7 +275,7 @@
                                                 <div class="" id="gallery-media-tab">
                                                     <div class="p-3">
                                                         <div class="row">
-                                                            <div class="col-lg-6">
+                                                            <div class="col-lg-8">
                                                                 <div
                                                                     class="d-flex justify-content-between align-items-center mb-2">
                                                                     <h6
@@ -308,7 +308,7 @@
                                                                                              style="width: 34px; height: 34px; object-fit: cover; border-radius: 4px; border: 1px solid #555;">
                                                                                     </td>
                                                                                     <td>
-                                                                                        <span class="text-truncate d-block" style="max-width: 170px;">
+                                                                                        <span class="  d-block" style="max-width: 370px;">
                                                                                             {{ $item->title ?: '—' }}
                                                                                         </span>
                                                                                     </td>
@@ -347,7 +347,7 @@
                                                                     </table>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-lg-6">
+                                                            <div class="col-lg-4">
                                                                 <h6
                                                                     class="text-muted small text-uppercase fw-bold mb-2 mt-3">
                                                                     Add
@@ -645,6 +645,14 @@
                 width: 0;
                 transition: width 0.4s ease-in-out;
                 border-radius: 5px;
+            }
+            .slick-list{
+                min-height: 500px !important;
+                width: 100% !important;
+            }
+            .slick-initialized .slick-slide{
+                min-height: 500px !important;
+                min-width: 500px !important;
             }
         </style>
     @endpush

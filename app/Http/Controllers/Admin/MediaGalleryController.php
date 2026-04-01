@@ -8,10 +8,13 @@ use App\Http\Controllers\Controller;
 use App\Models\GalleryMedia;
 use App\Models\LiveShow;
 use App\Models\LiveShowGalleryState;
+use FFMpeg\Coordinate\TimeCode;
+use FFMpeg\FFMpeg;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class MediaGalleryController extends Controller
@@ -46,49 +49,77 @@ class MediaGalleryController extends Controller
      */
     public function upload(Request $request): JsonResponse
     {
+        // 1. Validation for both Images and Videos
         $request->validate([
-            'file' => 'required|file',
+            'file' => 'required|file|mimetypes:video/mp4,video/mpeg,video/quicktime,image/jpeg,image/png,image/webp|max:15360', // 150MB limit
             'custom_name' => 'nullable|string|max:255',
         ]);
 
         $file = $request->file('file');
-        $custom_name = $request->input('custom_name');
-        $mime = $file->getMimeType();
-        $size = $file->getSize();
+        $mimeType = $file->getMimeType();
+        $isVideo = Str::startsWith($mimeType, 'video/');
 
-        $type = null;
-        if (in_array($mime, self::IMAGE_MIMES)) {
-            $type = 'image';
-            if ($size > self::IMAGE_MAX_BYTES) {
-                throw ValidationException::withMessages([
-                    'file' => ['Image must not exceed 2 MB.'],
+        $originalName = $file->getClientOriginalName();
+        $title = $request->input('custom_name') ?? pathinfo($originalName, PATHINFO_FILENAME);
+        $fileSize = $file->getSize();
+
+        $thumbnailFullUrl = null;
+        $tempThumbPath = null;
+
+        // 2. Process Video specifically (FFmpeg)
+        if ($isVideo) {
+            try {
+                $ffmpeg = FFMpeg::create([
+                    'ffmpeg.binaries' => '/usr/bin/ffmpeg',
+                    'ffprobe.binaries' => '/usr/bin/ffprobe',
                 ]);
+
+                $video = $ffmpeg->open($file->getRealPath());
+                $thumbnailName = 'thumb_'.time().'_'.Str::random(5).'.jpg';
+                $tempThumbPath = storage_path('app/public/'.$thumbnailName);
+
+                // Extract frame at 1 second
+                $video->frame(TimeCode::fromSeconds(1))->save($tempThumbPath);
+
+                // Upload Thumbnail to S3
+                $thumbS3Path = 'thumbnails/'.$thumbnailName;
+                Storage::disk('s3')->put($thumbS3Path, file_get_contents($tempThumbPath), 'public');
+                $thumbnailFullUrl = Storage::disk('s3')->url($thumbS3Path);
+            } catch (\Exception $e) {
+                \Log::error('Error extracting thumbnail: '.$e->getMessage());
             }
-        } elseif (in_array($mime, self::VIDEO_MIMES)) {
-            $type = 'video';
-            if ($size > self::VIDEO_MAX_BYTES) {
-                throw ValidationException::withMessages([
-                    'file' => ['Video must not exceed 100 MB.'],
-                ]);
-            }
-        } else {
-            throw ValidationException::withMessages([
-                'file' => ['File must be an image (JPEG, PNG, GIF, WebP) or video (MP4, WebM).'],
-            ]);
         }
 
-        // Store file to S3 in 'gallery-media/YYYY/MM' directory and get the full URL
-        $path = $file->store('gallery-media/'.date('Y/m'), 's3');
-        $fullUrl = Storage::disk('s3')->url($path);
+        // 3. Upload Main File (Image or Video) to S3
+        $folder = $isVideo ? 'videos' : 'images';
+        $filePathS3 = Storage::disk('s3')->putFile($folder, $file, 'public');
 
+        // 3. Check if the upload actually worked before getting the URL
+        if (! $filePathS3) {
+            return response()->json([
+                'success' => false,
+                'message' => 'S3 Upload failed. Check your AWS credentials and Bucket permissions. '.$filePathS3,
+                'error' => $filePathS3,
+            ], 500);
+        }
+
+        $fullFileUrl = Storage::disk('s3')->url($filePathS3);
+
+        // 4. Save to Database
         $media = GalleryMedia::create([
-            'path' => $path,
-            'type' => $type,
-            'original_name' => $file->getClientOriginalName(),
-            'file_size' => $size,
-            'mime_type' => $mime,
-            'title' => $request->input('custom_name'),
+            'path' => $fullFileUrl,
+            'type' => $isVideo ? 'video' : 'image',
+            'original_name' => $originalName,
+            'file_size' => $fileSize,
+            'mime_type' => $mimeType,
+            'title' => $title,
+            'thumbnail' => $thumbnailFullUrl, // Will be null for images
         ]);
+
+        // 5. Cleanup temp thumbnail if it exists
+        if ($tempThumbPath && file_exists($tempThumbPath)) {
+            unlink($tempThumbPath);
+        }
 
         return response()->json([
             'success' => true,
