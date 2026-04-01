@@ -1688,16 +1688,16 @@
                     vid.play().catch(function() {
                         console.error('Error playing video:', e);
                     });
-                    //unnute after 500 ms
+                   
                     setTimeout(() => {
                         vid.muted = false;
                     }, 1500);
-                    try {
-                        vid.click();
-                    } catch (e) {
-                        console.error('Error clicking video:', e);
-                        vid.click();
-                    }
+                    // try {
+                    //     vid.click();
+                    // } catch (e) {
+                    //     console.error('Error clicking video:', e);
+                    //     vid.click();
+                    // }
                 };
 
                 vid.addEventListener('loadedmetadata', applySeekAndPlay, {
