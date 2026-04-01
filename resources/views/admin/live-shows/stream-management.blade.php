@@ -287,60 +287,90 @@
                                                                         <i class="fas fa-eye-slash"></i> Hide on stream
                                                                     </button>
                                                                 </div>
-                                                                <div id="gallery-attached-list" class="table-responsive mb-3" style="max-height: 520px; overflow-y: auto;">
-                                                                    <table class="table table-sm table-dark table-hover align-middle mb-0">
+                                                                <div id="gallery-attached-list"
+                                                                    class="table-responsive mb-3"
+                                                                    style="max-height: 520px; overflow-y: auto;">
+                                                                    <table
+                                                                        class="table table-sm table-dark table-hover align-middle mb-0">
                                                                         <thead>
                                                                             <tr>
-                                                                                <th scope="col" style="width: 40px;">#</th>
-                                                                                <th scope="col" style="width: 45px;">Thumb</th>
+                                                                                <th scope="col"
+                                                                                    style="width: 40px;">#</th>
+                                                                                <th scope="col"
+                                                                                    style="width: 45px;">Thumb</th>
                                                                                 <th scope="col">Title</th>
-                                                                                <th scope="col" style="width: 65px;">Type</th>
-                                                                                <th scope="col" style="width: 160px;">Actions</th>
+                                                                                <th scope="col"
+                                                                                    style="width: 65px;">Type</th>
+                                                                                <th scope="col"
+                                                                                    style="min-width: 160px; text-align: right;">
+                                                                                    Actions</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
                                                                             @forelse ($liveShow->galleryMedia as $idx => $item)
-                                                                                <tr class="gallery-media-card" data-media-id="{{ $item->id }}" data-attached="1">
-                                                                                    <td class="text-muted small">{{ $idx + 1 }}</td>
+                                                                                <tr class="gallery-media-card"
+                                                                                    data-media-id="{{ $item->id }}"
+                                                                                    data-attached="1">
+                                                                                    <td class="text-muted small">
+                                                                                        {{ $idx + 1 }}</td>
                                                                                     <td class="p-1">
                                                                                         <img src="{{ $item->isImage() ? $item->path : $item->thumbnail ?? $item->path }}"
-                                                                                             alt=""
-                                                                                             style="width: 34px; height: 34px; object-fit: cover; border-radius: 4px; border: 1px solid #555;">
+                                                                                            alt=""
+                                                                                            style="width: 34px; height: 34px; object-fit: cover; border-radius: 4px; border: 1px solid #555;">
                                                                                     </td>
                                                                                     <td>
-                                                                                        <span class="  d-block" style="max-width: 370px;">
+                                                                                        <span class="  d-block"
+                                                                                            style="max-width: 370px;">
                                                                                             {{ $item->title ?: '—' }}
                                                                                         </span>
                                                                                     </td>
                                                                                     <td>
-                                                                                        <span class="badge {{ $item->type === 'video' ? 'bg-primary' : 'bg-warning text-dark' }}">{{ ucfirst($item->type) }}</span>
+                                                                                        <span
+                                                                                            class="badge {{ $item->type === 'video' ? 'bg-primary' : 'bg-warning text-dark' }}">{{ ucfirst($item->type) }}</span>
                                                                                     </td>
                                                                                     <td>
-                                                                                        <div class="d-flex gap-2 flex-wrap">
+                                                                                        <div
+                                                                                            class="d-flex gap-2 flex-wrap justify-content-end">
                                                                                             <button type="button"
-                                                                                                    class="btn btn-sm btn-success gallery-show-on-stream-btn"
-                                                                                                    data-media-id="{{ $item->id }}"
-                                                                                                    title="Show on live stream">
-                                                                                                <i class="fas fa-tv"></i>
+                                                                                                class="btn btn-sm btn-success gallery-show-on-stream-btn"
+                                                                                                data-media-id="{{ $item->id }}"
+                                                                                                title="Show on live stream">
+                                                                                                <i
+                                                                                                    class="fas fa-tv"></i>
+                                                                                                Show on stream
                                                                                             </button>
                                                                                             <button type="button"
-                                                                                                    class="btn btn-sm btn-outline-danger gallery-detach-btn"
-                                                                                                    data-media-id="{{ $item->id }}"
-                                                                                                    title="Remove from stream">
-                                                                                                <i class="fas fa-times"></i>
+                                                                                                class="btn btn-sm btn-warning gallery-hide-on-stream-btn me-3"
+                                                                                                onclick="galleryHideOnStream(this)"
+                                                                                                data-media-id="{{ $item->id }}"
+                                                                                                title="Hide on live stream">
+                                                                                                <i
+                                                                                                    class="fas fa-eye-slash"></i>
+                                                                                                Hide on stream
                                                                                             </button>
                                                                                             <button type="button"
-                                                                                                    class="btn btn-sm btn-secondary"
-                                                                                                    title="Preview"
-                                                                                                    onclick="window.open('{{ $item->isImage() ? $item->path : ($item->thumbnail ?? $item->path) }}', '_blank')">
-                                                                                                <i class="fas fa-eye"></i>
+                                                                                                class="btn btn-sm btn-outline-danger gallery-detach-btn"
+                                                                                                data-media-id="{{ $item->id }}"
+                                                                                                title="Remove from stream">
+                                                                                                <i
+                                                                                                    class="fas fa-times"></i>
+                                                                                            </button>
+                                                                                            <button type="button"
+                                                                                                class="btn btn-sm btn-secondary"
+                                                                                                title="Preview"
+                                                                                                onclick="window.open('{{ $item->isImage() ? $item->path : $item->thumbnail ?? $item->path }}', '_blank')">
+                                                                                                <i
+                                                                                                    class="fas fa-eye"></i>
                                                                                             </button>
                                                                                         </div>
                                                                                     </td>
                                                                                 </tr>
                                                                             @empty
                                                                                 <tr>
-                                                                                    <td colspan="5" class="text-muted small text-center" id="gallery-attached-empty">None attached yet.</td>
+                                                                                    <td colspan="5"
+                                                                                        class="text-muted small text-center"
+                                                                                        id="gallery-attached-empty">
+                                                                                        None attached yet.</td>
                                                                                 </tr>
                                                                             @endforelse
                                                                         </tbody>
@@ -353,56 +383,65 @@
                                                                     Add
                                                                     from gallery</h6>
                                                                 <div style="max-height: 520px; overflow-y: auto;">
-                                                                    <table class="table table-dark table-striped table-hover mb-0">
+                                                                    <table
+                                                                        class="table table-dark table-striped table-hover mb-0">
                                                                         <thead>
-                                                                        <tr>
-                                                                            <th style="width: 40px;"></th>
-                                                                            <th>Title</th>
-                                                                            <th>Type</th>
-                                                                            <th style="width: 170px;">Action</th>
-                                                                        </tr>
+                                                                            <tr>
+                                                                                <th style="width: 40px;"></th>
+                                                                                <th>Title</th>
+                                                                                <th>Type</th>
+                                                                                <th style="width: 170px;">Action</th>
+                                                                            </tr>
                                                                         </thead>
                                                                         <tbody id="gallery-available-list">
-                                                                        @php $attachedIds = $liveShow->galleryMedia->pluck('id')->toArray(); @endphp
-                                                                        @php $hasAvailable = false; @endphp
-                                                                        @foreach ($allGalleryMedia as $item)
-                                                                            @if (!in_array($item->id, $attachedIds))
-                                                                                @php $hasAvailable = true; @endphp
-                                                                                <tr class="gallery-media-card"
-                                                                                    data-media-id="{{ $item->id }}"
-                                                                                    data-attached="0">
-                                                                                    <td class="p-1">
-                                                                                        <img src="{{ $item->isImage() ? $item->path : $item->thumbnail ?? $item->path }}"
-                                                                                             style="width: 34px; height: 34px; object-fit: cover; border-radius: 4px; border: 1px solid #555;"
-                                                                                             alt="">
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <span class="text-truncate d-block" style="max-width: 170px;">
-                                                                                            {{ $item->title ?: '—' }}
-                                                                                        </span>
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <span class="badge {{ $item->type === 'video' ? 'bg-primary' : 'bg-warning text-dark' }}">{{ ucfirst($item->type) }}</span>
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <button type="button"
+                                                                            @php $attachedIds = $liveShow->galleryMedia->pluck('id')->toArray(); @endphp
+                                                                            @php $hasAvailable = false; @endphp
+                                                                            @foreach ($allGalleryMedia as $item)
+                                                                                @if (!in_array($item->id, $attachedIds))
+                                                                                    @php $hasAvailable = true; @endphp
+                                                                                    <tr class="gallery-media-card"
+                                                                                        data-media-id="{{ $item->id }}"
+                                                                                        data-attached="0">
+                                                                                        <td class="p-1">
+                                                                                            <img src="{{ $item->isImage() ? $item->path : $item->thumbnail ?? $item->path }}"
+                                                                                                style="width: 34px; height: 34px; object-fit: cover; border-radius: 4px; border: 1px solid #555;"
+                                                                                                alt="">
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <span
+                                                                                                class="text-truncate d-block"
+                                                                                                style="max-width: 170px;">
+                                                                                                {{ $item->title ?: '—' }}
+                                                                                            </span>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <span
+                                                                                                class="badge {{ $item->type === 'video' ? 'bg-primary' : 'bg-warning text-dark' }}">{{ ucfirst($item->type) }}</span>
+                                                                                        </td>
+                                                                                        <td>
+                                                                                            <button type="button"
                                                                                                 class="btn btn-sm btn-outline-primary gallery-attach-btn"
                                                                                                 data-media-id="{{ $item->id }}"
                                                                                                 title="Attach to stream">
-                                                                                            <i class="fas fa-plus"></i> Attach
-                                                                                        </button>
+                                                                                                <i
+                                                                                                    class="fas fa-plus"></i>
+                                                                                                Attach
+                                                                                            </button>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                @endif
+                                                                            @endforeach
+                                                                            @if (!$hasAvailable)
+                                                                                <tr>
+                                                                                    <td colspan="4"
+                                                                                        class="text-muted small text-center"
+                                                                                        id="gallery-available-empty">
+                                                                                        No other media in gallery.
+                                                                                        <a href="{{ route('admin.media-gallery.create') }}"
+                                                                                            target="_blank">Upload</a>
                                                                                     </td>
                                                                                 </tr>
                                                                             @endif
-                                                                        @endforeach
-                                                                        @if (!$hasAvailable)
-                                                                        <tr>
-                                                                            <td colspan="4" class="text-muted small text-center" id="gallery-available-empty">
-                                                                                No other media in gallery.
-                                                                                <a href="{{ route('admin.media-gallery.create') }}" target="_blank">Upload</a>
-                                                                            </td>
-                                                                        </tr>
-                                                                        @endif
                                                                         </tbody>
                                                                     </table>
                                                                 </div>
@@ -646,11 +685,13 @@
                 transition: width 0.4s ease-in-out;
                 border-radius: 5px;
             }
-            .slick-list{
+
+            .slick-list {
                 min-height: 500px !important;
                 width: 100% !important;
             }
-            .slick-initialized .slick-slide{
+
+            .slick-initialized .slick-slide {
                 min-height: 500px !important;
                 min-width: 500px !important;
             }
@@ -692,6 +733,7 @@
                     if (showBtn) {
                         e.preventDefault();
                         galleryShowOnStream(showBtn.getAttribute('data-media-id'), showBtn);
+                        turnTrClassToTableSuccess(showBtn);
                     }
                 });
                 document.getElementById('gallery-available-list')?.addEventListener('click', function(e) {
@@ -704,7 +746,10 @@
                 document.querySelector('.gallery-hide-on-stream-btn')?.addEventListener('click', function(e) {
                     e.preventDefault();
                     galleryHideOnStream(e.currentTarget);
+                    turnTrClassToTableSuccess(e.currentTarget);
                 });
+
+
             });
 
             const liveShowId = {{ $liveShow->id }};
@@ -747,6 +792,21 @@
                     .finally(() => {
                         btn.disabled = false;
                     });
+            }
+            //funtion to turn tr class of current button closet tr to table-success and other's without any class
+            function turnTrClassToTableSuccess(btn) {
+                const trs = document.querySelectorAll('tr');
+                trs.forEach(tr => {
+                    if (tr !== btn.closest('tr')) {
+                        tr.classList.remove('table-success');
+                    }
+                });
+
+                const tr = btn.closest('tr');
+                if (tr) {
+                    tr.classList.add('table-success');
+                }
+
             }
 
             function galleryHideOnStream(btn) {
