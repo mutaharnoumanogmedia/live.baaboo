@@ -1058,7 +1058,7 @@
 
                 $('.marquee-text').marquee({
                     direction: 'left',
-                    duration: 30000,
+                    duration: 25000,
                     gap: 20,
                     delay: 0,
                 });
