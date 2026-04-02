@@ -130,47 +130,24 @@
 
         📅 Den Nachholtermin gibt's bald – wir halten euch auf dem Laufenden!
     </div> --}}
-    <style>
-        .marquee-text {
-            display: inline-block;
-            padding-left: 100%;
-            animation: marquee 15s linear infinite;
-        }
 
-        @media (max-width: 768px) {
-            .marquee-text {
-                animation: marquee 10s linear infinite;
-            }
-        }
-
-        @keyframes marquee {
-            0% {
-                transform: translateX(0);
-            }
-
-            100% {
-                transform: translateX(-100%);
-            }
-        }
-    </style>
 
     <div class="w-100 py-2" style="background: #fde901; color: #140b63; font-weight: bold;">
         <div style="white-space: nowrap; overflow: hidden; width: 100%;">
             <div class="d-none d-lg-block">
-                <div class="marquee-text d-flex gap-2">
-                    @for ($i = 0; $i < 10; $i++)
-                        <div>
+                <div class="marquee-text  gap-2">
+
+                    <div>
+                        @for ($i = 0; $i < 10; $i++)
                             Nächste Show:
-
                             {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H:i') . ' Uhr' : 'Nicht festgelegt' }}
+                            <span> | </span>
+                            <span class="me-5"> Jetzt kostenlos mitspielen </span>
+                        @endfor
 
-                        </div>
-                        <div> | </div>
-                        <div> Jetzt kostenlos mitspielen </div>
-                        <div style="width: 100px;"> </div>
-                        <div style="width: 100px;"> </div>
-                        <div style="width: 100px;"> </div>
-                    @endfor
+
+                    </div>
+
 
                 </div>
             </div>
@@ -1072,6 +1049,21 @@
                     updateCountdown();
                     // setInterval(updateCountdown, 1000);
                 }
+            });
+        </script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery.Marquee/1.6.1/jquery.marquee.min.js"
+            integrity="sha512-7fmCiigv2+JYVu/jo/8KJ6CLmt4feBRUBiyGNdUBo+3tf6gA/02c6OTf3HW+h5kjCZGHrmSTgIwvvGxGimvEoA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script>
+            $(document).ready(function() {
+
+                $('.marquee-text').marquee({
+                    direction: 'left',
+                    duration: 10000,
+                    gap: 20,
+                    delay: 0,
+                });
             });
         </script>
     @endpush
