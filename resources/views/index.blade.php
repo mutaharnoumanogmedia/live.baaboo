@@ -156,23 +156,31 @@
 
     <div class="w-100 py-2" style="background: #fde901; color: #140b63; font-weight: bold;">
         <div style="white-space: nowrap; overflow: hidden; width: 100%;">
-            <div class="marquee-text d-flex gap-2">
-                @for ($i = 0; $i < 10; $i++)
-                    <div>
-                        Nächste Show:
-                        <span class="d-block d-lg-inline">
+            <div class="d-none d-lg-block">
+                <div class="marquee-text d-flex gap-2">
+                    @for ($i = 0; $i < 10; $i++)
+                        <div>
+                            Nächste Show:
+
                             {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H:i') . ' Uhr' : 'Nicht festgelegt' }}
-                        </span>
-                    </div>
-                    <div> | </div>
-                    <div> Jetzt kostenlos mitspielen </div>
-                    <div style="width: 100px;"> </div>
-                    <div style="width: 100px;"> </div>
-                    <div style="width: 100px;"> </div>
-                @endfor
 
+                        </div>
+                        <div> | </div>
+                        <div> Jetzt kostenlos mitspielen </div>
+                        <div style="width: 100px;"> </div>
+                        <div style="width: 100px;"> </div>
+                        <div style="width: 100px;"> </div>
+                    @endfor
+
+                </div>
             </div>
-
+            <div class="d-block d-lg-none">
+                <div class="text-center">
+                    Nächste Show:
+                    <span class="d-block d-lg-inline">
+                        {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H') . ' Uhr' : 'Nicht festgelegt' }}</span>
+                </div>
+            </div>
 
         </div>
 
@@ -202,7 +210,8 @@
 
             <div class="alert-next-show" style="">
                 Nächste Show:
-                {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H') . ' Uhr' : 'Nicht festgelegt' }}
+                <span class="d-block d-lg-inline">
+                    {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H') . ' Uhr' : 'Nicht festgelegt' }}</span>
             </div>
 
             <div class="hero-countdown mt-3 mb-2   mx-auto"
