@@ -1052,9 +1052,7 @@
             });
         </script>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery.Marquee/1.6.1/jquery.marquee.min.js"
-            integrity="sha512-7fmCiigv2+JYVu/jo/8KJ6CLmt4feBRUBiyGNdUBo+3tf6gA/02c6OTf3HW+h5kjCZGHrmSTgIwvvGxGimvEoA=="
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery.Marquee/1.6.1/jquery.marquee.min.js"></script>
         <script>
             $(document).ready(function() {
 
