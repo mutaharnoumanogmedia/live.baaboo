@@ -200,6 +200,27 @@ class MediaGalleryController extends Controller
         return response()->json(['success' => true, 'message' => 'Detached from live show.']);
     }
 
+    public function reorder(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'live_show_id' => 'required|exists:live_shows,id',
+            'order'        => 'required|array',
+            'order.*'      => 'integer|exists:gallery_media,id',
+        ]);
+
+        $liveShowId = $validated['live_show_id'];
+
+        DB::transaction(function () use ($liveShowId, $validated) {
+            foreach ($validated['order'] as $position => $mediaId) {
+                LiveShowGalleryMedia::where('live_show_id', $liveShowId)
+                    ->where('gallery_media_id', $mediaId)
+                    ->update(['sort_order' => $position]);
+            }
+        });
+
+        return response()->json(['success' => true, 'message' => 'Order updated.']);
+    }
+
     /** Page to pick a live show to attach a gallery item to */
     public function attachShow(GalleryMedia $media_gallery)
     {

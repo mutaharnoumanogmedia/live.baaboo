@@ -894,9 +894,9 @@
 
             let quizQuestion = data.quizQuestion;
 
-            currentQuizQuestionIndex++;
+            
             // add them to quizQuestion
-            quizQuestion.index = currentQuizQuestionIndex;
+            quizQuestion.index = data.quizQuestionIndex;
 
 
             showQuestionAndSetTimer(quizQuestion, timer);

@@ -291,6 +291,7 @@
                                         <table class="table table-sm table-dark table-hover align-middle mb-0">
                                             <thead>
                                                 <tr>
+                                                    <th scope="col" style="width: 30px;"></th>
                                                     <th scope="col" style="width: 40px;">#</th>
                                                     <th scope="col" style="width: 45px;">Thumb</th>
                                                     <th scope="col">Title</th>
@@ -1220,6 +1221,7 @@
             const liveShowId = {{ $liveShow->id }};
             const galleryAttachUrl = '{{ route('admin.media-gallery.attach-to-live-show') }}';
             const galleryDetachUrl = '{{ route('admin.media-gallery.detach-from-live-show') }}';
+            const galleryReorderUrl = '{{ route('admin.media-gallery.reorder') }}';
             const galleryMediaItemsUrl = '{{ route('admin.media-gallery.items', ['id' => $liveShow->id]) }}';
             const galleryShowOnStreamUrl =
                 '{{ route('admin.live-shows.stream-management.show-gallery-image', ['id' => $liveShow->id]) }}';
@@ -1342,9 +1344,9 @@
                             }
                             const emptyEl = document.getElementById('gallery-attached-empty');
                             if (emptyEl) emptyEl.remove();
-                            // Optionally handle available list "empty" states as before
-
-
+                            updateRowIndices();
+                            initSortable();
+                            persistOrder();
                         } else {
                             alert(data.message);
                         }
@@ -1444,6 +1446,7 @@
                                         media.gallery_media, idx));
                                 });
                             }
+                            initSortable();
                         } else {
                             alert(data.message);
                             return [];
@@ -1456,7 +1459,10 @@
                 return `
                 <tr class="gallery-media-card"
                     data-media-id="${data.id}" data-attached="1">
-                    <td class="text-muted small">
+                    <td class="drag-handle text-center" style="cursor: grab;">
+                        <i class="fas fa-grip-vertical text-muted"></i>
+                    </td>
+                    <td class="row-index text-muted small">
                         ${idx + 1}
                     </td>
                     <td class="p-1">
@@ -1592,7 +1598,66 @@
                     }
                 });
             }
+            function initSortable() {
+                const tbody = document.getElementById('attached-media-list');
+                if (!tbody || tbody._sortable) return;
+
+                tbody._sortable = new Sortable(tbody, {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    chosenClass: 'sortable-chosen',
+                    onEnd: function() {
+                        updateRowIndices();
+                        persistOrder();
+                    }
+                });
+            }
+
+            function updateRowIndices() {
+                const rows = document.querySelectorAll('#attached-media-list tr');
+                rows.forEach((row, i) => {
+                    const cell = row.querySelector('.row-index');
+                    if (cell) cell.textContent = i + 1;
+                });
+            }
+
+            function persistOrder() {
+                const rows = document.querySelectorAll('#attached-media-list tr[data-media-id]');
+                const order = Array.from(rows).map(r => parseInt(r.dataset.mediaId, 10));
+
+                fetch(galleryReorderUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': galleryCsrf,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        live_show_id: liveShowId,
+                        order: order
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success) console.error('Reorder failed', data);
+                })
+                .catch(err => console.error('Reorder error:', err));
+            }
         </script>
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+        <style>
+            .sortable-ghost {
+                opacity: 0.4;
+                background: rgba(90, 16, 172, 0.2) !important;
+            }
+            .sortable-chosen {
+                background: rgba(90, 16, 172, 0.1) !important;
+            }
+            .drag-handle:active {
+                cursor: grabbing !important;
+            }
+        </style>
     @endpush
 
 </x-app-dashboard-layout>

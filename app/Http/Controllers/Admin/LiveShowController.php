@@ -247,9 +247,13 @@ class LiveShowController extends Controller
         // total quiz questions
         $totalQuizQuestions = $liveShow->quizzes()->count();
         $quiz['totalQuizQuestions'] = $totalQuizQuestions;
+        // check this question is at what index in all quiz questions
+        $quizQuestionIndex = $liveShow->quizzes()->get()->toArray();
+        // from all quiz questions, get the index of this quiz question
+        $quizQuestionIndex = array_search($quizId, array_column($quizQuestionIndex, 'id'));
 
         // Broadcast the quiz question to users
-        ShowLiveShowQuizQuestionEvent::dispatch($quiz, (string) $liveShow->id, $request->seconds ?? 10, $request->is_last ?? false);
+        ShowLiveShowQuizQuestionEvent::dispatch($quiz, (string) $liveShow->id, $request->seconds ?? 10, $request->is_last ?? false, $quizQuestionIndex+1);
 
         return response()->json(['message' => 'Quiz question sent successfully!']);
     }
@@ -737,6 +741,4 @@ class LiveShowController extends Controller
         // download the csv file
         return response()->download($csv, 'quizzes'.$liveShow->title.'.csv');
     }
-
-  
 }

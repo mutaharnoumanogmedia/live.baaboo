@@ -22,16 +22,16 @@ class ShowLiveShowQuizQuestionEvent implements ShouldBroadcast
     public $live_show_id;
     public $timer;
     public $is_last;
+    public $quiz_question_index;
     
-    
-    public function __construct($quiz_question, $live_show_id, $timer, $is_last = false )
+    public function __construct($quiz_question, $live_show_id, $timer, $is_last = false, $quiz_question_index = 0 )
     {
         //
         $this->quiz_question = $quiz_question;
         $this->live_show_id = $live_show_id;
         $this->timer = $timer;
         $this->is_last = $is_last;
-      
+        $this->quiz_question_index = $quiz_question_index;
     }
 
     /**
@@ -53,6 +53,7 @@ class ShowLiveShowQuizQuestionEvent implements ShouldBroadcast
     {
         return [
             'quizQuestion' => $this->quiz_question,
+            'quizQuestionIndex' => $this->quiz_question_index,
            
             'liveShowId' => $this->live_show_id,
             'timer' => $this->timer ?? 15,

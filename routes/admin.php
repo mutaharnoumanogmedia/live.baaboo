@@ -38,6 +38,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('media-gallery/{media_gallery}/attach-show', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'attachShow'])->name('media-gallery.attach-show');
     Route::post('media-gallery/attach-to-live-show', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'attachToLiveShow'])->name('media-gallery.attach-to-live-show');
     Route::post('media-gallery/detach-from-live-show', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'detachFromLiveShow'])->name('media-gallery.detach-from-live-show');
+    Route::post('media-gallery/reorder', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'reorder'])->name('media-gallery.reorder');
     
     Route::get('media-gallery/items/{id}', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'items'])->name('media-gallery.items');
     
