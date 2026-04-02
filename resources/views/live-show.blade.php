@@ -1597,7 +1597,7 @@
         }
 
         document.getElementById('heartReactionBtn')?.addEventListener('click', function() {
-            if (!isLoggedIn || "{{ $liveShow->id }}" == 1004) {
+            if (!isLoggedIn) {
 
                 return;
             }

@@ -7,6 +7,7 @@ use App\Events\ShowGalleryImageEvent;
 use App\Http\Controllers\Controller;
 use App\Models\GalleryMedia;
 use App\Models\LiveShow;
+use App\Models\LiveShowGalleryMedia;
 use App\Models\LiveShowGalleryState;
 use FFMpeg\Coordinate\TimeCode;
 use FFMpeg\FFMpeg;
@@ -445,5 +446,27 @@ class MediaGalleryController extends Controller
             $playbackIso,
             $state->video_duration_seconds
         );
+    }
+
+    public function items( $live_show): JsonResponse
+    {
+        $live_show = LiveShow::findOrFail($live_show);
+        
+        $media = $live_show->galleryMediaItems;
+
+        return response()->json([
+            'success' => true,
+            'media' => $media,
+        ]);
+    }
+
+    public function allMedia(): JsonResponse
+    {
+        $media = GalleryMedia::orderBy('created_at', 'desc')->get();
+
+        return response()->json([
+            'success' => true,
+            'media' => $media,
+        ]);
     }
 }

@@ -32,12 +32,13 @@ class LiveShow extends Model
         'is_test_show' => 'boolean',
     ];
 
-    //scope test show
+    // scope test show
     public function scopeTestShow($query)
     {
         return $query->where('is_test_show', true);
     }
-    //scope not test show
+
+    // scope not test show
     public function scopeNotTestShow($query)
     {
         return $query->where('is_test_show', false);
@@ -107,6 +108,13 @@ class LiveShow extends Model
             ->withPivot('sort_order')
             ->orderBy('live_show_gallery_media.sort_order')
             ->withTimestamps();
+    }
+
+    public function galleryMediaItems()
+    {
+        return $this->hasMany(LiveShowGalleryMedia::class)->with('galleryMedia')
+            ->orderBy('live_show_gallery_media.sort_order');
+             
     }
 
     public function galleryState()

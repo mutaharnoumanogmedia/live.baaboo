@@ -167,7 +167,14 @@
                                     data-bs-target="#galleryTabPane" type="button" role="tab"
                                     aria-controls="galleryTabPane" aria-selected="false">
                                     Gallery Media
+
+
+                                    <span id="gallery-show-status" class="ms-3">
+
+                                    </span>
                                 </button>
+
+
                             </li>
                         </ul>
                     </div>
@@ -268,192 +275,37 @@
                             </div>
                             <div class="tab-pane fade" id="galleryTabPane" role="tabpanel"
                                 aria-labelledby="gallery-tab">
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <div class="card border-0 shadow-sm">
-                                            <div class="card-body">
-                                                <div class="" id="gallery-media-tab">
-                                                    <div class="p-3">
-                                                        <div class="row">
-                                                            <div class="col-lg-8">
-                                                                <div
-                                                                    class="d-flex justify-content-between align-items-center mb-2">
-                                                                    <h6
-                                                                        class="text-muted small text-uppercase fw-bold mb-0">
-                                                                        Attached to this stream</h6>
-                                                                    <button type="button"
-                                                                        class="btn btn-sm btn-outline-secondary gallery-hide-on-stream-btn"
-                                                                        title="Hide image/video overlay on live stream">
-                                                                        <i class="fas fa-eye-slash"></i> Hide on stream
-                                                                    </button>
-                                                                </div>
-                                                                <div id="gallery-attached-list"
-                                                                    class="table-responsive mb-3"
-                                                                    style="max-height: 520px; overflow-y: auto;">
-                                                                    <table
-                                                                        class="table table-sm table-dark table-hover align-middle mb-0">
-                                                                        <thead>
-                                                                            <tr>
-                                                                                <th scope="col"
-                                                                                    style="width: 40px;">#</th>
-                                                                                <th scope="col"
-                                                                                    style="width: 45px;">Thumb</th>
-                                                                                <th scope="col">Title</th>
-                                                                                <th scope="col"
-                                                                                    style="width: 65px;">Type</th>
-                                                                                <th scope="col"
-                                                                                    style="min-width: 160px; text-align: right;">
-                                                                                    Actions</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            @forelse ($liveShow->galleryMedia as $idx => $item)
-                                                                                <tr class="gallery-media-card"
-                                                                                    data-media-id="{{ $item->id }}"
-                                                                                    data-attached="1">
-                                                                                    <td class="text-muted small">
-                                                                                        {{ $idx + 1 }}</td>
-                                                                                    <td class="p-1">
-                                                                                        <img src="{{ $item->isImage() ? $item->path : $item->thumbnail ?? $item->path }}"
-                                                                                            alt=""
-                                                                                            style="width: 34px; height: 34px; object-fit: cover; border-radius: 4px; border: 1px solid #555;">
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <span class="  d-block"
-                                                                                            style="max-width: 370px;">
-                                                                                            {{ $item->title ?: '—' }}
-                                                                                        </span>
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <span
-                                                                                            class="badge {{ $item->type === 'video' ? 'bg-primary' : 'bg-warning text-dark' }}">{{ ucfirst($item->type) }}</span>
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <div
-                                                                                            class="d-flex gap-2 flex-wrap justify-content-end">
-                                                                                            <button type="button"
-                                                                                                class="btn btn-sm btn-success gallery-show-on-stream-btn"
-                                                                                                data-media-id="{{ $item->id }}"
-                                                                                                title="Show on live stream">
-                                                                                                <i
-                                                                                                    class="fas fa-tv"></i>
-                                                                                                Show on stream
-                                                                                            </button>
-                                                                                            <button type="button"
-                                                                                                class="btn btn-sm btn-warning gallery-hide-on-stream-btn me-3"
-                                                                                                onclick="galleryHideOnStream(this)"
-                                                                                                data-media-id="{{ $item->id }}"
-                                                                                                title="Hide on live stream">
-                                                                                                <i
-                                                                                                    class="fas fa-eye-slash"></i>
-                                                                                                Hide on stream
-                                                                                            </button>
-                                                                                            <button type="button"
-                                                                                                class="btn btn-sm btn-outline-danger gallery-detach-btn"
-                                                                                                data-media-id="{{ $item->id }}"
-                                                                                                title="Remove from stream">
-                                                                                                <i
-                                                                                                    class="fas fa-times"></i>
-                                                                                            </button>
-                                                                                            <button type="button"
-                                                                                                class="btn btn-sm btn-secondary"
-                                                                                                title="Preview"
-                                                                                                onclick="window.open('{{ $item->isImage() ? $item->path : $item->thumbnail ?? $item->path }}', '_blank')">
-                                                                                                <i
-                                                                                                    class="fas fa-eye"></i>
-                                                                                            </button>
-                                                                                        </div>
-                                                                                    </td>
-                                                                                </tr>
-                                                                            @empty
-                                                                                <tr>
-                                                                                    <td colspan="5"
-                                                                                        class="text-muted small text-center"
-                                                                                        id="gallery-attached-empty">
-                                                                                        None attached yet.</td>
-                                                                                </tr>
-                                                                            @endforelse
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-lg-4">
-                                                                <h6
-                                                                    class="text-muted small text-uppercase fw-bold mb-2 mt-3">
-                                                                    Add
-                                                                    from gallery</h6>
-                                                                <div style="max-height: 520px; overflow-y: auto;">
-                                                                    <table
-                                                                        class="table table-dark table-striped table-hover mb-0">
-                                                                        <thead>
-                                                                            <tr>
-                                                                                <th style="width: 40px;"></th>
-                                                                                <th>Title</th>
-                                                                                <th>Type</th>
-                                                                                <th style="width: 170px;">Action</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody id="gallery-available-list">
-                                                                            @php $attachedIds = $liveShow->galleryMedia->pluck('id')->toArray(); @endphp
-                                                                            @php $hasAvailable = false; @endphp
-                                                                            @foreach ($allGalleryMedia as $item)
-                                                                                @if (!in_array($item->id, $attachedIds))
-                                                                                    @php $hasAvailable = true; @endphp
-                                                                                    <tr class="gallery-media-card"
-                                                                                        data-media-id="{{ $item->id }}"
-                                                                                        data-attached="0">
-                                                                                        <td class="p-1">
-                                                                                            <img src="{{ $item->isImage() ? $item->path : $item->thumbnail ?? $item->path }}"
-                                                                                                style="width: 34px; height: 34px; object-fit: cover; border-radius: 4px; border: 1px solid #555;"
-                                                                                                alt="">
-                                                                                        </td>
-                                                                                        <td>
-                                                                                            <span
-                                                                                                class="text-truncate d-block"
-                                                                                                style="max-width: 170px;">
-                                                                                                {{ $item->title ?: '—' }}
-                                                                                            </span>
-                                                                                        </td>
-                                                                                        <td>
-                                                                                            <span
-                                                                                                class="badge {{ $item->type === 'video' ? 'bg-primary' : 'bg-warning text-dark' }}">{{ ucfirst($item->type) }}</span>
-                                                                                        </td>
-                                                                                        <td>
-                                                                                            <button type="button"
-                                                                                                class="btn btn-sm btn-outline-primary gallery-attach-btn"
-                                                                                                data-media-id="{{ $item->id }}"
-                                                                                                title="Attach to stream">
-                                                                                                <i
-                                                                                                    class="fas fa-plus"></i>
-                                                                                                Attach
-                                                                                            </button>
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                @endif
-                                                                            @endforeach
-                                                                            @if (!$hasAvailable)
-                                                                                <tr>
-                                                                                    <td colspan="4"
-                                                                                        class="text-muted small text-center"
-                                                                                        id="gallery-available-empty">
-                                                                                        No other media in gallery.
-                                                                                        <a href="{{ route('admin.media-gallery.create') }}"
-                                                                                            target="_blank">Upload</a>
-                                                                                    </td>
-                                                                                </tr>
-                                                                            @endif
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                            </div>
 
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                <div class="w-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h6 class="text-muted small text-uppercase fw-bold mb-0">
+                                            Attached to this stream</h6>
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-secondary gallery-hide-on-stream-btn"
+                                            title="Hide image/video overlay on live stream">
+                                            <i class="fas fa-eye-slash"></i> Hide on stream
+                                        </button>
+                                    </div>
+                                    <div id="gallery-attached-list" class="table-responsive mb-3"
+                                        style="max-height: 520px; overflow-y: auto;">
+                                        <table class="table table-sm table-dark table-hover align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" style="width: 40px;">#</th>
+                                                    <th scope="col" style="width: 45px;">Thumb</th>
+                                                    <th scope="col">Title</th>
+                                                    <th scope="col" style="width: 65px;">Type</th>
+                                                    <th scope="col" style="min-width: 160px; text-align: right;">
+                                                        Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="attached-media-list">
+
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -615,6 +467,54 @@
     </div>
 
 
+
+    <div class="modal fade" id="media-preview-modal" tabindex="-1" aria-labelledby="media-preview-modal-label"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="media-preview-modal-label">Media Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 d-flex justify-content-center align-items-center"
+                    style="min-height:400px;">
+                    <img src="" id="media-preview-modal-img" class="img-fluid rounded shadow"
+                        style="max-height:75vh; max-width:100%;">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal: Select Media From Gallery -->
+    <div class="modal fade" id="select-media-modal" tabindex="-1" aria-labelledby="select-media-modal-label"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="select-media-modal-label">Select Media from Gallery</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="min-height:350px;">
+                    <!-- Placeholder: List of available gallery media will be rendered here later -->
+                    <div id="select-media-modal-list" class="row g-3">
+                        <div class="col-12 text-muted text-center py-4">
+                            Loading available media...
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!-- You can add action buttons here later, e.g., confirm/cancel -->
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <style>
         /* Custom Styling for the Admin Dashboard */
         .bg-soft-info {
@@ -721,28 +621,6 @@
                     }
                 });
 
-                // Gallery media: attach/detach via AJAX (event delegation)
-                document.getElementById('gallery-attached-list')?.addEventListener('click', function(e) {
-                    const detachBtn = e.target.closest('.gallery-detach-btn');
-                    if (detachBtn) {
-                        e.preventDefault();
-                        galleryDetach(detachBtn.getAttribute('data-media-id'), detachBtn);
-                        return;
-                    }
-                    const showBtn = e.target.closest('.gallery-show-on-stream-btn');
-                    if (showBtn) {
-                        e.preventDefault();
-                        galleryShowOnStream(showBtn.getAttribute('data-media-id'), showBtn);
-                        turnTrClassToTableSuccess(showBtn);
-                    }
-                });
-                document.getElementById('gallery-available-list')?.addEventListener('click', function(e) {
-                    const btn = e.target.closest('.gallery-attach-btn');
-                    if (!btn) return;
-                    e.preventDefault();
-                    const mediaId = btn.getAttribute('data-media-id');
-                    galleryAttach(mediaId, btn);
-                });
                 document.querySelector('.gallery-hide-on-stream-btn')?.addEventListener('click', function(e) {
                     e.preventDefault();
                     galleryHideOnStream(e.currentTarget);
@@ -750,232 +628,9 @@
                 });
 
 
+                fetchGalleryMediaItems();
+                fetchGalleryShowStatus();
             });
-
-            const liveShowId = {{ $liveShow->id }};
-            const galleryAttachUrl = '{{ route('admin.media-gallery.attach-to-live-show') }}';
-            const galleryDetachUrl = '{{ route('admin.media-gallery.detach-from-live-show') }}';
-            const galleryShowOnStreamUrl =
-                '{{ route('admin.live-shows.stream-management.show-gallery-image', ['id' => $liveShow->id]) }}';
-            const galleryHideOnStreamUrl =
-                '{{ route('admin.live-shows.stream-management.hide-gallery-image', ['id' => $liveShow->id]) }}';
-            const galleryCsrf = '{{ csrf_token() }}';
-
-            function galleryShowOnStream(mediaId, btn) {
-                if (!btn) return;
-                btn.disabled = true;
-                fetch(galleryShowOnStreamUrl, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': galleryCsrf,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            gallery_media_id: parseInt(mediaId, 10)
-                        })
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success) {
-                            const label = btn.querySelector('i');
-                            if (label) {
-                                const orig = label.className;
-                                label.className = 'fas fa-check';
-                                setTimeout(() => {
-                                    label.className = orig;
-                                }, 800);
-                            }
-                        }
-                    })
-                    .catch(err => console.error('Show on stream error:', err))
-                    .finally(() => {
-                        btn.disabled = false;
-                    });
-            }
-            //funtion to turn tr class of current button closet tr to table-success and other's without any class
-            function turnTrClassToTableSuccess(btn) {
-                const trs = document.querySelectorAll('tr');
-                trs.forEach(tr => {
-                    if (tr !== btn.closest('tr')) {
-                        tr.classList.remove('table-success');
-                    }
-                });
-
-                const tr = btn.closest('tr');
-                if (tr) {
-                    tr.classList.add('table-success');
-                }
-
-            }
-
-            function galleryHideOnStream(btn) {
-                if (!btn) return;
-                btn.disabled = true;
-                fetch(galleryHideOnStreamUrl, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': galleryCsrf,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success) {
-                            const label = btn.querySelector('i');
-                            if (label) {
-                                const orig = label.className;
-                                label.className = 'fas fa-check';
-                                setTimeout(() => {
-                                    label.className = orig;
-                                }, 800);
-                            }
-                        }
-                    })
-                    .catch(err => console.error('Hide on stream error:', err))
-                    .finally(() => {
-                        btn.disabled = false;
-                    });
-            }
-
-            function galleryAttach(mediaId, btn) {
-                const card = btn.closest('.gallery-media-card');
-                if (!card) return;
-                btn.disabled = true;
-                fetch(galleryAttachUrl, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': galleryCsrf,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            live_show_id: liveShowId,
-                            gallery_media_id: parseInt(mediaId, 10)
-                        })
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.success) {
-                            card.setAttribute('data-attached', '1');
-                            const body = card.querySelector('.card-body');
-                            if (body) {
-                                // With title for video or image
-                                let typeTag = '';
-                                if (data.media && data.media.type) {
-                                    if (data.media && data.media.type) {
-                                        let badgeClass = 'bg-info';
-                                        if (data.media.type === 'video') badgeClass = 'bg-primary';
-                                        else if (data.media.type === 'image') badgeClass = 'bg-warning text-dark';
-                                        typeTag = '<span class="badge ' + badgeClass + ' mb-1">' +
-                                            data.media.type.charAt(0).toUpperCase() + data.media.type.slice(1) +
-                                            '</span>';
-                                    }
-                                }
-                                let titleHtml = '';
-                                if (data.media && data.media.title) {
-                                    titleHtml = '<div class="mt-2 text-muted small">' + data.media.title + '</div>';
-                                }
-                                body.innerHTML =
-                                    typeTag +
-                                    '<button type="button" class="btn btn-sm btn-success w-100 mb-1 gallery-show-on-stream-btn" data-media-id="' +
-                                    mediaId +
-                                    '" title="Show on live stream"><i class="fas fa-tv"></i> Show on stream</button>' +
-                                    '<button type="button" class="btn btn-sm btn-outline-danger w-100 gallery-detach-btn" data-media-id="' +
-                                    mediaId + '" title="Remove from stream"><i class="fas fa-times"></i> Remove</button>' +
-                                    titleHtml;
-                                document.getElementById('gallery-attached-list').appendChild(card);
-                                const emptyEl = document.getElementById('gallery-attached-empty');
-                                if (emptyEl) emptyEl.remove();
-                                const availableList = document.getElementById('gallery-available-list');
-                                if (availableList && !availableList.querySelector('.gallery-media-card') && !document
-                                    .getElementById('gallery-available-empty')) {
-                                    const emptyMsg = document.createElement('div');
-                                    emptyMsg.className = 'col-12 text-muted small';
-                                    emptyMsg.id = 'gallery-available-empty';
-                                    emptyMsg.innerHTML =
-                                        'No other media in gallery. <a href="{{ route('admin.media-gallery.create') }}" target="_blank">Upload</a>';
-                                    availableList.appendChild(emptyMsg);
-                                }
-                            }
-                        } else {
-                            alert(data.message);
-                        }
-                    })
-                    .catch(err => console.error('Gallery attach error:', err))
-                    .finally(() => {
-                        btn.disabled = false;
-                    });
-            }
-
-            function galleryDetach(mediaId, btn) {
-                const card = btn.closest('.gallery-media-card');
-                if (!card) return;
-                btn.disabled = true;
-                fetch(galleryDetachUrl, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': galleryCsrf,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            live_show_id: liveShowId,
-                            gallery_media_id: parseInt(mediaId, 10)
-                        })
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-
-                        if (data.success) {
-                            card.setAttribute('data-attached', '0');
-                            const body = card.querySelector('.card-body');
-                            if (body) {
-                                let typeTag = '';
-                                if (data.media && data.media.type) {
-                                    if (data.media.type === 'video') {
-                                        typeTag = '<span class="badge bg-primary mb-1">' +
-                                            data.media.type.charAt(0).toUpperCase() + data.media.type.slice(1) +
-                                            '</span>';
-                                    } else if (data.media.type === 'image') {
-                                        typeTag = '<span class="badge bg-warning text-dark mb-1">' +
-                                            data.media.type.charAt(0).toUpperCase() + data.media.type.slice(1) +
-                                            '</span>';
-                                    } else {
-                                        typeTag = '<span class="badge bg-info mb-1">' +
-                                            data.media.type.charAt(0).toUpperCase() + data.media.type.slice(1) +
-                                            '</span>';
-                                    }
-                                }
-                                let titleHtml = '';
-                                if (data.media && data.media.title) {
-                                    titleHtml = '<div class="mt-2 text-muted small">' + data.media.title + '</div>';
-                                }
-                                body.innerHTML =
-                                    typeTag +
-                                    '<button type="button" class="btn btn-sm btn-outline-primary w-100 gallery-attach-btn" data-media-id="' +
-                                    mediaId + '" title="Attach to stream"><i class="fas fa-plus"></i> Attach</button>' +
-                                    titleHtml;
-                            }
-                            document.getElementById('gallery-available-list').appendChild(card);
-                            const availableEmpty = document.getElementById('gallery-available-empty');
-                            if (availableEmpty) availableEmpty.remove();
-                            const attachedList = document.getElementById('gallery-attached-list');
-                            if (attachedList && !attachedList.querySelector('.gallery-media-card')) {
-                                const empty = document.createElement('div');
-                                empty.className = 'col-12 text-muted small';
-                                empty.id = 'gallery-attached-empty';
-                                empty.innerHTML = 'None attached yet.'; // changed to innerHTML for consistency, here too
-                                attachedList.appendChild(empty);
-                            }
-                        }
-                    })
-                    .catch(err => console.error('Gallery detach error:', err))
-                    .finally(() => {
-                        btn.disabled = false;
-                    });
-            }
 
             function fetchChatMessages() {
                 // Simulate an API call to fetch chat messages
@@ -1310,27 +965,6 @@
 
 
         <script>
-            // Enable Pusher logging - disable in production
-
-
-            // var channel = pusher.subscribe('live-show-online-users.{{ $liveShow->id }}');
-
-            // // System subscription event
-            // channel.bind('pusher:subscription_succeeded', function() {
-            //     console.log('Subscribed successfully!');
-            // });
-
-            // // Your Laravel broadcast event (drop the dot)
-            // channel.bind('LiveShowOnlineUsersEvent', function(data) {
-
-
-            //     fetchActivePlayers().then(activePlayers => {
-            //         appendPlayerList(activePlayers);
-            //     });
-            //     // You can also update DOM here:
-            //     // document.getElementById('onlineUsers').innerHTML = JSON.stringify(data.activeUsers);
-            // });
-
             var channel2 = pusher.subscribe('live-show-message.{{ $liveShow->id }}');
 
             // System subscription event
@@ -1338,13 +972,9 @@
                 console.log('Subscribed message event successfully!');
             });
 
-            // Your Laravel broadcast event (drop the dot)
             channel2.bind('LiveShowMessageEvent', function(data) {
                 console.log('new message:', data.data);
-
                 appendSingleMessage(data.data);
-                // You can also update DOM here:
-                // document.getElementById('onlineUsers').innerHTML = JSON.stringify(data.activeUsers);
             });
 
             var channelResetChat = pusher.subscribe('reset-chat.{{ $liveShow->id }}');
@@ -1583,6 +1213,384 @@
                 setTimeout(() => {
                     iframe.style.opacity = '1';
                 }, 100);
+            }
+
+
+            /*all media gallery functions*/
+            const liveShowId = {{ $liveShow->id }};
+            const galleryAttachUrl = '{{ route('admin.media-gallery.attach-to-live-show') }}';
+            const galleryDetachUrl = '{{ route('admin.media-gallery.detach-from-live-show') }}';
+            const galleryMediaItemsUrl = '{{ route('admin.media-gallery.items', ['id' => $liveShow->id]) }}';
+            const galleryShowOnStreamUrl =
+                '{{ route('admin.live-shows.stream-management.show-gallery-image', ['id' => $liveShow->id]) }}';
+            const galleryHideOnStreamUrl =
+                '{{ route('admin.live-shows.stream-management.hide-gallery-image', ['id' => $liveShow->id]) }}';
+            const galleryCsrf = '{{ csrf_token() }}';
+
+            const galleryShowStatusUrl =
+                '{{ route('admin.live-shows.gallery-stream-state', ['live_show' => $liveShow->id]) }}';
+
+            const allMediaUrl = '{{ route('admin.media-gallery.all') }}';
+
+
+
+            function galleryShowOnStream(mediaId, btn) {
+                if (!btn) return;
+                btn.disabled = true;
+                fetch(galleryShowOnStreamUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': galleryCsrf,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            gallery_media_id: parseInt(mediaId, 10)
+                        })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            const label = btn.querySelector('i');
+                            if (label) {
+                                const orig = label.className;
+                                label.className = 'fas fa-check';
+                                setTimeout(() => {
+                                    label.className = orig;
+                                }, 800);
+                            }
+                            //update gallery show status to showing
+                            updateGalleryShowStatus('showing');
+                        }
+                    })
+                    .catch(err => console.error('Show on stream error:', err))
+                    .finally(() => {
+                        btn.disabled = false;
+                    });
+            }
+            //funtion to turn tr class of current button closet tr to table-success and other's without any class
+            function turnTrClassToTableSuccess(btn) {
+                const trs = document.querySelectorAll('tr');
+                trs.forEach(tr => {
+                    if (tr !== btn.closest('tr')) {
+                        tr.classList.remove('table-success');
+                    }
+                });
+
+                const tr = btn.closest('tr');
+                if (tr) {
+                    tr.classList.add('table-success');
+                }
+
+            }
+
+            function galleryHideOnStream(btn) {
+                if (!btn) return;
+                btn.disabled = true;
+                fetch(galleryHideOnStreamUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': galleryCsrf,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            const label = btn.querySelector('i');
+                            if (label) {
+                                const orig = label.className;
+                                label.className = 'fas fa-check';
+                                setTimeout(() => {
+                                    label.className = orig;
+                                }, 800);
+                            }
+                            //update gallery show status to hidden
+                            updateGalleryShowStatus('hidden');
+                        }
+                    })
+                    .catch(err => console.error('Hide on stream error:', err))
+                    .finally(() => {
+                        btn.disabled = false;
+                    });
+
+            }
+
+            function galleryAttach(mediaId, btn) {
+                btn.disabled = true;
+                fetch(galleryAttachUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': galleryCsrf,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            live_show_id: liveShowId,
+                            gallery_media_id: parseInt(mediaId, 10)
+                        })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Remove the original card (if present), or handle row changes as needed
+                            const row = attachGalleryMediaItemRow(data.media, data.idx !== undefined ? data.idx : 0);
+                            const tbody = document.getElementById('attached-media-list');
+                            if (tbody) {
+                                tbody.insertAdjacentHTML('beforeend', row);
+                            }
+                            const emptyEl = document.getElementById('gallery-attached-empty');
+                            if (emptyEl) emptyEl.remove();
+                            // Optionally handle available list "empty" states as before
+
+
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(err => console.error('Gallery attach error:', err))
+                    .finally(() => {
+                        btn.disabled = false;
+                    });
+            }
+
+            function galleryDetach(mediaId, btn) {
+                const card = btn.closest('.gallery-media-card');
+                if (!card) return;
+                btn.disabled = true;
+                fetch(galleryDetachUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': galleryCsrf,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            live_show_id: liveShowId,
+                            gallery_media_id: parseInt(mediaId, 10)
+                        })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+
+                        if (data.success) {
+                            card.setAttribute('data-attached', '0');
+                            const body = card.querySelector('.card-body');
+                            if (body) {
+                                let typeTag = '';
+                                if (data.media && data.media.type) {
+                                    if (data.media.type === 'video') {
+                                        typeTag = '<span class="badge bg-primary mb-1">' +
+                                            data.media.type.charAt(0).toUpperCase() + data.media.type.slice(1) +
+                                            '</span>';
+                                    } else if (data.media.type === 'image') {
+                                        typeTag = '<span class="badge bg-warning text-dark mb-1">' +
+                                            data.media.type.charAt(0).toUpperCase() + data.media.type.slice(1) +
+                                            '</span>';
+                                    } else {
+                                        typeTag = '<span class="badge bg-info mb-1">' +
+                                            data.media.type.charAt(0).toUpperCase() + data.media.type.slice(1) +
+                                            '</span>';
+                                    }
+                                }
+                                let titleHtml = '';
+                                if (data.media && data.media.title) {
+                                    titleHtml = '<div class="mt-2 text-muted small">' + data.media.title + '</div>';
+                                }
+                                body.innerHTML =
+                                    typeTag +
+                                    '<button type="button" class="btn btn-sm btn-outline-primary w-100 gallery-attach-btn" data-media-id="' +
+                                    mediaId + '" title="Attach to stream"><i class="fas fa-plus"></i> Attach</button>' +
+                                    titleHtml;
+                            }
+                            document.getElementById('gallery-available-list').appendChild(card);
+                            const availableEmpty = document.getElementById('gallery-available-empty');
+                            if (availableEmpty) availableEmpty.remove();
+                            const attachedList = document.getElementById('gallery-attached-list');
+                            if (attachedList && !attachedList.querySelector('.gallery-media-card')) {
+                                const empty = document.createElement('div');
+                                empty.className = 'col-12 text-muted small';
+                                empty.id = 'gallery-attached-empty';
+                                empty.innerHTML = 'None attached yet.'; // changed to innerHTML for consistency, here too
+                                attachedList.appendChild(empty);
+                            }
+                        }
+                    })
+                    .catch(err => console.error('Gallery detach error:', err))
+                    .finally(() => {
+                        btn.disabled = false;
+                    });
+            }
+
+            function fetchGalleryMediaItems() {
+                return fetch(galleryMediaItemsUrl, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRF-TOKEN': galleryCsrf,
+                        }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        console.log('Gallery media items:', data);
+                        if (data.success) {
+                            //append gallery media items to gallery-available-list
+                            const galleryAvailableList = document.getElementById('attached-media-list');
+                            if (galleryAvailableList) {
+                                galleryAvailableList.innerHTML = '';
+                                data.media.forEach((media, idx) => {
+
+                                    galleryAvailableList.insertAdjacentHTML('beforeend', attachGalleryMediaItemRow(
+                                        media.gallery_media, idx));
+                                });
+                            }
+                        } else {
+                            alert(data.message);
+                            return [];
+                        }
+                    })
+                    .catch(err => console.error('Gallery media items error:', err))
+            }
+
+            function attachGalleryMediaItemRow(data, idx) {
+                return `
+                <tr class="gallery-media-card"
+                    data-media-id="${data.id}" data-attached="1">
+                    <td class="text-muted small">
+                        ${idx + 1}
+                    </td>
+                    <td class="p-1">
+                        <img src="${data.is_image ? data.path : (data.thumbnail ?? data.path)}"
+                            alt=""
+                            style="width: 34px; height: 34px; object-fit: cover; border-radius: 4px; border: 1px solid #555;">
+                    </td>
+                    <td>
+                        <span class="d-block" style="max-width: 370px;">
+                            ${data.title || '—'}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${data.type === 'video' ? 'bg-primary' : 'bg-warning text-dark'}">
+                            ${data.type ?? ''}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-2 flex-wrap justify-content-end">
+                            <button type="button"
+                                class="btn btn-sm btn-success gallery-show-on-stream-btn"
+                                data-media-id="${data.id}"
+                                title="Show on live stream">
+                                <i class="fas fa-tv"></i>
+                                Show
+                            </button>
+                            <button type="button"
+                                class="btn btn-sm btn-warning gallery-hide-on-stream-btn me-3"
+                                onclick="galleryHideOnStream(this)"
+                                data-media-id="${data.id}"
+                                title="Hide on live stream">
+                                <i class="fas fa-eye-slash"></i>
+                                Hide
+                            </button>
+                            <button type="button"
+                                class="btn btn-sm btn-outline-danger gallery-detach-btn"
+                                data-media-id="${data.id}"
+                                title="Remove from stream">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <button type="button"
+                                class="btn btn-sm btn-secondary" title="Preview"
+                                onclick="openMediaPreviewModal('${data.is_image ? data.path : (data.thumbnail ?? data.path)}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            }
+
+            function allMediaItemCard(data, idx) {
+                return `
+                <div class="col-6 col-md-3 col-lg-2">
+                    <div class="card">
+                        <img src="${data.is_image ? data.path : (data.thumbnail ?? data.path)}" class="card-img-top" alt="">    
+                        <div class="card-body">
+                            <h5 class="card-title">${data.title || '—'}</h5>
+                            <p class="card-text">${data.type ?? ''}</p>
+                        </div>
+                        <div class="card-footer">
+                            <button type="button" class="btn btn-sm btn-primary" onclick="attachMediaItem(this, '${data.id}')">Attach</button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }
+
+            function fetchGalleryShowStatus() {
+                return fetch(galleryShowStatusUrl, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRF-TOKEN': galleryCsrf,
+                        }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        console.log('Gallery show status:', data);
+
+                        updateGalleryShowStatus(data.showing ? 'showing' : 'hidden');
+
+                    })
+                    .catch(err => console.error('Gallery show status error:', err))
+            }
+
+            function updateGalleryShowStatus(status) {
+                const galleryShowStatus = document.getElementById('gallery-show-status');
+                if (galleryShowStatus) {
+                    if (status === 'showing') {
+                        galleryShowStatus.innerHTML = `<span class="badge bg-success">Showing</span>`;
+                    } else if (status === 'hidden') {
+                        galleryShowStatus.innerHTML = `<span class="badge bg-danger">Hidden</span>`;
+                    } else {
+                        galleryShowStatus.innerHTML = `<span class="badge bg-warning">Unknown</span>`;
+                    }
+                    galleryShowStatus.innerHTML = `<span class="badge bg-success">${status}</span>`;
+                }
+            }
+
+
+
+            function openMediaPreviewModal(url) {
+                const modal = document.getElementById('media-preview-modal');
+                if (modal) {
+                    const img = modal.querySelector('img');
+                    if (img) img.src = url;
+
+                    // Use Bootstrap's Modal API to show modal
+                    if (typeof bootstrap !== 'undefined') {
+                        let bsModal = bootstrap.Modal.getOrCreateInstance(modal);
+                        bsModal.show();
+                    }
+                }
+            }
+
+            function fetchAllMedia() {
+                return fetch(allMediaUrl, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': galleryCsrf,
+                    }
+                }).then(r => r.json()).then(data => {
+                    console.log('All media:', data);
+                    if (data.success) {
+                        const allMediaList = document.getElementById('select-media-modal-list');
+                        if (allMediaList) {
+                            allMediaList.innerHTML = '';
+                            data.media.forEach((media, idx) => {
+                                allMediaList.insertAdjacentHTML('beforeend', allMediaItemCard(media,
+                                    idx));
+                            });
+                        }
+                    }
+                });
             }
         </script>
     @endpush
