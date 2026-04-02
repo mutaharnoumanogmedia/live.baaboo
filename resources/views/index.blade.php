@@ -160,7 +160,9 @@
                 @for ($i = 0; $i < 10; $i++)
                     <div>
                         Nächste Show:
-                        {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H:i') . ' Uhr' : 'Nicht festgelegt' }}
+                        <span class="d-block d-lg-inline">
+                            {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H:i') . ' Uhr' : 'Nicht festgelegt' }}
+                        </span>
                     </div>
                     <div> | </div>
                     <div> Jetzt kostenlos mitspielen </div>
