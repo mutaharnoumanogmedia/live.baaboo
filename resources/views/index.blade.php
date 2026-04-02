@@ -1060,7 +1060,7 @@
 
                 $('.marquee-text').marquee({
                     direction: 'left',
-                    duration: 12000,
+                    duration: 15000,
                     gap: 20,
                     delay: 0,
                 });
