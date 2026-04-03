@@ -102,8 +102,13 @@ Route::post('/live-show/{id}/quizzes/{quizId}/send-quiz-question', function (\Il
     $totalQuizQuestions = $liveShow->quizzes()->count();
     $quizArr['totalQuizQuestions'] = $totalQuizQuestions;
 
+    // check this question is at what index in all quiz questions
+    $quizQuestionIndex = $liveShow->quizzes()->get()->toArray();
+    // from all quiz questions, get the index of this quiz question
+    $quizQuestionIndex = array_search($quizId, array_column($quizQuestionIndex, 'id'));
+
     \App\Events\ShowLiveShowQuizQuestionEvent::dispatch(
-        $quizArr, (string) $liveShow->id, $request->seconds ?? 10, $request->is_last ?? false
+        $quizArr, (string) $liveShow->id, $request->seconds ?? 10, $request->is_last ?? false, $quizQuestionIndex+1
     );
 
     return response()->json(['message' => 'Quiz question sent successfully!']);
