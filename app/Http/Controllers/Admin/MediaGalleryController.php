@@ -54,6 +54,7 @@ class MediaGalleryController extends Controller
         $request->validate([
             'file' => 'required|file|mimetypes:video/mp4,video/mpeg,video/quicktime,image/jpeg,image/png,image/webp|max:204800', // 200 MB limit
             'custom_name' => 'nullable|string|max:255',
+            'thumbnail' => 'nullable|file|mimes:jpeg,jpg,png|max:1024',
         ]);
 
         $file = $request->file('file');
@@ -67,27 +68,41 @@ class MediaGalleryController extends Controller
         $thumbnailFullUrl = null;
         $tempThumbPath = null;
 
-        // 2. Process Video specifically (FFmpeg)
+        // 2. Video thumbnail: prefer client-captured JPEG/PNG, else FFmpeg
         if ($isVideo) {
-            try {
-                $ffmpeg = FFMpeg::create([
-                    'ffmpeg.binaries' => '/usr/bin/ffmpeg',
-                    'ffprobe.binaries' => '/usr/bin/ffprobe',
-                ]);
+            $clientThumb = $request->file('thumbnail');
+            if ($clientThumb && $clientThumb->isValid()) {
+                try {
+                    $thumbnailName = 'thumb_'.time().'_'.Str::random(5).'.jpg';
+                    $thumbS3Path = 'thumbnails/'.$thumbnailName;
+                    Storage::disk('s3')->put($thumbS3Path, file_get_contents($clientThumb->getRealPath()), 'public');
+                    $thumbnailFullUrl = Storage::disk('s3')->url($thumbS3Path);
+                } catch (\Exception $e) {
+                    \Log::error('Error uploading client video thumbnail: '.$e->getMessage());
+                }
+            }
 
-                $video = $ffmpeg->open($file->getRealPath());
-                $thumbnailName = 'thumb_'.time().'_'.Str::random(5).'.jpg';
-                $tempThumbPath = storage_path('app/public/'.$thumbnailName);
+            if (! $thumbnailFullUrl) {
+                try {
+                    $ffmpeg = FFMpeg::create([
+                        'ffmpeg.binaries' => '/usr/bin/ffmpeg',
+                        'ffprobe.binaries' => '/usr/bin/ffprobe',
+                    ]);
 
-                // Extract frame at 1 second
-                $video->frame(TimeCode::fromSeconds(1))->save($tempThumbPath);
+                    $video = $ffmpeg->open($file->getRealPath());
+                    $thumbnailName = 'thumb_'.time().'_'.Str::random(5).'.jpg';
+                    $tempThumbPath = storage_path('app/public/'.$thumbnailName);
 
-                // Upload Thumbnail to S3
-                $thumbS3Path = 'thumbnails/'.$thumbnailName;
-                Storage::disk('s3')->put($thumbS3Path, file_get_contents($tempThumbPath), 'public');
-                $thumbnailFullUrl = Storage::disk('s3')->url($thumbS3Path);
-            } catch (\Exception $e) {
-                \Log::error('Error extracting thumbnail: '.$e->getMessage());
+                    // Extract frame at 1 second
+                    $video->frame(TimeCode::fromSeconds(1))->save($tempThumbPath);
+
+                    // Upload Thumbnail to S3
+                    $thumbS3Path = 'thumbnails/'.$thumbnailName;
+                    Storage::disk('s3')->put($thumbS3Path, file_get_contents($tempThumbPath), 'public');
+                    $thumbnailFullUrl = Storage::disk('s3')->url($thumbS3Path);
+                } catch (\Exception $e) {
+                    \Log::error('Error extracting thumbnail: '.$e->getMessage());
+                }
             }
         }
 
@@ -168,10 +183,21 @@ class MediaGalleryController extends Controller
 
     public function attachToLiveShow(Request $request): JsonResponse
     {
-        $validated = $request->validate([
+
+        $validator = \Validator::make($request->all(), [
             'live_show_id' => 'required|exists:live_shows,id',
             'gallery_media_id' => 'required|exists:gallery_media,id',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $validated = $validator->validated();
 
         $liveShow = LiveShow::findOrFail($validated['live_show_id']);
         $media = GalleryMedia::findOrFail($validated['gallery_media_id']);
@@ -204,8 +230,8 @@ class MediaGalleryController extends Controller
     {
         $validated = $request->validate([
             'live_show_id' => 'required|exists:live_shows,id',
-            'order'        => 'required|array',
-            'order.*'      => 'integer|exists:gallery_media,id',
+            'order' => 'required|array',
+            'order.*' => 'integer|exists:gallery_media,id',
         ]);
 
         $liveShowId = $validated['live_show_id'];
@@ -226,9 +252,12 @@ class MediaGalleryController extends Controller
     {
         $liveShows = LiveShow::orderBy('scheduled_at', 'desc')->get();
 
+        $attachedIds = $media_gallery->liveShows()->pluck('live_shows.id')->toArray();
+
         return view('admin.media-gallery.attach-show', [
             'media' => $media_gallery,
             'liveShows' => $liveShows,
+            'attachedIds' => $attachedIds,
         ]);
     }
 
@@ -469,10 +498,10 @@ class MediaGalleryController extends Controller
         );
     }
 
-    public function items( $live_show): JsonResponse
+    public function items($live_show): JsonResponse
     {
         $live_show = LiveShow::findOrFail($live_show);
-        
+
         $media = $live_show->galleryMediaItems;
 
         return response()->json([

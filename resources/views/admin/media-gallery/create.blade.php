@@ -50,6 +50,77 @@
         <script>
             Dropzone.autoDiscover = false;
 
+            /**
+             * Capture one frame from a video File as a JPEG Blob (for upload as `thumbnail`).
+             * Returns null if the browser cannot decode the file.
+             */
+            function captureVideoFrameAsJpegBlob(file, timeSeconds) {
+                return new Promise((resolve) => {
+                    const video = document.createElement('video');
+                    video.muted = true;
+                    video.playsInline = true;
+                    video.setAttribute('playsinline', '');
+                    video.preload = 'metadata';
+                    const url = URL.createObjectURL(file);
+                    let settled = false;
+
+                    const finish = (blob) => {
+                        if (settled) return;
+                        settled = true;
+                        URL.revokeObjectURL(url);
+                        video.remove();
+                        resolve(blob);
+                    };
+
+                    video.onerror = () => finish(null);
+
+                    video.onloadedmetadata = () => {
+                        const dur = video.duration;
+                        let t = timeSeconds;
+                        if (Number.isFinite(dur) && dur > 0) {
+                            t = Math.min(Math.max(timeSeconds, 0), Math.max(0, dur - 0.05));
+                        }
+                        try {
+                            video.currentTime = t;
+                        } catch (e) {
+                            finish(null);
+                        }
+                    };
+
+                    video.onseeked = () => {
+                        if (settled) return;
+                        requestAnimationFrame(() => {
+                            if (settled) return;
+                            try {
+                                const w = video.videoWidth;
+                                const h = video.videoHeight;
+                                if (!w || !h) {
+                                    finish(null);
+                                    return;
+                                }
+                                const maxW = 1280;
+                                let cw = w;
+                                let ch = h;
+                                if (w > maxW) {
+                                    cw = maxW;
+                                    ch = Math.round(h * (maxW / w));
+                                }
+                                const canvas = document.createElement('canvas');
+                                canvas.width = cw;
+                                canvas.height = ch;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(video, 0, 0, cw, ch);
+                                canvas.toBlob((blob) => finish(blob || null), 'image/jpeg', 0.88);
+                            } catch (e) {
+                                finish(null);
+                            }
+                        });
+                    };
+
+                    video.src = url;
+                });
+            }
+
             document.addEventListener('DOMContentLoaded', function() {
                 const dz = new Dropzone('#gallery-dropzone', {
                     url: '{{ route('admin.media-gallery.upload') }}',
@@ -88,12 +159,26 @@
                                 // Prevent dropzone (space or esc key) interfering
                                 e.stopPropagation();
                             });
+
+                            if (file.type && file.type.startsWith('video/')) {
+                                file._thumbPromise = captureVideoFrameAsJpegBlob(file, 1).then((blob) => {
+                                    file.clientThumbnailBlob = blob;
+                                    return blob;
+                                }).catch(() => {
+                                    file.clientThumbnailBlob = null;
+                                });
+                            } else {
+                                file._thumbPromise = Promise.resolve();
+                            }
                         });
 
                         this.on('sending', function(file, xhr, formData) {
                             // Append filename from the input if present
                             const filename = file.filenameInput ? file.filenameInput.value : '';
                             formData.append('custom_name', filename);
+                            if (file.clientThumbnailBlob instanceof Blob) {
+                                formData.append('thumbnail', file.clientThumbnailBlob, 'thumbnail.jpg');
+                            }
                         });
 
                         this.on('success', function(file, res) {
@@ -117,8 +202,16 @@
                         confirmBtn.type = 'button';
                         confirmBtn.className = 'btn btn-primary';
                         confirmBtn.innerHTML = 'Upload Selected Files';
-                        confirmBtn.onclick = () => {
-                            this.processQueue();
+                        const dropzoneInstance = this;
+                        confirmBtn.onclick = async () => {
+                            const pending = dropzoneInstance.getFilesWithStatus(Dropzone.ADDED);
+                            confirmBtn.disabled = true;
+                            try {
+                                await Promise.all(pending.map((f) => f._thumbPromise || Promise.resolve()));
+                            } finally {
+                                confirmBtn.disabled = false;
+                            }
+                            dropzoneInstance.processQueue();
                         };
                         document.getElementById('confirm-upload-container').appendChild(confirmBtn);
                     }
