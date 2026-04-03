@@ -1484,6 +1484,7 @@
                         <div class="d-flex gap-2 flex-wrap justify-content-end">
                             <button type="button"
                                 class="btn btn-sm btn-success gallery-show-on-stream-btn"
+                                onclick="galleryShowOnStream('${data.id}', this)"
                                 data-media-id="${data.id}"
                                 title="Show on live stream">
                                 <i class="fas fa-tv"></i>
@@ -1598,6 +1599,7 @@
                     }
                 });
             }
+
             function initSortable() {
                 const tbody = document.getElementById('attached-media-list');
                 if (!tbody || tbody._sortable) return;
@@ -1627,22 +1629,22 @@
                 const order = Array.from(rows).map(r => parseInt(r.dataset.mediaId, 10));
 
                 fetch(galleryReorderUrl, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': galleryCsrf,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        live_show_id: liveShowId,
-                        order: order
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': galleryCsrf,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            live_show_id: liveShowId,
+                            order: order
+                        })
                     })
-                })
-                .then(r => r.json())
-                .then(data => {
-                    if (!data.success) console.error('Reorder failed', data);
-                })
-                .catch(err => console.error('Reorder error:', err));
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data.success) console.error('Reorder failed', data);
+                    })
+                    .catch(err => console.error('Reorder error:', err));
             }
         </script>
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
@@ -1651,9 +1653,11 @@
                 opacity: 0.4;
                 background: rgba(90, 16, 172, 0.2) !important;
             }
+
             .sortable-chosen {
                 background: rgba(90, 16, 172, 0.1) !important;
             }
+
             .drag-handle:active {
                 cursor: grabbing !important;
             }
