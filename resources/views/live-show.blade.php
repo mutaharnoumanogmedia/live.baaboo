@@ -78,26 +78,31 @@
             font-family: 'Outfit', sans-serif;
             backdrop-filter: blur(8px);
         }
+
         .inactive-tab-content {
             max-width: 420px;
             padding: 2.5rem 2rem;
         }
+
         .inactive-tab-icon {
             font-size: 3rem;
             margin-bottom: 1.2rem;
             color: #ff6b6b;
         }
+
         .inactive-tab-content h3 {
             font-weight: 700;
             margin-bottom: 0.75rem;
             font-size: 1.4rem;
         }
+
         .inactive-tab-content p {
             color: #b0b0b0;
             font-size: 0.95rem;
             line-height: 1.5;
             margin-bottom: 1.5rem;
         }
+
         .btn-use-here {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
@@ -109,6 +114,7 @@
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
+
         .btn-use-here:hover {
             transform: scale(1.05);
             box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
@@ -125,7 +131,8 @@
                 <i class="fas fa-tv"></i>
             </div>
             <h3>{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}</h3>
-            <p>Die Live-Show ist in einem anderen Tab geöffnet.<br>Du kannst sie nur in einem Tab gleichzeitig nutzen.</p>
+            <p>Die Live-Show ist in einem anderen Tab geöffnet.<br>Du kannst sie nur in einem Tab gleichzeitig nutzen.
+            </p>
             <button id="useHereBtn" class="btn btn-use-here">
                 <i class="fas fa-arrow-right me-2"></i>Hier verwenden
             </button>
@@ -959,7 +966,7 @@
 
             let quizQuestion = data.quizQuestion;
 
-            
+
             // add them to quizQuestion
             quizQuestion.index = data.quizQuestionIndex;
 
@@ -2017,9 +2024,9 @@
         (function() {
             var liveShowTabKey = 'live_show_active_tab_{{ $liveShow->id }}';
             var tabId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-            var tabChannel = (typeof BroadcastChannel !== 'undefined')
-                ? new BroadcastChannel(liveShowTabKey)
-                : null;
+            var tabChannel = (typeof BroadcastChannel !== 'undefined') ?
+                new BroadcastChannel(liveShowTabKey) :
+                null;
 
             var overlay = document.getElementById('inactiveTabOverlay');
             var useHereBtn = document.getElementById('useHereBtn');
@@ -2027,7 +2034,10 @@
             function claimActiveTab() {
                 localStorage.setItem(liveShowTabKey, tabId);
                 if (tabChannel) {
-                    tabChannel.postMessage({ type: 'TAB_CLAIMED', tabId: tabId });
+                    tabChannel.postMessage({
+                        type: 'TAB_CLAIMED',
+                        tabId: tabId
+                    });
                 }
                 overlay.style.display = 'none';
                 if (typeof pusher !== 'undefined' && pusher.connection &&
@@ -2072,7 +2082,10 @@
                 if (localStorage.getItem(liveShowTabKey) === tabId) {
                     localStorage.removeItem(liveShowTabKey);
                     if (tabChannel) {
-                        tabChannel.postMessage({ type: 'TAB_RELEASED', tabId: tabId });
+                        tabChannel.postMessage({
+                            type: 'TAB_RELEASED',
+                            tabId: tabId
+                        });
                     }
                 }
             });
@@ -2080,6 +2093,16 @@
             claimActiveTab();
         })();
 
+
+        // Alert user if trying to close or reload the tab
+        window.addEventListener('beforeunload', function(e) {
+            if (isLoggedIn) {
+                var confirmationMessage =
+                    'Are you sure you want to leave or reload this live show? You may lose your progress or be disconnected.';
+                (e || window.event).returnValue = confirmationMessage; // For legacy browsers
+                return confirmationMessage; // For modern browsers
+            }
+        });
     </script>
 
 
