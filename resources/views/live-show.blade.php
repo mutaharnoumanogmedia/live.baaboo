@@ -2097,17 +2097,17 @@
         // Alert user if trying to close or reload the tab
         window.addEventListener('beforeunload', function(e) {
 
-            if (window.location.search.includes('preview=true') {
-                    return;
-                })
-                if (isLoggedIn) {
+            if (window.location.search.includes('preview=true')) {
+                return true;
+            }
+            if (isLoggedIn) {
 
 
-                    var confirmationMessage =
-                        'Are you sure you want to leave or reload this live show? You may lose your progress or be disconnected.';
-                    (e || window.event).returnValue = confirmationMessage; // For legacy browsers
-                    return confirmationMessage; // For modern browsers
-                }
+                var confirmationMessage =
+                    'Are you sure you want to leave or reload this live show? You may lose your progress or be disconnected.';
+                (e || window.event).returnValue = confirmationMessage; // For legacy browsers
+                return confirmationMessage; // For modern browsers
+            }
         });
     </script>
 
