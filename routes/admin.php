@@ -25,6 +25,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::resource('live-shows', \App\Http\Controllers\Admin\LiveShowController::class);
     Route::get('live-shows/{live_show}/gallery-attach', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'liveShowsAttachPage'])->name('live-shows.gallery-attach');
+    Route::get('live-shows/{live_show}/copy', [\App\Http\Controllers\Admin\LiveShowController::class, 'copyLiveShow'])->name('live-shows.copy');
 
     Route::resource('live-show-quizzes', \App\Http\Controllers\Admin\LiveShowQuizController::class);
 
@@ -39,9 +40,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('media-gallery/attach-to-live-show', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'attachToLiveShow'])->name('media-gallery.attach-to-live-show');
     Route::post('media-gallery/detach-from-live-show', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'detachFromLiveShow'])->name('media-gallery.detach-from-live-show');
     Route::post('media-gallery/reorder', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'reorder'])->name('media-gallery.reorder');
-    
+
     Route::get('media-gallery/items/{id}', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'items'])->name('media-gallery.items');
-    
 
     Route::get('live-shows/{live_show}/gallery-stream-state', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'galleryStreamState'])->name('live-shows.gallery-stream-state');
 

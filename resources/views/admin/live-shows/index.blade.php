@@ -59,6 +59,8 @@
                                         <a class="btn btn-sm btn-outline-secondary"
                                             href="{{ route('admin.live-shows.gallery-attach', $show) }}">Gallery
                                             Media</a>
+                                        <a class="btn btn-sm btn-outline-secondary"
+                                            href="{{ route('admin.live-shows.copy', $show->id) }}">Copy</a>
                                         <form action="{{ route('admin.live-shows.destroy', $show->id) }}"
                                             method="POST" style="display:inline;">
                                             @csrf

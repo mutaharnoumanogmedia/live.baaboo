@@ -17,6 +17,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\SendWinnerEmailJob;
 use App\Models\GalleryMedia;
 use App\Models\LiveShow;
+use App\Models\LiveShowGalleryMedia;
 use App\Models\LiveShowGalleryState;
 use App\Models\LiveShowQuiz;
 use App\Models\LiveShowWinnerPrize;
@@ -197,7 +198,14 @@ class LiveShowController extends Controller
      */
     public function destroy(LiveShow $live_show)
     {
+        $live_show->quizzes()->delete();
+        $live_show->winnerPrizes()->delete();
+        $live_show->galleryMedia()->delete();
+        $live_show->users()->detach();
+        $live_show->messages()->delete();
+        $live_show->galleryState()->delete();
         $live_show->delete();
+
         if ($live_show->thumbnail) {
             $thumbnailPath = str_replace(asset('storage/'), '', $live_show->thumbnail);
             Storage::disk('public')->delete($thumbnailPath);
@@ -253,7 +261,7 @@ class LiveShowController extends Controller
         $quizQuestionIndex = array_search($quizId, array_column($quizQuestionIndex, 'id'));
 
         // Broadcast the quiz question to users
-        ShowLiveShowQuizQuestionEvent::dispatch($quiz, (string) $liveShow->id, $request->seconds ?? 10, $request->is_last ?? false, $quizQuestionIndex+1);
+        ShowLiveShowQuizQuestionEvent::dispatch($quiz, (string) $liveShow->id, $request->seconds ?? 10, $request->is_last ?? false, $quizQuestionIndex + 1);
 
         return response()->json(['message' => 'Quiz question sent successfully!']);
     }
@@ -740,5 +748,50 @@ class LiveShowController extends Controller
 
         // download the csv file
         return response()->download($csv, 'quizzes'.$liveShow->title.'.csv');
+    }
+
+    // function to copy the same live show and create a new live show
+    public function copyLiveShow($id)
+    {
+        $liveShow = LiveShow::findOrFail($id);
+        //change the title to the new title
+        $newTitle = 'Copy of '.$liveShow->title.' - '.now()->format('Y-m-d H:i:s');
+        $newLiveShow = $liveShow->replicate();
+        $newLiveShow->title = $newTitle;
+        $newLiveShow->save();
+        // copy the quizzes
+        $quizzes = $liveShow->quizzes()->get();
+        foreach ($quizzes as $quiz) {
+            $newQuiz = LiveShowQuiz::create([
+                'live_show_id' => $newLiveShow->id,
+                'question' => $quiz->question,
+            ]);
+            $newQuiz->options()->createMany($quiz->options->map(function ($option) {
+                return [
+                    'option_text' => $option->option_text,
+                    'is_correct' => $option->is_correct,
+                ];
+            }));
+        }
+        // winners
+        $winnerPrizes = $liveShow->winnerPrizes()->get();
+        foreach ($winnerPrizes as $winnerPrize) {
+            $newWinnerPrize = LiveShowWinnerPrize::create([
+                'live_show_id' => $newLiveShow->id,
+                'prize' => $winnerPrize->prize,
+                'rank' => $winnerPrize->rank,
+            ]);
+        }
+        // media gallery
+        $mediaGallery = $liveShow->galleryMedia()->get();
+        foreach ($mediaGallery as $media) {
+            $newMedia = LiveShowGalleryMedia::create([
+                'live_show_id' => $newLiveShow->id,
+                'gallery_media_id' => $media->id,
+                'sort_order' => $media->sort_order ?? 0,
+            ]);
+        }
+
+        return redirect()->route('admin.live-shows.show', $newLiveShow->id)->with('success', 'Live show copied successfully!');
     }
 }
