@@ -220,23 +220,20 @@
 
                         <!-- Bottom Chat Input -->
                         <div class="bottom-chat-input">
-                          
+
                             <div class="input-group chat-input-group">
-                                <input
-                                    type="text"
-                                    maxlength="120"
-                                    placeholder="{{ __('de.main_ui.placeholder_message') }}"
-                                    id="chatInput"
-                                >
+                                <input type="text" maxlength="120"
+                                    placeholder="{{ __('de.main_ui.placeholder_message') }}" id="chatInput">
                                 <button type="button" id="send-btn-overlay" onclick="sendMessage()">
                                     <i class="fas fa-paper-plane"></i>
                                 </button>
-                                <button type="button" id="heartReactionBtn" title="{{ __('de.main_ui.send_heart') }}">
+                                <button type="button" id="heartReactionBtn"
+                                    title="{{ __('de.main_ui.send_heart') }}">
                                     <i class="fas fa-heart"></i>
                                 </button>
                             </div>
-                       
-                       
+
+
                         </div>
 
                     </div>
@@ -661,7 +658,12 @@
 
             // Re-attach event listeners for auto-submit on radio change
             document.querySelectorAll('input[name="option"]').forEach(option => {
-                option.addEventListener('change', submitQuiz);
+                option.addEventListener('change',
+                    function() {
+                        disableAllOptions();
+                        checkAuthStatusAndShowRegisterModal();
+                    }
+                );
             });
 
 
@@ -687,12 +689,22 @@
                 .catch(error => console.error('Error checking if user blocked from live show:', error));
         }
 
-        // Quiz functionality
-        function submitQuiz() {
+        function disableAllOptions() {
+            document.querySelectorAll('input[name="option"]').forEach(option => {
+                option.disabled = true;
+            });
+        }
+
+        function checkAuthStatusAndShowRegisterModal() {
             if (isLoggedIn == false) {
                 showRegisterModal();
                 return;
             }
+        }
+
+        // Quiz functionality
+        function submitQuiz() {
+
 
             const selected = document.querySelector('input[name="option"]:checked');
             if (selected) {
@@ -725,34 +737,29 @@
                             // Show correct/incorrect feedback
                             //using some instead of forEach to break the loop when correct answer is found, converting nodelist to array
 
-                            [...document.querySelectorAll('.quiz-option')].some(optionDiv => {
-                                const input = optionDiv.querySelectorAll('input')[0];
-                                // console.log('data.is_correct:', data.is_correct, 'input.value:', input
-                                //     .value,
-                                //     'data.correct_option_id:', data.correct_option_id);
-                                if (data.is_correct && input.value == data.correct_option_id) {
-                                    // optionDiv.classList.add('correct');
+                            // [...document.querySelectorAll('.quiz-option')].some(optionDiv => {
+                            //     const input = optionDiv.querySelectorAll('input')[0];
+                            //     // console.log('data.is_correct:', data.is_correct, 'input.value:', input
+                            //     //     .value,
+                            //     //     'data.correct_option_id:', data.correct_option_id);
+                            //     if (data.is_correct && input.value == data.correct_option_id) {
+                            //         // optionDiv.classList.add('correct');
+                            //         isCurrentAnswerCorrect = true;
+                            //         // console.log('Current answer is correct.');
+                            //         //stop lopping by returning true
+                            //         return true;
+                            //     } else {
+                            //         isCurrentAnswerCorrect = false;
+                            //     }
+                            //     input.disabled = true; // Disable further changes
 
-                                    isCurrentAnswerCorrect = true;
-                                    // console.log('Current answer is correct.');
-                                    //stop lopping by returning true
-                                    return true;
-
-
-                                } else {
-                                    // optionDiv.classList.add('incorrect');
-                                    // add .correct to the correct option
-                                    isCurrentAnswerCorrect = false;
-
-                                    // const correctOption = document.querySelectorAll(
-                                    //     `input[value="${data.correct_option_id}"]`)[0].parentElement;
-                                    // if (correctOption) {
-                                    //     correctOption.classList.add('correct');
-                                    // }
-                                }
-                                input.disabled = true; // Disable further changes
-
-                            });
+                            // });
+                            if (data.is_correct) {
+                                appendQuestionResponseStatus('success');
+                                fireConfetti();
+                            } else {
+                                appendQuestionResponseStatus('fail');
+                            }
                         } else {
                             //if authStatus
                             if (data.message && data.message == "unauthorized") {
@@ -770,13 +777,18 @@
                         }
                     })
             } else {
-                alert('Please select an answer first!');
+                appendQuestionResponseStatus('warning');
             }
         }
         //auto submit the quiz when radio option is selected
         const quizOptions = document.querySelectorAll('input[name="quiz"]');
         quizOptions.forEach(option => {
-            option.addEventListener('change', submitQuiz);
+            option.addEventListener('change',
+                function() {
+                    disableAllOptions();
+                    checkAuthStatusAndShowRegisterModal();
+                }
+            );
         });
 
         //uncheck and enable options
@@ -1179,13 +1191,15 @@
 
             // console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
             if (!isEliminated && isLoggedIn) {
-                if (isCurrentAnswerCorrect === true) {
-                    appendQuestionResponseStatus('success');
-                    fireConfetti();
-                    updateUserPoints();
-                } else {
-                    appendQuestionResponseStatus('fail');
-                }
+                // if (isCurrentAnswerCorrect === true) {
+                //     appendQuestionResponseStatus('success');
+                //     fireConfetti();
+                //     updateUserPoints();
+                // } else {
+                //     appendQuestionResponseStatus('fail');
+                // }
+
+                submitQuiz();
             }
             showVideoContainer();
         }
