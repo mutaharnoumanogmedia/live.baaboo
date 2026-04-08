@@ -32,6 +32,7 @@
     <meta name="twitter:title" content="{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}">
     <meta name="twitter:description" content="{{ __('de.main_ui.subtitle') }}">
     <meta name="twitter:image" content="{{ asset('og-image.webp') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- <!-- Google Tag Manager -->
     <script>
