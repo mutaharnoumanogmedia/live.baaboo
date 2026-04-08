@@ -101,11 +101,11 @@ class HomeController extends Controller
         }
 
         $currentLiveShow = LiveShow::whereIn('status', ['live', 'scheduled'])
-        ->where('scheduled_at', '>=', now())
-        ->orderBy('scheduled_at', 'asc')
-        ->notTestShow()
-        ->with('users')
-        ->first();
+            ->where('scheduled_at', '>=', now())
+            ->orderBy('scheduled_at', 'asc')
+            ->notTestShow()
+            ->with('users')
+            ->first();
 
         return view('index', compact('referredByUser', 'currentLiveShow'));
     }
@@ -153,7 +153,7 @@ class HomeController extends Controller
             $leadGenerationPayload = [
                 'name' => $user->name,
                 'email' => $user->email,
-                'partner_username' => User::where('id', $user->referred_by)->where("is_affiliate", 1)->first()->user_name ?? null,
+                'partner_username' => User::where('id', $user->referred_by)->where('is_affiliate', 1)->first()->user_name ?? null,
                 'magic_link' => $user->magic_link,
                 'referral_link' => $user->referral_link,
             ];
@@ -190,6 +190,10 @@ class HomeController extends Controller
         }
 
         // add user to live show users
+        // logic of max players reached
+        if ($liveShow->users()->count() >= $liveShow->max_players) {
+            return redirect()->route('index')->with('error', 'Die maximale Anzahl an Teilnehmern wurde erreicht.');
+        }
         $liveShow->users()->syncWithoutDetaching([
             $user->id => [
                 'is_online' => 1,
