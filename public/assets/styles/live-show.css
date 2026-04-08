@@ -555,7 +555,7 @@ body .end-show {
 
 .quiz-section {
     position: absolute;
-    width: 100%;
+    width: 99%;
     bottom: 20px;
     background: rgba(0, 0, 255, 0.2);
     border-radius: 15px;
