@@ -219,18 +219,23 @@
 
                         <!-- Bottom Chat Input -->
                         <div class="bottom-chat-input">
-                            <div class="chat-input-group">
-
-                                <input type="text" class="chat-input-field" maxlength="120"
-                                    placeholder="{{ __('de.main_ui.placeholder_message') }}" id="chatInput">
-                                <button class="send-btn-overlay" id="send-btn-overlay" onclick="sendMessage()">
+                          
+                            <div class="input-group chat-input-group">
+                                <input
+                                    type="text"
+                                    maxlength="120"
+                                    placeholder="{{ __('de.main_ui.placeholder_message') }}"
+                                    id="chatInput"
+                                >
+                                <button type="button" id="send-btn-overlay" onclick="sendMessage()">
                                     <i class="fas fa-paper-plane"></i>
                                 </button>
-                                <button type="button" id="heartReactionBtn"
-                                    title="{{ __('de.main_ui.send_heart') }}">
+                                <button type="button" id="heartReactionBtn" title="{{ __('de.main_ui.send_heart') }}">
                                     <i class="fas fa-heart"></i>
                                 </button>
                             </div>
+                       
+                       
                         </div>
 
                     </div>
