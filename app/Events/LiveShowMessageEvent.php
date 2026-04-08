@@ -4,8 +4,6 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -20,9 +18,11 @@ class LiveShowMessageEvent implements ShouldBroadcast
      * @return void
      */
     public $data;
+
     public $queue = 'low';
+
     public $delay = 10;
-    
+
     public function __construct($data)
     {
         $this->data = $data;
@@ -35,7 +35,7 @@ class LiveShowMessageEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('live-show.' . $this->data['live_show_id']);
+        return new Channel('live-show.'.$this->data['live_show_id']);
     }
 
     public function broadcastAs()

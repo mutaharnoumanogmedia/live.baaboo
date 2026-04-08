@@ -484,6 +484,86 @@
             cluster: '{{ env('PUSHER_APP_CLUSTER', 'eu') }}',
         });
 
+        function updatePlayersLeaderboard() {
+
+            //fetch users list with scores
+            fetch('{{ url('live-show/' . $liveShow->id . '/get-live-show-users-with-scores') }}')
+                .then(response => response.json())
+                .then(data => {
+                    const users = data.users;
+                    const totalUsers = data.totalUsers;
+                    // console.log('Players with scores:', users, 'totalUsers:', totalUsers);
+
+                    const playersListContainer = document.getElementById('players-leaderbord');
+                    playersListContainer.innerHTML = '';
+                    const you = data.you;
+                    if (you) {
+                        //add a player-list-item on top of the list
+                        const youDiv = document.createElement('div');
+                        youDiv.className =
+                            'player-list-item d-flex justify-content-between align-items-center mb-2 p-2 rounded bg-light border border-1';
+                        youDiv.innerHTML = `
+                <div>
+                    <span style="margin-right: 20px;">
+                        <i class="fas fa-user-circle text-primary ms-2" title="You"></i>
+                        </span>
+                            <strong>${you.name} (You)</strong>
+
+                            <span class="ms-2">${you.is_winner ? '<i class="fas fa-trophy text-warning ms-2" title="Winner"></i>' : ''}</span>
+                        </div>
+                        <div>
+                            Score: ${you.score || 0}
+                        </div>
+            `;
+                        playersListContainer.appendChild(youDiv);
+                    }
+
+                    users.forEach((user, index) => {
+                        let bgColor = '';
+                        switch (index) {
+                            case 0:
+                                bgColor =
+                                    'background: linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%);'; // Gold
+                                break;
+                            case 1:
+                                bgColor =
+                                    'background: linear-gradient(90deg, #C0C0C0 0%, #F5F5F5 100%);'; // Silver
+                                break;
+                            default:
+                                bgColor =
+                                    'background: linear-gradient(90deg, #CD7F32 0%, #FFE4C4 100%);'; // Bronze
+                                break;
+
+                        }
+                        const userDiv = document.createElement('div');
+                        userDiv.className =
+                            'player-list-item d-flex justify-content-between align-items-center mb-2 p-2 rounded ';
+                        if (user.score > 0 && user.is_winner) {
+                            userDiv.style = bgColor;
+                        }
+
+                        userDiv.innerHTML = `
+
+                        <div >
+                    <span style="margin-right: 20px;">${toOrdinalSup(index + 1)}</span>
+                            <strong>${user.name} ${user.id == userId ? '(You)' : ''}</strong>
+
+                            <span class="ms-2">${user.is_winner ? '<i class="fas fa-trophy text-warning ms-2" title="Winner"></i>' : ''}</span>
+                        </div>
+                        <div>
+                            Score: ${user.score || 0}
+                        </div>
+                    `;
+                        playersListContainer.appendChild(userDiv);
+                    });
+
+                    document.getElementById('user-count').innerHTML = totalUsers;
+                })
+                .catch(error => console.error('Error fetching players with scores:', error));
+
+
+        }
+
 
         $(document).ready(function() {
             // Initialize Pusher
@@ -1165,7 +1245,7 @@
                 evaluationDiv.innerHTML = '';
                 document.querySelector('#quizTimer').style.display = "none";
                 showVideoContainer();
-                // updatePlayersLeaderboard();
+
             }, 3000);
         }
 
@@ -1361,8 +1441,7 @@
                         label.textContent = `${stat.percentage}% (${stat.total_response_for_option})`;
                     }
                     //make correct option green
-                    // console.log('Correct option id:', data.correctOptionId, 'Current option id:', stat
-                        .quiz_option_id);
+                    // console.log('Correct option id:', data.correctOptionId, 'Current option id:', stat.quiz_option_id);
                     if (data.correctOptionId == stat.quiz_option_id) {
                         // console.log("green for correct applying");
 
@@ -1438,86 +1517,6 @@
             console.log('new message:', data.data);
             addOverlayMessage('@' + data.data.user.name, data.data.message);
         });
-
-        function updatePlayersLeaderboard() {
-
-            //fetch users list with scores
-            fetch('{{ url('live-show/' . $liveShow->id . '/get-live-show-users-with-scores') }}')
-                .then(response => response.json())
-                .then(data => {
-                    const users = data.users;
-                    const totalUsers = data.totalUsers;
-                    // console.log('Players with scores:', users, 'totalUsers:', totalUsers);
-
-                    const playersListContainer = document.getElementById('players-leaderbord');
-                    playersListContainer.innerHTML = '';
-                    const you = data.you;
-                    if (you) {
-                        //add a player-list-item on top of the list
-                        const youDiv = document.createElement('div');
-                        youDiv.className =
-                            'player-list-item d-flex justify-content-between align-items-center mb-2 p-2 rounded bg-light border border-1';
-                        youDiv.innerHTML = `
-                            <div>
-                                <span style="margin-right: 20px;">
-                                    <i class="fas fa-user-circle text-primary ms-2" title="You"></i>
-                                    </span>
-                                        <strong>${you.name} (You)</strong>
-
-                                        <span class="ms-2">${you.is_winner ? '<i class="fas fa-trophy text-warning ms-2" title="Winner"></i>' : ''}</span>
-                                    </div>
-                                    <div>
-                                        Score: ${you.score || 0}
-                                    </div>
-                        `;
-                        playersListContainer.appendChild(youDiv);
-                    }
-
-                    users.forEach((user, index) => {
-                        let bgColor = '';
-                        switch (index) {
-                            case 0:
-                                bgColor =
-                                    'background: linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%);'; // Gold
-                                break;
-                            case 1:
-                                bgColor =
-                                    'background: linear-gradient(90deg, #C0C0C0 0%, #F5F5F5 100%);'; // Silver
-                                break;
-                            default:
-                                bgColor =
-                                    'background: linear-gradient(90deg, #CD7F32 0%, #FFE4C4 100%);'; // Bronze
-                                break;
-
-                        }
-                        const userDiv = document.createElement('div');
-                        userDiv.className =
-                            'player-list-item d-flex justify-content-between align-items-center mb-2 p-2 rounded ';
-                        if (user.score > 0 && user.is_winner) {
-                            userDiv.style = bgColor;
-                        }
-
-                        userDiv.innerHTML = `
-
-                                    <div >
-                                <span style="margin-right: 20px;">${toOrdinalSup(index + 1)}</span>
-                                        <strong>${user.name} ${user.id == userId ? '(You)' : ''}</strong>
-
-                                        <span class="ms-2">${user.is_winner ? '<i class="fas fa-trophy text-warning ms-2" title="Winner"></i>' : ''}</span>
-                                    </div>
-                                    <div>
-                                        Score: ${user.score || 0}
-                                    </div>
-                                `;
-                        playersListContainer.appendChild(userDiv);
-                    });
-
-                    document.getElementById('user-count').innerHTML = totalUsers;
-                })
-                .catch(error => console.error('Error fetching players with scores:', error));
-
-
-        }
     </script>
 
 
