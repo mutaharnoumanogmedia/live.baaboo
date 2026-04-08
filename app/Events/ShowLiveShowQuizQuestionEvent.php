@@ -4,8 +4,6 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -14,18 +12,26 @@ class ShowLiveShowQuizQuestionEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $queue = 'low';
+
+    public $delay = 10;
+
     /**
      * Create a new event instance.
      *
      * @return void
      */
     public $quiz_question;
+
     public $live_show_id;
+
     public $timer;
+
     public $is_last;
+
     public $quiz_question_index;
-    
-    public function __construct($quiz_question, $live_show_id, $timer, $is_last = false, $quiz_question_index = 0 )
+
+    public function __construct($quiz_question, $live_show_id, $timer, $is_last = false, $quiz_question_index = 0)
     {
         //
         $this->quiz_question = $quiz_question;
@@ -42,7 +48,7 @@ class ShowLiveShowQuizQuestionEvent implements ShouldBroadcastNow
      */
     public function broadcastOn(): Channel
     {
-        return new Channel('live-show.' . $this->live_show_id);
+        return new Channel('live-show.'.$this->live_show_id);
     }
 
     public function broadcastAs(): string
@@ -55,11 +61,11 @@ class ShowLiveShowQuizQuestionEvent implements ShouldBroadcastNow
         return [
             'quizQuestion' => $this->quiz_question,
             'quizQuestionIndex' => $this->quiz_question_index,
-           
+
             'liveShowId' => $this->live_show_id,
             'timer' => $this->timer ?? 15,
             'isLast' => $this->is_last ?? false,
-           
+
         ];
     }
 }

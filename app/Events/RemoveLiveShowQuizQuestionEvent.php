@@ -11,7 +11,9 @@ use Illuminate\Queue\SerializesModels;
 class RemoveLiveShowQuizQuestionEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
+    public $queue = 'low';
 
+    public $delay = 10;
     /**
      * Create a new event instance.
      *

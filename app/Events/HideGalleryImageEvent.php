@@ -11,7 +11,8 @@ use Illuminate\Queue\SerializesModels;
 class HideGalleryImageEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
+    public $queue = 'low';
+    public $delay = 10;
     public function __construct(
         public string $liveShowId
     ) {}

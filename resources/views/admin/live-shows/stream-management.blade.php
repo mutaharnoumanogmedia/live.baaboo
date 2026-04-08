@@ -360,6 +360,12 @@
                                          data-bs-toggle="tooltip" data-bs-placement="top">
                                          <i class="fas fa-eraser"></i>
                                      </button>
+                                     <button class="btn btn-warning" id="toggleChatStatusBtn" title="Toggle Chat Access"
+                                         data-bs-toggle="tooltip" data-bs-placement="top">
+                                         <i class="fas fa-comments"></i>
+                                         <span id="chatToggleBtnText">Disable Chat</span>
+                                     </button>
+                                     <span class="badge bg-success ms-2" id="chatStatusBadge">Chat Enabled</span>
                                      <a href="{{ route('admin.live-shows.export-all-chats-as-csv', $liveShow->id) }}"
                                          class="btn btn-primary" id="exportChatsBtn" title="Export Chats"
                                          data-bs-toggle="tooltip" data-bs-placement="top">
@@ -439,6 +445,20 @@
                                              <tr>
                                                  <td>Max Winner</td>
                                                  <td>{{ $liveShow->max_winners }}</td>
+                                             </tr>
+                                             <tr>
+                                                 <td>Max Players</td>
+                                                 <td>{{ $liveShow->max_players ?? 'Unlimited' }}</td>
+                                             </tr>
+                                             <tr>
+                                                 <td>Chat Status</td>
+                                                 <td>
+                                                     @if ($liveShow->chat_enabled)
+                                                         <span class="badge bg-success">Enabled</span>
+                                                     @else
+                                                         <span class="badge bg-danger">Disabled</span>
+                                                     @endif
+                                                 </td>
                                              </tr>
                                              <tr>
                                                  <th>Winners Prizes</th>
@@ -613,6 +633,7 @@
      @push('scripts')
          <script>
              Pusher.logToConsole = true;
+            let isChatEnabled = {{ $liveShow->chat_enabled ? 'true' : 'false' }};
 
              var pusher = new Pusher('{{ env('PUSHER_APP_KEY', '2a66d003a7ded9fe567a') }}', {
                  cluster: '{{ env('PUSHER_APP_CLUSTER', 'eu') }}',
@@ -632,6 +653,13 @@
                          resetChat();
                      }
                  });
+                document.getElementById('toggleChatStatusBtn')?.addEventListener('click', function() {
+                    const nextStatus = !isChatEnabled;
+                    const actionText = nextStatus ? 'enable' : 'disable';
+                    if (confirm(`Are you sure you want to ${actionText} participant chat?`)) {
+                        toggleLiveChatStatus(nextStatus);
+                    }
+                });
 
                  document.querySelector('.gallery-hide-on-stream-btn')?.addEventListener('click', function(e) {
                      e.preventDefault();
@@ -644,6 +672,7 @@
                  fetchGalleryShowStatus();
 
                  fetchAllMedia();
+                updateAdminChatUi(isChatEnabled);
              });
 
              function fetchChatMessages() {
@@ -798,6 +827,50 @@
                      chatContainer.innerHTML = '<p class="text-muted">No messages yet.</p>';
                  }
              }
+
+            function updateAdminChatUi(chatEnabled) {
+                isChatEnabled = !!chatEnabled;
+                const badge = document.getElementById('chatStatusBadge');
+                const btn = document.getElementById('toggleChatStatusBtn');
+                const btnText = document.getElementById('chatToggleBtnText');
+                if (badge) {
+                    badge.classList.remove('bg-success', 'bg-danger');
+                    badge.classList.add(isChatEnabled ? 'bg-success' : 'bg-danger');
+                    badge.textContent = isChatEnabled ? 'Chat Enabled' : 'Chat Disabled';
+                }
+                if (btn) {
+                    btn.classList.remove('btn-warning', 'btn-success');
+                    btn.classList.add(isChatEnabled ? 'btn-warning' : 'btn-success');
+                    btn.setAttribute('title', isChatEnabled ? 'Disable chat for participants' :
+                        'Enable chat for participants');
+                }
+                if (btnText) {
+                    btnText.textContent = isChatEnabled ? 'Disable Chat' : 'Enable Chat';
+                }
+            }
+
+            function toggleLiveChatStatus(chatEnabled) {
+                return fetch(`{{ route('admin.live-shows.stream-management.chat-status', ['id' => $liveShow->id]) }}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            chat_enabled: chatEnabled ? 1 : 0
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            updateAdminChatUi(!!data.chat_enabled);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating chat status:', error);
+                    });
+            }
 
 
 
@@ -1002,6 +1075,9 @@
                      chatContainer.innerHTML = '<p class="text-muted">No messages yet.</p>';
                  }
              });
+            channelResetChat.bind('LiveShowChatStatusUpdatedEvent', function(data) {
+                updateAdminChatUi(!!data.chatEnabled);
+            });
 
 
 

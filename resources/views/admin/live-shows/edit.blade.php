@@ -72,6 +72,26 @@
                                 </option>
                             </select>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label required-field">Max Players</label>
+                            <input type="number" name="max_players" class="form-control" min="1" max="100000"
+                                required value="{{ old('max_players', $liveShow->max_players ?? 1000) }}">
+                            <div class="form-text">Maximum number of participants allowed to join this show</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label required-field">Chat Status</label>
+                            <select name="chat_enabled" class="form-select" required>
+                                <option value="1"
+                                    {{ (string) old('chat_enabled', (int) ($liveShow->chat_enabled ?? 1)) === '1' ? 'selected' : '' }}>
+                                    Enabled
+                                </option>
+                                <option value="0"
+                                    {{ (string) old('chat_enabled', (int) ($liveShow->chat_enabled ?? 1)) === '0' ? 'selected' : '' }}>
+                                    Disabled
+                                </option>
+                            </select>
+                            <div class="form-text">Participants can send messages only when chat is enabled</div>
+                        </div>
 
                         {{-- <div class="col-md-12 mb-3">
                             <label class="form-label">Stream Link</label>

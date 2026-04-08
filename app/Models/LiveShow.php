@@ -22,6 +22,8 @@ class LiveShow extends Model
         'prize_amount',
         'currency',
         'max_winners',
+        'max_players',
+        'chat_enabled',
         'created_by',
 
     ];
@@ -29,7 +31,9 @@ class LiveShow extends Model
     protected $casts = [
         'scheduled_at' => 'datetime',
         'prize_amount' => 'float',
+        'max_players' => 'integer',
         'is_test_show' => 'boolean',
+        'chat_enabled' => 'boolean',
     ];
 
     // scope test show

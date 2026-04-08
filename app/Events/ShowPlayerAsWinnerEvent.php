@@ -12,6 +12,10 @@ class ShowPlayerAsWinnerEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $queue = 'low';
+
+    public $delay = 10;
+
     public $userId;
 
     public $liveShowId;

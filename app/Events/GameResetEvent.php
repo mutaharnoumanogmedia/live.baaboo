@@ -4,14 +4,16 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 class GameResetEvent implements ShouldBroadcast
 {
+    public $queue = 'low';
+
+    public $delay = 10;
+
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $liveShowId;
@@ -23,7 +25,7 @@ class GameResetEvent implements ShouldBroadcast
 
     public function broadcastOn()
     {
-        return new Channel('live-show.' . $this->liveShowId);
+        return new Channel('live-show.'.$this->liveShowId);
     }
 
     public function broadcastAs()

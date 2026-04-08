@@ -4,8 +4,6 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -14,14 +12,21 @@ class LiveShowQuizUserResponses implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $queue = 'low';
+
+    public $delay = 10;
+
     /**
      * Create a new event instance.
      *
      * @return void
      */
     public $liveShowId;
+
     public $quizId;
+
     public $statistics;
+
     public $correctOptionId;
 
     public function __construct($liveShowId, $quizId, $statistics, $correctOptionId)
@@ -32,7 +37,6 @@ class LiveShowQuizUserResponses implements ShouldBroadcast
         $this->correctOptionId = $correctOptionId;
     }
 
-
     /**
      * Get the channels the event should broadcast on.
      *
@@ -40,13 +44,14 @@ class LiveShowQuizUserResponses implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('live-show.' . $this->liveShowId);
+        return new Channel('live-show.'.$this->liveShowId);
     }
 
     public function broadcastAs()
     {
         return 'LiveShowQuizUserResponses';
     }
+
     public function broadcastWith()
     {
         return [

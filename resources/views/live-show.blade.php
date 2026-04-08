@@ -460,6 +460,8 @@
 
         let isCurrentAnswerCorrect = null;
         let isEliminated = {{ $isEliminated ? 'true' : 'false' }};
+        let isChatEnabled = {{ $liveShow->chat_enabled ? 'true' : 'false' }};
+        let isUserBlockedFromChat = false;
 
         const VAPID_PUBLIC_KEY = "{{ env('VAPID_PUBLIC_KEY') }}";
         const csrfToken = "{{ csrf_token() }}";
@@ -569,6 +571,7 @@
             // Initialize Pusher
             fetchMessages();
             updatePlayersLeaderboard();
+            updateChatComposerState();
 
             if (isLoggedIn) {
                 checkIfUserBlockedFromLiveShow();
@@ -664,9 +667,13 @@
                 .then(data => {
                     if (data.blocked) {
                         // console.log('User blocked from live show:', data);
+                        isUserBlockedFromChat = true;
                         alert('You have been blocked from live chat participation.');
                         //disable message input and send button
                         disableMessageInputAndSendButton();
+                    } else {
+                        isUserBlockedFromChat = false;
+                        updateChatComposerState();
 
 
                     }
@@ -797,6 +804,10 @@
 
             if (isLoggedIn == false) {
                 showRegisterModal();
+                return;
+            }
+            if (!isChatEnabled) {
+                alert('Der Chat ist derzeit vom Moderator deaktiviert.');
                 return;
             }
             const message = $chatInput.value.trim();
@@ -1375,9 +1386,11 @@
                 if (data.userId == userId) {
                     console.log('User block from live show event received:', data);
                     if (data.isBlocked) {
+                        isUserBlockedFromChat = true;
                         alert('Du wurdest für die Chat Teilnahme blockiert.');
                         disableMessageInputAndSendButton();
                     } else {
+                        isUserBlockedFromChat = false;
                         alert('Sie wurden aus der Live-Chat-Teilnahme entblockt.');
                         enableMessageInputAndSendButton();
                     }
@@ -1517,6 +1530,14 @@
             console.log('new message:', data.data);
             addOverlayMessage('@' + data.data.user.name, data.data.message);
         });
+        var channelChatStatus = pusher.subscribe('live-show-chat-status.{{ $liveShow->id }}');
+        channelChatStatus.bind('pusher:subscription_succeeded', function() {
+            console.log('Chat status channel subscribed successfully!');
+        });
+        channelChatStatus.bind('LiveShowChatStatusUpdatedEvent', function(data) {
+            console.log('Chat status updated:', data);
+            applyChatStatus(!!data.chatEnabled, true);
+        });
     </script>
 
 
@@ -1599,27 +1620,38 @@
 
 
         function disableMessageInputAndSendButton() {
-
-
-            $chatInput.disabled = true;
-            $sendBtnOverlay.disabled = true;
-            document.querySelector('#chatInput').style.opacity = '0.5';
-            document.querySelector('#send-btn-overlay').style.opacity = '0.5';
-            document.querySelector('#chatInput').style.cursor = 'not-allowed';
-            document.querySelector('#send-btn-overlay').style.cursor = 'not-allowed';
-            document.querySelector('#chatInput').style.pointerEvents = 'none';
-            document.querySelector('#send-btn-overlay').style.pointerEvents = 'none';
+            isUserBlockedFromChat = true;
+            updateChatComposerState();
         }
 
         function enableMessageInputAndSendButton() {
-            $chatInput.disabled = false;
-            $sendBtnOverlay.disabled = false;
-            document.querySelector('#chatInput').style.opacity = '1';
-            document.querySelector('#send-btn-overlay').style.opacity = '1';
-            document.querySelector('#chatInput').style.cursor = 'pointer';
-            document.querySelector('#send-btn-overlay').style.cursor = 'pointer';
-            document.querySelector('#chatInput').style.pointerEvents = 'auto';
-            document.querySelector('#send-btn-overlay').style.pointerEvents = 'auto';
+            isUserBlockedFromChat = false;
+            updateChatComposerState();
+        }
+
+        function applyChatStatus(chatEnabled, showMessage = false) {
+            isChatEnabled = !!chatEnabled;
+            updateChatComposerState();
+
+            // if (showMessage) {
+            //     if (isChatEnabled) {
+            //         alert('Der Chat ist jetzt wieder aktiviert.');
+            //     } else {
+            //         alert('Der Chat wurde vom Moderator deaktiviert.');
+            //     }
+            // }
+        }
+
+        function updateChatComposerState() {
+            const shouldDisable = (!isChatEnabled) || isUserBlockedFromChat;
+            $chatInput.disabled = shouldDisable;
+            $sendBtnOverlay.disabled = shouldDisable;
+            document.querySelector('#chatInput').style.opacity = shouldDisable ? '0.5' : '1';
+            document.querySelector('#send-btn-overlay').style.opacity = shouldDisable ? '0.5' : '1';
+            document.querySelector('#chatInput').style.cursor = shouldDisable ? 'not-allowed' : 'pointer';
+            document.querySelector('#send-btn-overlay').style.cursor = shouldDisable ? 'not-allowed' : 'pointer';
+            document.querySelector('#chatInput').style.pointerEvents = shouldDisable ? 'none' : 'auto';
+            document.querySelector('#send-btn-overlay').style.pointerEvents = shouldDisable ? 'none' : 'auto';
         }
 
 

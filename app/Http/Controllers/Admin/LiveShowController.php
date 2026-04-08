@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\GameResetEvent;
 use App\Events\HideGalleryImageEvent;
+use App\Events\LiveShowChatStatusUpdatedEvent;
 use App\Events\LiveShowMessageEvent;
 use App\Events\LiveShowQuizUserResponses;
 use App\Events\RemoveLiveShowQuizQuestionEvent;
@@ -79,6 +80,8 @@ class LiveShowController extends Controller
             'prize_amount' => 'required|numeric|min:0',
             'currency' => 'required|string|max:5',
             'max_winners' => 'required|integer|min:1|max:50',
+            'max_players' => 'required|integer|min:1|max:100000',
+            'chat_enabled' => 'required|boolean',
             'winner_prizes' => 'nullable|array',
             'winner_prizes.*' => 'nullable|string|max:255',
             'is_test_show' => 'required|boolean',
@@ -140,6 +143,8 @@ class LiveShowController extends Controller
             'prize_amount' => 'required|numeric|min:0',
             'currency' => 'required|string|max:5',
             'max_winners' => 'required|integer|min:1|max:50',
+            'max_players' => 'required|integer|min:1|max:100000',
+            'chat_enabled' => 'required|boolean',
             'winner_prizes' => 'nullable|array',
             'winner_prizes.*' => 'nullable|string|max:255',
             'is_test_show' => 'required|boolean',
@@ -439,6 +444,27 @@ class LiveShowController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Chat reset successfully.',
+        ]);
+    }
+
+    public function updateChatStatus(Request $request, $id): JsonResponse
+    {
+        $request->validate([
+            'chat_enabled' => 'required|boolean',
+        ]);
+
+        $liveShow = LiveShow::findOrFail($id);
+        $chatEnabled = (bool) $request->boolean('chat_enabled');
+
+        $liveShow->chat_enabled = $chatEnabled;
+        $liveShow->save();
+
+        LiveShowChatStatusUpdatedEvent::dispatch((string) $liveShow->id, $chatEnabled);
+
+        return response()->json([
+            'success' => true,
+            'chat_enabled' => $chatEnabled,
+            'message' => $chatEnabled ? 'Chat enabled successfully.' : 'Chat disabled successfully.',
         ]);
     }
 

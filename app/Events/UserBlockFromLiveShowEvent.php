@@ -12,6 +12,10 @@ class UserBlockFromLiveShowEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $queue = 'low';
+
+    public $delay = 10;
+
     public $liveShowId;
 
     public $userId;

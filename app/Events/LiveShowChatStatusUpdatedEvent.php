@@ -8,39 +8,36 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class LiveShowOnlineUsersEvent implements ShouldBroadcast
+class LiveShowChatStatusUpdatedEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
     public $queue = 'low';
-
     public $delay = 10;
-
     public string $liveShowId;
 
-    public int $timer = 15;
+    public bool $chatEnabled;
 
-    public function __construct($liveShowId, int $timer = 15)
+    public function __construct(string $liveShowId, bool $chatEnabled)
     {
         $this->liveShowId = $liveShowId;
-        $this->timer = $timer;
+        $this->chatEnabled = $chatEnabled;
     }
 
     public function broadcastOn(): Channel
     {
-        return new Channel('live-show-online-users.'.$this->liveShowId);
+        return new Channel('live-show-chat-status.'.$this->liveShowId);
     }
 
     public function broadcastAs(): string
     {
-        return 'LiveShowOnlineUsersEvent';
+        return 'LiveShowChatStatusUpdatedEvent';
     }
 
     public function broadcastWith(): array
     {
         return [
             'liveShowId' => $this->liveShowId,
-            'timer' => $this->timer,
+            'chatEnabled' => $this->chatEnabled,
         ];
     }
 }

@@ -48,6 +48,11 @@ class GamePlayController extends Controller
     {
 
         try {
+            $liveShow = LiveShow::live()->find($liveShowId);
+            if (! $liveShow) {
+                return response()->json(['message' => 'Live show not found.'], 404);
+            }
+
             if (Auth::guard('web')->check()) {
                 return response()->json(['success' => false, 'messages' => ['User already logged in.'], 'user' => Auth::guard('web')->user(), 'authStatus' => Auth::guard('web')->check()]);
             }
@@ -55,28 +60,28 @@ class GamePlayController extends Controller
             // if user already registered , login it and update pivot table
             $existingUser = \App\Models\User::where('email', $request->email)->first();
             if ($existingUser) {
-                // update pivot table
-                $liveShow = LiveShow::live()->find($liveShowId);
+                $userPivot = $liveShow->users()->where('user_id', $existingUser->id)->first();
+                $isAlreadyRegisteredForThisShow = (bool) $userPivot;
 
-                // check if live show and user is attached to it
-                if ($liveShow) {
-                    $userPivot = $liveShow->users()->where('user_id', $existingUser->id)->first();
-                    if ($userPivot && $userPivot->pivot->status === 'eliminated') {
-                        // Do not update if eliminated, just update online status
-                        $liveShow->users()->updateExistingPivot($existingUser->id, ['is_online' => 1, 'last_active_at' => now()]);
-                    } else {
-                        $liveShow->users()->syncWithoutDetaching(
-                            [
-                                $existingUser->id => [
-                                    'is_online' => 1,
-                                    'created_at' => now(),
-                                    'updated_at' => now(),
-                                    'status' => 'registered',
-                                    'last_active_at' => now(),
-                                ],
-                            ]
-                        );
-                    }
+                if (! $isAlreadyRegisteredForThisShow && $this->isMaxPlayersReached($liveShow)) {
+                    return $this->maxPlayersReachedResponse($liveShow);
+                }
+
+                if ($userPivot && $userPivot->pivot->status === 'eliminated') {
+                    // Do not update status if eliminated, only mark online.
+                    $liveShow->users()->updateExistingPivot($existingUser->id, ['is_online' => 1, 'last_active_at' => now()]);
+                } else {
+                    $liveShow->users()->syncWithoutDetaching(
+                        [
+                            $existingUser->id => [
+                                'is_online' => 1,
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                                'status' => 'registered',
+                                'last_active_at' => now(),
+                            ],
+                        ]
+                    );
                 }
 
                 Auth::guard('web')->login($existingUser);
@@ -140,9 +145,8 @@ class GamePlayController extends Controller
             $validated['name'] = $userName;
             $validated['user_name'] = $userName;
 
-            $liveShow = LiveShow::live()->find($liveShowId);
-            if (! $liveShow) {
-                return response()->json(['message' => 'Live show not found.'], 404);
+            if ($this->isMaxPlayersReached($liveShow)) {
+                return $this->maxPlayersReachedResponse($liveShow);
             }
 
             // Create the user
@@ -377,6 +381,9 @@ class GamePlayController extends Controller
         if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
+        if (! $liveShow->chat_enabled) {
+            return response()->json(['message' => 'Der Chat ist derzeit vom Moderator deaktiviert.'], 403);
+        }
         // check if user is blocked from the live show
         $isBlocked = $liveShow->blockedUsers()->where('user_id', $user->id)->first();
         if ($isBlocked) {
@@ -570,6 +577,25 @@ class GamePlayController extends Controller
         }
 
         return response()->json(['users' => $users, 'totalUsers' => $totalUsers, 'you' => $you ?? null]);
+    }
+
+    private function isMaxPlayersReached(LiveShow $liveShow): bool
+    {
+        $maxPlayers = (int) ($liveShow->max_players ?? 0);
+        if ($maxPlayers <= 0) {
+            return false;
+        }
+
+        return $liveShow->users()->count() >= $maxPlayers;
+    }
+
+    private function maxPlayersReachedResponse(LiveShow $liveShow)
+    {
+        return response()->json([
+            'success' => false,
+            'messages' => ['Leider ist die maximale Teilnehmerzahl erreicht. Eine Registrierung ist aktuell nicht mehr moeglich.'],
+            'max_players' => (int) $liveShow->max_players,
+        ], 403);
     }
 
     private function sessionGeneration(User $user, Request $request)

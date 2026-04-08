@@ -12,6 +12,10 @@ class ResetChatEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+    public $queue = 'low';
+
+    public $delay = 10;
+
     public $liveShowId;
 
     public function __construct($liveShowId)
@@ -21,7 +25,7 @@ class ResetChatEvent implements ShouldBroadcast
 
     public function broadcastOn()
     {
-        return new Channel('live-show.' . $this->liveShowId);
+        return new Channel('live-show.'.$this->liveShowId);
     }
 
     public function broadcastAs()
