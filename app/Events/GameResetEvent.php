@@ -23,7 +23,7 @@ class GameResetEvent implements ShouldBroadcast
 
     public function broadcastOn()
     {
-        return new Channel('live-show-game-reset.' . $this->liveShowId);
+        return new Channel('live-show.' . $this->liveShowId);
     }
 
     public function broadcastAs()

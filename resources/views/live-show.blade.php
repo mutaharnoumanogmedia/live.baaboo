@@ -477,8 +477,9 @@
 
         // console.log('isEliminated:', isEliminated);
         console.log('isLoggedIn:', isLoggedIn);
-
-        Pusher.logToConsole = true;
+        @if (env('APP_ENV') !== 'production')
+            Pusher.logToConsole = true;
+        @endif
         var pusher = new Pusher('{{ env('PUSHER_APP_KEY', '2a66d003a7ded9fe567a') }}', {
             cluster: '{{ env('PUSHER_APP_CLUSTER', 'eu') }}',
         });
@@ -769,12 +770,9 @@
                     const overlayChat = document.getElementById('overlayChat');
                     overlayChat.innerHTML = ''; // Clear existing messages
                     data.messages.forEach(msg => {
-                        console.log('msg:', msg);
+                        // console.log('msg:', msg);
                         if (msg.user !== null) {
-
                             addOverlayMessage('@' + msg.user.name, msg.message);
-
-
                         }
                     });
                 })
@@ -794,8 +792,8 @@
                 let firstChild = overlayChat.firstChild;
                 firstChild.remove();
 
-                console.log('removed first child:', firstChild, 'overlayChat children length:', overlayChat.children
-                    .length);
+                // console.log('removed first child:', firstChild, 'overlayChat children length:', overlayChat.children
+                //     .length);
 
             }
             overlayChat.scrollTop = overlayChat.scrollHeight;
@@ -864,7 +862,7 @@
                 .then(data => {
                     if (data.success) {
                         const username = data.user.user_name;
-                        console.log('username:', username);
+                        // console.log('username:', username);
 
                         var modal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
                         modal.hide();
@@ -952,7 +950,7 @@
         let currentQuizQuestionIndex = 0;
 
 
-        var channel = pusher.subscribe('live-show-quiz.{{ $liveShow->id }}');
+        var channel = pusher.subscribe('live-show.{{ $liveShow->id }}');
         // System subscription event
         channel.bind('pusher:subscription_succeeded', function() {
             console.log('Quiz Subscribed successfully!');
@@ -1065,8 +1063,7 @@
 
                 // currentCountdownMilliseconds = Math.floor(remainingMs);
                 // currentCountdownSeconds = Math.floor(remainingMs / 1000);
-                console.log('currentCountdownSeconds:',
-                    currentCountdownSeconds);
+                // console.log('currentCountdownSeconds:', currentCountdownSeconds);
             }
 
             updateTimer();
@@ -1083,7 +1080,7 @@
                 option.disabled = true;
             });
 
-            console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
+            // console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
             if (!isEliminated && isLoggedIn) {
                 if (isCurrentAnswerCorrect === true) {
                     appendQuestionResponseStatus('success');
@@ -1100,7 +1097,7 @@
         function evaluateElinimation() {
             document.querySelector('#quizTimer').style.display = "none";
 
-            console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
+            // console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
             updateUserPoints();
 
             if (!isEliminated && isLoggedIn) {
@@ -1125,11 +1122,11 @@
         }
 
         function updateUserPoints() {
-            console.log('Updating user points...');
+            // console.log('Updating user points...');
             fetch('{{ url('/live-show/get-my-points/' . $liveShow->id) }}')
                 .then(response => response.json())
                 .then(data => {
-                    console.log('User points response:', data);
+                    // console.log('User points response:', data);
                     document.getElementById('user-points').innerHTML = data.points;
                 });
         }
@@ -1218,7 +1215,7 @@
         //     cluster: '{{ env('PUSHER_APP_CLUSTER', 'eu') }}',
         // });
 
-        var channelRemoveQuestion = pusher.subscribe('remove-live-show-quiz.{{ $liveShow->id }}');
+        var channelRemoveQuestion = pusher.subscribe('live-show.{{ $liveShow->id }}');
 
         // System subscription event
         channelRemoveQuestion.bind('pusher:subscription_succeeded', function() {
@@ -1317,7 +1314,7 @@
         // Example: call after user interaction
 
 
-        var channelUpdateLiveShow = pusher.subscribe('update-live-show.{{ $liveShow->id }}');
+        var channelUpdateLiveShow = pusher.subscribe('live-show.{{ $liveShow->id }}');
         // System subscription event
         channelUpdateLiveShow.bind('pusher:subscription_succeeded', function() {
             console.log('Update Live Show Subscribed successfully!');
@@ -1349,7 +1346,7 @@
 
         function revealResponses(data) {
             $(".option-result-container").css("display", "block");
-            console.log('Quiz responses:', data);
+            // console.log('Quiz responses:', data);
             // Handle displaying the responses in the UI
             let stats = data.statistics;
 
@@ -1364,10 +1361,10 @@
                         label.textContent = `${stat.percentage}% (${stat.total_response_for_option})`;
                     }
                     //make correct option green
-                    console.log('Correct option id:', data.correctOptionId, 'Current option id:', stat
+                    // console.log('Correct option id:', data.correctOptionId, 'Current option id:', stat
                         .quiz_option_id);
                     if (data.correctOptionId == stat.quiz_option_id) {
-                        console.log("green for correct applying");
+                        // console.log("green for correct applying");
 
                         bar.style.background = '#28a74580'; // Green for correct
                     }
@@ -1380,14 +1377,14 @@
 
 
 
-        var channelUsersQuizResponses = pusher.subscribe('live-show-quiz-users-responses.{{ $liveShow->id }}');
+        var channelUsersQuizResponses = pusher.subscribe('live-show.{{ $liveShow->id }}');
         // System subscription event
         channelUsersQuizResponses.bind('pusher:subscription_succeeded', function() {
-            console.log('Quiz Users responses successfully!');
+            // console.log('Quiz Users responses successfully!');
         });
         // Your Laravel broadcast event (drop the dot)
         channelUsersQuizResponses.bind('LiveShowQuizUserResponses', function(data) {
-            console.log('User Responses:', data);
+            // console.log('User Responses:', data);
             revealResponses(data);
         });
 
@@ -1401,14 +1398,14 @@
 
 
 
-        var channelGameReset = pusher.subscribe('live-show-game-reset.{{ $liveShow->id }}');
+        var channelGameReset = pusher.subscribe('live-show.{{ $liveShow->id }}');
         // System subscription event
         channelGameReset.bind('pusher:subscription_succeeded', function() {
-            console.log('Game reset channel subscribed successfully!');
+            // console.log('Game reset channel subscribed successfully!');
         });
         // Your Laravel broadcast event (drop the dot)
         channelGameReset.bind('GameResetEvent', function(data) {
-            console.log('Game reset event received:', data);
+            // console.log('Game reset event received:', data);
 
 
             // FORCE LOGOUT OR REDIRECT
@@ -1429,11 +1426,11 @@
         });
 
 
-        var channel2 = pusher.subscribe('live-show-message.{{ $liveShow->id }}');
+        var channel2 = pusher.subscribe('live-show.{{ $liveShow->id }}');
 
         // System subscription event
         channel2.bind('pusher:subscription_succeeded', function() {
-            console.log('Subscribed message event successfully!');
+            // console.log('Subscribed message event successfully!');
         });
 
         // Your Laravel broadcast event (drop the dot)
@@ -1631,7 +1628,7 @@
 
 
 
-        var channelResetChat = pusher.subscribe('reset-chat.{{ $liveShow->id }}');
+        var channelResetChat = pusher.subscribe('live-show.{{ $liveShow->id }}');
         channelResetChat.bind('pusher:subscription_succeeded', function() {
             console.log('Reset chat channel subscribed successfully!');
         });
@@ -1695,9 +1692,9 @@
                 })
                 .catch(function() {});
         });
-        var channelHearts = pusher.subscribe('live-show-hearts.{{ $liveShow->id }}');
+        var channelHearts = pusher.subscribe('live-show.{{ $liveShow->id }}');
         channelHearts.bind('pusher:subscription_succeeded', function() {
-            console.log('Heart reactions channel subscribed');
+            // console.log('Heart reactions channel subscribed');
         });
         channelHearts.bind('HeartReactionEvent', function(data) {
             spawnHeartReaction(data.user_name);
@@ -1890,7 +1887,7 @@
             });
         }
 
-        var channelGalleryImage = pusher.subscribe('live-show-gallery-image.{{ $liveShow->id }}');
+        var channelGalleryImage = pusher.subscribe('live-show.{{ $liveShow->id }}');
         channelGalleryImage.bind('pusher:subscription_succeeded', function() {
             console.log('Gallery image channel subscribed successfully!');
         });

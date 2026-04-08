@@ -22,7 +22,7 @@ class ShowGalleryImageEvent implements ShouldBroadcast
 
     public function broadcastOn(): Channel
     {
-        return new Channel('live-show-gallery-image.'.$this->liveShowId);
+        return new Channel('live-show.'.$this->liveShowId);
     }
 
     public function broadcastAs(): string

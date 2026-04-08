@@ -4,13 +4,11 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class RemoveLiveShowQuizQuestionEvent implements ShouldBroadcast
+class RemoveLiveShowQuizQuestionEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -20,6 +18,7 @@ class RemoveLiveShowQuizQuestionEvent implements ShouldBroadcast
      * @return void
      */
     public $quiz_question_id;
+
     public $live_show_id;
 
     public function __construct($quiz_question_id, $live_show_id)
@@ -28,7 +27,6 @@ class RemoveLiveShowQuizQuestionEvent implements ShouldBroadcast
         $this->live_show_id = $live_show_id;
     }
 
-
     /**
      * Get the channels the event should broadcast on.
      *
@@ -36,7 +34,7 @@ class RemoveLiveShowQuizQuestionEvent implements ShouldBroadcast
      */
     public function broadcastOn(): Channel
     {
-        return new Channel('remove-live-show-quiz.' . $this->live_show_id);
+        return new Channel('live-show.'.$this->live_show_id);
     }
 
     public function broadcastAs(): string
@@ -48,7 +46,7 @@ class RemoveLiveShowQuizQuestionEvent implements ShouldBroadcast
     {
         return [
             'quizQuestionId' => $this->quiz_question_id,
-            'liveShowId' => $this->live_show_id
+            'liveShowId' => $this->live_show_id,
         ];
     }
 }

@@ -40,7 +40,7 @@ class LiveShowQuizUserResponses implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('live-show-quiz-users-responses.' . $this->liveShowId);
+        return new Channel('live-show.' . $this->liveShowId);
     }
 
     public function broadcastAs()

@@ -979,7 +979,7 @@
 
 
          <script>
-             var channel2 = pusher.subscribe('live-show-message.{{ $liveShow->id }}');
+            var channel2 = pusher.subscribe('live-show.{{ $liveShow->id }}');
 
              // System subscription event
              channel2.bind('pusher:subscription_succeeded', function() {
@@ -991,7 +991,7 @@
                  appendSingleMessage(data.data);
              });
 
-             var channelResetChat = pusher.subscribe('reset-chat.{{ $liveShow->id }}');
+            var channelResetChat = pusher.subscribe('live-show.{{ $liveShow->id }}');
              channelResetChat.bind('pusher:subscription_succeeded', function() {
                  console.log('Reset chat channel subscribed successfully!');
              });

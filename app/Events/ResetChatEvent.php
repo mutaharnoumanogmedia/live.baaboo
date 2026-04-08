@@ -21,7 +21,7 @@ class ResetChatEvent implements ShouldBroadcast
 
     public function broadcastOn()
     {
-        return new Channel('reset-chat.' . $this->liveShowId);
+        return new Channel('live-show.' . $this->liveShowId);
     }
 
     public function broadcastAs()

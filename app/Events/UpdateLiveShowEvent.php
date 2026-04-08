@@ -36,7 +36,7 @@ class UpdateLiveShowEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('update-live-show.' . $this->liveShowId);
+        return new Channel('live-show.' . $this->liveShowId);
     }
     public function broadcastAs()
     {

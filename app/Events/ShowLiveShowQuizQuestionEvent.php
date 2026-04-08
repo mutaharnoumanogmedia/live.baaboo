@@ -6,10 +6,11 @@ use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ShowLiveShowQuizQuestionEvent implements ShouldBroadcast
+class ShowLiveShowQuizQuestionEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -41,7 +42,7 @@ class ShowLiveShowQuizQuestionEvent implements ShouldBroadcast
      */
     public function broadcastOn(): Channel
     {
-        return new Channel('live-show-quiz.' . $this->live_show_id);
+        return new Channel('live-show.' . $this->live_show_id);
     }
 
     public function broadcastAs(): string

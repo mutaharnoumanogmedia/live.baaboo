@@ -11,6 +11,8 @@ use Illuminate\Queue\SerializesModels;
 class HeartReactionEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
+    public $queue = 'low';
+    public $delay = 10;
 
     public function __construct(
         public string $liveShowId,
@@ -20,7 +22,7 @@ class HeartReactionEvent implements ShouldBroadcast
 
     public function broadcastOn(): Channel
     {
-        return new Channel('live-show-hearts.' . $this->liveShowId);
+        return new Channel('live-show.' . $this->liveShowId);
     }
 
     public function broadcastAs(): string
