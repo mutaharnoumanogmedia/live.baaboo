@@ -372,7 +372,7 @@ class LiveShowController extends Controller
     public function apiGetLiveShowMessages($id)
     {
         $liveShow = LiveShow::findOrFail($id);
-        $messages = $liveShow->messages()->with('user')->orderBy('created_at', 'desc')->get()->reverse()->values();
+        $messages = $liveShow->messages()->with('user')->orderBy('created_at', 'desc')->limit(500)->get()->reverse()->values();
 
         return response()->json($messages);
     }
