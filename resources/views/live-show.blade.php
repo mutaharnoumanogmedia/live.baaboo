@@ -276,7 +276,7 @@
                 </li>
 
                 <!-- 3) Players -->
-                <li class="nav-item flex-fill" role="presentation">
+                <li class="nav-item flex-fill" role="presentation" id="player-tab-nav-item">
                     <a class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
                         id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
                         aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
@@ -567,6 +567,33 @@
                 .catch(error => console.error('Error fetching players with scores:', error));
 
 
+        }
+
+        function hideWinnersTabForParticipants() {
+            const playerNavItem = document.getElementById('player-tab-nav-item');
+            const playerTabLink = document.getElementById('playerTab-tab');
+            const playerTabPane = document.getElementById('playerTab');
+            const chatTabLink = document.getElementById('chatTab-tab');
+            const chatTabPane = document.getElementById('chatTab');
+
+            if (playerNavItem) {
+                playerNavItem.style.display = 'none';
+            }
+            if (playerTabLink) {
+                playerTabLink.classList.remove('active');
+                playerTabLink.setAttribute('aria-selected', 'false');
+            }
+            if (playerTabPane) {
+                playerTabPane.classList.remove('show', 'active');
+            }
+
+            if (chatTabLink) {
+                chatTabLink.classList.add('active');
+                chatTabLink.setAttribute('aria-selected', 'true');
+            }
+            if (chatTabPane) {
+                chatTabPane.classList.add('show', 'active');
+            }
         }
 
 
@@ -1539,13 +1566,13 @@
             console.log('new message:', data.data);
             addOverlayMessage('@' + data.data.user.name, data.data.message);
         });
-        var channelChatStatus = pusher.subscribe('live-show-chat-status.{{ $liveShow->id }}');
-        channelChatStatus.bind('pusher:subscription_succeeded', function() {
-            console.log('Chat status channel subscribed successfully!');
-        });
-        channelChatStatus.bind('LiveShowChatStatusUpdatedEvent', function(data) {
+        channel2.bind('LiveShowChatStatusUpdatedEvent', function(data) {
             console.log('Chat status updated:', data);
             applyChatStatus(!!data.chatEnabled, true);
+        });
+        channel2.bind('HideLiveShowWinnersTabEvent', function(data) {
+            console.log('Hide winners tab event received:', data);
+            hideWinnersTabForParticipants();
         });
     </script>
 

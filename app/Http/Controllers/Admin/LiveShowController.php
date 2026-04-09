@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\GameResetEvent;
 use App\Events\HideGalleryImageEvent;
+use App\Events\HideLiveShowWinnersTabEvent;
 use App\Events\LiveShowChatStatusUpdatedEvent;
 use App\Events\LiveShowMessageEvent;
 use App\Events\LiveShowQuizUserResponses;
@@ -444,6 +445,17 @@ class LiveShowController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Chat reset successfully.',
+        ]);
+    }
+
+    public function hideWinnersTab($id): JsonResponse
+    {
+        $liveShow = LiveShow::findOrFail($id);
+        HideLiveShowWinnersTabEvent::dispatch((string) $liveShow->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Winners tab hidden for participants.',
         ]);
     }
 

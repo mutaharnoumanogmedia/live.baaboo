@@ -61,6 +61,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('live-shows/stream-management/{id}/fetch-messages', [\App\Http\Controllers\Admin\LiveShowController::class, 'fetchChatMessages'])->name('live-shows.stream-management.fetch-chat-messages');
     Route::post('live-shows/stream-management/{id}/send-message', [\App\Http\Controllers\Admin\LiveShowController::class, 'sendMessage'])->name('live-shows.stream-management.send-message');
     Route::post('live-shows/stream-management/{id}/reset-chat', [\App\Http\Controllers\Admin\LiveShowController::class, 'resetChat'])->name('live-shows.stream-management.reset-chat');
+    Route::post('live-shows/stream-management/{id}/hide-winners-tab', [\App\Http\Controllers\Admin\LiveShowController::class, 'hideWinnersTab'])->name('live-shows.stream-management.hide-winners-tab');
     Route::post('live-shows/stream-management/{id}/chat-status', [\App\Http\Controllers\Admin\LiveShowController::class, 'updateChatStatus'])->name('live-shows.stream-management.chat-status');
     Route::post('live-shows/stream-management/{id}/show-gallery-image', [\App\Http\Controllers\Admin\LiveShowController::class, 'showGalleryImage'])->name('live-shows.stream-management.show-gallery-image');
     Route::post('live-shows/stream-management/{id}/hide-gallery-image', [\App\Http\Controllers\Admin\LiveShowController::class, 'hideGalleryImage'])->name('live-shows.stream-management.hide-gallery-image');

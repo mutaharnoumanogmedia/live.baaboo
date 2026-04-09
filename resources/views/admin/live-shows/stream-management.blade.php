@@ -114,10 +114,16 @@
                                                  <h6 class="text-muted small text-uppercase fw-bold mb-3">Winners
                                                      Ceremony</h6>
                                                  <button type="button"
-                                                     class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm"
+                                                     class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm my-2"
                                                      onclick="updateWinners()">
                                                      <i class="fas fa-trophy me-2"></i> Announce Winners
                                                  </button>
+                                                 <button type="button"
+                                                     class="btn btn-outline-warning w-100 py-2 fw-bold text-white shadow-sm my-2"
+                                                     onclick="hideWinnerTab()">
+                                                     <i class="fas fa-eye-slash me-2"></i> Hide Winners
+                                                 </button>
+
                                              </div>
                                          </div>
                                      </div>
@@ -360,8 +366,8 @@
                                          data-bs-toggle="tooltip" data-bs-placement="top">
                                          <i class="fas fa-eraser"></i>
                                      </button>
-                                     <button class="btn btn-warning" id="toggleChatStatusBtn" title="Toggle Chat Access"
-                                         data-bs-toggle="tooltip" data-bs-placement="top">
+                                     <button class="btn btn-warning" id="toggleChatStatusBtn"
+                                         title="Toggle Chat Access" data-bs-toggle="tooltip" data-bs-placement="top">
                                          <i class="fas fa-comments"></i>
                                          <span id="chatToggleBtnText">Disable Chat</span>
                                      </button>
@@ -633,7 +639,7 @@
      @push('scripts')
          <script>
              Pusher.logToConsole = true;
-            let isChatEnabled = {{ $liveShow->chat_enabled ? 'true' : 'false' }};
+             let isChatEnabled = {{ $liveShow->chat_enabled ? 'true' : 'false' }};
 
              var pusher = new Pusher('{{ env('PUSHER_APP_KEY', '2a66d003a7ded9fe567a') }}', {
                  cluster: '{{ env('PUSHER_APP_CLUSTER', 'eu') }}',
@@ -653,13 +659,13 @@
                          resetChat();
                      }
                  });
-                document.getElementById('toggleChatStatusBtn')?.addEventListener('click', function() {
-                    const nextStatus = !isChatEnabled;
-                    const actionText = nextStatus ? 'enable' : 'disable';
-                    if (confirm(`Are you sure you want to ${actionText} participant chat?`)) {
-                        toggleLiveChatStatus(nextStatus);
-                    }
-                });
+                 document.getElementById('toggleChatStatusBtn')?.addEventListener('click', function() {
+                     const nextStatus = !isChatEnabled;
+                     const actionText = nextStatus ? 'enable' : 'disable';
+                     if (confirm(`Are you sure you want to ${actionText} participant chat?`)) {
+                         toggleLiveChatStatus(nextStatus);
+                     }
+                 });
 
                  document.querySelector('.gallery-hide-on-stream-btn')?.addEventListener('click', function(e) {
                      e.preventDefault();
@@ -672,7 +678,7 @@
                  fetchGalleryShowStatus();
 
                  fetchAllMedia();
-                updateAdminChatUi(isChatEnabled);
+                 updateAdminChatUi(isChatEnabled);
              });
 
              function fetchChatMessages() {
@@ -680,7 +686,7 @@
                  return fetch(`{{ url('api/live-show') }}/{{ $liveShow->id }}/get-live-show-messages`)
                      .then(response => response.json())
                      .then(data => {
-                        //  console.log('Chat messages:', data);
+                         //  console.log('Chat messages:', data);
                          // Assuming data is an array of messages
                          return data;
                      })
@@ -828,49 +834,49 @@
                  }
              }
 
-            function updateAdminChatUi(chatEnabled) {
-                isChatEnabled = !!chatEnabled;
-                const badge = document.getElementById('chatStatusBadge');
-                const btn = document.getElementById('toggleChatStatusBtn');
-                const btnText = document.getElementById('chatToggleBtnText');
-                if (badge) {
-                    badge.classList.remove('bg-success', 'bg-danger');
-                    badge.classList.add(isChatEnabled ? 'bg-success' : 'bg-danger');
-                    badge.textContent = isChatEnabled ? 'Chat Enabled' : 'Chat Disabled';
-                }
-                if (btn) {
-                    btn.classList.remove('btn-warning', 'btn-success');
-                    btn.classList.add(isChatEnabled ? 'btn-warning' : 'btn-success');
-                    btn.setAttribute('title', isChatEnabled ? 'Disable chat for participants' :
-                        'Enable chat for participants');
-                }
-                if (btnText) {
-                    btnText.textContent = isChatEnabled ? 'Disable Chat' : 'Enable Chat';
-                }
-            }
+             function updateAdminChatUi(chatEnabled) {
+                 isChatEnabled = !!chatEnabled;
+                 const badge = document.getElementById('chatStatusBadge');
+                 const btn = document.getElementById('toggleChatStatusBtn');
+                 const btnText = document.getElementById('chatToggleBtnText');
+                 if (badge) {
+                     badge.classList.remove('bg-success', 'bg-danger');
+                     badge.classList.add(isChatEnabled ? 'bg-success' : 'bg-danger');
+                     badge.textContent = isChatEnabled ? 'Chat Enabled' : 'Chat Disabled';
+                 }
+                 if (btn) {
+                     btn.classList.remove('btn-warning', 'btn-success');
+                     btn.classList.add(isChatEnabled ? 'btn-warning' : 'btn-success');
+                     btn.setAttribute('title', isChatEnabled ? 'Disable chat for participants' :
+                         'Enable chat for participants');
+                 }
+                 if (btnText) {
+                     btnText.textContent = isChatEnabled ? 'Disable Chat' : 'Enable Chat';
+                 }
+             }
 
-            function toggleLiveChatStatus(chatEnabled) {
-                return fetch(`{{ route('admin.live-shows.stream-management.chat-status', ['id' => $liveShow->id]) }}`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            chat_enabled: chatEnabled ? 1 : 0
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            updateAdminChatUi(!!data.chat_enabled);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error updating chat status:', error);
-                    });
-            }
+             function toggleLiveChatStatus(chatEnabled) {
+                 return fetch(`{{ route('admin.live-shows.stream-management.chat-status', ['id' => $liveShow->id]) }}`, {
+                         method: 'POST',
+                         headers: {
+                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                             'Accept': 'application/json',
+                             'Content-Type': 'application/json'
+                         },
+                         body: JSON.stringify({
+                             chat_enabled: chatEnabled ? 1 : 0
+                         })
+                     })
+                     .then(response => response.json())
+                     .then(data => {
+                         if (data.success) {
+                             updateAdminChatUi(!!data.chat_enabled);
+                         }
+                     })
+                     .catch(error => {
+                         console.error('Error updating chat status:', error);
+                     });
+             }
 
 
 
@@ -884,7 +890,7 @@
                      .then(response => response.json())
                      .then(data => {
                          // Assuming data is an array of player names
-                        //  console.log('Active Players Data:', data);
+                         //  console.log('Active Players Data:', data);
                          users = data.users.map(player => {
                              return {
                                  name: player.name,
@@ -909,7 +915,7 @@
              }
 
              function appendPlayerList(data) {
-                //  console.log('Appending player list:', data);
+                 //  console.log('Appending player list:', data);
                  const activePlayersList = document.getElementById('activePlayersList');
                  activePlayersList.innerHTML = ''; // Clear existing list
                  if (data.totalUsers === 0) {
@@ -1052,7 +1058,7 @@
 
 
          <script>
-            var channel2 = pusher.subscribe('live-show.{{ $liveShow->id }}');
+             var channel2 = pusher.subscribe('live-show.{{ $liveShow->id }}');
 
              // System subscription event
              channel2.bind('pusher:subscription_succeeded', function() {
@@ -1060,24 +1066,24 @@
              });
 
              channel2.bind('LiveShowMessageEvent', function(data) {
-                //  console.log('new message:', data.data);
+                 //  console.log('new message:', data.data);
                  appendSingleMessage(data.data);
              });
 
-            var channelResetChat = pusher.subscribe('live-show.{{ $liveShow->id }}');
+             var channelResetChat = pusher.subscribe('live-show.{{ $liveShow->id }}');
              channelResetChat.bind('pusher:subscription_succeeded', function() {
                  console.log('Reset chat channel subscribed successfully!');
              });
              channelResetChat.bind('ResetChatEvent', function() {
-                //  console.log('Chat reset event received');
+                 //  console.log('Chat reset event received');
                  const chatContainer = document.querySelector('#live-chat-messages');
                  if (chatContainer) {
                      chatContainer.innerHTML = '<p class="text-muted">No messages yet.</p>';
                  }
              });
-            channelResetChat.bind('LiveShowChatStatusUpdatedEvent', function(data) {
-                updateAdminChatUi(!!data.chatEnabled);
-            });
+             channelResetChat.bind('LiveShowChatStatusUpdatedEvent', function(data) {
+                 updateAdminChatUi(!!data.chatEnabled);
+             });
 
 
 
@@ -1095,7 +1101,7 @@
                      })
                      .then(response => response.json())
                      .then(data => {
-                        //  console.log('Quiz question removed:', data);
+                         //  console.log('Quiz question removed:', data);
                          hideQuizTimer();
                          // Optionally, remove the quiz from the UI
                      })
@@ -1118,17 +1124,41 @@
                      })
                      .then(response => response.json())
                      .then(data => {
-                        //  console.log('Winners updated:', data);
+                         //  console.log('Winners updated:', data);
                          // alert(data.message);
                          // Optionally, refresh the player list to show winners
-                         fetchActivePlayers().then(data => {
-                             appendPlayerList(data);
-                         });
+                         //  fetchActivePlayers().then(data => {
+                         //      appendPlayerList(data);
+                         //  });
+                         document.getElementById('fetchPlayersButton').click();
                      })
                      .catch(error => {
                          console.error('Error updating winners:', error);
                      });
              }
+
+            function hideWinnerTab() {
+                if (!confirm('Are you sure you want to hide the winners tab for participants?')) {
+                    return;
+                }
+
+                fetch(`{{ route('admin.live-shows.stream-management.hide-winners-tab', ['id' => $liveShow->id]) }}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message || 'Winners tab hidden.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error hiding winners tab:', error);
+                    });
+            }
          </script>
          <script>
              document.addEventListener('DOMContentLoaded', function() {
@@ -1170,7 +1200,7 @@
                      },
                      contentType: "application/json",
                      success: function(data) {
-                        //  console.log("Live show updated:", data);
+                         //  console.log("Live show updated:", data);
                          alert(data.message);
                          // Optionally redirect or update the UI
                      },
@@ -1193,7 +1223,7 @@
                          },
                      }).then(response => response.json())
                      .then(data => {
-                        //  console.log('Quiz responses:', data);
+                         //  console.log('Quiz responses:', data);
                          // Handle displaying the responses in the UI
                          let stats = data.statistics;
                          stats.forEach(stat => {
@@ -1229,7 +1259,7 @@
                      })
                      .then(response => response.json())
                      .then(data => {
-                        //  console.log('Game reset:', data);
+                         //  console.log('Game reset:', data);
                          alert(data.message);
                          // Optionally, refresh the player list to show all players as active
                          fetchActivePlayers().then(data => {
@@ -1276,7 +1306,7 @@
                      correctLevel: QRCode.CorrectLevel.H // High error correction level
                  });
 
-                //  console.log('QR Code generated for:', dataToEncode);
+                 //  console.log('QR Code generated for:', dataToEncode);
              }
 
              function announcementEventTest() {
@@ -1287,7 +1317,7 @@
                          'Accept': 'application/json',
                      },
                  }).then(response => response.text()).then(data => {
-                    //  console.log('Announcement sent:', data);
+                     //  console.log('Announcement sent:', data);
                  }).catch(error => {
                      console.error('Error sending announcement:', error);
                  });
@@ -1523,7 +1553,7 @@
                      })
                      .then(r => r.json())
                      .then(data => {
-                        //  console.log('Gallery media items:', data);
+                         //  console.log('Gallery media items:', data);
                          if (data.success) {
                              //append gallery media items to gallery-available-list
                              const galleryAvailableList = document.getElementById('attached-media-list');
@@ -1630,7 +1660,7 @@
                      })
                      .then(r => r.json())
                      .then(data => {
-                        //  console.log('Gallery show status:', data);
+                         //  console.log('Gallery show status:', data);
 
                          updateGalleryShowStatus(data.showing ? 'showing' : 'hidden');
 
@@ -1675,7 +1705,7 @@
                          'X-CSRF-TOKEN': galleryCsrf,
                      }
                  }).then(r => r.json()).then(data => {
-                    //  console.log('All media:', data);
+                     //  console.log('All media:', data);
                      if (data.success) {
                          const allMediaList = document.getElementById('select-media-modal-list');
                          if (allMediaList) {
@@ -1737,7 +1767,7 @@
              }
 
              function attachMediaItem(btn, mediaId) {
-                //  console.log('Attach media item:', btn, mediaId);
+                 //  console.log('Attach media item:', btn, mediaId);
                  btn.disabled = true;
                  fetch(galleryAttachUrl, {
                          method: 'POST',
@@ -1752,7 +1782,7 @@
                          })
                      }).then(r => r.json()).then(data => {
                          if (data.success) {
-                            //  console.log('Attach media item success:', data);
+                             //  console.log('Attach media item success:', data);
                              // //append the media item to the attached media list
                              // const attachedMediaList = document.getElementById('attached-media-list');
                              // if (attachedMediaList) {
@@ -1761,7 +1791,8 @@
                              //close the select media modal
                              const selectMediaModal = document.getElementById('select-media-modal');
                              if (selectMediaModal) {
-                                 const modalInstance = bootstrap.Modal.getInstance(selectMediaModal) || new bootstrap.Modal(selectMediaModal);
+                                 const modalInstance = bootstrap.Modal.getInstance(selectMediaModal) || new bootstrap.Modal(
+                                     selectMediaModal);
                                  modalInstance.hide();
                              }
                              // //refresh the attached media list
