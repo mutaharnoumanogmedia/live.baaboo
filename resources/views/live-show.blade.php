@@ -1383,7 +1383,7 @@
                             'n/a' && prizeData.is_winner == true) {
                             document.getElementById('prizeAmount').textContent = prizeData.prize;
                             fireConfetti();
-                            addOverlayMessage('@System', 'Congratulations! You have won ' + prizeData.prize);
+                            // addOverlayMessage('@System', 'Congratulations! You have won ' + prizeData.prize);
                             showWinnerDialogDiv();
                         }
                         document.getElementById('playerTab-tab').click();
