@@ -884,7 +884,7 @@
                      .then(response => response.json())
                      .then(data => {
                          // Assuming data is an array of player names
-                         console.log('Active Players Data:', data);
+                        //  console.log('Active Players Data:', data);
                          users = data.users.map(player => {
                              return {
                                  name: player.name,
