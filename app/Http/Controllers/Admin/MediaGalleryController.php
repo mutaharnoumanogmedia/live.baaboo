@@ -168,7 +168,11 @@ class MediaGalleryController extends Controller
 
     public function destroy(GalleryMedia $media_gallery)
     {
-        Storage::disk('public')->delete($media_gallery->path);
+        // delete file from s3
+        Storage::disk('s3')->delete($media_gallery->path);
+
+        // delete thumbnail from s3
+        Storage::disk('s3')->delete($media_gallery->thumbnail);
         $media_gallery->liveShows()->detach();
         $media_gallery->delete();
 

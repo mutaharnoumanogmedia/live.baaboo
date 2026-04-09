@@ -1,6 +1,6 @@
 <x-guest-layout>
     <!-- Live Show Banner -->
-    {{-- @if (isset($currentLiveShow) && $currentLiveShow)
+    @if (isset($currentLiveShow) && $currentLiveShow)
         <style>
             /* Updated banner styles */
             .live-show-banner {
@@ -117,7 +117,7 @@
                 </div>
             </div>
         </div>
-    @endif --}}
+    @endif
 
     {{-- <div class="container text-center m-auto"
         style="background-color: #fde901; color: #140b63; padding: 20px; border-radius: 10px;">
