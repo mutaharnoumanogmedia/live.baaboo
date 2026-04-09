@@ -1047,7 +1047,7 @@
 
                 if (scheduledDate) {
                     updateCountdown();
-                    // setInterval(updateCountdown, 1000);
+                    setInterval(updateCountdown, 1000);
                 }
             });
         </script>

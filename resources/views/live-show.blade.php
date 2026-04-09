@@ -767,10 +767,7 @@
                                 var registerModal = new bootstrap.Modal(document.getElementById(
                                     'registerModal'));
                                 registerModal.show();
-
-                                //uncheck the selected option and enable all options
                                 uncheckAndEnableOptions();
-
                             } else {
                                 alert(data.message || 'Failed to submit quiz. Please try again.');
                             }
@@ -1191,46 +1188,38 @@
 
             // console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
             if (!isEliminated && isLoggedIn) {
-                // if (isCurrentAnswerCorrect === true) {
-                //     appendQuestionResponseStatus('success');
-                //     fireConfetti();
-                //     updateUserPoints();
-                // } else {
-                //     appendQuestionResponseStatus('fail');
-                // }
-
                 submitQuiz();
             }
             showVideoContainer();
         }
 
 
-        function evaluateElinimation() {
-            document.querySelector('#quizTimer').style.display = "none";
+        // function evaluateElinimation() {
+        //     document.querySelector('#quizTimer').style.display = "none";
 
-            // console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
-            updateUserPoints();
+        //     // console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
+        //     updateUserPoints();
 
-            if (!isEliminated && isLoggedIn) {
-                if (isCurrentAnswerCorrect === true) {
-                    fireConfetti();
-                    appendQuestionResponseStatus('success');
-                } else if (isCurrentAnswerCorrect === false) {
-                    appendQuestionResponseStatus('fail');
+        //     if (!isEliminated && isLoggedIn) {
+        //         if (isCurrentAnswerCorrect === true) {
+        //             fireConfetti();
+        //             appendQuestionResponseStatus('success');
+        //         } else if (isCurrentAnswerCorrect === false) {
+        //             appendQuestionResponseStatus('fail');
 
-                    isEliminated = true;
-                } else {
-                    isEliminated = true;
-                    appendQuestionResponseStatus('warning');
-                }
-            } else {
-                showVideoContainer();
-            }
+        //             isEliminated = true;
+        //         } else {
+        //             isEliminated = true;
+        //             appendQuestionResponseStatus('warning');
+        //         }
+        //     } else {
+        //         showVideoContainer();
+        //     }
 
-            // Reset for next question
-            // isCurrentAnswerCorrect = null;
-            //uncheckAndEnableOptions();
-        }
+        //     // Reset for next question
+        //     // isCurrentAnswerCorrect = null;
+        //     //uncheckAndEnableOptions();
+        // }
 
         function updateUserPoints() {
             // console.log('Updating user points...');
