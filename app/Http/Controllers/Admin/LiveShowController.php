@@ -359,7 +359,7 @@ class LiveShowController extends Controller
             \Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
             // Dispatch job to send winner email after 30 minutes
             try {
-                SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now()->addMinutes(2));
+                SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now()->addMinutes(30));
             } catch (\Exception $e) {
                 // log the error
                 \Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage());
