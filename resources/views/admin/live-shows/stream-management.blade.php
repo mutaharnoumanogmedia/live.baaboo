@@ -1060,7 +1060,7 @@
              });
 
              channel2.bind('LiveShowMessageEvent', function(data) {
-                 console.log('new message:', data.data);
+                //  console.log('new message:', data.data);
                  appendSingleMessage(data.data);
              });
 
@@ -1069,7 +1069,7 @@
                  console.log('Reset chat channel subscribed successfully!');
              });
              channelResetChat.bind('ResetChatEvent', function() {
-                 console.log('Chat reset event received');
+                //  console.log('Chat reset event received');
                  const chatContainer = document.querySelector('#live-chat-messages');
                  if (chatContainer) {
                      chatContainer.innerHTML = '<p class="text-muted">No messages yet.</p>';
@@ -1095,7 +1095,7 @@
                      })
                      .then(response => response.json())
                      .then(data => {
-                         console.log('Quiz question removed:', data);
+                        //  console.log('Quiz question removed:', data);
                          hideQuizTimer();
                          // Optionally, remove the quiz from the UI
                      })
@@ -1118,7 +1118,7 @@
                      })
                      .then(response => response.json())
                      .then(data => {
-                         console.log('Winners updated:', data);
+                        //  console.log('Winners updated:', data);
                          // alert(data.message);
                          // Optionally, refresh the player list to show winners
                          fetchActivePlayers().then(data => {
@@ -1170,7 +1170,7 @@
                      },
                      contentType: "application/json",
                      success: function(data) {
-                         console.log("Live show updated:", data);
+                        //  console.log("Live show updated:", data);
                          alert(data.message);
                          // Optionally redirect or update the UI
                      },
@@ -1193,7 +1193,7 @@
                          },
                      }).then(response => response.json())
                      .then(data => {
-                         console.log('Quiz responses:', data);
+                        //  console.log('Quiz responses:', data);
                          // Handle displaying the responses in the UI
                          let stats = data.statistics;
                          stats.forEach(stat => {
@@ -1229,7 +1229,7 @@
                      })
                      .then(response => response.json())
                      .then(data => {
-                         console.log('Game reset:', data);
+                        //  console.log('Game reset:', data);
                          alert(data.message);
                          // Optionally, refresh the player list to show all players as active
                          fetchActivePlayers().then(data => {
@@ -1276,7 +1276,7 @@
                      correctLevel: QRCode.CorrectLevel.H // High error correction level
                  });
 
-                 console.log('QR Code generated for:', dataToEncode);
+                //  console.log('QR Code generated for:', dataToEncode);
              }
 
              function announcementEventTest() {
@@ -1287,7 +1287,7 @@
                          'Accept': 'application/json',
                      },
                  }).then(response => response.text()).then(data => {
-                     console.log('Announcement sent:', data);
+                    //  console.log('Announcement sent:', data);
                  }).catch(error => {
                      console.error('Error sending announcement:', error);
                  });
@@ -1523,7 +1523,7 @@
                      })
                      .then(r => r.json())
                      .then(data => {
-                         console.log('Gallery media items:', data);
+                        //  console.log('Gallery media items:', data);
                          if (data.success) {
                              //append gallery media items to gallery-available-list
                              const galleryAvailableList = document.getElementById('attached-media-list');
@@ -1630,7 +1630,7 @@
                      })
                      .then(r => r.json())
                      .then(data => {
-                         console.log('Gallery show status:', data);
+                        //  console.log('Gallery show status:', data);
 
                          updateGalleryShowStatus(data.showing ? 'showing' : 'hidden');
 
@@ -1675,7 +1675,7 @@
                          'X-CSRF-TOKEN': galleryCsrf,
                      }
                  }).then(r => r.json()).then(data => {
-                     console.log('All media:', data);
+                    //  console.log('All media:', data);
                      if (data.success) {
                          const allMediaList = document.getElementById('select-media-modal-list');
                          if (allMediaList) {
@@ -1737,7 +1737,7 @@
              }
 
              function attachMediaItem(btn, mediaId) {
-                 console.log('Attach media item:', btn, mediaId);
+                //  console.log('Attach media item:', btn, mediaId);
                  btn.disabled = true;
                  fetch(galleryAttachUrl, {
                          method: 'POST',
@@ -1752,7 +1752,7 @@
                          })
                      }).then(r => r.json()).then(data => {
                          if (data.success) {
-                             console.log('Attach media item success:', data);
+                            //  console.log('Attach media item success:', data);
                              // //append the media item to the attached media list
                              // const attachedMediaList = document.getElementById('attached-media-list');
                              // if (attachedMediaList) {
