@@ -570,15 +570,12 @@
         }
 
         function hideWinnersTabForParticipants() {
-            const playerNavItem = document.getElementById('player-tab-nav-item');
             const playerTabLink = document.getElementById('playerTab-tab');
             const playerTabPane = document.getElementById('playerTab');
             const chatTabLink = document.getElementById('chatTab-tab');
             const chatTabPane = document.getElementById('chatTab');
 
-            if (playerNavItem) {
-                playerNavItem.style.display = 'none';
-            }
+            // Just inactivate player tab & its content, and make chat tab active
             if (playerTabLink) {
                 playerTabLink.classList.remove('active');
                 playerTabLink.setAttribute('aria-selected', 'false');
@@ -594,6 +591,7 @@
             if (chatTabPane) {
                 chatTabPane.classList.add('show', 'active');
             }
+
         }
 
 
