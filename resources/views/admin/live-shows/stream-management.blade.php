@@ -680,7 +680,7 @@
                  return fetch(`{{ url('api/live-show') }}/{{ $liveShow->id }}/get-live-show-messages`)
                      .then(response => response.json())
                      .then(data => {
-                         console.log('Chat messages:', data);
+                        //  console.log('Chat messages:', data);
                          // Assuming data is an array of messages
                          return data;
                      })
@@ -909,7 +909,7 @@
              }
 
              function appendPlayerList(data) {
-                 console.log('Appending player list:', data);
+                //  console.log('Appending player list:', data);
                  const activePlayersList = document.getElementById('activePlayersList');
                  activePlayersList.innerHTML = ''; // Clear existing list
                  if (data.totalUsers === 0) {
