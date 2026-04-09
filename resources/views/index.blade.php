@@ -1001,7 +1001,7 @@
                 @if (isset($currentLiveShow) && $currentLiveShow->scheduled_at)
                     var scheduledTime =
                         "{{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('Y-m-d H:i:s') }}";
-                    var scheduledDate = new Date(scheduledTime.replace(' ', 'T') + '+00:00'); // force EU timezone
+                    var scheduledDate = new Date(scheduledTime.replace(' ', 'T') + '-01:00'); // force EU timezone
                 @else
                     var scheduledDate = null;
                 @endif
