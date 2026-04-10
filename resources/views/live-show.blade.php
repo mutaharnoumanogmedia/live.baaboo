@@ -451,8 +451,8 @@
 
 
         let currentCountdownSeconds = 0;
-        let secondResponseTime = 0;
-        // let currentCountdownMilliseconds = 0; // total elapsed ms
+        let responseTimeMs = 0;
+        let currentCountdownMilliseconds = 0; // total elapsed ms
         let countdownStartTime = null; // set when timer starts
 
         let isCurrentAnswerCorrect = null;
@@ -680,7 +680,7 @@
                 option.addEventListener('change',
                     function() {
                         disableAllOptions();
-                        captureSecondResponseTime();
+                        captureResponseTimeMilliseconds();
                         checkAuthStatusAndShowRegisterModal();
                     }
                 );
@@ -709,9 +709,14 @@
                 .catch(error => console.error('Error checking if user blocked from live show:', error));
         }
 
-        function captureSecondResponseTime() {
-            secondResponseTime = currentCountdownSeconds;
-            console.log('secondResponseTime:', secondResponseTime);
+        function captureResponseTimeMilliseconds() {
+            if (!countdownStartTime) {
+                responseTimeMs = 1;
+
+                return;
+            }
+
+            responseTimeMs = Math.max(1, Date.now() - countdownStartTime);
         }
 
         function disableAllOptions() {
@@ -752,7 +757,7 @@
                         body: JSON.stringify({
                             option: option,
                             quiz_id: document.getElementById('quizId').value,
-                            seconds_to_submit: secondResponseTime
+                            milliseconds_to_submit: responseTimeMs
                         })
                     })
                     .then(response => response.json())
@@ -793,7 +798,7 @@
             option.addEventListener('change',
                 function() {
                     disableAllOptions();
-                    captureSecondResponseTime();
+                    captureResponseTimeMilliseconds();
                     checkAuthStatusAndShowRegisterModal();
                 }
             );

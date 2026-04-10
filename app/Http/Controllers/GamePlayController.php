@@ -248,8 +248,16 @@ class GamePlayController extends Controller
     public function submitQuiz(Request $request, $liveShowId)
     {
         $user = Auth::guard('web')->user();
-        $totalMilliSecondsToSubmit = $request->seconds_to_submit ?? 1;
-        $totalMilliSecondsToSubmit = $totalMilliSecondsToSubmit == 0 ? 1 : $totalMilliSecondsToSubmit;
+        $totalMilliSecondsToSubmit = (float) ($request->milliseconds_to_submit ?? 0);
+        if ($totalMilliSecondsToSubmit <= 0) {
+            // Backward compatibility for older clients still sending seconds_to_submit.
+            $secondsFallback = (float) ($request->seconds_to_submit ?? 0);
+            $totalMilliSecondsToSubmit = $secondsFallback > 0 ? ($secondsFallback * 1000) : 1;
+        }
+
+        $responseScore = $this->calculateScoreFromMilliseconds($totalMilliSecondsToSubmit);
+        $totalSecondsToSubmit = max($totalMilliSecondsToSubmit / 1000, 0.001);
+
         if (! $user) {
             return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::guard('web')->check()], 401);
         }
@@ -312,7 +320,8 @@ class GamePlayController extends Controller
                 [
                     'quiz_option_id' => $quizOption->id,
                     'is_correct' => $quizOption->is_correct,
-                    'seconds_to_submit' => $totalMilliSecondsToSubmit,
+                    'seconds_to_submit' => $totalSecondsToSubmit,
+                    'response_score' => $responseScore,
 
                     'user_response' => $quizOption->option_text,
                     'created_at' => now(),
@@ -337,7 +346,6 @@ class GamePlayController extends Controller
 
             ], 200);
         } else {
-            $responseScore = $this->calculateScoreFromMilliseconds($totalMilliSecondsToSubmit);
             $newScore = $currentScore + $responseScore;
 
             $liveShow->users()->updateExistingPivot($user->id, ['score' => $newScore]);
@@ -364,11 +372,11 @@ class GamePlayController extends Controller
         }
     }
 
-    private function calculateScoreFromMilliseconds(int $timeToSubmitMs): int
+    private function calculateScoreFromMilliseconds(float $timeToSubmitMs): float
     {
         $seconds = max($timeToSubmitMs / 1000, 0.001);
 
-        return (int) round((1 + (1 / $seconds)));
+        return round(1 + (1 / $seconds), 4) * 100;
     }
 
     public function updateEliminationStatus(Request $request, $liveShowId)
