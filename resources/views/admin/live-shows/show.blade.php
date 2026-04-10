@@ -100,11 +100,14 @@
                                     <th>Email</th>
                                     <th>Status</th>
                                     <th>Score</th>
+                                    <th>Rank</th>
+                                    <th>Is Winner</th>
+                                    <th>Prize Won</th>
                                     <th>Joined At</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($liveShow->users as $index => $user)
+                                @foreach ($liveShow->users->sortByDesc('pivot.score')->sortByDesc('pivot.rank')->sortByDesc('pivot.is_winner') as $index => $user)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $user->name }}</td>
@@ -116,6 +119,9 @@
                                             </span>
                                         </td>
                                         <td>{{ $user->pivot->score }}</td>
+                                        <td>{{ $user->pivot->rank }}</td>
+                                        <td>{{ $user->pivot->is_winner ? 'Yes' : 'No' }}</td>
+                                        <td>{{ $user->pivot->prize_won }}</td>
                                         <td>{{ $user->pivot->created_at->format('d M Y, H:i') }}</td>
                                     </tr>
                                 @endforeach
