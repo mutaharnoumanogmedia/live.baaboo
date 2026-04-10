@@ -111,8 +111,7 @@ class LiveShowController extends Controller
         $liveShow->load(['creator', 'winnerPrizes', 'users' => function ($query) {
             $query->withPivot(['score', 'status', 'created_at', 'prize_won', 'is_winner', 'is_online', 'created_at'])
                 ->orderByDesc('user_live_shows.is_winner')
-                ->orderByDesc('user_live_shows.score')
-                ->orderByDesc('user_live_shows.rank');
+                ->orderByDesc('user_live_shows.score');
         }]);
 
         return view('admin.live-shows.show', compact('liveShow'));

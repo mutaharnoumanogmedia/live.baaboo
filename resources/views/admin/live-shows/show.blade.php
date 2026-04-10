@@ -100,7 +100,7 @@
                                     <th>Email</th>
                                     <th>Status</th>
                                     <th>Score</th>
-                                    <th>Rank</th>
+                                  
                                     <th>Is Winner</th>
                                     <th>Prize Won</th>
                                     <th>Joined At</th>
@@ -119,7 +119,7 @@
                                             </span>
                                         </td>
                                         <td>{{ $user->pivot->score }}</td>
-                                        <td>{{ $user->pivot->rank }}</td>
+                                        
                                         <td>{{ $user->pivot->is_winner ? 'Yes' : 'No' }}</td>
                                         <td>{{ $user->pivot->prize_won }}</td>
                                         <td>{{ $user->pivot->created_at->format('d M Y, H:i') }}</td>
