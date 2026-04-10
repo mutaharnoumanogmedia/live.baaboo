@@ -98,13 +98,13 @@
                             <span style="color:#140b63;">{{ $currentLiveShow->title ?? 'Live Show' }}</span>
                             <span class="mx-2">·</span>
                         </h5>
-                        <p class="mb-0 opacity-75 fs-6"
+                        {{-- <p class="mb-0 opacity-75 fs-6"
                            style="color:#140b63;">
                             <i class="bi bi-people-fill" style="color:#140b63;"></i>
                             {{ $currentLiveShow->users->count() ?? 0 }}
                             {{ $currentLiveShow->users->count() == 1 ? 'Mitspieler ist' : 'Mitspieler sind' }} gerade
                             dabei
-                        </p>
+                        </p> --}}
                     </div>
                     <div
                         class="text-center col-md-3 text-md-end d-flex justify-content-center justify-content-md-end align-items-center">
