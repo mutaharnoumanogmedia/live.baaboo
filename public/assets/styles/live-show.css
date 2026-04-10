@@ -15,6 +15,7 @@ body {
     overflow-y: scroll;
 
     background: url("../images/quiz-bg.png") no-repeat center center;
+    background-size: cover;
 }
 
 .bg-nav-radial-top-gradient {
