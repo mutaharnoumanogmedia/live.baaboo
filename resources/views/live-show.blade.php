@@ -197,7 +197,7 @@
             </div>
         </div>
 
-        <div class="fixed-bottom">
+        <div class="position-absolute bottom-0 w-100">
             <div id="liveShowTabContainer">
 
                 <div class="tab-content" id="liveShowTabsContent">
@@ -1139,8 +1139,7 @@
 
 
 
-        function startTimer(duration, onComplete) {
-
+        function startTimer(durationSeconds, onComplete) {
             document.querySelector('#quizTimer').style.display = "block";
             const circle = document.querySelector(".timer-progress");
             const text = document.querySelector(".timer-text");
@@ -1149,40 +1148,46 @@
             const circumference = 2 * Math.PI * radius;
             circle.style.strokeDasharray = circumference;
 
-            let timeLeft = duration;
+            const durationMs = durationSeconds * 1000;
             countdownStartTime = Date.now();
 
             function updateTimer() {
-                text.textContent = timeLeft;
-                const offset = -circumference + (timeLeft / duration) * circumference;
+                const now = Date.now();
+                const elapsedMs = now - countdownStartTime;
+                const remainingMs = Math.max(0, durationMs - elapsedMs);
+
+                // Keep this global in ms if needed elsewhere
+                currentCountdownMilliseconds = remainingMs;
+
+                // If you still need seconds for UI/API:
+                const remainingSeconds = Math.ceil(remainingMs / 1000);
+                text.textContent = remainingSeconds;
+
+                const progress = remainingMs / durationMs;
+                const offset = -circumference + progress * circumference;
                 circle.style.strokeDashoffset = offset;
 
-                //if 5 seconds left change color to red
-                if (timeLeft <= 5) {
-                    circle.style.stroke = "#dc3545"; // Red color
+                if (remainingMs <= 5000) {
+                    circle.style.stroke = "#dc3545";
                     $videoContainer.style.display = "none";
                 } else {
-                    circle.style.stroke = "#007bff"; // Default color
+                    circle.style.stroke = "#007bff";
                     $videoContainer.style.display = "block";
                 }
 
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    //add  delay before calling onComplete
+                // If you need elapsed seconds for submit:
+                currentCountdownSeconds = elapsedMs / 1000;
+
+                if (remainingMs <= 0) {
+                    clearInterval(timerHandle);
                     setTimeout(() => {
                         if (onComplete) onComplete();
                     }, 1500);
                 }
-                timeLeft--;
-                currentCountdownSeconds = duration - timeLeft;
-                console.log('duration:', duration, 'timeLeft:', timeLeft, 'currentCountdownSeconds:',
-                    currentCountdownSeconds);
-
-
             }
 
             updateTimer();
-            const timer = setInterval(updateTimer, 1000);
+            const timerHandle = setInterval(updateTimer, 50); // smoother updates
         }
 
         // Example: start a 10 second timer

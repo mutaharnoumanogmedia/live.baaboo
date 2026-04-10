@@ -20,7 +20,8 @@ return new class extends Migration
             $table->foreignId('quiz_id')->constrained('live_show_quizzes')->onDelete('no action');
             $table->foreignId('user_id')->constrained('users')->onDelete('no action');
             $table->boolean('is_correct')->default(false);
-            $table->integer('seconds_to_submit')->default(0)->nullable();
+            $table->float('seconds_to_submit')->default(0.0)->nullable();
+            $table->float('response_score')->default(0.00)->nullable();
             $table->text('user_response')->nullable();
             $table->timestamps();
         });

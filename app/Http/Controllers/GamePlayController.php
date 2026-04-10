@@ -248,8 +248,8 @@ class GamePlayController extends Controller
     public function submitQuiz(Request $request, $liveShowId)
     {
         $user = Auth::guard('web')->user();
-        $totalSecondsToSubmit = $request->seconds_to_submit ?? 1;
-        $totalSecondsToSubmit = $totalSecondsToSubmit == 0 ? 1 : $totalSecondsToSubmit;
+        $totalMilliSecondsToSubmit = $request->seconds_to_submit ?? 1;
+        $totalMilliSecondsToSubmit = $totalMilliSecondsToSubmit == 0 ? 1 : $totalMilliSecondsToSubmit;
         if (! $user) {
             return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::guard('web')->check()], 401);
         }
@@ -312,7 +312,8 @@ class GamePlayController extends Controller
                 [
                     'quiz_option_id' => $quizOption->id,
                     'is_correct' => $quizOption->is_correct,
-                    'seconds_to_submit' => $totalSecondsToSubmit,
+                    'seconds_to_submit' => $totalMilliSecondsToSubmit,
+
                     'user_response' => $quizOption->option_text,
                     'created_at' => now(),
                 ]
@@ -336,8 +337,20 @@ class GamePlayController extends Controller
 
             ], 200);
         } else {
-            $newScore = round($currentScore + (1 + 1 / $totalSecondsToSubmit) * 1000); // example scoring logic
+            $responseScore = $this->calculateScoreFromMilliseconds($totalMilliSecondsToSubmit);
+            $newScore = $currentScore + $responseScore;
+
             $liveShow->users()->updateExistingPivot($user->id, ['score' => $newScore]);
+            UserQuizResponse::updateOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'quiz_id' => $quizId,
+                    'user_quiz_id' => $userQuiz->id,
+                ],
+                [
+                    'response_score' => $responseScore,
+                ]
+            );
 
             return response()->json([
                 'success' => true,
@@ -346,8 +359,16 @@ class GamePlayController extends Controller
                 'correct_option_id' => $quizOption->id,
                 'is_correct' => true,
                 'score' => $newScore,
+                'response_score' => $responseScore,
             ], 200);
         }
+    }
+
+    private function calculateScoreFromMilliseconds(int $timeToSubmitMs): int
+    {
+        $seconds = max($timeToSubmitMs / 1000, 0.001);
+
+        return (int) round((1 + (1 / $seconds)));
     }
 
     public function updateEliminationStatus(Request $request, $liveShowId)
@@ -519,7 +540,7 @@ class GamePlayController extends Controller
         //             })
         //             ->get();
 
-        //         $totalSecondsToSubmit = $userQuizResponses->sum('seconds_to_submit');
+        //         $totalMilliSecondsToSubmit = $userQuizResponses->sum('seconds_to_submit');
         //         $firstResponseTime = $userQuizResponses->min('created_at') ?? now();
 
         //         return [
@@ -527,7 +548,7 @@ class GamePlayController extends Controller
         //             'name' => $user->name,
         //             'score' => $score,
         //             'is_winner' => $user->pivot->is_winner ?? false,
-        //             'total_seconds_to_submit' => $totalSecondsToSubmit,
+        //             'total_seconds_to_submit' => $totalMilliSecondsToSubmit,
         //             'first_response_time' => $firstResponseTime,
         //         ];
         //     })

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class UserQuizResponse extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'user_quiz_id',
         'quiz_option_id',
@@ -16,19 +17,28 @@ class UserQuizResponse extends Model
         'is_correct',
         'user_response',
         'seconds_to_submit',
+        'response_score'
     ];
+
+    protected $casts = [
+        'seconds_to_submit' => 'float',
+    ];
+
     public function userQuiz()
     {
         return $this->belongsTo(UserQuiz::class, 'user_quiz_id');
     }
+
     public function quizOption()
     {
         return $this->belongsTo(QuizOption::class, 'quiz_option_id');
     }
+
     public function quiz()
     {
         return $this->belongsTo(LiveShowQuiz::class, 'quiz_id');
     }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
