@@ -1,6 +1,6 @@
 <x-guest-layout>
     <!-- Live Show Banner -->
-    @if (isset($currentLiveShow) && $currentLiveShow)
+    @if (isset($currentLiveShow) && $currentLiveShow && false)
         <style>
             /* Updated banner styles */
             .live-show-banner {
@@ -119,18 +119,7 @@
         </div>
     @endif
 
-    {{-- <div class="container text-center m-auto"
-        style="background-color: #fde901; color: #140b63; padding: 20px; border-radius: 10px;">
-        <p class="fs-3"> 🚨 Technische Panne bei Badabing-Premiere – sorry!</p>
-        <br>
-        Ihr wart so viele, dass unsere Server nicht mitgekommen sind. Bestes Problem, das uns passieren konnte – aber
-        trotzdem: Entschuldigung an alle, die live dabei sein wollten.
-        <br>
-
-
-        📅 Den Nachholtermin gibt's bald – wir halten euch auf dem Laufenden!
-    </div> --}}
-
+   
 
     <div class="w-100 py-2" style="background: #fde901; color: #140b63; font-weight: bold;">
         <div style="white-space: nowrap; overflow: hidden; width: 100%;">
@@ -842,21 +831,21 @@
             var scheduleData = {
                 "carousel_items": [
 
-                    {
-                        "badge": "BALD",
-                        "date": "09.04.2026 um 20:00 Uhr",
-                        "title": "Die große Premiere 2.0",
-                        "description": "Die allererste Badabing Game Show - sei von Anfang an dabei und sichere Dir die ersten Gewinne!",
-                        "meta": [{
-                                "icon": "bulls-eye-icon.png",
-                                "label": "Wissen + Speed"
-                            },
-                            {
-                                "icon": "gift-icon.png",
-                                "label": "Premieren-Preise"
-                            }
-                        ]
-                    },
+                    // {
+                    //     "badge": "BALD",
+                    //     "date": "09.04.2026 um 20:00 Uhr",
+                    //     "title": "Die große Premiere 2.0",
+                    //     "description": "Die allererste Badabing Game Show - sei von Anfang an dabei und sichere Dir die ersten Gewinne!",
+                    //     "meta": [{
+                    //             "icon": "bulls-eye-icon.png",
+                    //             "label": "Wissen + Speed"
+                    //         },
+                    //         {
+                    //             "icon": "gift-icon.png",
+                    //             "label": "Premieren-Preise"
+                    //         }
+                    //     ]
+                    // },
                     {
                         "badge": "BALD",
                         "date": "16.04.2026 um 20:00 Uhr",
