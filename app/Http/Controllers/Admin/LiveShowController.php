@@ -109,7 +109,10 @@ class LiveShowController extends Controller
     {
         // eager-load users from pivot table
         $liveShow->load(['creator', 'winnerPrizes', 'users' => function ($query) {
-            $query->withPivot(['score', 'status', 'created_at', 'prize_won', 'is_winner', 'is_online', 'created_at']);
+            $query->withPivot(['score', 'status', 'created_at', 'prize_won', 'is_winner', 'is_online', 'created_at'])
+                ->orderByDesc('user_live_shows.is_winner')
+                ->orderByDesc('user_live_shows.score')
+                ->orderByDesc('user_live_shows.rank');
         }]);
 
         return view('admin.live-shows.show', compact('liveShow'));
@@ -792,7 +795,7 @@ class LiveShowController extends Controller
     public function copyLiveShow($id)
     {
         $liveShow = LiveShow::findOrFail($id);
-        //change the title to the new title
+        // change the title to the new title
         $newTitle = 'Copy of '.$liveShow->title.' - '.now()->format('Y-m-d H:i:s');
         $newLiveShow = $liveShow->replicate();
         $newLiveShow->title = $newTitle;

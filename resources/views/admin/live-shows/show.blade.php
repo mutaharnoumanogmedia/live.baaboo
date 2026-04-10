@@ -107,7 +107,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($liveShow->users->sortByDesc('pivot.score')->sortByDesc('pivot.rank')->sortByDesc('pivot.is_winner') as $index => $user)
+                                @foreach ($liveShow->users as $index => $user)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $user->name }}</td>
