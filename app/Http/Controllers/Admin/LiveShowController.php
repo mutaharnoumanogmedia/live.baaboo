@@ -635,10 +635,19 @@ class LiveShowController extends Controller
             'status' => 'required|in:scheduled,live,completed',
         ]);
 
-        $liveShow->status = $request->input('status');
+        $newStatus = $request->input('status');
+
+        if ($newStatus === 'live' && $liveShow->status !== 'live') {
+            $liveShow->start_time = now();
+        }
+
+        if ($newStatus === 'completed' && $liveShow->status !== 'completed') {
+            $liveShow->end_time = now();
+        }
+
+        $liveShow->status = $newStatus;
         $liveShow->save();
 
-        // Broadcast the update live show event
         \App\Events\UpdateLiveShowEvent::dispatch((string) $liveShow->id, $liveShow->status);
 
         return response()->json(['message' => 'Live show has been updated successfully.']);
@@ -790,7 +799,137 @@ class LiveShowController extends Controller
         return response()->download($csv, 'quizzes'.$liveShow->title.'.csv');
     }
 
-    // function to copy the same live show and create a new live show
+    public function viewDetails($id)
+    {
+        $liveShow = LiveShow::with(['creator', 'winnerPrizes', 'quizzes.options'])->findOrFail($id);
+
+        $players = $liveShow->users()
+            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at'])
+            ->orderByDesc('user_live_shows.is_winner')
+            ->orderByDesc('user_live_shows.score')
+            ->get();
+
+        $totalQuestions = $liveShow->quizzes->count();
+
+        return view('admin.live-shows.view-details', compact('liveShow', 'players', 'totalQuestions'));
+    }
+
+    public function getPlayerResponses($liveShowId, $userId)
+    {
+        $liveShow = LiveShow::findOrFail($liveShowId);
+
+        $responses = UserQuizResponse::where('user_id', $userId)
+            ->whereHas('userQuiz', function ($q) use ($liveShowId) {
+                $q->where('live_show_id', $liveShowId);
+            })
+            ->with(['quiz.options', 'quizOption'])
+            ->orderBy('created_at', 'asc')
+            ->get()
+            ->map(function ($response) {
+                return [
+                    'id' => $response->id,
+                    'question' => $response->quiz->question ?? 'N/A',
+                    'selected_option' => $response->quizOption->option_text ?? 'N/A',
+                    'is_correct' => (bool) $response->is_correct,
+                    'seconds_to_submit' => $response->seconds_to_submit,
+                    'response_score' => $response->response_score,
+                    'options' => $response->quiz->options->map(function ($opt) {
+                        return [
+                            'id' => $opt->id,
+                            'option_text' => $opt->option_text,
+                            'is_correct' => (bool) $opt->is_correct,
+                        ];
+                    }),
+                    'created_at' => $response->created_at->format('d M Y, H:i:s'),
+                ];
+            });
+
+        return response()->json(['responses' => $responses]);
+    }
+
+    public function exportAllParticipantsCSV($id)
+    {
+        $liveShow = LiveShow::findOrFail($id);
+
+        $players = $liveShow->users()
+            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'created_at'])
+            ->orderByDesc('user_live_shows.is_winner')
+            ->orderByDesc('user_live_shows.score')
+            ->get();
+
+        $totalQuestions = $liveShow->quizzes()->count();
+
+        $csv = fopen('php://temp', 'w');
+        fputcsv($csv, ['#', 'Name', 'Email', 'Score', 'Correct Answers', 'Total Questions', 'Is Winner', 'Prize Won', 'Status', 'Joined At']);
+
+        foreach ($players as $index => $player) {
+            $correctAnswers = UserQuizResponse::where('user_id', $player->id)
+                ->whereHas('userQuiz', fn ($q) => $q->where('live_show_id', $id))
+                ->where('is_correct', true)
+                ->count();
+
+            fputcsv($csv, [
+                $index + 1,
+                $player->name,
+                $player->email,
+                $player->pivot->score ?? 0,
+                $correctAnswers,
+                $totalQuestions,
+                $player->pivot->is_winner ? 'Yes' : 'No',
+                $player->pivot->prize_won ?? 'N/A',
+                ucfirst($player->pivot->status ?? ''),
+                $player->pivot->created_at,
+            ]);
+        }
+
+        rewind($csv);
+        $csvContents = stream_get_contents($csv);
+        fclose($csv);
+
+        $filename = 'participants_'.str_replace(' ', '_', $liveShow->title).'.csv';
+
+        return response($csvContents)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    }
+
+    public function exportPlayerCSV($liveShowId, $userId)
+    {
+        $liveShow = LiveShow::findOrFail($liveShowId);
+        $user = \App\Models\User::findOrFail($userId);
+
+        $responses = UserQuizResponse::where('user_id', $userId)
+            ->whereHas('userQuiz', fn ($q) => $q->where('live_show_id', $liveShowId))
+            ->with(['quiz', 'quizOption'])
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        $csv = fopen('php://temp', 'w');
+        fputcsv($csv, ['#', 'Question', 'Selected Answer', 'Correct?', 'Time (seconds)', 'Score', 'Answered At']);
+
+        foreach ($responses as $index => $response) {
+            fputcsv($csv, [
+                $index + 1,
+                $response->quiz->question ?? 'N/A',
+                $response->quizOption->option_text ?? 'N/A',
+                $response->is_correct ? 'Yes' : 'No',
+                $response->seconds_to_submit,
+                $response->response_score,
+                $response->created_at->format('d M Y, H:i:s'),
+            ]);
+        }
+
+        rewind($csv);
+        $csvContents = stream_get_contents($csv);
+        fclose($csv);
+
+        $filename = 'player_'.str_replace(' ', '_', $user->name).'_show_'.str_replace(' ', '_', $liveShow->title).'.csv';
+
+        return response($csvContents)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    }
+
     public function copyLiveShow($id)
     {
         $liveShow = LiveShow::findOrFail($id);

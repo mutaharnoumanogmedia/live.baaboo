@@ -26,6 +26,9 @@ class LiveShow extends Model
         'chat_enabled',
         'created_by',
 
+        'start_time',
+        'end_time',
+
     ];
 
     protected $casts = [
@@ -34,6 +37,8 @@ class LiveShow extends Model
         'max_players' => 'integer',
         'is_test_show' => 'boolean',
         'chat_enabled' => 'boolean',
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
     ];
 
     // scope test show
@@ -118,7 +123,7 @@ class LiveShow extends Model
     {
         return $this->hasMany(LiveShowGalleryMedia::class)->with('galleryMedia')
             ->orderBy('live_show_gallery_media.sort_order');
-             
+
     }
 
     public function galleryState()

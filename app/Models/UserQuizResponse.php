@@ -22,6 +22,7 @@ class UserQuizResponse extends Model
 
     protected $casts = [
         'seconds_to_submit' => 'float',
+        'response_score' => 'float',
     ];
 
     public function userQuiz()

@@ -53,6 +53,8 @@
                                             href="{{ route('admin.live-shows.edit', $show->id) }}">Edit</a>
                                         <a class="btn btn-sm btn-outline-info"
                                             href="{{ route('admin.live-shows.show', $show->id) }}">View</a>
+                                        <a class="btn btn-sm btn-outline-light"
+                                            href="{{ route('admin.live-shows.view-details', $show->id) }}">Details</a>
                                         <a class="btn btn-sm btn-outline-warning"
                                             href="{{ route('admin.live-show-quizzes.index', ['live_show_id' => $show->id]) }}">Quiz
                                             Questions</a>
