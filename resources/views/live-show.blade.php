@@ -121,6 +121,8 @@
             object-fit: cover !important;
             width: 100% !important;
             height: 100% !important;
+            pointer-events: none !important;
+            
         }
 
         .dIzgYQV4CBbzZxzJbwbS,
@@ -133,12 +135,12 @@
             display: block !important;
         }
 
-        .zg_autoplay_mask {
+        /* .zg_autoplay_mask {
             display: none !important;
             background: rgba(0, 0, 0, 0.7) !important;
             font-family: -apple-system, system-ui, sans-serif !important;
             font-size: 18px !important;
-        }
+        } */
 
         .IoC1lj0UQIKqG1pNh5vE,
         #zego_left_notify_wrapper,
@@ -146,8 +148,24 @@
         #ZegoRoomMobileLeaveButton,
         #ZegoRoomHeader,
         #ZegoRoomCssMobileMore,
-        #ZegoRoomFooter {
+        #ZegoRoomFooter,
+        #ZegoVideoPlayerName {
             display: none !important;
+        }
+
+        #zego-live-root #ZegoRoomHeader,
+        #zego-live-root #ZegoRoomFooter,
+        #zego-live-root #ZegoRoomCssMobileMore,
+        #zego-live-root #ZegoRoomMobileLeaveButton,
+        #zego-live-root #zego_left_notify_wrapper,
+        #zego-live-root #zego_right_notify_wrapper,
+        #zego-live-root .PutMpvQbQ8ffCLR93qIq {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            max-height: 0 !important;
+            overflow: hidden !important;
+            pointer-events: none !important;
         }
     </style>
 </head>
@@ -234,114 +252,116 @@
 
                 </div>
             </div>
-        </div>
+            <div class="position-absolute bottom-0 w-100">
+                <div id="liveShowTabContainer">
 
-        <div class="position-absolute bottom-0 w-100">
-            <div id="liveShowTabContainer">
+                    <div class="tab-content" id="liveShowTabsContent">
+                        <div class="tab-pane fade show active" id="chatTab" role="tabpanel"
+                            aria-labelledby="chatTab-tab">
+                            <div class="chat-container" id="chatContainer">
+                                <!-- TikTok-style Overlay Chat -->
+                                <div class="overlay-chat" id="overlayChat"></div>
 
-                <div class="tab-content" id="liveShowTabsContent">
-                    <div class="tab-pane fade show active" id="chatTab" role="tabpanel"
-                        aria-labelledby="chatTab-tab">
-                        <div class="chat-container" id="chatContainer">
-                            <!-- TikTok-style Overlay Chat -->
-                            <div class="overlay-chat" id="overlayChat"></div>
+                                <!-- Bottom Chat Input -->
+                                <div class="bottom-chat-input">
 
-                            <!-- Bottom Chat Input -->
-                            <div class="bottom-chat-input">
+                                    <div class="input-group chat-input-group">
+                                        <input type="text" maxlength="120"
+                                            placeholder="{{ __('de.main_ui.placeholder_message') }}" id="chatInput">
+                                        <button type="button" id="send-btn-overlay" onclick="sendMessage()">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                        <button type="button" id="heartReactionBtn"
+                                            title="{{ __('de.main_ui.send_heart') }}">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                    </div>
+                                    <div id="chatDisabledMsg"
+                                        style="display: none; text-align: center; font-size: 0.75rem; color: #999; padding: 4px 0 2px;">
+                                        Unser Chat macht gerade kurz Pause – hier ist heute richtig was los!
+                                    </div>
 
-                                <div class="input-group chat-input-group">
-                                    <input type="text" maxlength="120"
-                                        placeholder="{{ __('de.main_ui.placeholder_message') }}" id="chatInput">
-                                    <button type="button" id="send-btn-overlay" onclick="sendMessage()">
-                                        <i class="fas fa-paper-plane"></i>
-                                    </button>
-                                    <button type="button" id="heartReactionBtn"
-                                        title="{{ __('de.main_ui.send_heart') }}">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
-                                </div>
-                                <div id="chatDisabledMsg" style="display: none; text-align: center; font-size: 0.75rem; color: #999; padding: 4px 0 2px;">
-                                    Unser Chat macht gerade kurz Pause – hier ist heute richtig was los!
                                 </div>
 
                             </div>
-
                         </div>
-                    </div>
-                    <div class="tab-pane fade " id="playerTab" role="tabpanel" aria-labelledby="playerTab-tab">
-                        <!-- Player List -->
-                        <div class="container-fluid ">
-                            <div class="players-list-group-container">
-                                <h5 class="mb-3"><i
-                                        class="fas fa-users me-2 text-primary"></i>{{ __('de.main_ui.players_scores') }}
-                                </h5>
-                                <ul class="list-group" id="players-leaderbord">
-                                </ul>
+                        <div class="tab-pane fade " id="playerTab" role="tabpanel" aria-labelledby="playerTab-tab">
+                            <!-- Player List -->
+                            <div class="container-fluid ">
+                                <div class="players-list-group-container">
+                                    <h5 class="mb-3"><i
+                                            class="fas fa-users me-2 text-primary"></i>{{ __('de.main_ui.players_scores') }}
+                                    </h5>
+                                    <ul class="list-group" id="players-leaderbord">
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <nav class="navbar mobile-nav bottom-nav bg-nav-radial-top-gradient border-top">
+                    <ul
+                        class="flex-row px-2 text-center nav d-flex flex-nowrap w-100 justify-content-between align-items-center">
+
+                        <!-- 1) Logo -->
+                        <li class="nav-item flex-fill">
+                            <a href="#"
+                                class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center">
+                                <img src="{{ asset('images/badabing-logo.webp') }}" alt="Logo"
+                                    style="height:46px;width:auto;">
+                            </a>
+                        </li>
+
+                        <!-- 2) Chat -->
+                        <li class="nav-item flex-fill" role="presentation">
+                            <a class="px-0 py-2 nav-link active d-flex flex-column align-items-center justify-content-center"
+                                id="chatTab-tab" data-bs-toggle="tab" href="#chatTab" role="tab"
+                                aria-controls="chatTab" aria-selected="true">
+                                <i class="fas fa-comments fs-5"></i>
+                                <small class="mt-1">{{ __('de.main_ui.chat') }}</small>
+                            </a>
+                        </li>
+
+                        <!-- 3) Players -->
+                        <li class="nav-item flex-fill" role="presentation" id="player-tab-nav-item">
+                            <a class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
+                                id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
+                                aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-users fs-5 me-1"></i>
+                                    <span id="user-count" class="fw-semibold small">0</span>
+                                </div>
+                                <small class="mt-1">{{ __('de.main_ui.players') }}</small>
+                            </a>
+                        </li>
+
+                        <!-- 4) Register / Profile -->
+                        <li class="nav-item flex-fill" id="register-profile-item">
+                            @guest('web')
+                                <a href="#"
+                                    class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
+                                    data-bs-target="#registerModal" data-bs-toggle="modal">
+                                    <i class="fas fa-user-plus fs-5"></i>
+                                    <small class="mt-1">{{ __('de.main_ui.join') }}</small>
+                                </a>
+                            @elseauth('web')
+                                <a href="#"
+                                    class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
+                                    data-bs-toggle="modal" data-bs-target="#userInfoModal">
+                                    <i class="fas fa-user fs-5"></i>
+                                    <small class="mt-1 text-truncate" style="max-width:70px;">
+                                        {{ Auth::guard('web')->user()->name }}
+                                    </small>
+                                </a>
+                            @endauth
+                        </li>
+
+                    </ul>
+                </nav>
             </div>
-            <nav class="navbar mobile-nav bottom-nav bg-nav-radial-top-gradient border-top">
-                <ul
-                    class="flex-row px-2 text-center nav d-flex flex-nowrap w-100 justify-content-between align-items-center">
-
-                    <!-- 1) Logo -->
-                    <li class="nav-item flex-fill">
-                        <a href="#"
-                            class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center">
-                            <img src="{{ asset('images/badabing-logo.webp') }}" alt="Logo"
-                                style="height:46px;width:auto;">
-                        </a>
-                    </li>
-
-                    <!-- 2) Chat -->
-                    <li class="nav-item flex-fill" role="presentation">
-                        <a class="px-0 py-2 nav-link active d-flex flex-column align-items-center justify-content-center"
-                            id="chatTab-tab" data-bs-toggle="tab" href="#chatTab" role="tab"
-                            aria-controls="chatTab" aria-selected="true">
-                            <i class="fas fa-comments fs-5"></i>
-                            <small class="mt-1">{{ __('de.main_ui.chat') }}</small>
-                        </a>
-                    </li>
-
-                    <!-- 3) Players -->
-                    <li class="nav-item flex-fill" role="presentation" id="player-tab-nav-item">
-                        <a class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
-                            id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
-                            aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-users fs-5 me-1"></i>
-                                <span id="user-count" class="fw-semibold small">0</span>
-                            </div>
-                            <small class="mt-1">{{ __('de.main_ui.players') }}</small>
-                        </a>
-                    </li>
-
-                    <!-- 4) Register / Profile -->
-                    <li class="nav-item flex-fill" id="register-profile-item">
-                        @guest('web')
-                            <a href="#"
-                                class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
-                                data-bs-target="#registerModal" data-bs-toggle="modal">
-                                <i class="fas fa-user-plus fs-5"></i>
-                                <small class="mt-1">{{ __('de.main_ui.join') }}</small>
-                            </a>
-                        @elseauth('web')
-                            <a href="#"
-                                class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
-                                data-bs-toggle="modal" data-bs-target="#userInfoModal">
-                                <i class="fas fa-user fs-5"></i>
-                                <small class="mt-1 text-truncate" style="max-width:70px;">
-                                    {{ Auth::guard('web')->user()->name }}
-                                </small>
-                            </a>
-                        @endauth
-                    </li>
-
-                </ul>
-            </nav>
         </div>
+
+
 
 
         <!-- Full-Screen Overlay Modal (not closable) -->
@@ -500,6 +520,8 @@
         let isEliminated = {{ $isEliminated ? 'true' : 'false' }};
         let isChatEnabled = {{ $liveShow->chat_enabled ? 'true' : 'false' }};
         let isUserBlockedFromChat = false;
+
+        const zegoLiveRoot = document.getElementById('zego-live-root');
 
         const VAPID_PUBLIC_KEY = "{{ env('VAPID_PUBLIC_KEY') }}";
         const csrfToken = "{{ csrf_token() }}";
@@ -1670,6 +1692,18 @@
 
             vid.play();
             vid.muted = false;
+
+            if (zegoLiveRoot) {
+                const video = zegoLiveRoot.querySelector('video');
+                if (video) {
+                    video.muted = false;
+                    video.volume = 1.0;
+                    video.play().catch(() => {});
+
+                    console.log(' zegoLiveRoot video:', video);
+
+                }
+            }
         });
         /**
          * Pusher test event subscription for debugging
@@ -2292,6 +2326,11 @@
                             showAudioVideoSettingsButton: false,
                             showScreenSharingButton: false,
                             showLeaveRoomConfirmDialog: false,
+                            showMirror: false,
+                            fillMode: "cover",
+
+
+
                             translateLanguage: 'German',
                             innerText: {
                                 roomLiveNotStarted: "The broadcast hasn't started yet.",
