@@ -102,7 +102,7 @@
                         @endcan
 
                         @can('can-manage-analytics')
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" href="{{ route('admin.analytics.index') }}">
                                 <div class="sb-nav-link-icon"><i class="bi bi-graph-up-arrow"></i></div>
                                 Analytics
                             </a>

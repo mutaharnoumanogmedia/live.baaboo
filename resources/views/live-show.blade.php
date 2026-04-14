@@ -106,6 +106,49 @@
             height: 100vh;
             overflow: hidden;
         }
+
+        /* Embedded Zego player (replaces iframe) */
+        #zego-live-root {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            overflow: hidden;
+        }
+
+        #zego-live-root video {
+            object-fit: cover !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .dIzgYQV4CBbzZxzJbwbS,
+        #ZegoRoomFooter,
+        #ZegoRoomHeader {
+            display: none !important;
+        }
+
+        .QAHxuJxRZWb3P_cbR8QA {
+            display: block !important;
+        }
+
+        .zg_autoplay_mask {
+            display: none !important;
+            background: rgba(0, 0, 0, 0.7) !important;
+            font-family: -apple-system, system-ui, sans-serif !important;
+            font-size: 18px !important;
+        }
+
+        .IoC1lj0UQIKqG1pNh5vE,
+        #zego_left_notify_wrapper,
+        #zego_right_notify_wrapper,
+        #ZegoRoomMobileLeaveButton,
+        #ZegoRoomHeader,
+        #ZegoRoomCssMobileMore,
+        #ZegoRoomFooter {
+            display: none !important;
+        }
     </style>
 </head>
 
@@ -140,12 +183,8 @@
             <!-- Video Container -->
             <div class="video-container" id="videoContainer">
                 <div class="video-placeholder" id="videoPlaceholder">
-                    {{-- <div id="player"></div> --}}
-                    <iframe id="live-broadcast-iframe" src="{{ route('show-live-broadcast', [$liveShow->id]) }}"
-                        frameborder="0"></iframe>
-
-
-
+                    {{-- Zego UIKit (embedded; token from server) --}}
+                    <div id="zego-live-root"></div>
                 </div>
 
             </div>
@@ -221,7 +260,9 @@
                                         <i class="fas fa-heart"></i>
                                     </button>
                                 </div>
-
+                                <div id="chatDisabledMsg" style="display: none; text-align: center; font-size: 0.75rem; color: #999; padding: 4px 0 2px;">
+                                    Unser Chat macht gerade kurz Pause – hier ist heute richtig was los!
+                                </div>
 
                             </div>
 
@@ -838,7 +879,7 @@
                 return;
             }
             if (!isChatEnabled) {
-                alert('Der Chat ist derzeit vom Moderator deaktiviert.');
+                alert('Unser Chat macht gerade kurz Pause – hier ist heute richtig was los!');
                 return;
             }
             const message = $chatInput.value.trim();
@@ -1680,6 +1721,7 @@
             document.querySelector('#send-btn-overlay').style.cursor = shouldDisable ? 'not-allowed' : 'pointer';
             document.querySelector('#chatInput').style.pointerEvents = shouldDisable ? 'none' : 'auto';
             document.querySelector('#send-btn-overlay').style.pointerEvents = shouldDisable ? 'none' : 'auto';
+            document.getElementById('chatDisabledMsg').style.display = shouldDisable ? 'block' : 'none';
         }
 
 
@@ -2167,6 +2209,137 @@
         });
     </script>
 
+    <script src="https://unpkg.com/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
+    <script>
+        (function() {
+            const TOKEN_URL = "{{ route('live-show.zego-uikit-token', $liveShow->id) }}";
+            const LIVE_SHOW_ID = {{ $liveShow->id }};
+
+            function onZgAutoplayMaskAppeared(callback) {
+                let executed = false;
+                const observer = new MutationObserver(function(mutationsList) {
+                    if (!executed && document.querySelector('.zg_autoplay_mask')) {
+                        executed = true;
+                        callback();
+                        observer.disconnect();
+                    }
+                });
+                if (document.querySelector('.zg_autoplay_mask')) {
+                    executed = true;
+                    callback();
+                } else {
+                    observer.observe(document.body, {
+                        childList: true,
+                        subtree: true
+                    });
+                }
+            }
+
+            function bootZegoEmbeddedPlayer() {
+                if (typeof ZegoUIKitPrebuilt === 'undefined') {
+                    console.error('Zego UIKit failed to load');
+                    return;
+                }
+                fetch(TOKEN_URL, {
+                        credentials: 'same-origin',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(function(r) {
+                        return r.json();
+                    })
+                    .then(function(data) {
+                        if (data.error) {
+                            console.error('Zego token error:', data.error);
+                            return;
+                        }
+                        const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
+                            data.app_id,
+                            data.token,
+                            data.room_id,
+                            data.user_id,
+                            data.user_name
+                        );
+                        const zp = ZegoUIKitPrebuilt.create(kitToken);
+                        zp.joinRoom({
+                            container: document.getElementById('zego-live-root'),
+                            scenario: {
+                                mode: ZegoUIKitPrebuilt.LiveStreaming,
+                                config: {
+                                    role: ZegoUIKitPrebuilt.Audience,
+                                },
+                            },
+                            sharedLinks: [{
+                                name: 'Join as an audience',
+                                url: window.location.origin +
+                                    window.location.pathname +
+                                    '?roomID=' +
+                                    encodeURIComponent(data.room_id) +
+                                    '&role=Audience',
+                            }],
+                            showMemberJoinNotice: false,
+                            showUserJoinAndLeave: false,
+                            showMessageNotification: false,
+                            showTextChat: false,
+                            showInRoomMessageButton: false,
+                            showUserList: false,
+                            showPreJoinView: false,
+                            turnOnCameraWhenJoining: false,
+                            turnOnMicrophoneWhenJoining: false,
+                            showMyCameraToggleButton: false,
+                            showMyMicrophoneToggleButton: false,
+                            showAudioVideoSettingsButton: false,
+                            showScreenSharingButton: false,
+                            showLeaveRoomConfirmDialog: false,
+                            translateLanguage: 'German',
+                            innerText: {
+                                roomLiveNotStarted: "The broadcast hasn't started yet.",
+                                roomEmpty: "The host has left the room.",
+                                userJoin: "{userName} joined the stream",
+                                userLeave: "{userName} left",
+                                send: "Send",
+                                inputMessagePlaceholder: "Type a message...",
+                                networkNotGood: "Poor network connection",
+                                networkDisconnected: "Disconnected. Reconnecting...",
+                            },
+                        });
+
+                        onZgAutoplayMaskAppeared(function() {
+                            const mask = document.querySelector('.zg_autoplay_mask');
+                            if (!mask) {
+                                return;
+                            }
+                            mask.style.display = 'flex';
+                            const content = mask.querySelectorAll('.zg_autoplay_content')[0];
+                            if (content) {
+                                content.innerHTML =
+                                    '<div style="text-align:center;padding:20px;">' +
+                                    '<div style="font-size:50px;margin-bottom:15px;">🔊</div>' +
+                                    '<div style="font-size:18px;font-weight:500;">Tap or click resume enable audio</div>' +
+                                    '</div>';
+                            }
+                        });
+
+                        if (typeof pusher !== 'undefined') {
+                            const ch = pusher.subscribe('set-broadcast-room-id.' + LIVE_SHOW_ID);
+                            ch.bind('SetBroadcastRoomIdEvent', function() {
+                                window.location.reload();
+                            });
+                        }
+                    })
+                    .catch(function(err) {
+                        console.error('Zego embed init failed', err);
+                    });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', bootZegoEmbeddedPlayer);
+            } else {
+                bootZegoEmbeddedPlayer();
+            }
+        })();
+    </script>
 
 </body>
 

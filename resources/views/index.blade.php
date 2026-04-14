@@ -1,6 +1,6 @@
 <x-guest-layout>
     <!-- Live Show Banner -->
-    @if (isset($currentLiveShow) && $currentLiveShow && false)
+    @if (isset($currentLiveShow) && $currentLiveShow)
         <style>
             /* Updated banner styles */
             .live-show-banner {
@@ -10,9 +10,11 @@
                 box-shadow: 0 4px 20px rgba(160, 130, 255, 0.08);
                 margin-bottom: 36px;
                 margin-top: 36px;
+                padding: 15px;
             }
 
-            .live-badge {
+
+            .live-show-badge {
                 background: #f73fae;
                 color: #000000;
                 padding: 6px 18px;
@@ -21,6 +23,9 @@
                 box-shadow: 0 2px 8px rgba(255, 167, 38, 0.06);
                 font-weight: bold;
                 font-size: 1rem;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
             }
 
             .live-dot {
@@ -34,8 +39,10 @@
                 vertical-align: middle;
             }
 
-            .text-gradient {
-                color: #140b63;
+            .live-show-content-container {
+                display: flex;
+                align-items: center;
+                justify-content: left;
             }
 
             .schedule-highlight {
@@ -44,14 +51,36 @@
                 padding: 0.20em 0.7em;
                 border-radius: 8px;
                 font-weight: bold;
+                width: 150px;
             }
 
+            .live-show-title {
+                width: 100%;
+                text-align: left;
+                font-weight: bold;
+                font-size: 1.2rem;
+                color: #140b63;
+                margin-top: 10px;
+                margin-bottom: 10px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                padding: 0 15px;
+            }
+
+            .text-gradient {
+                color: #140b63;
+            }
+
+
+
             .banner-announcement {
-                background:  #f73fae  !important;
+                background: #f73fae !important;
                 color: #140b63 !important;
                 border-radius: 30px !important;
-                letter-spacing:1px;
-                display: inline-block;
+                letter-spacing: 1px;
+
+                width: fit-content;
+                margin: 0 auto;
             }
 
             .border-purple {
@@ -59,67 +88,107 @@
             }
 
             .join-live-btn {
-                background: #f73fae  ;
+                background: #f73fae;
                 color: #000000 !important;
                 border-radius: 24px !important;
                 font-weight: bold !important;
                 border: 2px solid #bb5ff5 !important;
             }
+
             .text-orange {
                 color: #f73fae !important;
             }
+
+            @media (min-width: 992px) {
+                .banner-announcement {
+                    margin-top: -35px !important;
+                }
+            }
+
+        @media (max-width: 991.98px) {
+            .live-show-content-container {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+            }
+            .live-show-content-container > * {
+                display: block;
+                width: 100%;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .live-show-badge{
+                width: auto;
+                border-radius: 24px;
+            }
+        }
+   
         </style>
         <div class="live-show-banner position-relative" style="overflow:visible;">
-            <div class="text-center position-absolute w-100" style="top:-30px; left:0;">
-                <span class="px-4 py-2 shadow banner-announcement fs-5">
-                    ✨ <span style="color:#fde901;">It's Show Time!</span> Lass dir den Spaß nicht entgehen! ✨
-                </span>
+
+            <div class="px-4 py-2 shadow banner-announcement fs-5 text-center">
+                ✨ <span style="color:#fde901;">It's Show Time!</span> Lass dir den Spaß nicht entgehen! ✨
             </div>
-            <div class="container">
-                <div class="py-3 row align-items-center" style="min-height:80px;">
-                    <div class="mb-3 text-center col-md-2 text-md-start mb-md-0 d-flex align-items-center">
-                        <span class="live-badge fs-6 fw-bolder d-inline-flex align-items-center">
-                            <span class="live-dot me-2"></span>
-                            @if (isset($currentLiveShow) && in_array($currentLiveShow->status, ['live', 'scheduled']))
-                                @if ($currentLiveShow->scheduled_at)
-                                    <span class="schedule-highlight">
-                                        {{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H') }} Uhr
-                                    </span>
+
+            <div class="container mt-3">
+                <div class="row">
+                    <div class="col-lg-9 ">
+                        <div class="live-show-content-container">
+                            <div class="live-show-badge  ">
+                                <div class="live-dot me-2"></div>
+                                @if (isset($currentLiveShow) && $currentLiveShow->status == 'scheduled')
+                                    @if ($currentLiveShow->scheduled_at)
+                                        <div class="schedule-highlight">
+                                            {{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H') }}
+                                            Uhr
+                                        </div>
+                                    @endif
+                                @elseif (isset($currentLiveShow) && $currentLiveShow->status == 'live')
+                                    <div class="schedule-highlight">
+                                        LIVE NOW
+                                    </div>
+                                @else
                                 @endif
-                            @else
-                                <span class="schedule-highlight">
-                                    LIVE NOW
-                                </span>
-                            @endif
-                        </span>
+
+                            </div>
+                            <div class="live-show-title">
+                                <h5 class="mb-1 fw-bold text-gradient" style="font-size:1.2rem;">
+                                    <span style="color:#140b63;">{{ $currentLiveShow->title ?? 'Live Show' }}</span>
+                                    <span class="mx-2">·</span>
+                                </h5>
+                                {{-- <p class="mb-0 opacity-75 fs-6"
+                                   style="color:#140b63;">
+                                    <i class="bi bi-people-fill" style="color:#140b63;"></i>
+                                    {{ $currentLiveShow->users->count() ?? 0 }}
+                                    {{ $currentLiveShow->users->count() == 1 ? 'Mitspieler ist' : 'Mitspieler sind' }} gerade
+                                    dabei
+                                </p> --}}
+                            </div>
+
+                        </div>
                     </div>
-                    <div class="mb-3 text-center col-md-7 text-md-start mb-md-0">
-                        <h5 class="mb-1 fw-bold text-gradient" style="font-size:1.2rem;">
-                            <span style="color:#140b63;">{{ $currentLiveShow->title ?? 'Live Show' }}</span>
-                            <span class="mx-2">·</span>
-                        </h5>
-                        {{-- <p class="mb-0 opacity-75 fs-6"
-                           style="color:#140b63;">
-                            <i class="bi bi-people-fill" style="color:#140b63;"></i>
-                            {{ $currentLiveShow->users->count() ?? 0 }}
-                            {{ $currentLiveShow->users->count() == 1 ? 'Mitspieler ist' : 'Mitspieler sind' }} gerade
-                            dabei
-                        </p> --}}
-                    </div>
-                    <div
-                        class="text-center col-md-3 text-md-end d-flex justify-content-center justify-content-md-end align-items-center">
-                        <a href="{{ route('live-show', $currentLiveShow->id) }}"
-                            class="px-4 shadow-sm btn btn-lg join-live-btn"
-                            style="border-radius: 24px;">
-                            <i class="fas fa-play me-2 text-orange"></i>Jetzt mitspielen
-                        </a>
+                    <div class="col-lg-3 d-inline-flex justify-content-center">
+                        <div class="live-show-join-btn">
+                            <a href="{{ route('live-show', $currentLiveShow->id) }}"
+                                class="px-4 shadow-sm btn btn-lg join-live-btn" style="border-radius: 24px;">
+                                <i class="fas fa-play me-2 text-orange"></i>Jetzt mitspielen
+                            </a>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
     @endif
 
-   
+
 
     <div class="w-100 py-2" style="background: #fde901; color: #140b63; font-weight: bold;">
         <div style="white-space: nowrap; overflow: hidden; width: 100%;">

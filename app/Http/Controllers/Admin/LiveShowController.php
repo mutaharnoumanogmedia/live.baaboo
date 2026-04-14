@@ -811,7 +811,10 @@ class LiveShowController extends Controller
 
         $totalQuestions = $liveShow->quizzes->count();
 
-        return view('admin.live-shows.view-details', compact('liveShow', 'players', 'totalQuestions'));
+        $playedCount = $players->filter(fn ($p) => ($p->pivot->score > 0 || $p->pivot->is_online))->count();
+        $notParticipatedCount = $players->count() - $playedCount;
+
+        return view('admin.live-shows.view-details', compact('liveShow', 'players', 'totalQuestions', 'playedCount', 'notParticipatedCount'));
     }
 
     public function getPlayerResponses($liveShowId, $userId)

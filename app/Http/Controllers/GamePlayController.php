@@ -14,9 +14,12 @@ use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use App\Models\Viewer;
 use App\Services\AffiliateAPIService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use ZEGO\ZegoErrorCodes;
+use ZEGO\ZegoServerAssistant;
 
 class GamePlayController extends Controller
 {
@@ -620,6 +623,16 @@ class GamePlayController extends Controller
 
     private function maxPlayersReachedResponse(LiveShow $liveShow)
     {
+        // take next scheduled live show
+        $nextScheduledLiveShow = LiveShow::where('status', 'scheduled')->orderBy('scheduled_at', 'asc')->first();
+        if ($nextScheduledLiveShow) {
+            return response()->json([
+                'success' => false,
+                'messages' => ['Leider ist der Raum voll - die nächste Show ist am  '.(Carbon::parse($nextScheduledLiveShow->scheduled_at)->format('d.m.Y H:i').'Uhr statt.')],
+                'max_players' => (int) $liveShow->max_players,
+            ], 403);
+        }
+
         return response()->json([
             'success' => false,
             'messages' => ['Leider ist die maximale Teilnehmerzahl erreicht. Eine Registrierung ist aktuell nicht mehr moeglich.'],
@@ -674,6 +687,48 @@ class GamePlayController extends Controller
         $liveShow = \DB::table('live_shows')->where('id', $id)->first();
 
         return view('show-live-broadcast', compact('liveShow'));
+    }
+
+    /**
+     * Server-generated Zego token04 for UIKit (do not expose ZEGO_SERVER_SECRET to the browser).
+     */
+    public function zegoUIKitToken($id)
+    {
+        $liveShow = LiveShow::findOrFail($id);
+
+        if (empty($liveShow->stream_id)) {
+            return response()->json(['error' => 'Stream room not configured for this show.'], 422);
+        }
+
+        $appId = (int) env('ZEGO_APP_ID');
+        $secret = (string) env('ZEGO_SERVER_SECRET');
+
+        if ($appId === 0 || strlen($secret) !== 32) {
+            return response()->json(['error' => 'Zego is not configured correctly.'], 500);
+        }
+
+        $userId = session()->getId();
+        if ($userId === '') {
+            $userId = 'guest-'.uniqid('', true);
+        }
+
+        $userName = 'player-'.$userId;
+
+        $result = ZegoServerAssistant::generateToken04($appId, $userId, $secret, 3600, '');
+
+        if ($result->code !== ZegoErrorCodes::success) {
+            return response()->json([
+                'error' => $result->message ?? 'Could not generate Zego token.',
+            ], 500);
+        }
+
+        return response()->json([
+            'app_id' => $appId,
+            'token' => $result->token,
+            'room_id' => (string) $liveShow->stream_id,
+            'user_id' => $userId,
+            'user_name' => $userName,
+        ]);
     }
 
     public function getLatestLiveOrScheduledShow()

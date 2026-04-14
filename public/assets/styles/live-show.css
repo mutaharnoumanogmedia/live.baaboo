@@ -224,7 +224,8 @@ body .end-show {
 }
 
 .video-container #player,
-.video-container iframe {
+.video-container iframe,
+.video-container #zego-live-root {
     border-radius: 00px;
     width: 100%;
     height: 100%;

@@ -57,6 +57,7 @@ Route::middleware(['auth:web'])->group(function () {
 });
 Route::get('live-show/{id}/get-live-show-users-with-scores', [GamePlayController::class, 'getLiveShowUsersWithScores']);
 Route::get('show-live-broadcast/{id}', [GamePlayController::class, 'showLiveBroadcast'])->name('show-live-broadcast');
+Route::get('live-show/{id}/zego-uikit-token', [GamePlayController::class, 'zegoUIKitToken'])->name('live-show.zego-uikit-token');
 
 Route::get('/test-message-event', function () {
     event(new \App\Events\LiveShowMessageEvent([
@@ -84,36 +85,37 @@ Route::get('admin/login', function () {
     if (Auth::guard('admin')->check()) {
         return redirect()->route('admin.dashboard');
     }
+
     return view('auth.login');
 })->name('admin.login');
 require __DIR__.'/auth.php';
 Route::get('{name}', [HomeController::class, 'registerUserViaForm'])->name('register-user-via-form');
 
 // a route to add 1000 users to given live show id
-// Route::get('/test/live-show/{id}/add-1000-users', function ($id) {
-//     $liveShow = LiveShow::find($id);
-//     if (! $liveShow) {
-//         return response()->json(['message' => 'Live show not found'], 404);
-//     }
-//     // create 1000 users
-//     for ($i = 0; $i < 1000; $i++) {
-//         try {
-//             $userName = 'test'.rand(100000, 999999);
-//             $user = User::create([
-//                 'name' => $userName,
-//                 'email' => $userName.'@test.baaboo.com',
-//                 'password' => bcrypt('baaboo123'),
-//                 'user_name' => $userName,
-//                 'agree_for_terms' => 1,
-//                 'agree_for_email' => 1,
-//                 'is_affiliate' => 1,
-//             ]);
-//             // add users to live show
-//             $liveShow->users()->attach($user->id);
-//         } catch (\Exception $e) {
-//             \Log::error('Error adding user to live show: '.$e->getMessage());
-//         }
-//     }
+Route::get('/test/live-show/{id}/add-users/{count}', function ($id, $count) {
+    $liveShow = LiveShow::find($id);
+    if (! $liveShow) {
+        return response()->json(['message' => 'Live show not found'], 404);
+    }
+    // create 1000 users
+    for ($i = 0; $i < $count; $i++) {
+        try {
+            $userName = 'test'.rand(100000, 999999);
+            $user = User::create([
+                'name' => $userName,
+                'email' => $userName.'@test.baaboo.com',
+                'password' => bcrypt('baaboo123'),
+                'user_name' => $userName,
+                'agree_for_terms' => 1,
+                'agree_for_email' => 1,
+                'is_affiliate' => 1,
+            ]);
+            // add users to live show
+            $liveShow->users()->attach($user->id);
+        } catch (\Exception $e) {
+            \Log::error('Error adding user to live show: '.$e->getMessage());
+        }
+    }
 
-//     return response()->json(['message' => '1000 users added to live show'], 200);
-// });
+    return response()->json(['message' => '1000 users added to live show'], 200);
+});

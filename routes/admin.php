@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminProfileController;
+use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\AppSettingsController;
 use App\Http\Controllers\Admin\HomeController as AdminHomeController;
 use App\Http\Controllers\Admin\LiveShowController;
@@ -111,4 +112,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         'push-notifications',
         PushNotificationController::class
     )->only(['index', 'create', 'store', 'show']);
+
+    Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('analytics/chart-data', [AnalyticsController::class, 'chartData'])->name('analytics.chart-data');
+    Route::get('analytics/quiz-accuracy', [AnalyticsController::class, 'quizAccuracyData'])->name('analytics.quiz-accuracy');
+    Route::get('analytics/response-time', [AnalyticsController::class, 'responseTimeData'])->name('analytics.response-time');
+    Route::get('analytics/top-performers', [AnalyticsController::class, 'topPerformers'])->name('analytics.top-performers');
+    Route::get('analytics/show-summary', [AnalyticsController::class, 'showSummary'])->name('analytics.show-summary');
 })->middleware(['auth']);
