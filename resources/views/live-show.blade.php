@@ -122,7 +122,7 @@
             width: 100% !important;
             height: 100% !important;
             pointer-events: none !important;
-            
+
         }
 
         .dIzgYQV4CBbzZxzJbwbS,
@@ -252,7 +252,7 @@
 
                 </div>
             </div>
-            
+
         </div>
         <div class="position-absolute bottom-0 w-100">
             <div id="liveShowTabContainer">
@@ -529,6 +529,9 @@
         let isLoggedIn = {{ Auth::guard('web')->check() ? 'true' : 'false' }};
         let userId = {{ Auth::guard('web')->check() ? Auth::guard('web')->user()->id : -1 }};
         console.log("initial val of issLoggedIn ", isLoggedIn, userId);
+
+        let liveShowStatus = '{{ $liveShow->status }}';
+        console.log("initial val of liveShowStatus ", liveShowStatus);
 
 
         if (isLoggedIn === true) {
@@ -1393,10 +1396,6 @@
 
 
     <script>
-        // var pusher = new Pusher('{{ env('PUSHER_APP_KEY', '2a66d003a7ded9fe567a') }}', {
-        //     cluster: '{{ env('PUSHER_APP_CLUSTER', 'eu') }}',
-        // });
-
         var channelRemoveQuestion = pusher.subscribe('live-show.{{ $liveShow->id }}');
 
         // System subscription event
@@ -1910,18 +1909,6 @@
                         });
                     }, 1500);
 
-
-
-
-                    // setTimeout(() => {
-                    //     if (vid.paused) {
-                    //         vid.play().catch(function(e) {
-                    //             console.error('Error playing video after timeout:', e);
-                    //         });
-                    //     }
-                    // }, 3000);
-
-
                 };
 
                 vid.addEventListener('loadedmetadata', applySeekAndPlay, {
@@ -2373,9 +2360,19 @@
             }
 
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', bootZegoEmbeddedPlayer);
+                document.addEventListener('DOMContentLoaded', function() {
+                    if (liveShowStatus == 'live') {
+                        bootZegoEmbeddedPlayer();
+                    } else {
+                        console.log("liveShowStatus is not live, so not booting Zego embedded player");
+                    }
+                });
             } else {
-                bootZegoEmbeddedPlayer();
+                if (liveShowStatus == 'live') {
+                    bootZegoEmbeddedPlayer();
+                } else {
+                    console.log("liveShowStatus is not live, so not booting Zego embedded player");
+                }
             }
         })();
     </script>
