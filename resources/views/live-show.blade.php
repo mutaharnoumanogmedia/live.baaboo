@@ -189,7 +189,7 @@
         </div>
 
         <!-- Centered Play Button Overlay -->
-        <div id="playButtonOverlay" style="">
+        <div id="playButtonOverlay" style="display: none;">
             <button id="playButton" style="">
                 <i class="fas fa-play fa-3x" style="color:white;"></i>
             </button>
@@ -536,8 +536,6 @@
 
         if (isLoggedIn === true) {
             console.log("user is logged in, fetching player points");
-
-
         }
 
         // console.log('isEliminated:', isEliminated);
@@ -545,6 +543,7 @@
         @if (env('APP_ENV') !== 'production')
             Pusher.logToConsole = true;
         @endif
+
         var pusher = new Pusher('{{ env('PUSHER_APP_KEY', '2a66d003a7ded9fe567a') }}', {
             cluster: '{{ env('PUSHER_APP_CLUSTER', 'eu') }}',
         });
@@ -656,6 +655,7 @@
 
 
         $(document).ready(function() {
+            onLoadGameShow();
             // Initialize Pusher
             fetchMessages();
             updatePlayersLeaderboard();
@@ -1680,11 +1680,18 @@
             console.log('Push notifications enabled');
         }
 
-        document.getElementById("playButton").addEventListener("click", function() {
+        document.getElementById("playButton").addEventListener("click", () => {
             console.log('Tap to play clicked');
+            document.getElementById('playButtonOverlay').style.display = 'none';
+
+            onLoadGameShow();
+
+        });
+
+        function onLoadGameShow() {
+
             // enablePush();
 
-            document.getElementById('playButtonOverlay').style.display = 'none';
 
             if (isLoggedIn == false)
                 showRegisterModal();
@@ -1703,7 +1710,7 @@
 
                 }
             }
-        });
+        }
         /**
          * Pusher test event subscription for debugging
          */
@@ -2350,7 +2357,8 @@
                         if (typeof pusher !== 'undefined') {
                             const ch = pusher.subscribe('set-broadcast-room-id.' + LIVE_SHOW_ID);
                             ch.bind('SetBroadcastRoomIdEvent', function() {
-                                window.location.reload();
+                                // window.location.reload();
+                                console.log('SetBroadcastRoomIdEvent received');
                             });
                         }
                     })
