@@ -1693,9 +1693,10 @@
             // enablePush();
 
 
-            if (isLoggedIn == false)
+            if (isLoggedIn == false && window.location.search.indexOf('preview=true') === -1) {
                 showRegisterModal();
-
+            }
+           
             vid.play();
             vid.muted = false;
 
@@ -2357,7 +2358,8 @@
                         if (typeof pusher !== 'undefined') {
                             const ch = pusher.subscribe('set-broadcast-room-id.' + LIVE_SHOW_ID);
                             ch.bind('SetBroadcastRoomIdEvent', function() {
-                                // window.location.reload();
+                                window.location.reload(true); // Force reload from the server, user will not be asked
+                           
                                 console.log('SetBroadcastRoomIdEvent received');
                             });
                         }
