@@ -189,7 +189,7 @@
         </div>
 
         <!-- Centered Play Button Overlay -->
-        <div id="playButtonOverlay" style="display: none;">
+        <div id="playButtonOverlay" style="">
             <button id="playButton" style="">
                 <i class="fas fa-play fa-3x" style="color:white;"></i>
             </button>
@@ -655,7 +655,7 @@
 
 
         $(document).ready(function() {
-            onLoadGameShow();
+            // onLoadGameShow();
             // Initialize Pusher
             fetchMessages();
             updatePlayersLeaderboard();
