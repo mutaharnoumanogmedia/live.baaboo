@@ -11,8 +11,10 @@ use Illuminate\Queue\SerializesModels;
 class LiveShowChatStatusUpdatedEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-    public $queue = 'low';
+
+    public $queue = 'high';
     public $delay = 10;
+
     public string $liveShowId;
 
     public bool $chatEnabled;

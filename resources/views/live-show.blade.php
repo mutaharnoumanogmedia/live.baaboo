@@ -117,13 +117,19 @@
             overflow: hidden;
         }
 
-        #zego-live-root video {
+        #zego-live-root iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* #zego-live-root video {
             object-fit: cover !important;
             width: 100% !important;
             height: 100% !important;
             pointer-events: none !important;
 
-        }
+        } */
 
         .dIzgYQV4CBbzZxzJbwbS,
         #ZegoRoomFooter,
@@ -202,7 +208,11 @@
             <div class="video-container" id="videoContainer">
                 <div class="video-placeholder" id="videoPlaceholder">
                     {{-- Zego UIKit (embedded; token from server) --}}
-                    <div id="zego-live-root"></div>
+                    <div id="zego-live-root">
+                        <iframe src="{{ route('show-live-broadcast', ['id' => $liveShow->id]) }}"
+                            title="iframe video player" frameborder="0" allow="autoplay; encrypted-media; "
+                            style=""></iframe>
+                    </div>
                 </div>
 
             </div>
@@ -1620,13 +1630,19 @@
             console.log('new message:', data.data);
             addOverlayMessage('@' + data.data.user.name, data.data.message);
         });
-        channel2.bind('LiveShowChatStatusUpdatedEvent', function(data) {
-            console.log('Chat status updated:', data);
-            applyChatStatus(!!data.chatEnabled, true);
-        });
         channel2.bind('HideLiveShowWinnersTabEvent', function(data) {
             console.log('Hide winners tab event received:', data);
             hideWinnersTabForParticipants();
+        });
+
+
+        var channelChatStatus = pusher.subscribe('live-show-chat-status.{{ $liveShow->id }}');
+        channelChatStatus.bind('pusher:subscription_succeeded', function() {
+            console.log('Chat status channel subscribed successfully!');
+        });
+        channelChatStatus.bind('LiveShowChatStatusUpdatedEvent', function(data) {
+            console.log('Chat status updated:', data);
+            applyChatStatus(!!data.chatEnabled, true);
         });
     </script>
 
@@ -1696,7 +1712,7 @@
             if (isLoggedIn == false && window.location.search.indexOf('preview=true') === -1) {
                 showRegisterModal();
             }
-           
+
             vid.play();
             vid.muted = false;
 
@@ -2238,7 +2254,7 @@
         });
     </script>
 
-    <script src="https://unpkg.com/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
+    {{-- <script src="https://unpkg.com/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
     <script>
         (function() {
             const TOKEN_URL = "{{ route('live-show.zego-uikit-token', $liveShow->id) }}";
@@ -2385,7 +2401,7 @@
                 }
             }
         })();
-    </script>
+    </script> --}}
 
 </body>
 
