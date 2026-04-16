@@ -1514,15 +1514,15 @@
         // Your Laravel broadcast event (drop the dot)
         channelUpdateLiveShow.bind('UpdateLiveShowEvent', function(data) {
             console.log('Update Live Show:', data);
+            location.reload();
 
-            if (data.status && data.status != 'live') {
-                emptyTheBodyWithEndShow('Der Status der Live-Show hat sich geändert zu "' + data.status +
-                    '". Sie werden in Kürze weitergeleitet.');
-            } else {
-                //reload the page to reflect the changes
-                location.reload();
-            }
-            emptyTheBodyWithEndShow();
+                // if (data.status && data.status != 'live') {
+                //     emptyTheBodyWithEndShow(data.updateMessage);
+                // } else {
+                //     //reload the page to reflect the changes
+                //     location.reload();
+                // }
+            // emptyTheBodyWithEndShow();
         });
 
 
@@ -1581,9 +1581,7 @@
 
 
         @if ($liveShow->status != 'live')
-            emptyTheBodyWithEndShow(
-                'Die Game-Show „Badabing“ findet am  {{ $liveShow->status == 'scheduled' ? ' ' . \Carbon\Carbon::parse($liveShow->scheduled_at)->format('d F Y, H:i') . 'Uhr statt.' : '' }} .  '
-            );
+            emptyTheBodyWithEndShow('{{ $updateMessage }}');
         @endif
 
 

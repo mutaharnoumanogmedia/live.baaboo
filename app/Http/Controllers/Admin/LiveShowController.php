@@ -32,6 +32,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class LiveShowController extends Controller
 {
@@ -631,6 +632,8 @@ class LiveShowController extends Controller
     {
         $liveShow = LiveShow::findOrFail($id);
 
+        $updateMessage = '';
+
         $request->validate([
             'status' => 'required|in:scheduled,live,completed',
         ]);
@@ -643,12 +646,13 @@ class LiveShowController extends Controller
 
         if ($newStatus === 'completed' && $liveShow->status !== 'completed') {
             $liveShow->end_time = now();
+            $updateMessage = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme! Die nächste Show ist am '.Carbon::parse($this->getNextScheduledLiveShowDate())->format('d.m.Y H:i').'Uhr statt.';
         }
 
         $liveShow->status = $newStatus;
         $liveShow->save();
 
-        \App\Events\UpdateLiveShowEvent::dispatch((string) $liveShow->id, $liveShow->status);
+        \App\Events\UpdateLiveShowEvent::dispatch((string) $liveShow->id, $liveShow->status, $updateMessage);
 
         return response()->json(['message' => 'Live show has been updated successfully.']);
     }
@@ -975,5 +979,15 @@ class LiveShowController extends Controller
         }
 
         return redirect()->route('admin.live-shows.show', $newLiveShow->id)->with('success', 'Live show copied successfully!');
+    }
+
+    private function getNextScheduledLiveShowDate()
+    {
+        $nextScheduledLiveShow = LiveShow::where('status', 'scheduled')->orderBy('scheduled_at', 'asc')->first();
+        if ($nextScheduledLiveShow) {
+            return $nextScheduledLiveShow->scheduled_at;
+        }
+
+        return null;
     }
 }

@@ -43,8 +43,15 @@ class GamePlayController extends Controller
                 ],
             ];
         }
+        $updateMessage = '';
+        if ($liveShow->status == 'completed') {
+            $nextScheduledLiveShow = LiveShow::where('status', 'scheduled')->orderBy('scheduled_at', 'asc')->first();
+            if ($nextScheduledLiveShow) {
+                $updateMessage = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme! Die nächste Show ist am '.Carbon::parse($nextScheduledLiveShow->scheduled_at)->format('d.m.Y H:i').'Uhr statt.';
+            }
+        }
 
-        return view('live-show', compact('liveShow', 'isEliminated', 'galleryStreamInitial'));
+        return view('live-show', compact('liveShow', 'isEliminated', 'galleryStreamInitial', 'updateMessage'));
     }
 
     public function registerUser(Request $request, $liveShowId)

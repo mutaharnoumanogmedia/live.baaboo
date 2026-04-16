@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class LiveShowQuiz extends Model
 {
     use HasFactory;
-    protected $fillable = ['live_show_id', 'question'];
+    protected $fillable = ['live_show_id', 'question', 'created_by'];
 
     public function liveShow()
     {

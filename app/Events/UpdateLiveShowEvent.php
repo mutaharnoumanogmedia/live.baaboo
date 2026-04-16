@@ -25,10 +25,13 @@ class UpdateLiveShowEvent implements ShouldBroadcast
 
     public $status;
 
-    public function __construct($liveShowId, $status)
+    public $updateMessage;
+
+    public function __construct($liveShowId, $status, $updateMessage)
     {
         $this->liveShowId = $liveShowId;
         $this->status = $status;
+        $this->updateMessage = $updateMessage;
     }
 
     /**
@@ -44,5 +47,14 @@ class UpdateLiveShowEvent implements ShouldBroadcast
     public function broadcastAs()
     {
         return 'UpdateLiveShowEvent';
+    }
+
+    public function broadcastWith()
+    {
+        return [
+            'liveShowId' => $this->liveShowId,
+            'status' => $this->status,
+            'updateMessage' => $this->updateMessage,
+        ];
     }
 }

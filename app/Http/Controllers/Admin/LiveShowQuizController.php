@@ -55,6 +55,7 @@ class LiveShowQuizController extends Controller
             $quiz = LiveShowQuiz::create([
                 'live_show_id' => $request->live_show_id,
                 'question' => $qData['question'],
+                'created_by' => auth()->user()->id,
             ]);
 
             $correctIndex = $qData['correct'] ?? null;
@@ -113,6 +114,7 @@ class LiveShowQuizController extends Controller
         $quiz->update([
             'live_show_id' => $request->live_show_id,
             'question' => $request->question,
+            'created_by' => auth()->user()->id,
         ]);
 
         // Extract options array
