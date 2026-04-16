@@ -560,7 +560,6 @@ body .end-show {
     width: 100%;
     bottom: 20px;
     left: 0;
-
     background: rgba(0, 0, 255, 0.2);
     border-radius: 15px;
     padding: 15px;
@@ -1070,4 +1069,39 @@ input[type="radio"]:disabled + label {
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
+}
+
+.score-text {
+    font-size: 1.2rem;
+    font-weight: 600;
+    
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+.trophy-icon {
+   
+    margin-left: 10px;
+    font-size: 1.2rem;
+}
+.winner-div {
+    color: #222;
+    border-radius: 20px;
+    font-size: 1.2rem;
+}
+.gold-div {
+    background: #fdeba3;
+    color: #78620A !important;
+    border: 1px solid #ffd700;
+}
+
+.silver-div {
+    background: #d7d7d8;
+    color: darkslategray !important;
+    border: 1px solid #c0c0c0;
+}
+
+.bronze-div {
+    background: #e7cfae;
+    color: #7f6031 !important;
+    border: 1px solid #7f6031;
 }

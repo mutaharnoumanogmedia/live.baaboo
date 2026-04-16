@@ -583,29 +583,30 @@
                         </span>
                             <strong>${you.name} (You)</strong>
 
-                            <span class="ms-2">${you.is_winner ? '<i class="fas fa-trophy text-warning ms-2" title="Winner"></i>' : ''}</span>
+                            <span class="trophy-icon">${you.is_winner ? '<i class="fas fa-trophy" title="Winner"></i>' : ''}</span>
                         </div>
-                        <div>
-                            Score: ${you.score || 0}
+                        <div class="score-text">
+                            ${you.score ? Math.round(you.score) : 0}
+                       
                         </div>
             `;
                         playersListContainer.appendChild(youDiv);
                     }
 
                     users.forEach((user, index) => {
-                        let bgColor = '';
+                        let winnerBgColorClass = '';
                         switch (index) {
                             case 0:
-                                bgColor =
-                                    'background: linear-gradient(90deg, #FFD700 0%, #FFF8DC 100%);'; // Gold
+                                winnerBgColorClass =
+                                    'winner-div gold-div'; // Gold
                                 break;
                             case 1:
-                                bgColor =
-                                    'background: linear-gradient(90deg, #C0C0C0 0%, #F5F5F5 100%);'; // Silver
+                                winnerBgColorClass =
+                                    'winner-div silver-div'; // Silver
                                 break;
                             default:
-                                bgColor =
-                                    'background: linear-gradient(90deg, #CD7F32 0%, #FFE4C4 100%);'; // Bronze
+                                winnerBgColorClass =
+                                    'winner-div bronze-div'; // Bronze
                                 break;
 
                         }
@@ -613,19 +614,20 @@
                         userDiv.className =
                             'player-list-item d-flex justify-content-between align-items-center mb-2 p-2 rounded ';
                         if (user.score > 0 && user.is_winner) {
-                            userDiv.style = bgColor;
+                            userDiv.className += ` ${winnerBgColorClass}`;
                         }
 
                         userDiv.innerHTML = `
 
                         <div >
                     <span style="margin-right: 20px;">${toOrdinalSup(index + 1)}</span>
-                            <strong>${user.name} ${user.id == userId ? '(You)' : ''}</strong>
+                             ${user.name} ${user.id == userId ? '(You)' : ''} 
 
-                            <span class="ms-2">${user.is_winner ? '<i class="fas fa-trophy text-warning ms-2" title="Winner"></i>' : ''}</span>
+                            <span class="trophy-icon">${user.is_winner ? '<i class="fas fa-trophy " title="Winner"></i>' : ''}</span>
                         </div>
-                        <div>
-                            Score: ${user.score || 0}
+                        
+                        <div class="score-text">
+                            ${user.score ? Math.round(user.score) : 0}
                         </div>
                     `;
                         playersListContainer.appendChild(userDiv);
