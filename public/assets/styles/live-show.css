@@ -154,6 +154,16 @@ body .end-show {
     background: transparent;
     transition: background 0.4s ease;
 }
+.live-show-bottom-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    z-index: 1000;
+}
 
 .main-container {
     position: absolute;
