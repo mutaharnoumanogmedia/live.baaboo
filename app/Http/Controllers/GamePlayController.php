@@ -265,7 +265,7 @@ class GamePlayController extends Controller
             $totalMilliSecondsToSubmit = $secondsFallback > 0 ? ($secondsFallback * 1000) : 1;
         }
 
-        $responseScore = $this->calculateScoreFromMilliseconds($totalMilliSecondsToSubmit);
+        // $responseScore = $this->calculateScoreFromMilliseconds($totalMilliSecondsToSubmit);
         $totalSecondsToSubmit = max($totalMilliSecondsToSubmit / 1000, 0.001);
 
         if (! $user) {
@@ -321,6 +321,11 @@ class GamePlayController extends Controller
         $quizOption = QuizOption::where('id', $option)->where('quiz_id', $quizId)->first();
         // store in user_quiz_responses table
         if ($quizOption) {
+            if ($quizOption->is_correct) {
+                $responseScore = $this->calculateScoreFromMilliseconds($totalMilliSecondsToSubmit);
+            } else {
+                $responseScore = 0;
+            }
             UserQuizResponse::updateOrCreate(
                 [
                     'user_id' => $user->id,

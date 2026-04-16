@@ -2243,10 +2243,10 @@
             if (isLoggedIn) {
 
 
-                var confirmationMessage =
-                    'Are you sure you want to leave or reload this live show? You may lose your progress or be disconnected.';
-                (e || window.event).returnValue = confirmationMessage; // For legacy browsers
-                return confirmationMessage; // For modern browsers
+                // var confirmationMessage =
+                //     'Are you sure you want to leave or reload this live show? You may lose your progress or be disconnected.';
+                // (e || window.event).returnValue = confirmationMessage; // For legacy browsers
+                // return confirmationMessage; // For modern browsers
             }
         });
     </script>

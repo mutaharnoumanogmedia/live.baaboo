@@ -12,7 +12,7 @@ class ShowGalleryImageEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $queue = 'low';
+    public $queue = 'high';
 
     public $delay = 10;
 
