@@ -177,7 +177,7 @@
 </head>
 
 <body>
-    <div class="main-container">
+    <div class="">
         <!-- Single-Tab Restriction Overlay -->
         <div id="inactiveTabOverlay">
             <div class="inactive-tab-content">
@@ -264,7 +264,7 @@
             </div>
 
         </div>
-        <div class="position-absolute bottom-0 w-100">
+        <div class="position-fixed bottom-0 w-100" style="z-index: 1000; max-width: 100%;">
             <div id="liveShowTabContainer">
 
                 <div class="tab-content" id="liveShowTabsContent">
@@ -371,6 +371,7 @@
                 </ul>
             </nav>
         </div>
+       
 
 
 

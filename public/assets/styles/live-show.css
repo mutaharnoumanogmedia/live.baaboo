@@ -157,7 +157,7 @@ body .end-show {
 
 .main-container {
     position: absolute;
-    height: calc(100vh - 100px);
+    height: calc(100vh - 70px);
 
     /* dynamic viewport */
     width: 100%;
@@ -1089,7 +1089,7 @@ input[type="radio"]:disabled + label {
     font-size: 1.2rem;
 }
 .gold-div {
-    background: #fdeba3;
+    background: #ffd700;
     color: #78620A !important;
     border: 1px solid #ffd700;
 }
