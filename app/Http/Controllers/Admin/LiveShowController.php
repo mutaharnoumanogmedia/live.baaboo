@@ -903,18 +903,15 @@ class LiveShowController extends Controller
     public function exportWinnersCSV($id)
     {
         $liveShow = LiveShow::findOrFail($id);
-        $totalQuestions = $liveShow->quizzes()->count();
         $winners = $liveShow->users()->where('is_winner', true)->orderByDesc('user_live_shows.score')->get();
         $csv = fopen('php://temp', 'w');
-        fputcsv($csv, ['#', 'Name', 'Email', 'Score', 'Correct Answers', 'Total Questions', 'Is Winner', 'Prize Won', 'Status', 'Joined At']);
+        fputcsv($csv, ['#', 'Name', 'Email', 'Score',  'Is Winner', 'Prize Won', 'Status', 'Joined At']);
         foreach ($winners as $index => $winner) {
             fputcsv($csv, [
                 $index + 1,
                 $winner->name,
                 $winner->email,
                 $winner->pivot->score ?? 0,
-                $winner->pivot->correct_answers ?? 0,
-                $totalQuestions,
                 $winner->pivot->is_winner ? 'Yes' : 'No',
                 $winner->pivot->prize_won ?? 'N/A',
                 ucfirst($winner->pivot->status ?? ''),
