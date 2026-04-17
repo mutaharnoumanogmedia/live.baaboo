@@ -52,6 +52,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('live-shows/stream-management/{id}', [\App\Http\Controllers\Admin\LiveShowController::class, 'streamManagement'])->name('live-shows.stream-management');
     Route::get('live-shows/stream-broadcaster/{id}', [\App\Http\Controllers\Admin\LiveShowController::class, 'streamBroadcaster'])->name('live-shows.stream-management.broadcaster');
+    Route::get('live-shows/{id}/players', [\App\Http\Controllers\Admin\LiveShowController::class, 'allPlayers'])->name('live-shows.players');
 
     Route::post('live-shows/stream-management/{id}/save-room-id', [\App\Http\Controllers\Admin\LiveShowController::class, 'saveRoomID'])->name('live-shows.stream-management.save-room-id');
 
@@ -98,6 +99,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Route::post('live-shows/stream-management/{liveShowId}/block-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'blockUser'])->name('live-shows.block-user');
     Route::post('live-shows/stream-management/{liveShowId}/toggle-block-status-for-player/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'toggleBlockStatusForPlayer'])->name('live-shows.toggle-block-status-for-player');
+    Route::post('live-shows/stream-management/{liveShowId}/reset-score/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'resetPlayerScore'])->name('live-shows.reset-player-score');
 
     Route::get('live-shows/{id}/export-all-chats-as-csv', [\App\Http\Controllers\Admin\LiveShowController::class, 'exportAllChatsOfLiveShowAsCSV'])->name('live-shows.export-all-chats-as-csv');
     Route::get('live-shows/{id}/export-all-users-as-csv', [\App\Http\Controllers\Admin\LiveShowController::class, 'exportAllUsersOfLiveShowAsCSV'])->name('live-shows.export-all-users-as-csv');

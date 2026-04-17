@@ -51,8 +51,9 @@
                                     <td class="d-flex gap-2">
                                         <a class="btn btn-sm btn-outline-primary"
                                             href="{{ route('admin.live-shows.edit', $show->id) }}">Edit</a>
-                                        <a class="btn btn-sm btn-outline-info"
-                                            href="{{ route('admin.live-shows.show', $show->id) }}">View</a>
+                                        <a class="btn btn-sm btn-success"
+                                            href="{{ route('admin.live-shows.players', $show->id) }}">All
+                                            Players</a>
                                         <a class="btn btn-sm btn-outline-light"
                                             href="{{ route('admin.live-shows.view-details', $show->id) }}">Details</a>
                                         <a class="btn btn-sm btn-outline-warning"

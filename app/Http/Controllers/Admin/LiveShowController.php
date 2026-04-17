@@ -545,13 +545,26 @@ class LiveShowController extends Controller
     {
         $liveShow = LiveShow::findOrFail($id);
 
-        $skip = request()->get('skip', 0);
-        $take = request()->get('take', 100);
+        $skip = max((int) request()->get('skip', 0), 0);
+        $take = max((int) request()->get('take', 100), 1);
+        $search = trim((string) request()->get('search', ''));
 
         $totalUsers = $liveShow->users()->count();
 
-        $users = $liveShow->users()
+        $usersQuery = $liveShow->users()
             ->withPivot(['score', 'status', 'is_winner', 'created_at', 'last_active', 'is_online', 'prize_won'])
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($subQuery) use ($search) {
+                    $subQuery
+                        ->where('users.name', 'like', '%'.$search.'%')
+                        ->orWhere('users.email', 'like', '%'.$search.'%')
+                        ->orWhere('users.user_name', 'like', '%'.$search.'%');
+                });
+            });
+
+        $filteredUsers = (clone $usersQuery)->count();
+
+        $users = $usersQuery
             ->orderByDesc('user_live_shows.score')
             ->skip($skip)
             ->take($take)
@@ -573,7 +586,31 @@ class LiveShowController extends Controller
             })
             ->values();
 
-        return response()->json(['users' => $users, 'totalUsers' => $totalUsers]);
+        return response()->json([
+            'users' => $users,
+            'totalUsers' => $totalUsers,
+            'filteredUsers' => $filteredUsers,
+            'skip' => $skip,
+            'take' => $take,
+            'hasMore' => ($skip + $users->count()) < $filteredUsers,
+        ]);
+    }
+
+    public function allPlayers($id)
+    {
+        $liveShow = LiveShow::findOrFail($id);
+
+        $players = $liveShow->users()
+            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at'])
+            ->withExists(['blockedLiveShows as is_blocked_for_live_show' => function ($query) use ($id) {
+                $query->where('live_show_id', $id);
+            }])
+            ->orderByDesc('user_live_shows.score')
+            ->get();
+
+        $totalPlayers = $liveShow->users()->count();
+
+        return view('admin.live-shows.all-players', compact('liveShow', 'players', 'totalPlayers'));
     }
 
     public function extractYouTubeId(string $url): ?string
@@ -626,6 +663,27 @@ class LiveShowController extends Controller
         UserBlockFromLiveShowEvent::dispatch($liveShowId, $userId, $isBlocked);
 
         return response()->json(['success' => true, 'message' => 'Player block status updated to '.($isBlocked ? 'blocked' : 'unblocked').'.', 'user' => $user]);
+    }
+
+    public function resetPlayerScore($liveShowId, $userId): JsonResponse
+    {
+        $liveShow = LiveShow::findOrFail($liveShowId);
+        $user = $liveShow->users()->where('user_id', $userId)->first();
+
+        if (! $user) {
+            return response()->json(['success' => false, 'message' => 'User not found in this live show.'], 404);
+        }
+
+        $liveShow->users()->updateExistingPivot($userId, [
+            'score' => 0,
+            'is_winner' => false,
+            'prize_won' => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Player score reset successfully.',
+        ]);
     }
 
     public function updateLiveShow(Request $request, $id)

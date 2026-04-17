@@ -33,18 +33,33 @@
                              </span>
                          </h6>
                      </div>
-                     <div class="card-body p-0">
-                         <div class="d-flex justify-content-end mb-3 p-1">
-                             <button type="button" class="btn btn-primary btn-sm me-2" id="fetchPlayersButton">
-                                 <i class="fas fa-sync"></i> Refresh Players
-                             </button>
-
-                             <a href="{{ route('admin.live-shows.export-all-users-as-csv', $liveShow->id) }}"
-                                 title="Export Users" class="btn btn-primary btn-sm" id="exportUsersBtn"
-                                 data-bs-toggle="tooltip" data-bs-placement="top" title="Export Users">
-                                 <i class="fas fa-file-export"></i>
-                             </a>
-                         </div>
+                    <div class="card-body p-0">
+                        <div class="d-flex justify-content-between align-items-center gap-2 mb-2 p-2 flex-wrap">
+                            <div class="input-group input-group-sm" style="max-width: 100%;">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="playerSearchInput"
+                                    placeholder="Search players by name, username, or email">
+                            </div>
+                            <div class="d-flex gap-2 ms-auto">
+                                <a target="_blank" href="{{ route('admin.live-shows.players', $liveShow->id) }}"
+                                    class="btn btn-outline-light btn-sm text-nowrap">
+                                    <i class="fas fa-external-link-alt me-1"></i> View All
+                                </a>
+                                <button type="button" class="btn btn-primary btn-sm text-nowrap" id="fetchPlayersButton">
+                                    <i class="fas fa-sync"></i> Refresh Players
+                                </button>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center px-2 pb-2 small text-muted">
+                            <span id="playersSearchSummary">Showing players</span>
+                            <a href="{{ route('admin.live-shows.export-all-users-as-csv', $liveShow->id) }}"
+                                title="Export Users" class="btn btn-primary btn-sm" id="exportUsersBtn"
+                                data-bs-toggle="tooltip" data-bs-placement="top">
+                                <i class="fas fa-file-export"></i>
+                            </a>
+                        </div>
                          <ul class="list-group list-group-flush" id="activePlayersList"
                              style=" overflow-y: scroll; max-height: 80vh; padding-bottom: 30px;">
                              <li class="list-group-item d-flex align-items-center border-0 px-3">
@@ -56,6 +71,12 @@
                                  <div class="small fw-medium">Loading...</div>
                              </li>
                          </ul>
+                        <div class="p-2 border-top">
+                            <button type="button" class="btn btn-outline-primary btn-sm w-100 d-none"
+                                id="loadMorePlayersButton">
+                                <i class="fas fa-plus-circle me-1"></i> Load More Players
+                            </button>
+                        </div>
                      </div>
                  </div>
              </div>
@@ -645,17 +666,39 @@
          <script>
              Pusher.logToConsole = true;
              let isChatEnabled = {{ $liveShow->chat_enabled ? 'true' : 'false' }};
+            const playerPageSize = 100;
+            const playerListState = {
+                loadedCount: playerPageSize,
+                search: '',
+                totalUsers: 0,
+                filteredUsers: 0,
+                hasMore: false,
+            };
+            let playerSearchDebounceTimer = null;
 
              var pusher = new Pusher('{{ env('PUSHER_APP_KEY', '2a66d003a7ded9fe567a') }}', {
                  cluster: '{{ env('PUSHER_APP_CLUSTER', 'eu') }}',
              });
 
              document.addEventListener('DOMContentLoaded', function() {
-                 fetchAndAppendPlayers();
+                fetchAndAppendPlayers();
 
                  fetchChatMessages().then(messages => {
                      appendChatMessages(messages);
                  });
+
+                document.getElementById('playerSearchInput')?.addEventListener('input', function(event) {
+                    clearTimeout(playerSearchDebounceTimer);
+                    playerSearchDebounceTimer = setTimeout(() => {
+                        playerListState.search = event.target.value.trim();
+                        playerListState.loadedCount = playerPageSize;
+                        fetchAndAppendPlayers();
+                    }, 250);
+                });
+
+                document.getElementById('loadMorePlayersButton')?.addEventListener('click', function() {
+                    loadMorePlayers();
+                });
 
                  document.getElementById('resetChatBtn').addEventListener('click', function() {
                      if (confirm('Are you sure you want to reset the chat? All messages will be removed.')) {
@@ -683,6 +726,11 @@
                  fetchAllMedia();
                  updateAdminChatUi(isChatEnabled);
              });
+
+            // Refresh the currently visible player window every 30 seconds.
+             setInterval(() => {
+                refreshVisiblePlayers();
+             }, 30000);
 
              function fetchChatMessages() {
                  // Simulate an API call to fetch chat messages
@@ -785,7 +833,7 @@
                          console.log('Player block status updated:', data);
                          if (data.success) {
                              alert(data.message);
-                             fetchAndAppendPlayers();
+                            refreshVisiblePlayers();
                          }
                      })
                      .catch(error => {
@@ -794,11 +842,38 @@
                      });
              }
 
+            function resetScore(userId) {
+                if (!confirm('Are you sure you want to reset this player score?')) {
+                    return;
+                }
+
+                fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/reset-score/${userId}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            refreshVisiblePlayers();
+                        } else {
+                            alert(data.message || 'Could not reset player score.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error resetting player score:', error);
+                        alert('Error resetting player score.');
+                    });
+            }
+
 
              //onlick #fetchPlayersButton execute fetchActivePlayers and appendPlayerList
              document.getElementById('fetchPlayersButton').addEventListener('click', function() {
 
-                 fetchAndAppendPlayers();
+                refreshVisiblePlayers();
              });
 
 
@@ -877,114 +952,216 @@
 
 
 
-             function fetchActivePlayers() {
-                 // Simulate an API call to fetch active players
-                 var activePlayerUlElement = document.getElementById('activePlayersList');
-                 activePlayerUlElement.innerHTML =
-                     '<li class="list-group-item bg-dark text-white d-flex align-items-center justify-content-center"><i class="fas fa-spinner fa-spin me-2"></i> Loading...</li>';
+            function escapeHtml(value) {
+                return String(value ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
 
-                 return fetch(`{{ url('api/live-show') }}/{{ $liveShow->id }}/get-live-show-users`)
-                     .then(response => response.json())
-                     .then(data => {
-                         // Assuming data is an array of player names
-                         //  console.log('Active Players Data:', data);
-                         users = data.users.map(player => {
-                             return {
-                                 name: player.name,
-                                 id: player.id,
-                                 is_online: player.is_online,
-                                 is_winner: player.is_winner,
-                                 prize_won: player.prize_won,
-                                 status: player.status,
-                                 score: player.score,
-                                 is_blocked: player.is_blocked
-                             }
-                         });
-                         return {
-                             users: users,
-                             totalUsers: data.totalUsers
-                         };
-                     })
-                     .catch(error => {
-                         console.error('Error fetching active players:', error);
-                         return [];
-                     });
-             }
+            function setPlayersLoading() {
+                const activePlayerUlElement = document.getElementById('activePlayersList');
+                activePlayerUlElement.innerHTML =
+                    '<li class="list-group-item bg-dark text-white d-flex align-items-center justify-content-center"><i class="fas fa-spinner fa-spin me-2"></i> Loading...</li>';
+            }
 
-             function appendPlayerList(data) {
-                 //  console.log('Appending player list:', data);
-                 const activePlayersList = document.getElementById('activePlayersList');
-                 activePlayersList.innerHTML = ''; // Clear existing list
-                 if (data.totalUsers === 0) {
-                     activePlayersList.innerHTML = '<li class="list-group-item bg-dark text-white">No active players</li>';
-                     return;
-                 }
+            function updatePlayerListMeta() {
+                const totalUsersCount = document.getElementById('total-users-count');
+                const summary = document.getElementById('playersSearchSummary');
+                const loadMoreButton = document.getElementById('loadMorePlayersButton');
+                const searchActive = playerListState.search !== '';
 
-                 data.users.forEach((player, index) => {
-                     const li = `<li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
-                       
+                totalUsersCount.innerText = searchActive ?
+                    `(${playerListState.filteredUsers}/${playerListState.totalUsers})` :
+                    `(${playerListState.totalUsers})`;
+
+                summary.textContent = searchActive ?
+                    `Showing ${playerListState.filteredUsers} matching player(s)` :
+                    `Showing ${playerListState.totalUsers} participating player(s)`;
+
+                loadMoreButton.classList.toggle('d-none', !playerListState.hasMore);
+            }
+
+            function buildPlayerListItem(player, index) {
+                const playerName = escapeHtml(player.name);
+                const playerEmail = escapeHtml(player.email);
+                const prizeWon = escapeHtml(player.prize_won ?? '');
+                const playerShowUrl = `{{ url('admin/players') }}/${player.id}`;
+
+                return `<li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                    <div class='text-white'>
+                        ${index}.
+                        <strong class='${player.status != 'eliminated' ? 'text-white' : 'text-secondary'}'>${playerName}</strong>
+                        <span class="ms-2 ${player.is_online == 1 ? 'text-success' : 'text-secondary'}">
+                            <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
+                        </span>
+                        <span class='ms-2 text-white'>${player.score !== null ? ` ${player.score}` : ''}</span>
+                        ${player.is_winner ? '<i class="bi bi-trophy-fill text-warning"></i>' : ''}
+                        <div class='text-white small text-secondary'>${playerEmail}</div>
                         <div class='text-white'>
-                            ${index + 1}.
-                            <strong class='${player.status != 'eliminated' ? 'text-white' : 'text-secondary'}'>${player.name}</strong>
-                            <span class="ms-2 ${player.is_online == 1 ? 'text-success' : 'text-secondary'}">
-                           <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
-                            </span>
-                            <span class='ms-2 text-white'>
-                                ${player.score !== null ? ` ${player.score}` : ''}
-                                </span>
-                            ${player.is_winner ? '<i class="bi bi-trophy-fill text-warning"></i>' : ''}
-                            <div class='text-white'>
-                                ${player.is_winner &&player.prize_won ? `Prize:<br> <span class='badge bg-primary'> ${player.prize_won} </span>` : ''}
-                                </div>
-
+                            ${player.is_winner && prizeWon ? `Prize:<br> <span class='badge bg-primary'> ${prizeWon} </span>` : ''}
                         </div>
+                    </div>
 
-                        <div>
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="playerDropdownMenuButton${player.id}" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-three-dots"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end"
+                    <div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="playerDropdownMenuButton${player.id}" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end"
                                 id="playerDropdownMenu${player.id}"
-                                aria-labelledby="playerDropdownMenuButton">
-                                    <li>
-                                        <a class="dropdown-item" target="_blank" href="#">
-                                            <i class="fas fa-eye"></i>
-                                            View Details
-                                        </a>
-                                    </li>
-                                    <li id="dd_option_toggleBlockStatusForPlayer${player.id}">
-                                        <a  class="dropdown-item" href="javascript:void(0)"
-                                        onclick="toggleBlockStatusForPlayer('${player.id}', '${player.is_blocked ? 'unblock' : 'block'}')"
-                                        > 
+                                aria-labelledby="playerDropdownMenuButton${player.id}">
+                                <li>
+                                    <a class="dropdown-item" target="_blank" href="${playerShowUrl}">
+                                        <i class="fas fa-eye"></i>
+                                        View Details
+                                    </a>
+                                </li>
+                                <li id="dd_option_toggleBlockStatusForPlayer${player.id}">
+                                    <a class="dropdown-item" href="javascript:void(0)"
+                                        onclick="toggleBlockStatusForPlayer('${player.id}', '${player.is_blocked ? 'unblock' : 'block'}')">
                                         <i class="fas fa-ban"></i>
                                         ${player.is_blocked ? 'Unblock Player' : 'Block Player'}
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item"
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item"
                                         href="javascript:void(0)"
-                                        onclick="resetScore('${player.id}')"
-                                        > 
+                                        onclick="resetScore('${player.id}')">
                                         <i class="fas fa-sync"></i>
                                         Reset Score
-                                        </a>
-                                    </li>  
-                                </ul>
-                            </div>
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
-                    </li>`;
-                     activePlayersList.innerHTML += li;
-                 });
+                    </div>
+                </li>`;
+            }
 
-                 document.getElementById('total-users-count').innerText = `(${data.totalUsers})`;
-             }
+            function appendPlayerList(data, options = {}) {
+                const {
+                    append = false
+                } = options;
+                const activePlayersList = document.getElementById('activePlayersList');
 
-             function fetchAndAppendPlayers() {
-                 fetchActivePlayers().then(data => {
-                     appendPlayerList(data);
-                 });
-             }
+                if (!append) {
+                    activePlayersList.innerHTML = '';
+                }
+
+                if (data.users.length === 0 && !append) {
+                    activePlayersList.innerHTML =
+                        '<li class="list-group-item bg-dark text-white">No players found.</li>';
+                    return;
+                }
+
+                const startIndex = append ? (playerListState.loadedCount - data.users.length) : 0;
+
+                data.users.forEach((player, index) => {
+                    activePlayersList.insertAdjacentHTML('beforeend', buildPlayerListItem(player, startIndex + index + 1));
+                });
+            }
+
+            function fetchActivePlayers({
+                skip = 0,
+                take = playerPageSize
+            } = {}) {
+                const query = new URLSearchParams({
+                    skip,
+                    take,
+                });
+
+                if (playerListState.search !== '') {
+                    query.set('search', playerListState.search);
+                }
+
+                return fetch(`{{ url('api/live-show') }}/{{ $liveShow->id }}/get-live-show-users?${query.toString()}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        return {
+                            users: data.users.map(player => ({
+                                name: player.name,
+                                id: player.id,
+                                email: player.email,
+                                is_online: player.is_online,
+                                is_winner: player.is_winner,
+                                prize_won: player.prize_won,
+                                status: player.status,
+                                score: player.score,
+                                is_blocked: player.is_blocked
+                            })),
+                            totalUsers: data.totalUsers,
+                            filteredUsers: data.filteredUsers ?? data.totalUsers,
+                            hasMore: !!data.hasMore,
+                        };
+                    })
+                    .catch(error => {
+                        console.error('Error fetching active players:', error);
+                        return {
+                            users: [],
+                            totalUsers: 0,
+                            filteredUsers: 0,
+                            hasMore: false,
+                        };
+                    });
+            }
+
+            function refreshVisiblePlayers() {
+                const take = Math.max(playerListState.loadedCount, playerPageSize);
+                setPlayersLoading();
+
+                return fetchActivePlayers({
+                    skip: 0,
+                    take
+                }).then(data => {
+                    playerListState.loadedCount = Math.max(data.users.length, playerPageSize);
+                    playerListState.totalUsers = data.totalUsers;
+                    playerListState.filteredUsers = data.filteredUsers;
+                    playerListState.hasMore = data.hasMore;
+                    appendPlayerList(data);
+                    updatePlayerListMeta();
+                });
+            }
+
+            function fetchAndAppendPlayers() {
+                setPlayersLoading();
+                playerListState.loadedCount = playerPageSize;
+
+                return fetchActivePlayers({
+                    skip: 0,
+                    take: playerListState.loadedCount
+                }).then(data => {
+                    playerListState.totalUsers = data.totalUsers;
+                    playerListState.filteredUsers = data.filteredUsers;
+                    playerListState.hasMore = data.hasMore;
+                    appendPlayerList(data);
+                    updatePlayerListMeta();
+                });
+            }
+
+            function loadMorePlayers() {
+                const loadMoreButton = document.getElementById('loadMorePlayersButton');
+                loadMoreButton.disabled = true;
+                loadMoreButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Loading...';
+
+                return fetchActivePlayers({
+                    skip: playerListState.loadedCount,
+                    take: playerPageSize
+                }).then(data => {
+                    playerListState.loadedCount += data.users.length;
+                    playerListState.totalUsers = data.totalUsers;
+                    playerListState.filteredUsers = data.filteredUsers;
+                    playerListState.hasMore = data.hasMore;
+                    appendPlayerList(data, {
+                        append: true
+                    });
+                    updatePlayerListMeta();
+                }).finally(() => {
+                    loadMoreButton.disabled = false;
+                    loadMoreButton.innerHTML = '<i class="fas fa-plus-circle me-1"></i> Load More Players';
+                });
+            }
 
              const timerDiv = document.querySelector('#quizTimer');
 
@@ -1017,7 +1194,7 @@
 
                          // Fetch players list 5 seconds after timer finishes
                          setTimeout(() => {
-                             fetchAndAppendPlayers();
+                            refreshVisiblePlayers();
                          }, 5000);
                      }
                  }, 1000);
@@ -1260,7 +1437,7 @@
                          //  console.log('Game reset:', data);
                          alert(data.message);
                          // Optionally, refresh the player list to show all players as active
-                         fetchAndAppendPlayers();
+                        refreshVisiblePlayers();
                      })
                      .catch(error => {
                          console.error('Error resetting game:', error);
