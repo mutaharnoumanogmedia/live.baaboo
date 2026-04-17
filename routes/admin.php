@@ -107,6 +107,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('live-shows/{id}/player-responses/{userId}', [LiveShowController::class, 'getPlayerResponses'])->name('live-shows.player-responses');
     Route::get('live-shows/{id}/export-participants-csv', [LiveShowController::class, 'exportAllParticipantsCSV'])->name('live-shows.export-participants-csv');
     Route::get('live-shows/{id}/export-player-csv/{userId}', [LiveShowController::class, 'exportPlayerCSV'])->name('live-shows.export-player-csv');
+    Route::get('live-shows/{id}/export-winners-csv', [LiveShowController::class, 'exportWinnersCSV'])->name('live-shows.export-winners-csv');
 
     Route::resource(
         'push-notifications',

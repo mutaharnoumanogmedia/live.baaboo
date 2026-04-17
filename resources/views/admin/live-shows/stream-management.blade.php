@@ -362,21 +362,26 @@
                          <div class="tab-content">
                              <div class="tab-pane fade show active" id="chat-tab">
                                  <div class="p-3">
-                                     <button class="btn btn-primary" id="resetChatBtn" title="Reset Chat"
+                                     <button class="btn btn-primary mb-1" id="resetChatBtn" title="Reset Chat"
                                          data-bs-toggle="tooltip" data-bs-placement="top">
                                          <i class="fas fa-eraser"></i>
                                      </button>
-                                     <button class="btn btn-warning" id="toggleChatStatusBtn"
-                                         title="Toggle Chat Access" data-bs-toggle="tooltip" data-bs-placement="top">
-                                         <i class="fas fa-comments"></i>
-                                         <span id="chatToggleBtnText">Disable Chat</span>
-                                     </button>
-                                     <span class="badge bg-success ms-2" id="chatStatusBadge">Chat Enabled</span>
+
+
                                      <a href="{{ route('admin.live-shows.export-all-chats-as-csv', $liveShow->id) }}"
-                                         class="btn btn-primary" id="exportChatsBtn" title="Export Chats"
+                                         class="btn btn-primary mb-1 ms-1" id="exportChatsBtn" title="Export Chats"
                                          data-bs-toggle="tooltip" data-bs-placement="top">
                                          <i class="fas fa-file-export"></i>
                                      </a>
+
+                                     <button class="btn btn-warning mb-1 ms-1" id="toggleChatStatusBtn"
+                                         title="Toggle Chat Access" data-bs-toggle="tooltip" data-bs-placement="top">
+                                         <span class="badge bg-success ms-2 d-none" id="chatStatusBadge">Chat
+                                             Enabled</span>
+                                         <i class="fas fa-comments"></i>
+
+                                         <span id="chatToggleBtnText">Disable Chat</span>
+                                     </button>
                                  </div>
                                  <div id="live-chat-messages" class="p-3">
                                  </div>
@@ -646,9 +651,7 @@
              });
 
              document.addEventListener('DOMContentLoaded', function() {
-                 fetchActivePlayers().then(data => {
-                     appendPlayerList(data);
-                 });
+                 fetchAndAppendPlayers();
 
                  fetchChatMessages().then(messages => {
                      appendChatMessages(messages);
@@ -782,9 +785,7 @@
                          console.log('Player block status updated:', data);
                          if (data.success) {
                              alert(data.message);
-                             fetchActivePlayers().then(data => {
-                                 appendPlayerList(data);
-                             });
+                             fetchAndAppendPlayers();
                          }
                      })
                      .catch(error => {
@@ -792,20 +793,16 @@
                          alert('Error updating player block status: ' + error.message);
                      });
              }
-             //every 20 seconds execute fetchActivePlayers and appendPlayerList
-             // setInterval(() => {
-             //     fetchActivePlayers().then(data => {
-             //         appendPlayerList(data);
-             //     });
-             // }, 20000);
+
 
              //onlick #fetchPlayersButton execute fetchActivePlayers and appendPlayerList
              document.getElementById('fetchPlayersButton').addEventListener('click', function() {
 
-                 fetchActivePlayers().then(data => {
-                     appendPlayerList(data);
-                 });
+                 fetchAndAppendPlayers();
              });
+
+
+
 
              function resetChat() {
                  fetch(`{{ route('admin.live-shows.stream-management.reset-chat', ['id' => $liveShow->id]) }}`, {
@@ -983,6 +980,12 @@
                  document.getElementById('total-users-count').innerText = `(${data.totalUsers})`;
              }
 
+             function fetchAndAppendPlayers() {
+                 fetchActivePlayers().then(data => {
+                     appendPlayerList(data);
+                 });
+             }
+
              const timerDiv = document.querySelector('#quizTimer');
 
 
@@ -1010,15 +1013,15 @@
                          clearInterval(timerDiv._quizTimerInterval);
                          setTimeout(() => {
                              timerDiv.style.display = 'none';
-
-
-
-                             fetchActivePlayers().then(data => {
-                                 appendPlayerList(data);
-                             });
                          }, 500); // Give a short delay before hiding
+
+                         // Fetch players list 5 seconds after timer finishes
+                         setTimeout(() => {
+                             fetchAndAppendPlayers();
+                         }, 5000);
                      }
                  }, 1000);
+
              }
 
              function hideQuizTimer() {
@@ -1124,12 +1127,7 @@
                      })
                      .then(response => response.json())
                      .then(data => {
-                         //  console.log('Winners updated:', data);
-                         // alert(data.message);
-                         // Optionally, refresh the player list to show winners
-                         //  fetchActivePlayers().then(data => {
-                         //      appendPlayerList(data);
-                         //  });
+
                          document.getElementById('fetchPlayersButton').click();
                      })
                      .catch(error => {
@@ -1137,28 +1135,28 @@
                      });
              }
 
-            function hideWinnerTab() {
-                if (!confirm('Are you sure you want to hide the winners tab for participants?')) {
-                    return;
-                }
+             function hideWinnerTab() {
+                 if (!confirm('Are you sure you want to hide the winners tab for participants?')) {
+                     return;
+                 }
 
-                fetch(`{{ route('admin.live-shows.stream-management.hide-winners-tab', ['id' => $liveShow->id]) }}`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json',
-                        },
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message || 'Winners tab hidden.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error hiding winners tab:', error);
-                    });
-            }
+                 fetch(`{{ route('admin.live-shows.stream-management.hide-winners-tab', ['id' => $liveShow->id]) }}`, {
+                         method: 'POST',
+                         headers: {
+                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                             'Accept': 'application/json',
+                         },
+                     })
+                     .then(response => response.json())
+                     .then(data => {
+                         if (data.success) {
+                             alert(data.message || 'Winners tab hidden.');
+                         }
+                     })
+                     .catch(error => {
+                         console.error('Error hiding winners tab:', error);
+                     });
+             }
          </script>
          <script>
              document.addEventListener('DOMContentLoaded', function() {
@@ -1262,9 +1260,7 @@
                          //  console.log('Game reset:', data);
                          alert(data.message);
                          // Optionally, refresh the player list to show all players as active
-                         fetchActivePlayers().then(data => {
-                             appendPlayerList(data);
-                         });
+                         fetchAndAppendPlayers();
                      })
                      .catch(error => {
                          console.error('Error resetting game:', error);

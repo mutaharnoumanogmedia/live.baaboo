@@ -27,12 +27,12 @@ use App\Models\QuizOption;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use App\Services\LiveShowQuizService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 
 class LiveShowController extends Controller
 {
@@ -894,6 +894,37 @@ class LiveShowController extends Controller
         fclose($csv);
 
         $filename = 'participants_'.str_replace(' ', '_', $liveShow->title).'.csv';
+
+        return response($csvContents)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
+    }
+
+    public function exportWinnersCSV($id)
+    {
+        $liveShow = LiveShow::findOrFail($id);
+        $totalQuestions = $liveShow->quizzes()->count();
+        $winners = $liveShow->users()->where('is_winner', true)->get();
+        $csv = fopen('php://temp', 'w');
+        fputcsv($csv, ['#', 'Name', 'Email', 'Score', 'Correct Answers', 'Total Questions', 'Is Winner', 'Prize Won', 'Status', 'Joined At']);
+        foreach ($winners as $index => $winner) {
+            fputcsv($csv, [
+                $index + 1,
+                $winner->name,
+                $winner->email,
+                $winner->pivot->score ?? 0,
+                $winner->pivot->correct_answers ?? 0,
+                $totalQuestions,
+                $winner->pivot->is_winner ? 'Yes' : 'No',
+                $winner->pivot->prize_won ?? 'N/A',
+                ucfirst($winner->pivot->status ?? ''),
+                $winner->pivot->created_at,
+            ]);
+        }
+        rewind($csv);
+        $csvContents = stream_get_contents($csv);
+        fclose($csv);
+        $filename = 'winners_'.str_replace(' ', '_', $liveShow->title).'.csv';
 
         return response($csvContents)
             ->header('Content-Type', 'text/csv')

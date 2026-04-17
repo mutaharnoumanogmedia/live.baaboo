@@ -20,7 +20,7 @@
             <a href="{{ route('admin.live-shows.edit', $liveShow->id) }}" class="btn btn-secondary btn-sm ms-1">
                 <i class="fas fa-edit me-1"></i> Edit
             </a>
-       
+
         </h2>
     </x-slot>
 
@@ -163,19 +163,27 @@
                 </div>
             </div>
 
-            {{-- Export Buttons --}}
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="text-dark mb-0"><i class="fas fa-users me-2"></i>Players & Responses</h5>
-                <a href="{{ route('admin.live-shows.export-participants-csv', $liveShow->id) }}"
-                    class="btn btn-outline-success btn-sm">
-                    <i class="fas fa-file-csv me-1"></i> Export All Participants CSV
-                </a>
-            </div>
+
 
             {{-- Split Panel: Players Left, Responses Right --}}
             <div class="row" id="detailsContainer">
                 {{-- Left Panel: Players List --}}
                 <div class="col-lg-5 col-md-6 mb-3" id="playersPanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="text-white mb-0"><i class="fas fa-users me-2"></i>Players & Responses</h5>
+                        <div class="w-100">
+                            <a href="{{ route('admin.live-shows.export-participants-csv', $liveShow->id) }}"
+                                class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-file-csv me-1"></i> Export All Participants CSV
+                            </a>
+                            <a href="{{ route('admin.live-shows.export-winners-csv', $liveShow->id) }}"
+                                class="btn btn-outline-primary btn-sm ms-2">
+                                <i class="fas fa-trophy me-1"></i> Export Winners CSV
+                            </a>
+                        </div>
+                    </div>
+                   
+
                     <div class="card shadow-sm border-0 h-100">
                         <div
                             class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
