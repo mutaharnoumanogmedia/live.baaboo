@@ -33,33 +33,34 @@
                              </span>
                          </h6>
                      </div>
-                    <div class="card-body p-0">
-                        <div class="d-flex justify-content-between align-items-center gap-2 mb-2 p-2 flex-wrap">
-                            <div class="input-group input-group-sm" style="max-width: 100%;">
-                                <span class="input-group-text">
-                                    <i class="fas fa-search"></i>
-                                </span>
-                                <input type="text" class="form-control" id="playerSearchInput"
-                                    placeholder="Search players by name, username, or email">
-                            </div>
-                            <div class="d-flex gap-2 ms-auto">
-                                <a target="_blank" href="{{ route('admin.live-shows.players', $liveShow->id) }}"
-                                    class="btn btn-outline-light btn-sm text-nowrap">
-                                    <i class="fas fa-external-link-alt me-1"></i> View All
-                                </a>
-                                <button type="button" class="btn btn-primary btn-sm text-nowrap" id="fetchPlayersButton">
-                                    <i class="fas fa-sync"></i> Refresh Players
-                                </button>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center px-2 pb-2 small text-muted">
-                            <span id="playersSearchSummary">Showing players</span>
-                            <a href="{{ route('admin.live-shows.export-all-users-as-csv', $liveShow->id) }}"
-                                title="Export Users" class="btn btn-primary btn-sm" id="exportUsersBtn"
-                                data-bs-toggle="tooltip" data-bs-placement="top">
-                                <i class="fas fa-file-export"></i>
-                            </a>
-                        </div>
+                     <div class="card-body p-0">
+                         <div class="d-flex justify-content-between align-items-center gap-2 mb-2 p-2 flex-wrap">
+                             <div class="input-group input-group-sm" style="max-width: 100%;">
+                                 <span class="input-group-text">
+                                     <i class="fas fa-search"></i>
+                                 </span>
+                                 <input type="text" class="form-control" id="playerSearchInput"
+                                     placeholder="Search players by name, username, or email">
+                             </div>
+                             <div class="d-flex gap-2 ms-auto">
+                                 <a target="_blank" href="{{ route('admin.live-shows.players', $liveShow->id) }}"
+                                     class="btn btn-outline-light btn-sm text-nowrap">
+                                     <i class="fas fa-external-link-alt me-1"></i> View All
+                                 </a>
+                                 <button type="button" class="btn btn-primary btn-sm text-nowrap"
+                                     id="fetchPlayersButton">
+                                     <i class="fas fa-sync"></i> Refresh Players
+                                 </button>
+                             </div>
+                         </div>
+                         <div class="d-flex justify-content-between align-items-center px-2 pb-2 small text-muted">
+                             <span id="playersSearchSummary">Showing players</span>
+                             <a href="{{ route('admin.live-shows.export-all-users-as-csv', $liveShow->id) }}"
+                                 title="Export Users" class="btn btn-primary btn-sm" id="exportUsersBtn"
+                                 data-bs-toggle="tooltip" data-bs-placement="top">
+                                 <i class="fas fa-file-export"></i>
+                             </a>
+                         </div>
                          <ul class="list-group list-group-flush" id="activePlayersList"
                              style=" overflow-y: scroll; max-height: 80vh; padding-bottom: 30px;">
                              <li class="list-group-item d-flex align-items-center border-0 px-3">
@@ -71,12 +72,12 @@
                                  <div class="small fw-medium">Loading...</div>
                              </li>
                          </ul>
-                        <div class="p-2 border-top">
-                            <button type="button" class="btn btn-outline-primary btn-sm w-100 d-none"
-                                id="loadMorePlayersButton">
-                                <i class="fas fa-plus-circle me-1"></i> Load More Players
-                            </button>
-                        </div>
+                         <div class="p-2 border-top">
+                             <button type="button" class="btn btn-outline-primary btn-sm w-100 d-none"
+                                 id="loadMorePlayersButton">
+                                 <i class="fas fa-plus-circle me-1"></i> Load More Players
+                             </button>
+                         </div>
                      </div>
                  </div>
              </div>
@@ -134,15 +135,33 @@
                                              <div class="card-body">
                                                  <h6 class="text-muted small text-uppercase fw-bold mb-3">Winners
                                                      Ceremony</h6>
-                                                 <button type="button"
+                                                 <button type="button" id="announceWinnersBtn"
                                                      class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm my-2"
-                                                     onclick="updateWinners()">
-                                                     <i class="fas fa-trophy me-2"></i> Announce Winners
+                                                     onclick="updateWinners()"
+                                                     @if ($liveShow->winners_announced) disabled aria-disabled="true" @endif>
+                                                     <span id="announceWinnersBtnContent"
+                                                         class="announce-winners-btn-label @if ($liveShow->winners_announced) d-none @endif">
+                                                         <i class="fas fa-trophy me-2"></i> Announce Winners
+                                                     </span>
+                                                     <span id="announceWinnersBtnLoader"
+                                                         class="announce-winners-btn-loader d-none">
+                                                         <i class="fas fa-spinner fa-spin me-2" aria-hidden="true"></i>
+                                                         Announcing…
+                                                     </span>
+                                                     <span id="announceWinnersBtnDone"
+                                                         class="announce-winners-btn-done @if (!$liveShow->winners_announced) d-none @endif">
+                                                         <i class="fas fa-check me-2"></i> Winners announced
+                                                     </span>
                                                  </button>
+                                                 <p id="announceWinnersAckMessage"
+                                                     class="small text-success mb-0 mt-2 px-1 @if (!$liveShow->winners_announced) d-none @endif">
+                                                     Winners have been announced. Winner notification emails have been
+                                                     queued for the winners.
+                                                 </p>
                                                  <button type="button"
                                                      class="btn btn-outline-warning w-100 py-2 fw-bold text-white shadow-sm my-2"
                                                      onclick="hideWinnerTab()">
-                                                     <i class="fas fa-eye-slash me-2"></i> Hide Winners
+                                                     <i class="fas fa-eye-slash me-2"></i> Hide winner tab
                                                  </button>
 
                                              </div>
@@ -155,7 +174,9 @@
                                                  </h6>
                                                  <form action="" method="post" id="live-show-status-form"
                                                      class="d-flex gap-2">
-                                                     <select class="form-select fw-bold" id="liveShowStatusSelect">
+                                                     <select class="form-select fw-bold" id="liveShowStatusSelect"
+                                                         onchange="updateLiveShowStatus(this.value)">
+                                                         >
                                                          <option value="scheduled"
                                                              {{ $liveShow->status == 'scheduled' ? 'selected' : '' }}>⏳
                                                              Scheduled</option>
@@ -168,8 +189,8 @@
                                                              Completed
                                                          </option>
                                                      </select>
-                                                     <button type="submit"
-                                                         class="btn btn-dark text-nowrap px-3">Update</button>
+                                                     {{-- <button type="submit"
+                                                         class="btn btn-dark text-nowrap px-3">Update</button> --}}
                                                  </form>
                                              </div>
                                          </div>
@@ -181,173 +202,155 @@
                  </div>
 
                  <div class="card border-0 shadow-sm mb-4">
-                     <div class="card-header bg-light py-3">
-                         <ul class="nav nav-tabs card-header-tabs" id="quizGalleryTabs" role="tablist">
-                             <li class="nav-item" role="presentation">
-                                 <button class="nav-link active" id="quiz-tab" data-bs-toggle="tab"
-                                     data-bs-target="#quizTabPane" type="button" role="tab"
-                                     aria-controls="quizTabPane" aria-selected="true">
-                                     Quiz Questions
-                                 </button>
-                             </li>
-                             <li class="nav-item" role="presentation">
-                                 <button class="nav-link" id="gallery-tab" data-bs-toggle="tab"
-                                     data-bs-target="#galleryTabPane" type="button" role="tab"
-                                     aria-controls="galleryTabPane" aria-selected="false">
-                                     Gallery Media
-
-
-                                     <span id="gallery-show-status" class="ms-3">
-
-                                     </span>
-                                 </button>
-
-
-                             </li>
-                         </ul>
-                     </div>
                      <div class="card-body position-relative">
-                         <div class="tab-content" id="quizGalleryTabsContent">
-                             <div class="tab-pane fade show active" id="quizTabPane" role="tabpanel"
-                                 aria-labelledby="quiz-tab">
-                                 <div class="question-slider px-2">
-                                     @foreach ($liveShow->quizzes as $index => $quiz)
-                                         <div class="px-2">
-                                             <div class="card border mb-3">
-                                                 <div class="card-body" style="height: 450px; overflow-y:scroll">
-                                                     <div class="text-center mb-4 fw-bold">
-                                                         <div class="mb-2">Question {{ $index + 1 }} /
-                                                             {{ $liveShow->quizzes->count() }}</div>
-                                                         <div class="fw-bold h3">{{ $quiz->question }}</div>
-                                                     </div>
+                         <div class="row">
+                             <div class="col-lg-6 ">
+                                 <div class="p-3   rounded bg-dark">
+                                     <h5 class="mb-0 fw-bold text-center mb-3">Quiz Questions</h5>
+                                     <div class="question-slider ">
+                                         @foreach ($liveShow->quizzes as $index => $quiz)
+                                             <div class="px-2">
+                                                 <div class="card border mb-3">
+                                                     <div class="card-body" style="height: auto; overflow-y:scroll">
+                                                         <div class="text-center mb-4 fw-bold">
+                                                             <div class="mb-2">Question {{ $index + 1 }} /
+                                                                 {{ $liveShow->quizzes->count() }}</div>
+                                                             <div class="fw-bold h3">{{ $quiz->question }}</div>
+                                                         </div>
 
-                                                     @if ($quiz->options)
-                                                         <div class="row g-3 mb-4">
-                                                             @foreach ($quiz->options as $option)
-                                                                 <div class="col-md-6">
-                                                                     <div
-                                                                         class="p-3 border rounded @if ($option->is_correct) border-success @endif">
+                                                         @if ($quiz->options)
+                                                             <div class="row g-3 mb-4">
+                                                                 @foreach ($quiz->options as $option)
+                                                                     <div class="col-md-12">
                                                                          <div
-                                                                             class="d-flex justify-content-between mb-2">
-                                                                             <span
-                                                                                 class="fw-bold @if ($option->is_correct) text-success @endif">
-                                                                                 {{ $option->option_text }}
-                                                                                 @if ($option->is_correct)
-                                                                                     <i
-                                                                                         class="fas fa-check-circle ms-1"></i>
-                                                                                 @endif
-                                                                             </span>
-                                                                             <span class="small fw-bold"
-                                                                                 id="option-result-label-{{ $option->id }}">0%</span>
-                                                                         </div>
-                                                                         <div class="progress" style="height: 8px;">
-                                                                             <div id="option-result-bar-{{ $option->id }}"
-                                                                                 class="progress-bar @if ($option->is_correct) bg-success @else bg-primary @endif"
-                                                                                 role="progressbar" style="width: 0%">
+                                                                             class="p-3 border rounded @if ($option->is_correct) border-success @endif">
+                                                                             <div
+                                                                                 class="d-flex justify-content-between mb-2">
+                                                                                 <span
+                                                                                     class="fw-bold @if ($option->is_correct) text-success @endif">
+                                                                                     {{ $option->option_text }}
+                                                                                     @if ($option->is_correct)
+                                                                                         <i
+                                                                                             class="fas fa-check-circle ms-1"></i>
+                                                                                     @endif
+                                                                                 </span>
+                                                                                 <span class="small fw-bold"
+                                                                                     id="option-result-label-{{ $option->id }}">0%</span>
+                                                                             </div>
+                                                                             <div class="progress"
+                                                                                 style="height: 8px;">
+                                                                                 <div id="option-result-bar-{{ $option->id }}"
+                                                                                     class="progress-bar @if ($option->is_correct) bg-success @else bg-primary @endif"
+                                                                                     role="progressbar"
+                                                                                     style="width: 0%">
+                                                                                 </div>
                                                                              </div>
                                                                          </div>
                                                                      </div>
-                                                                 </div>
-                                                             @endforeach
-                                                         </div>
-
-                                                         <form method="POST"
-                                                             id="quiz-timer-form-{{ $quiz->id }}"
-                                                             onsubmit="submitQuizTimerForm(event, {{ $quiz->id }})"
-                                                             class="row g-2 align-items-center justify-content-center">
-                                                             @csrf
-                                                             <div class="col-auto">
-                                                                 <div class="input-group">
-                                                                     <span class="input-group-text bg-white"><i
-                                                                             class="fas fa-stopwatch text-muted"></i></span>
-                                                                     <input type="number" min="1"
-                                                                         name="seconds"
-                                                                         id="timer-{{ $quiz->id }}"
-                                                                         value="10"
-                                                                         class="form-control text-center fw-bold"
-                                                                         style="width: 80px;" required>
-                                                                 </div>
+                                                                 @endforeach
                                                              </div>
-                                                             @if ($loop->last)
-                                                                 <input type="hidden" name="is_last" value="1">
-                                                             @endif
-                                                             <div class="col-auto">
-                                                                 <div class="btn-group shadow-sm">
-                                                                     <button type="submit"
-                                                                         class="btn btn-success px-3">
-                                                                         <i class="fas fa-play me-2"></i> Start
-                                                                     </button>
-                                                                     <button type="button"
-                                                                         onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }})"
-                                                                         class="btn btn-info px-3 text-white">
-                                                                         <i class="fas fa-chart-bar me-2"></i> Show
-                                                                         Responses
-                                                                     </button>
-                                                                     <button class="btn btn-danger px-3"
-                                                                         type="button"
-                                                                         onclick="removeQuiz({{ $quiz->id }})">
-                                                                         <i class="fas fa-times me-2"></i> Hide
-                                                                     </button>
 
+                                                             <form method="POST"
+                                                                 id="quiz-timer-form-{{ $quiz->id }}"
+                                                                 onsubmit="submitQuizTimerForm(event, {{ $quiz->id }})"
+                                                                 class="row g-2 align-items-center justify-content-center">
+                                                                 @csrf
+                                                                 <div class="col-auto">
+                                                                     <div class="input-group">
+                                                                         <span class="input-group-text bg-white"><i
+                                                                                 class="fas fa-stopwatch text-muted"></i></span>
+                                                                         <input type="number" min="1"
+                                                                             name="seconds"
+                                                                             id="timer-{{ $quiz->id }}"
+                                                                             value="10"
+                                                                             class="form-control text-center fw-bold"
+                                                                             style="width: 80px;" required>
+                                                                     </div>
                                                                  </div>
-                                                             </div>
-                                                         </form>
-                                                     @endif
+                                                                 @if ($loop->last)
+                                                                     <input type="hidden" name="is_last"
+                                                                         value="1">
+                                                                 @endif
+                                                                 <div class="col-auto">
+                                                                     <div class="btn-group shadow-sm">
+                                                                         <button type="submit"
+                                                                             class="btn btn-success px-3">
+                                                                             <i class="fas fa-play me-2"></i> Start
+                                                                         </button>
+                                                                         <button type="button"
+                                                                             onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }})"
+                                                                             class="btn btn-info px-3 text-white">
+                                                                             <i class="fas fa-chart-bar me-2"></i> Show
+                                                                             Responses
+                                                                         </button>
+                                                                         <button class="btn btn-danger px-3"
+                                                                             type="button"
+                                                                             onclick="removeQuiz({{ $quiz->id }})">
+                                                                             <i class="fas fa-times me-2"></i> Hide
+                                                                         </button>
+
+                                                                     </div>
+                                                                 </div>
+                                                             </form>
+                                                         @endif
+                                                     </div>
                                                  </div>
                                              </div>
-                                         </div>
-                                     @endforeach
-                                 </div>
+                                         @endforeach
+                                     </div>
 
-                                 <div id="quizTimer"
-                                     style=" position: absolute; bottom: 120px; right: 100px;   padding: 10px; border: 1px solid transparent; border-radius: 50%; z-index: 1000;width: 100px;height: 100px;display: none;align-items: center;justify-content: center; font-size: 3rem;font-weight: bold; text-align: center; background: url('{{ asset('/images/clock.png') }}') no-repeat center center; background-size: contain;">
-                                     <span id="quizTimerText" style="color: #000;margin-top: 10px;">0</span>
+                                     <div id="quizTimer"
+                                         style=" position: absolute; bottom: 120px; right: 100px;   padding: 10px; border: 1px solid transparent; border-radius: 50%; z-index: 1000;width: 100px;height: 100px;display: none;align-items: center;justify-content: center; font-size: 3rem;font-weight: bold; text-align: center; background: url('{{ asset('/images/clock.png') }}') no-repeat center center; background-size: contain;">
+                                         <span id="quizTimerText" style="color: #000;margin-top: 10px;">0</span>
+                                     </div>
                                  </div>
                              </div>
-                             <div class="tab-pane fade" id="galleryTabPane" role="tabpanel"
-                                 aria-labelledby="gallery-tab">
+                             <div class="col-lg-6">
+                                 <h5 class="mb-0 fw-bold text-center mb-3">Gallery Media</h5>
+                                 <div class="p-3 border border-light rounded bg-dark">
+                                     <div class="w-100">
+                                         <div class="d-flex justify-content-between align-items-center mb-2">
+                                             <h6 class="text-muted small text-uppercase fw-bold mb-0">
+                                                 Attached to this stream</h6>
 
-                                 <div class="w-100">
-                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                         <h6 class="text-muted small text-uppercase fw-bold mb-0">
-                                             Attached to this stream</h6>
+                                             <button type="button" class="btn btn-sm btn-outline-primary"
+                                                 title="Attach media from gallery" data-bs-toggle="modal"
+                                                 data-bs-target="#select-media-modal">
+                                                 <i class="fas fa-plus"></i> Add from gallery
+                                             </button>
+                                             <button type="button"
+                                                 class="btn btn-sm btn-outline-secondary gallery-hide-on-stream-btn"
+                                                 title="Hide image/video overlay on live stream">
+                                                 <i class="fas fa-eye-slash"></i> Hide on stream
+                                             </button>
+                                         </div>
+                                         <div id="gallery-attached-list" class="table-responsive mb-3"
+                                             style="max-height: 520px; overflow-y: auto;">
+                                             <table class="table table-sm table-dark table-hover align-middle mb-0">
+                                                 <thead>
+                                                     <tr>
+                                                         <th scope="col" style="width: 30px;"></th>
+                                                         <th scope="col" style="width: 40px;">#</th>
+                                                         <th scope="col" style="width: 45px;">Thumb</th>
+                                                         <th scope="col">Title</th>
+                                                         <th scope="col" style="width: 65px;">Type</th>
+                                                         <th scope="col"
+                                                             style="min-width: 160px; text-align: right;">
+                                                             Actions</th>
+                                                     </tr>
+                                                 </thead>
+                                                 <tbody id="attached-media-list">
 
-                                         <button type="button" class="btn btn-sm btn-outline-primary"
-                                             title="Attach media from gallery" data-bs-toggle="modal"
-                                             data-bs-target="#select-media-modal">
-                                             <i class="fas fa-plus"></i> Add from gallery
-                                         </button>
-                                         <button type="button"
-                                             class="btn btn-sm btn-outline-secondary gallery-hide-on-stream-btn"
-                                             title="Hide image/video overlay on live stream">
-                                             <i class="fas fa-eye-slash"></i> Hide on stream
-                                         </button>
-                                     </div>
-                                     <div id="gallery-attached-list" class="table-responsive mb-3"
-                                         style="max-height: 520px; overflow-y: auto;">
-                                         <table class="table table-sm table-dark table-hover align-middle mb-0">
-                                             <thead>
-                                                 <tr>
-                                                     <th scope="col" style="width: 30px;"></th>
-                                                     <th scope="col" style="width: 40px;">#</th>
-                                                     <th scope="col" style="width: 45px;">Thumb</th>
-                                                     <th scope="col">Title</th>
-                                                     <th scope="col" style="width: 65px;">Type</th>
-                                                     <th scope="col" style="min-width: 160px; text-align: right;">
-                                                         Actions</th>
-                                                 </tr>
-                                             </thead>
-                                             <tbody id="attached-media-list">
-
-                                             </tbody>
-                                         </table>
+                                                 </tbody>
+                                             </table>
+                                         </div>
                                      </div>
                                  </div>
-
                              </div>
                          </div>
                      </div>
                  </div>
+
 
 
              </main>
@@ -375,6 +378,12 @@
                                          onclick="refreshPreview()">
                                          <i class="fas fa-refresh"></i>
                                      </button>
+                                     <button class="btn btn-sm btn-secondary ms-2" id="mutePreviewButton"
+                                         onclick="togglePreviewMute()" title="Mute/Unmute Preview">
+                                         <i class="fas fa-volume-mute" id="mutePreviewIcon"></i>
+                                     </button>
+
+
                                  </a>
                              </li>
                          </ul>
@@ -513,10 +522,11 @@
                                  </div>
                              </div>
                              <div class="tab-pane fade" id="live-show-preview">
-                                 <div class="p-2">
+                                 <div class="p-2 d-flex justify-content-center align-items-center   ">
                                      <iframe src="{{ url('live-show-play/' . $liveShow->id) }}?preview=true"
-                                         class="live-show-preview-iframe"
-                                         style="min-width: 100%; min-height: 844px; max-width: 390px; max-height: 844px; pointer-events: none; border-radius: 30px; border: 1px solid #ccc;"
+                                         id="live-show-preview-iframe"
+                                         class="live-show-preview-iframe mt-2"
+                                         style="height: 956px; width: 500px; pointer-events: none; border-radius: 30px; border: 1px solid #ccc;overflow: hidden;"
                                          allowfullscreen="true" allow="autoplay; encrypted-media; picture-in-picture"
                                          frameborder="0"></iframe>
                                  </div>
@@ -623,6 +633,7 @@
      </style>
 
      @push('styles')
+         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
          <style>
              #live-chat-messages {
                  height: 60vh;
@@ -663,54 +674,106 @@
      @endpush
 
      @push('scripts')
+         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.all.min.js"></script>
          <script>
              Pusher.logToConsole = true;
              let isChatEnabled = {{ $liveShow->chat_enabled ? 'true' : 'false' }};
-            const playerPageSize = 100;
-            const playerListState = {
-                loadedCount: playerPageSize,
-                search: '',
-                totalUsers: 0,
-                filteredUsers: 0,
-                hasMore: false,
-            };
-            let playerSearchDebounceTimer = null;
+             const playerPageSize = 100;
+             const playerListState = {
+                 loadedCount: playerPageSize,
+                 search: '',
+                 totalUsers: 0,
+                 filteredUsers: 0,
+                 hasMore: false,
+             };
+             let playerSearchDebounceTimer = null;
+             let liveShowStatus = '{{ $liveShow->status }}';
+             let liveShowWinnersAnnounced = {{ $liveShow->winners_announced ? 'true' : 'false' }};
 
              var pusher = new Pusher('{{ env('PUSHER_APP_KEY', '2a66d003a7ded9fe567a') }}', {
                  cluster: '{{ env('PUSHER_APP_CLUSTER', 'eu') }}',
              });
 
+             function streamSwalSuccess(message, title) {
+                 return Swal.fire({
+                     icon: 'success',
+                     title: title || 'Success',
+                     text: message || undefined,
+                 });
+             }
+
+             function streamSwalError(message, title) {
+                 return Swal.fire({
+                     icon: 'error',
+                     title: title || 'Error',
+                     text: message || undefined,
+                 });
+             }
+
+             function streamSwalWarning(message, title) {
+                 return Swal.fire({
+                     icon: 'warning',
+                     title: title || 'Notice',
+                     text: message || undefined,
+                 });
+             }
+
+             function streamSwalConfirm(options) {
+                 return Swal.fire(Object.assign({
+                     icon: 'warning',
+                     showCancelButton: true,
+                     confirmButtonText: 'Yes, continue',
+                     cancelButtonText: 'Cancel',
+                     reverseButtons: true,
+                 }, options));
+             }
+
              document.addEventListener('DOMContentLoaded', function() {
-                fetchAndAppendPlayers();
+                 fetchAndAppendPlayers();
 
                  fetchChatMessages().then(messages => {
                      appendChatMessages(messages);
                  });
 
-                document.getElementById('playerSearchInput')?.addEventListener('input', function(event) {
-                    clearTimeout(playerSearchDebounceTimer);
-                    playerSearchDebounceTimer = setTimeout(() => {
-                        playerListState.search = event.target.value.trim();
-                        playerListState.loadedCount = playerPageSize;
-                        fetchAndAppendPlayers();
-                    }, 250);
-                });
+                 document.getElementById('playerSearchInput')?.addEventListener('input', function(event) {
+                     clearTimeout(playerSearchDebounceTimer);
+                     playerSearchDebounceTimer = setTimeout(() => {
+                         playerListState.search = event.target.value.trim();
+                         playerListState.loadedCount = playerPageSize;
+                         fetchAndAppendPlayers();
+                     }, 250);
+                 });
 
-                document.getElementById('loadMorePlayersButton')?.addEventListener('click', function() {
-                    loadMorePlayers();
-                });
+                 document.getElementById('loadMorePlayersButton')?.addEventListener('click', function() {
+                     loadMorePlayers();
+                 });
 
                  document.getElementById('resetChatBtn').addEventListener('click', function() {
-                     if (confirm('Are you sure you want to reset the chat? All messages will be removed.')) {
-                         resetChat();
-                     }
+                     streamSwalConfirm({
+                         title: 'Reset live chat?',
+                         text: 'All chat messages will be removed for everyone. This cannot be undone.',
+                         confirmButtonText: 'Yes, reset chat',
+                         confirmButtonColor: '#d33',
+                     }).then(function(result) {
+                         if (result.isConfirmed) {
+                             resetChat();
+                         }
+                     });
                  });
                  document.getElementById('toggleChatStatusBtn')?.addEventListener('click', function() {
                      const nextStatus = !isChatEnabled;
                      const actionText = nextStatus ? 'enable' : 'disable';
-                     if (confirm(`Are you sure you want to ${actionText} participant chat?`)) {
-                         toggleLiveChatStatus(nextStatus);
-                     }
+                     streamSwalConfirm({
+                         title: nextStatus ? 'Enable participant chat?' : 'Disable participant chat?',
+                         text: nextStatus ?
+                             'Viewers will be able to send messages in the live show chat.' :
+                             'Viewers will not be able to send new chat messages.',
+                         confirmButtonText: nextStatus ? 'Yes, enable chat' : 'Yes, disable chat',
+                     }).then(function(result) {
+                         if (result.isConfirmed) {
+                             toggleLiveChatStatus(nextStatus);
+                         }
+                     });
                  });
 
                  document.querySelector('.gallery-hide-on-stream-btn')?.addEventListener('click', function(e) {
@@ -727,9 +790,11 @@
                  updateAdminChatUi(isChatEnabled);
              });
 
-            // Refresh the currently visible player window every 30 seconds.
+             // Refresh the currently visible player window every 30 seconds.
              setInterval(() => {
-                refreshVisiblePlayers();
+                 if (liveShowStatus == 'live') {
+                     refreshVisiblePlayers();
+                 }
              }, 30000);
 
              function fetchChatMessages() {
@@ -814,66 +879,86 @@
              }
 
              function toggleBlockStatusForPlayer(userId, action) {
-                 if (!confirm('Are you sure you want to ' + action + ' this player?')) {
-                     return;
-                 }
-                 fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/toggle-block-status-for-player/${userId}`, {
-                         method: 'POST',
-                         headers: {
-                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                             'Accept': 'application/json',
-                             'Content-Type': 'application/json'
-                         },
-                         body: JSON.stringify({
-                             action: action
+                 const isBlock = action === 'block';
+                 streamSwalConfirm({
+                     title: isBlock ? 'Block this player?' : 'Unblock this player?',
+                     text: isBlock ?
+                         'They will be blocked from live chat until you unblock them.' :
+                         'They will be able to participate in live chat again.',
+                     confirmButtonText: isBlock ? 'Yes, block' : 'Yes, unblock',
+                     confirmButtonColor: isBlock ? '#d33' : '#3085d6',
+                 }).then(function(result) {
+                     if (!result.isConfirmed) {
+                         return;
+                     }
+                     fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/toggle-block-status-for-player/${userId}`, {
+                             method: 'POST',
+                             headers: {
+                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                 'Accept': 'application/json',
+                                 'Content-Type': 'application/json'
+                             },
+                             body: JSON.stringify({
+                                 action: action
+                             })
                          })
-                     })
-                     .then(response => response.json())
-                     .then(data => {
-                         console.log('Player block status updated:', data);
-                         if (data.success) {
-                             alert(data.message);
-                            refreshVisiblePlayers();
-                         }
-                     })
-                     .catch(error => {
-                         console.error('Error updating player block status:', error);
-                         alert('Error updating player block status: ' + error.message);
-                     });
+                         .then(response => response.json())
+                         .then(data => {
+                             console.log('Player block status updated:', data);
+                             if (data.success) {
+                                 streamSwalSuccess(data.message, 'Player updated');
+                                 refreshVisiblePlayers();
+                             } else {
+                                 streamSwalError(data.message || 'Could not update this player.');
+                             }
+                         })
+                         .catch(error => {
+                             console.error('Error updating player block status:', error);
+                             streamSwalError(error.message || 'Could not update player block status.',
+                                 'Chat block update failed');
+                         });
+                 });
              }
 
-            function resetScore(userId) {
-                if (!confirm('Are you sure you want to reset this player score?')) {
-                    return;
-                }
-
-                fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/reset-score/${userId}`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json',
-                        },
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(data.message);
-                            refreshVisiblePlayers();
-                        } else {
-                            alert(data.message || 'Could not reset player score.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error resetting player score:', error);
-                        alert('Error resetting player score.');
-                    });
-            }
+             function resetScore(userId) {
+                 streamSwalConfirm({
+                     title: 'Reset player score?',
+                     text: 'Their score and progress for this live show will be cleared.',
+                     confirmButtonText: 'Yes, reset score',
+                     confirmButtonColor: '#d33',
+                 }).then(function(result) {
+                     if (!result.isConfirmed) {
+                         return;
+                     }
+                     fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/reset-score/${userId}`, {
+                             method: 'POST',
+                             headers: {
+                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                 'Accept': 'application/json',
+                             },
+                         })
+                         .then(response => response.json())
+                         .then(data => {
+                             if (data.success) {
+                                 streamSwalSuccess(data.message, 'Score reset');
+                                 refreshVisiblePlayers();
+                             } else {
+                                 streamSwalError(data.message || 'Could not reset this player\'s score.',
+                                     'Reset failed');
+                             }
+                         })
+                         .catch(error => {
+                             console.error('Error resetting player score:', error);
+                             streamSwalError('Please try again in a moment.', 'Could not reset score');
+                         });
+                 });
+             }
 
 
              //onlick #fetchPlayersButton execute fetchActivePlayers and appendPlayerList
              document.getElementById('fetchPlayersButton').addEventListener('click', function() {
 
-                refreshVisiblePlayers();
+                 refreshVisiblePlayers();
              });
 
 
@@ -892,10 +977,15 @@
                      .then(data => {
                          if (data.success) {
                              updateChatAfterReset();
+                             streamSwalSuccess(data.message || 'All chat messages have been cleared.',
+                                 'Chat reset');
+                         } else {
+                             streamSwalError(data.message || 'Could not reset the chat.', 'Reset failed');
                          }
                      })
                      .catch(error => {
                          console.error('Error resetting chat:', error);
+                         streamSwalError('Could not reset the chat. Please try again.', 'Reset failed');
                      });
              }
 
@@ -943,54 +1033,62 @@
                      .then(data => {
                          if (data.success) {
                              updateAdminChatUi(!!data.chat_enabled);
+                             streamSwalSuccess(
+                                 data.message || (data.chat_enabled ?
+                                     'Participants can now send chat messages.' :
+                                     'Participant chat has been turned off.'),
+                                 'Chat updated');
+                         } else {
+                             streamSwalError(data.message || 'Could not update chat settings.', 'Update failed');
                          }
                      })
                      .catch(error => {
                          console.error('Error updating chat status:', error);
+                         streamSwalError('Could not update chat settings. Please try again.', 'Update failed');
                      });
              }
 
 
 
-            function escapeHtml(value) {
-                return String(value ?? '')
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#39;');
-            }
+             function escapeHtml(value) {
+                 return String(value ?? '')
+                     .replace(/&/g, '&amp;')
+                     .replace(/</g, '&lt;')
+                     .replace(/>/g, '&gt;')
+                     .replace(/"/g, '&quot;')
+                     .replace(/'/g, '&#39;');
+             }
 
-            function setPlayersLoading() {
-                const activePlayerUlElement = document.getElementById('activePlayersList');
-                activePlayerUlElement.innerHTML =
-                    '<li class="list-group-item bg-dark text-white d-flex align-items-center justify-content-center"><i class="fas fa-spinner fa-spin me-2"></i> Loading...</li>';
-            }
+             function setPlayersLoading() {
+                 const activePlayerUlElement = document.getElementById('activePlayersList');
+                 activePlayerUlElement.innerHTML =
+                     '<li class="list-group-item bg-dark text-white d-flex align-items-center justify-content-center"><i class="fas fa-spinner fa-spin me-2"></i> Loading...</li>';
+             }
 
-            function updatePlayerListMeta() {
-                const totalUsersCount = document.getElementById('total-users-count');
-                const summary = document.getElementById('playersSearchSummary');
-                const loadMoreButton = document.getElementById('loadMorePlayersButton');
-                const searchActive = playerListState.search !== '';
+             function updatePlayerListMeta() {
+                 const totalUsersCount = document.getElementById('total-users-count');
+                 const summary = document.getElementById('playersSearchSummary');
+                 const loadMoreButton = document.getElementById('loadMorePlayersButton');
+                 const searchActive = playerListState.search !== '';
 
-                totalUsersCount.innerText = searchActive ?
-                    `(${playerListState.filteredUsers}/${playerListState.totalUsers})` :
-                    `(${playerListState.totalUsers})`;
+                 totalUsersCount.innerText = searchActive ?
+                     `(${playerListState.filteredUsers}/${playerListState.totalUsers})` :
+                     `(${playerListState.totalUsers})`;
 
-                summary.textContent = searchActive ?
-                    `Showing ${playerListState.filteredUsers} matching player(s)` :
-                    `Showing ${playerListState.totalUsers} participating player(s)`;
+                 summary.textContent = searchActive ?
+                     `Showing ${playerListState.filteredUsers} matching player(s)` :
+                     `Showing ${playerListState.totalUsers} participating player(s)`;
 
-                loadMoreButton.classList.toggle('d-none', !playerListState.hasMore);
-            }
+                 loadMoreButton.classList.toggle('d-none', !playerListState.hasMore);
+             }
 
-            function buildPlayerListItem(player, index) {
-                const playerName = escapeHtml(player.name);
-                const playerEmail = escapeHtml(player.email);
-                const prizeWon = escapeHtml(player.prize_won ?? '');
-                const playerShowUrl = `{{ url('admin/players') }}/${player.id}`;
+             function buildPlayerListItem(player, index) {
+                 const playerName = escapeHtml(player.name);
+                 const playerEmail = escapeHtml(player.email);
+                 const prizeWon = escapeHtml(player.prize_won ?? '');
+                 const playerShowUrl = `{{ url('admin/players') }}/${player.id}`;
 
-                return `<li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
+                 return `<li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
                     <div class='text-white'>
                         ${index}.
                         <strong class='${player.status != 'eliminated' ? 'text-white' : 'text-secondary'}'>${playerName}</strong>
@@ -1038,130 +1136,131 @@
                         </div>
                     </div>
                 </li>`;
-            }
+             }
 
-            function appendPlayerList(data, options = {}) {
-                const {
-                    append = false
-                } = options;
-                const activePlayersList = document.getElementById('activePlayersList');
+             function appendPlayerList(data, options = {}) {
+                 const {
+                     append = false
+                 } = options;
+                 const activePlayersList = document.getElementById('activePlayersList');
 
-                if (!append) {
-                    activePlayersList.innerHTML = '';
-                }
+                 if (!append) {
+                     activePlayersList.innerHTML = '';
+                 }
 
-                if (data.users.length === 0 && !append) {
-                    activePlayersList.innerHTML =
-                        '<li class="list-group-item bg-dark text-white">No players found.</li>';
-                    return;
-                }
+                 if (data.users.length === 0 && !append) {
+                     activePlayersList.innerHTML =
+                         '<li class="list-group-item bg-dark text-white">No players found.</li>';
+                     return;
+                 }
 
-                const startIndex = append ? (playerListState.loadedCount - data.users.length) : 0;
+                 const startIndex = append ? (playerListState.loadedCount - data.users.length) : 0;
 
-                data.users.forEach((player, index) => {
-                    activePlayersList.insertAdjacentHTML('beforeend', buildPlayerListItem(player, startIndex + index + 1));
-                });
-            }
+                 data.users.forEach((player, index) => {
+                     activePlayersList.insertAdjacentHTML('beforeend', buildPlayerListItem(player, startIndex + index +
+                         1));
+                 });
+             }
 
-            function fetchActivePlayers({
-                skip = 0,
-                take = playerPageSize
-            } = {}) {
-                const query = new URLSearchParams({
-                    skip,
-                    take,
-                });
+             function fetchActivePlayers({
+                 skip = 0,
+                 take = playerPageSize
+             } = {}) {
+                 const query = new URLSearchParams({
+                     skip,
+                     take,
+                 });
 
-                if (playerListState.search !== '') {
-                    query.set('search', playerListState.search);
-                }
+                 if (playerListState.search !== '') {
+                     query.set('search', playerListState.search);
+                 }
 
-                return fetch(`{{ url('api/live-show') }}/{{ $liveShow->id }}/get-live-show-users?${query.toString()}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        return {
-                            users: data.users.map(player => ({
-                                name: player.name,
-                                id: player.id,
-                                email: player.email,
-                                is_online: player.is_online,
-                                is_winner: player.is_winner,
-                                prize_won: player.prize_won,
-                                status: player.status,
-                                score: player.score,
-                                is_blocked: player.is_blocked
-                            })),
-                            totalUsers: data.totalUsers,
-                            filteredUsers: data.filteredUsers ?? data.totalUsers,
-                            hasMore: !!data.hasMore,
-                        };
-                    })
-                    .catch(error => {
-                        console.error('Error fetching active players:', error);
-                        return {
-                            users: [],
-                            totalUsers: 0,
-                            filteredUsers: 0,
-                            hasMore: false,
-                        };
-                    });
-            }
+                 return fetch(`{{ url('api/live-show') }}/{{ $liveShow->id }}/get-live-show-users?${query.toString()}`)
+                     .then(response => response.json())
+                     .then(data => {
+                         return {
+                             users: data.users.map(player => ({
+                                 name: player.name,
+                                 id: player.id,
+                                 email: player.email,
+                                 is_online: player.is_online,
+                                 is_winner: player.is_winner,
+                                 prize_won: player.prize_won,
+                                 status: player.status,
+                                 score: player.score,
+                                 is_blocked: player.is_blocked
+                             })),
+                             totalUsers: data.totalUsers,
+                             filteredUsers: data.filteredUsers ?? data.totalUsers,
+                             hasMore: !!data.hasMore,
+                         };
+                     })
+                     .catch(error => {
+                         console.error('Error fetching active players:', error);
+                         return {
+                             users: [],
+                             totalUsers: 0,
+                             filteredUsers: 0,
+                             hasMore: false,
+                         };
+                     });
+             }
 
-            function refreshVisiblePlayers() {
-                const take = Math.max(playerListState.loadedCount, playerPageSize);
-                setPlayersLoading();
+             function refreshVisiblePlayers() {
+                 const take = Math.max(playerListState.loadedCount, playerPageSize);
+                 setPlayersLoading();
 
-                return fetchActivePlayers({
-                    skip: 0,
-                    take
-                }).then(data => {
-                    playerListState.loadedCount = Math.max(data.users.length, playerPageSize);
-                    playerListState.totalUsers = data.totalUsers;
-                    playerListState.filteredUsers = data.filteredUsers;
-                    playerListState.hasMore = data.hasMore;
-                    appendPlayerList(data);
-                    updatePlayerListMeta();
-                });
-            }
+                 return fetchActivePlayers({
+                     skip: 0,
+                     take
+                 }).then(data => {
+                     playerListState.loadedCount = Math.max(data.users.length, playerPageSize);
+                     playerListState.totalUsers = data.totalUsers;
+                     playerListState.filteredUsers = data.filteredUsers;
+                     playerListState.hasMore = data.hasMore;
+                     appendPlayerList(data);
+                     updatePlayerListMeta();
+                 });
+             }
 
-            function fetchAndAppendPlayers() {
-                setPlayersLoading();
-                playerListState.loadedCount = playerPageSize;
+             function fetchAndAppendPlayers() {
+                 setPlayersLoading();
+                 playerListState.loadedCount = playerPageSize;
 
-                return fetchActivePlayers({
-                    skip: 0,
-                    take: playerListState.loadedCount
-                }).then(data => {
-                    playerListState.totalUsers = data.totalUsers;
-                    playerListState.filteredUsers = data.filteredUsers;
-                    playerListState.hasMore = data.hasMore;
-                    appendPlayerList(data);
-                    updatePlayerListMeta();
-                });
-            }
+                 return fetchActivePlayers({
+                     skip: 0,
+                     take: playerListState.loadedCount
+                 }).then(data => {
+                     playerListState.totalUsers = data.totalUsers;
+                     playerListState.filteredUsers = data.filteredUsers;
+                     playerListState.hasMore = data.hasMore;
+                     appendPlayerList(data);
+                     updatePlayerListMeta();
+                 });
+             }
 
-            function loadMorePlayers() {
-                const loadMoreButton = document.getElementById('loadMorePlayersButton');
-                loadMoreButton.disabled = true;
-                loadMoreButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Loading...';
+             function loadMorePlayers() {
+                 const loadMoreButton = document.getElementById('loadMorePlayersButton');
+                 loadMoreButton.disabled = true;
+                 loadMoreButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Loading...';
 
-                return fetchActivePlayers({
-                    skip: playerListState.loadedCount,
-                    take: playerPageSize
-                }).then(data => {
-                    playerListState.loadedCount += data.users.length;
-                    playerListState.totalUsers = data.totalUsers;
-                    playerListState.filteredUsers = data.filteredUsers;
-                    playerListState.hasMore = data.hasMore;
-                    appendPlayerList(data, {
-                        append: true
-                    });
-                    updatePlayerListMeta();
-                }).finally(() => {
-                    loadMoreButton.disabled = false;
-                    loadMoreButton.innerHTML = '<i class="fas fa-plus-circle me-1"></i> Load More Players';
-                });
-            }
+                 return fetchActivePlayers({
+                     skip: playerListState.loadedCount,
+                     take: playerPageSize
+                 }).then(data => {
+                     playerListState.loadedCount += data.users.length;
+                     playerListState.totalUsers = data.totalUsers;
+                     playerListState.filteredUsers = data.filteredUsers;
+                     playerListState.hasMore = data.hasMore;
+                     appendPlayerList(data, {
+                         append: true
+                     });
+                     updatePlayerListMeta();
+                 }).finally(() => {
+                     loadMoreButton.disabled = false;
+                     loadMoreButton.innerHTML = '<i class="fas fa-plus-circle me-1"></i> Load More Players';
+                 });
+             }
 
              const timerDiv = document.querySelector('#quizTimer');
 
@@ -1194,7 +1293,7 @@
 
                          // Fetch players list 5 seconds after timer finishes
                          setTimeout(() => {
-                            refreshVisiblePlayers();
+                             refreshVisiblePlayers();
                          }, 5000);
                      }
                  }, 1000);
@@ -1268,9 +1367,6 @@
 
 
              function removeQuiz(quizId) {
-                 // if (!confirm('Are you sure you want to remove this quiz question?')) {
-                 //     return;
-                 // }
 
                  fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/quizzes/${quizId}/remove-quiz-question`, {
                          method: 'POST',
@@ -1290,49 +1386,160 @@
                      });
              }
 
-             function updateWinners() {
-                 if (!confirm('Are you sure you want to announce winners?')) {
+             function setAnnounceWinnersLoading(isLoading) {
+                 const btn = document.getElementById('announceWinnersBtn');
+                 const label = document.getElementById('announceWinnersBtnContent');
+                 const loader = document.getElementById('announceWinnersBtnLoader');
+                 const done = document.getElementById('announceWinnersBtnDone');
+                 if (!btn || !label || !loader || !done) {
                      return;
                  }
+                 if (liveShowWinnersAnnounced) {
+                     return;
+                 }
+                 if (isLoading) {
+                     btn.disabled = true;
+                     label.classList.add('d-none');
+                     done.classList.add('d-none');
+                     loader.classList.remove('d-none');
+                 }
+             }
 
-                 fetch(`{{ route('admin.live-shows.update-winners', ['liveShowId' => $liveShow->id]) }}`, {
-                         method: 'POST',
-                         headers: {
-                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                             'Accept': 'application/json',
-                         },
-                     })
-                     .then(response => response.json())
-                     .then(data => {
+             function clearAnnounceWinnersLoading() {
+                 const btn = document.getElementById('announceWinnersBtn');
+                 const label = document.getElementById('announceWinnersBtnContent');
+                 const loader = document.getElementById('announceWinnersBtnLoader');
+                 if (!btn || !label || !loader) {
+                     return;
+                 }
+                 loader.classList.add('d-none');
+                 if (liveShowWinnersAnnounced) {
+                     return;
+                 }
+                 btn.disabled = false;
+                 label.classList.remove('d-none');
+             }
 
-                         document.getElementById('fetchPlayersButton').click();
-                     })
-                     .catch(error => {
-                         console.error('Error updating winners:', error);
-                     });
+             function applyAnnounceWinnersCompleted() {
+                 const btn = document.getElementById('announceWinnersBtn');
+                 const label = document.getElementById('announceWinnersBtnContent');
+                 const loader = document.getElementById('announceWinnersBtnLoader');
+                 const done = document.getElementById('announceWinnersBtnDone');
+                 const ack = document.getElementById('announceWinnersAckMessage');
+                 if (btn) {
+                     btn.disabled = true;
+                 }
+                 if (label) {
+                     label.classList.add('d-none');
+                 }
+                 if (loader) {
+                     loader.classList.add('d-none');
+                 }
+                 if (done) {
+                     done.classList.remove('d-none');
+                 }
+                 if (ack) {
+                     ack.classList.remove('d-none');
+                 }
+                 liveShowWinnersAnnounced = true;
+             }
+
+             function updateWinners() {
+                 if (liveShowWinnersAnnounced) {
+                     streamSwalWarning('Winners have already been announced for this live show.', 'Already announced');
+                     return;
+                 }
+                 streamSwalConfirm({
+                     title: 'Announce winners?',
+                     text: 'This will determine winners by score, notify participants, and queue winner notification emails.',
+                     confirmButtonText: 'Yes, announce winners',
+                 }).then(function(result) {
+                     if (!result.isConfirmed) {
+                         return;
+                     }
+                     setAnnounceWinnersLoading(true);
+                     fetch(`{{ route('admin.live-shows.update-winners', ['liveShowId' => $liveShow->id]) }}`, {
+                             method: 'POST',
+                             headers: {
+                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                 'Accept': 'application/json',
+                             },
+                         })
+                         .then(function(response) {
+                             return response.json().then(function(data) {
+                                 return {
+                                     ok: response.ok,
+                                     status: response.status,
+                                     data: data
+                                 };
+                             });
+                         })
+                         .then(function(result) {
+                             if (result.status === 422) {
+                                 applyAnnounceWinnersCompleted();
+                                 streamSwalWarning(
+                                     result.data.message ||
+                                     'Winners have already been announced for this live show.',
+                                     'Already announced');
+                                 return;
+                             }
+                             if (!result.ok) {
+                                 clearAnnounceWinnersLoading();
+                                 streamSwalError(
+                                     (result.data && result.data.message) ? result.data.message :
+                                     'Could not announce winners. Please try again.',
+                                     'Update failed');
+                                 return;
+                             }
+                             applyAnnounceWinnersCompleted();
+                             streamSwalSuccess(
+                                 (result.data && result.data.message) ? result.data.message :
+                                 'Winners have been announced for this live show.',
+                                 'Winners announced');
+                             var fetchBtn = document.getElementById('fetchPlayersButton');
+                             if (fetchBtn) {
+                                 fetchBtn.click();
+                             }
+                         })
+                         .catch(function(error) {
+                             console.error('Error updating winners:', error);
+                             clearAnnounceWinnersLoading();
+                             streamSwalError('Could not announce winners. Please try again.', 'Update failed');
+                         });
+                 });
              }
 
              function hideWinnerTab() {
-                 if (!confirm('Are you sure you want to hide the winners tab for participants?')) {
-                     return;
-                 }
-
-                 fetch(`{{ route('admin.live-shows.stream-management.hide-winners-tab', ['id' => $liveShow->id]) }}`, {
-                         method: 'POST',
-                         headers: {
-                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                             'Accept': 'application/json',
-                         },
-                     })
-                     .then(response => response.json())
-                     .then(data => {
-                         if (data.success) {
-                             alert(data.message || 'Winners tab hidden.');
-                         }
-                     })
-                     .catch(error => {
-                         console.error('Error hiding winners tab:', error);
-                     });
+                 streamSwalConfirm({
+                     title: 'Hide winner tab?',
+                     text: 'Participants will no longer see the winners tab in the live show.',
+                     confirmButtonText: 'Yes, hide tab',
+                 }).then(function(result) {
+                     if (!result.isConfirmed) {
+                         return;
+                     }
+                     fetch(`{{ route('admin.live-shows.stream-management.hide-winners-tab', ['id' => $liveShow->id]) }}`, {
+                             method: 'POST',
+                             headers: {
+                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                 'Accept': 'application/json',
+                             },
+                         })
+                         .then(response => response.json())
+                         .then(data => {
+                             if (data.success) {
+                                 streamSwalSuccess(data.message || 'The winners tab is now hidden for participants.',
+                                     'Winners tab hidden');
+                             } else {
+                                 streamSwalError(data.message || 'Could not hide the winners tab.',
+                                     'Request failed');
+                             }
+                         })
+                         .catch(error => {
+                             console.error('Error hiding winners tab:', error);
+                             streamSwalError('Could not hide the winners tab. Please try again.', 'Request failed');
+                         });
+                 });
              }
          </script>
          <script>
@@ -1358,34 +1565,42 @@
              });
 
 
+
              function updateLiveShowStatus(status) {
-                 if (!confirm('Are you sure you want to update the status to ' + status + '?')) {
-                     return;
-                 }
-
-                 $.ajax({
-                     url: "{{ route('admin.live-shows.update-live-show', ['id' => $liveShow->id]) }}",
-                     method: "POST",
-                     data: JSON.stringify({
-                         status: status
-                     }),
-                     headers: {
-                         "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                         "Accept": "application/json"
-                     },
-                     contentType: "application/json",
-                     success: function(data) {
-                         //  console.log("Live show updated:", data);
-                         alert(data.message);
-                         // Optionally redirect or update the UI
-                     },
-                     error: function(xhr, status, error) {
-                         console.error("Error ending live show:", error);
-                         console.log(xhr.responseText);
+                 streamSwalConfirm({
+                     title: 'Update live show status?',
+                     text: 'The status will be set to "' + status + '" for this live show.',
+                     confirmButtonText: 'Yes, update status',
+                 }).then(function(result) {
+                     if (!result.isConfirmed) {
+                         return;
                      }
+                     $.ajax({
+                         url: "{{ route('admin.live-shows.update-live-show', ['id' => $liveShow->id]) }}",
+                         method: "POST",
+                         data: JSON.stringify({
+                             status: status
+                         }),
+                         headers: {
+                             "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                             "Accept": "application/json"
+                         },
+                         contentType: "application/json",
+                         success: function(data) {
+                             streamSwalSuccess(data.message || 'Live show status was updated.',
+                                 'Status updated');
+                             liveShowStatus = data.status;
+                         },
+                         error: function(xhr, status, error) {
+                             console.error("Error ending live show:", error);
+                             console.log(xhr.responseText);
+                             var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON
+                                 .message :
+                                 'Could not update the live show status. Please try again.';
+                             streamSwalError(msg, 'Update failed');
+                         }
+                     });
                  });
-
-
              }
 
 
@@ -1420,28 +1635,33 @@
 
 
              document.getElementById('resetGameButton').addEventListener('click', function() {
-                 if (!confirm(
-                         'Are you sure you want to reset the game? This will remove all players current progress.')) {
-                     return;
-                 }
-
-                 fetch(`{{ route('admin.live-shows.reset-game', ['id' => $liveShow->id]) }}`, {
-                         method: 'POST',
-                         headers: {
-                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                             'Accept': 'application/json',
-                         },
-                     })
-                     .then(response => response.json())
-                     .then(data => {
-                         //  console.log('Game reset:', data);
-                         alert(data.message);
-                         // Optionally, refresh the player list to show all players as active
-                        refreshVisiblePlayers();
-                     })
-                     .catch(error => {
-                         console.error('Error resetting game:', error);
-                     });
+                 streamSwalConfirm({
+                     title: 'Reset the game?',
+                     text: 'This will remove all current player progress for this live show.',
+                     confirmButtonText: 'Yes, reset game',
+                     confirmButtonColor: '#d33',
+                 }).then(function(result) {
+                     if (!result.isConfirmed) {
+                         return;
+                     }
+                     fetch(`{{ route('admin.live-shows.reset-game', ['id' => $liveShow->id]) }}`, {
+                             method: 'POST',
+                             headers: {
+                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                 'Accept': 'application/json',
+                             },
+                         })
+                         .then(response => response.json())
+                         .then(data => {
+                             streamSwalSuccess(data.message || 'The game has been reset.',
+                                 'Game reset');
+                             refreshVisiblePlayers();
+                         })
+                         .catch(error => {
+                             console.error('Error resetting game:', error);
+                             streamSwalError('Could not reset the game. Please try again.', 'Reset failed');
+                         });
+                 });
              });
          </script>
 
@@ -1464,7 +1684,9 @@
 
                  // Check if the input is not empty
                  if (dataToEncode.trim() === '') {
-                     alert('Please enter some text or a URL to generate the QR code.');
+                     streamSwalWarning(
+                         'Add a link or text in the field above, or use the default join link, then generate again.',
+                         'Nothing to encode');
                      return;
                  }
 
@@ -1640,7 +1862,8 @@
                              initSortable();
                              persistOrder();
                          } else {
-                             alert(data.message);
+                             streamSwalError(data.message || 'Could not attach this item to the stream.',
+                                 'Attach failed');
                          }
                      })
                      .catch(err => console.error('Gallery attach error:', err))
@@ -1649,72 +1872,83 @@
                      });
              }
 
-             function galleryDetach(mediaId, btn) {
-                 const card = btn.closest('.gallery-media-card');
-                 if (!card) return;
-                 btn.disabled = true;
-                 fetch(galleryDetachUrl, {
-                         method: 'POST',
-                         headers: {
-                             'X-CSRF-TOKEN': galleryCsrf,
-                             'Accept': 'application/json',
-                             'Content-Type': 'application/json'
-                         },
-                         body: JSON.stringify({
-                             live_show_id: liveShowId,
-                             gallery_media_id: parseInt(mediaId, 10)
-                         })
-                     })
-                     .then(r => r.json())
-                     .then(data => {
+             function ensureGalleryAttachedEmptyRow() {
+                 const tbody = document.getElementById('attached-media-list');
+                 if (!tbody) {
+                     return;
+                 }
+                 const hasAttached = tbody.querySelector('tr.gallery-media-card[data-media-id]');
+                 let emptyRow = document.getElementById('gallery-attached-empty');
+                 if (!hasAttached) {
+                     if (!emptyRow) {
+                         tbody.insertAdjacentHTML('beforeend',
+                             '<tr id="gallery-attached-empty" class="text-muted">' +
+                             '<td colspan="6" class="text-center py-3 small">No media attached. Use &quot;Add from gallery&quot; to attach items.</td>' +
+                             '</tr>'
+                         );
+                     }
+                 } else if (emptyRow) {
+                     emptyRow.remove();
+                 }
+             }
 
-                         if (data.success) {
-                             card.setAttribute('data-attached', '0');
-                             const body = card.querySelector('.card-body');
-                             if (body) {
-                                 let typeTag = '';
-                                 if (data.media && data.media.type) {
-                                     if (data.media.type === 'video') {
-                                         typeTag = '<span class="badge bg-primary mb-1">' +
-                                             data.media.type.charAt(0).toUpperCase() + data.media.type.slice(1) +
-                                             '</span>';
-                                     } else if (data.media.type === 'image') {
-                                         typeTag = '<span class="badge bg-warning text-dark mb-1">' +
-                                             data.media.type.charAt(0).toUpperCase() + data.media.type.slice(1) +
-                                             '</span>';
-                                     } else {
-                                         typeTag = '<span class="badge bg-info mb-1">' +
-                                             data.media.type.charAt(0).toUpperCase() + data.media.type.slice(1) +
-                                             '</span>';
-                                     }
-                                 }
-                                 let titleHtml = '';
-                                 if (data.media && data.media.title) {
-                                     titleHtml = '<div class="mt-2 text-muted small">' + data.media.title + '</div>';
-                                 }
-                                 body.innerHTML =
-                                     typeTag +
-                                     '<button type="button" class="btn btn-sm btn-outline-primary w-100 gallery-attach-btn" data-media-id="' +
-                                     mediaId + '" title="Attach to stream"><i class="fas fa-plus"></i> Attach</button>' +
-                                     titleHtml;
+             function galleryDetach(mediaId, btn) {
+                 const row = btn.closest('tr.gallery-media-card');
+                 if (!row) {
+                     return;
+                 }
+                 streamSwalConfirm({
+                     title: 'Remove from stream?',
+                     text: 'This media will be removed from this live show’s attached list. You can add it again later.',
+                     confirmButtonText: 'Yes, remove',
+                     confirmButtonColor: '#d33',
+                 }).then(function(result) {
+                     if (!result.isConfirmed) {
+                         return;
+                     }
+                     btn.disabled = true;
+                     fetch(galleryDetachUrl, {
+                             method: 'POST',
+                             headers: {
+                                 'X-CSRF-TOKEN': galleryCsrf,
+                                 'Accept': 'application/json',
+                                 'Content-Type': 'application/json'
+                             },
+                             body: JSON.stringify({
+                                 live_show_id: liveShowId,
+                                 gallery_media_id: parseInt(mediaId, 10)
+                             })
+                         })
+                         .then(function(r) {
+                             return r.json().then(function(data) {
+                                 return {
+                                     ok: r.ok,
+                                     data: data
+                                 };
+                             });
+                         })
+                         .then(function(res) {
+                             if (!res.ok || !res.data.success) {
+                                 streamSwalError(
+                                     (res.data && res.data.message) ? res.data.message :
+                                     'Could not remove this item from the stream.',
+                                     'Remove failed');
+                                 return;
                              }
-                             document.getElementById('gallery-available-list').appendChild(card);
-                             const availableEmpty = document.getElementById('gallery-available-empty');
-                             if (availableEmpty) availableEmpty.remove();
-                             const attachedList = document.getElementById('gallery-attached-list');
-                             if (attachedList && !attachedList.querySelector('.gallery-media-card')) {
-                                 const empty = document.createElement('div');
-                                 empty.className = 'col-12 text-muted small';
-                                 empty.id = 'gallery-attached-empty';
-                                 empty.innerHTML = 'None attached yet.'; // changed to innerHTML for consistency, here too
-                                 attachedList.appendChild(empty);
-                             }
-                         }
-                     })
-                     .catch(err => console.error('Gallery detach error:', err))
-                     .finally(() => {
-                         btn.disabled = false;
-                     });
+                             row.remove();
+                             updateRowIndices();
+                             persistOrder();
+                             ensureGalleryAttachedEmptyRow();
+                             streamSwalSuccess(res.data.message || 'Removed from this stream.', 'Removed');
+                         })
+                         .catch(function(err) {
+                             console.error('Gallery detach error:', err);
+                             streamSwalError('Could not remove this item. Please try again.', 'Remove failed');
+                         })
+                         .finally(function() {
+                             btn.disabled = false;
+                         });
+                 });
              }
 
              function fetchGalleryMediaItems() {
@@ -1726,7 +1960,7 @@
                      })
                      .then(r => r.json())
                      .then(data => {
-                         //  console.log('Gallery media items:', data);
+                         console.log('Gallery media items:', data);
                          if (data.success) {
                              //append gallery media items to gallery-available-list
                              const galleryAvailableList = document.getElementById('attached-media-list');
@@ -1735,12 +1969,16 @@
                                  data.media.forEach((media, idx) => {
 
                                      galleryAvailableList.insertAdjacentHTML('beforeend', attachGalleryMediaItemRow(
-                                         media.gallery_media, idx));
+                                         media, idx));
                                  });
+                                 if (!data.media.length) {
+                                     ensureGalleryAttachedEmptyRow();
+                                 }
                              }
                              initSortable();
                          } else {
-                             alert(data.message);
+                             streamSwalError(data.message || 'Could not load gallery items for this stream.',
+                                 'Gallery load failed');
                              return [];
                          }
                      })
@@ -1793,7 +2031,8 @@
                             <button type="button"
                                 class="btn btn-sm btn-outline-danger gallery-detach-btn"
                                 data-media-id="${data.id}"
-                                title="Remove from stream">
+                                title="Remove from stream"
+                                onclick="galleryDetach('${data.id}', this)">
                                 <i class="fas fa-times"></i>
                             </button>
                             <button type="button"
@@ -1919,6 +2158,9 @@
              function persistOrder() {
                  const rows = document.querySelectorAll('#attached-media-list tr[data-media-id]');
                  const order = Array.from(rows).map(r => parseInt(r.dataset.mediaId, 10));
+                 if (order.length === 0) {
+                     return;
+                 }
 
                  fetch(galleryReorderUrl, {
                          method: 'POST',
@@ -1972,13 +2214,42 @@
                              fetchGalleryMediaItems();
                          } else {
                              console.error('Attach media item error:', data);
-                             alert(data.message);
+                             streamSwalError(data.message || 'Could not attach this media item.', 'Attach failed');
                          }
                      })
                      .catch(err => console.error('Attach media item error:', err))
                      .finally(() => {
                          btn.disabled = false;
                      });
+             }
+
+
+
+             function togglePreviewMute() {
+                 // Assuming the iframe for preview has an id="live-show-preview-iframe"
+                 var iframe = document.getElementById('live-show-preview-iframe');
+                 if (iframe && iframe.contentWindow) {
+                     // Try to access the video/audio element in the iframe via postMessage or direct access
+                     // This requires the iframe to be in the same origin
+                     try {
+                         // Direct access (same origin)
+                         var video = iframe.contentWindow.document.querySelector('video, audio');
+                         if (video) {
+                             video.muted = !video.muted;
+                             document.getElementById('mutePreviewIcon').className = video.muted ? 'fas fa-volume-mute' :
+                                 'fas fa-volume-up';
+                         } else {
+                             // No video/audio found
+                             streamSwalError('No audio/video found in the preview.', 'Mute Preview');
+                         }
+                     } catch (e) {
+                         // If cross-origin or error
+                         streamSwalError('Unable to mute the preview due to browser restrictions or cross-origin.',
+                             'Mute Preview');
+                     }
+                 } else {
+                     streamSwalError('Preview iframe not found.', 'Mute Preview');
+                 }
              }
          </script>
          <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>

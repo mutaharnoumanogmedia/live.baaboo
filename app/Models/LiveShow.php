@@ -24,6 +24,7 @@ class LiveShow extends Model
         'max_winners',
         'max_players',
         'chat_enabled',
+        'winners_announced',
         'created_by',
 
         'start_time',
@@ -37,6 +38,7 @@ class LiveShow extends Model
         'max_players' => 'integer',
         'is_test_show' => 'boolean',
         'chat_enabled' => 'boolean',
+        'winners_announced' => 'boolean',
         'start_time' => 'datetime',
         'end_time' => 'datetime',
     ];

@@ -301,6 +301,15 @@ class LiveShowController extends Controller
         if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
+
+        if ($liveShow->winners_announced) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Winners have already been announced for this live show.',
+                'winners_announced' => true,
+            ], 422);
+        }
+
         // make all users is_winner = false
         $liveShow->users()->update(['is_winner' => false]);
 
@@ -370,7 +379,14 @@ class LiveShowController extends Controller
             }
         }
 
-        return response()->json(['success' => true, 'message' => 'Users winner status updated.', 'winnerUsers' => $topMaxWinnersByScore]);
+        $liveShow->update(['winners_announced' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Winners have been announced. Winner notification emails have been queued for the winners.',
+            'winners_announced' => true,
+            'winnerUsers' => $topMaxWinnersByScore,
+        ]);
     }
 
     public function apiGetLiveShowMessages($id)
@@ -712,7 +728,7 @@ class LiveShowController extends Controller
 
         \App\Events\UpdateLiveShowEvent::dispatch((string) $liveShow->id, $liveShow->status, $updateMessage);
 
-        return response()->json(['message' => 'Live show has been updated successfully.']);
+        return response()->json(['message' => 'Live show has been updated successfully.', 'status' => $newStatus]);
     }
 
     public function getUsersQuizResponses(

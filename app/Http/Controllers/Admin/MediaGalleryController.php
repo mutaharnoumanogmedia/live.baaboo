@@ -506,7 +506,7 @@ class MediaGalleryController extends Controller
     {
         $live_show = LiveShow::findOrFail($live_show);
 
-        $media = $live_show->galleryMediaItems;
+        $media = $live_show->galleryMedia;
 
         return response()->json([
             'success' => true,

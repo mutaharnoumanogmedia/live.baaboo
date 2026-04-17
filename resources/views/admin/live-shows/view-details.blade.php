@@ -91,6 +91,18 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <div class="border border-secondary rounded p-3 h-100">
+                                        <small class="text-secondary d-block mb-1">Winners announced</small>
+                                        @if (! empty($liveShow->winners_announced))
+                                            <strong class="text-success">Yes</strong>
+                                            <span class="d-block small text-muted mt-1">Winner emails are queued per
+                                                your schedule.</span>
+                                        @else
+                                            <strong class="text-warning">No</strong>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="border border-secondary rounded p-3 h-100">
                                         <small class="text-secondary d-block mb-1">Total Players</small>
                                         <strong>{{ $players->count() }}</strong>
                                     </div>
