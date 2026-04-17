@@ -904,7 +904,7 @@ class LiveShowController extends Controller
     {
         $liveShow = LiveShow::findOrFail($id);
         $totalQuestions = $liveShow->quizzes()->count();
-        $winners = $liveShow->users()->where('is_winner', true)->get();
+        $winners = $liveShow->users()->where('is_winner', true)->orderByDesc('user_live_shows.score')->get();
         $csv = fopen('php://temp', 'w');
         fputcsv($csv, ['#', 'Name', 'Email', 'Score', 'Correct Answers', 'Total Questions', 'Is Winner', 'Prize Won', 'Status', 'Joined At']);
         foreach ($winners as $index => $winner) {
