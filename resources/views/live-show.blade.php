@@ -512,6 +512,7 @@
         const $videoContainer = document.querySelector('#videoContainer');
         const $quizOverlay = document.getElementById('quizOverlay');
         const $overlayChat = document.getElementById('overlayChat');
+        const OVERLAY_CHAT_MAX_MESSAGES = 100;
 
         const overlay = document.getElementById('galleryOverlayModal');
         const img = document.getElementById('galleryOverlayImage');
@@ -959,14 +960,31 @@
             }
         }
 
+        function trimOverlayChatToMax(overlayChat) {
+            if (!overlayChat) {
+                return;
+            }
+            while (overlayChat.querySelectorAll('.chat-message-overlay').length > OVERLAY_CHAT_MAX_MESSAGES) {
+                const oldest = overlayChat.querySelector('.chat-message-overlay');
+                if (!oldest) {
+                    break;
+                }
+                oldest.remove();
+            }
+        }
+
         function fetchMessages() {
             fetch('{{ url('/live-show/' . $liveShow->id . '/messages') }}')
                 .then(response => response.json())
                 .then(data => {
 
                     const overlayChat = document.getElementById('overlayChat');
+                    if (!overlayChat) {
+                        return;
+                    }
                     overlayChat.innerHTML = ''; // Clear existing messages
-                    data.messages.forEach(msg => {
+                    const messages = (data.messages || []).slice(-OVERLAY_CHAT_MAX_MESSAGES);
+                    messages.forEach(msg => {
                         // console.log('msg:', msg);
                         if (msg.user !== null) {
                             addOverlayMessage('@' + msg.user.name, msg.message);
@@ -978,6 +996,13 @@
 
         function addOverlayMessage(user, text) {
             const overlayChat = document.getElementById('overlayChat');
+            if (!overlayChat) {
+                return;
+            }
+            const emptyHint = overlayChat.querySelector('p.text-muted');
+            if (emptyHint) {
+                emptyHint.remove();
+            }
             const messageDiv = document.createElement('div');
             messageDiv.className = 'chat-message-overlay';
             messageDiv.innerHTML = `
@@ -985,14 +1010,7 @@
                 <div class="message-text">${text}</div>
             `;
             overlayChat.appendChild(messageDiv);
-            while (overlayChat.children.length > 100) {
-                let firstChild = overlayChat.firstChild;
-                firstChild.remove();
-
-                // console.log('removed first child:', firstChild, 'overlayChat children length:', overlayChat.children
-                //     .length);
-
-            }
+            trimOverlayChatToMax(overlayChat);
             overlayChat.scrollTop = overlayChat.scrollHeight;
 
         }
