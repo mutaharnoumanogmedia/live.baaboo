@@ -524,8 +524,7 @@
                              <div class="tab-pane fade" id="live-show-preview">
                                  <div class="p-2 d-flex justify-content-center align-items-center   ">
                                      <iframe src="{{ url('live-show-play/' . $liveShow->id) }}?preview=true"
-                                         id="live-show-preview-iframe"
-                                         class="live-show-preview-iframe mt-2"
+                                         id="live-show-preview-iframe" class="live-show-preview-iframe mt-2"
                                          style="height: 956px; width: 500px; pointer-events: none; border-radius: 30px; border: 1px solid #ccc;overflow: hidden;"
                                          allowfullscreen="true" allow="autoplay; encrypted-media; picture-in-picture"
                                          frameborder="0"></iframe>
@@ -1640,7 +1639,12 @@
                      text: 'This will remove all current player progress for this live show.',
                      confirmButtonText: 'Yes, reset game',
                      confirmButtonColor: '#d33',
-                 }).then(function(result) {
+                 }).then(function(result) { //add spinner to the button
+                     const btn = document.getElementById('resetGameButton');
+                     if (btn) {
+                         btn.disabled = true;
+                         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resetting...';
+                     }
                      if (!result.isConfirmed) {
                          return;
                      }
@@ -1655,7 +1659,8 @@
                          .then(data => {
                              streamSwalSuccess(data.message || 'The game has been reset.',
                                  'Game reset');
-                             refreshVisiblePlayers();
+                             //refreshVisiblePlayers();
+                             window.location.reload();
                          })
                          .catch(error => {
                              console.error('Error resetting game:', error);

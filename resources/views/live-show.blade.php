@@ -1534,12 +1534,12 @@
             console.log('Update Live Show:', data);
             location.reload();
 
-                // if (data.status && data.status != 'live') {
-                //     emptyTheBodyWithEndShow(data.updateMessage);
-                // } else {
-                //     //reload the page to reflect the changes
-                //     location.reload();
-                // }
+            // if (data.status && data.status != 'live') {
+            //     emptyTheBodyWithEndShow(data.updateMessage);
+            // } else {
+            //     //reload the page to reflect the changes
+            //     location.reload();
+            // }
             // emptyTheBodyWithEndShow();
         });
 
@@ -2268,6 +2268,10 @@
             }
         });
     </script>
+
+    @if (request()->boolean('debug_bot') && $liveShow->is_test_show)
+        <script src="{{ url('js/live-show-quiz-debug-bot.js') }}"></script>
+    @endif
 
     {{-- <script src="https://unpkg.com/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
     <script>
