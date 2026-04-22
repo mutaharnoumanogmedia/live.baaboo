@@ -585,52 +585,60 @@ class LiveShowController extends Controller
         $skip = max((int) request()->get('skip', 0), 0);
         $take = max((int) request()->get('take', 100), 1);
         $search = trim((string) request()->get('search', ''));
+        try {
 
-        $totalUsers = $liveShow->users()->count();
+            $totalUsers = $liveShow->users()->count();
+            $quizService = new LiveShowQuizService;
+            $players = $quizService->getSortedPlayers($liveShow);
 
-        $usersQuery = $liveShow->users()
-            ->withPivot(['score', 'status', 'is_winner', 'created_at', 'last_active', 'is_online', 'prize_won'])
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($subQuery) use ($search) {
-                    $subQuery
-                        ->where('users.name', 'like', '%'.$search.'%')
-                        ->orWhere('users.email', 'like', '%'.$search.'%')
-                        ->orWhere('users.user_name', 'like', '%'.$search.'%');
+            $usersQuery = $players
+                ->when($search !== '', function ($query) use ($search) {
+                    $query->where(function ($subQuery) use ($search) {
+                        $subQuery
+                            ->where('users.name', 'like', '%'.$search.'%')
+                            ->orWhere('users.email', 'like', '%'.$search.'%')
+                            ->orWhere('users.user_name', 'like', '%'.$search.'%');
+                    });
                 });
-            });
 
-        $filteredUsers = (clone $usersQuery)->count();
+            $filteredUsers = (clone $usersQuery)->count();
 
-        $users = $usersQuery
-            ->orderByDesc('user_live_shows.score')
-            ->skip($skip)
-            ->take($take)
-            ->get()
-            ->map(function ($user) use ($id) {
-                return [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'is_online' => $user->pivot->is_online,
-                    'is_winner' => $user->pivot->is_winner ?? null,
-                    'status' => $user->pivot->status ?? null,
-                    'score' => $user->pivot->score ?? null,
-                    'prize_won' => $user->pivot->prize_won ?? null,
-                    'is_blocked' => $user->blockedLiveShows()
-                        ->where('live_show_id', $id)
-                        ->exists(),
-                ];
-            })
-            ->values();
+            $users = $usersQuery
+                ->skip($skip)
+                ->take($take)
+              
+                ->map(function ($user) use ($id) {
+                    return [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'email' => $user->email,
+                        'is_online' => $user->pivot->is_online,
+                        'is_winner' => $user->pivot->is_winner ?? null,
+                        'status' => $user->pivot->status ?? null,
+                        'score' => $user->pivot->score ?? null,
+                        'prize_won' => $user->pivot->prize_won ?? null,
+                        'is_blocked' => $user->blockedLiveShows()
+                            ->where('live_show_id', $id)
+                            ->exists(),
+                    ];
+                })
+                ->values();
 
-        return response()->json([
-            'users' => $users,
-            'totalUsers' => $totalUsers,
-            'filteredUsers' => $filteredUsers,
-            'skip' => $skip,
-            'take' => $take,
-            'hasMore' => ($skip + $users->count()) < $filteredUsers,
-        ]);
+            return response()->json([
+                'users' => $users,
+                'totalUsers' => $totalUsers,
+                'filteredUsers' => $filteredUsers,
+                'skip' => $skip,
+                'take' => $take,
+                'hasMore' => ($skip + $users->count()) < $filteredUsers,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching live show users.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function allPlayers($id)
