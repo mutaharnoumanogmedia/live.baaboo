@@ -1094,9 +1094,7 @@
 
                         isEliminated = data.isEliminated == true ? true : false;
 
-                        // console.log('User registered successfully:', data, 'isEliminated:', isEliminated,
-                        //     'isLoggedIn:', isLoggedIn, 'userId:', userId);
-
+                    
                         playerAsWinnerEventTrigger();
                         userBlockedFromLiveShowEventTrigger();
                         checkIfUserBlockedFromLiveShow();
@@ -1477,12 +1475,8 @@
                             console.error('Error fetching prize money:', err);
                         });
                 }
-                document.getElementById('playerTab-tab').click();
-
-
-
-
-                // Optionally, you can add more UI feedback here, like a popup or sound effect.
+                document.getElementById('player-tab-nav-item').click();
+                document.getElementById('playerTab').click();
             });
 
         }
