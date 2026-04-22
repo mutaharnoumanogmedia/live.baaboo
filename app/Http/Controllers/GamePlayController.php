@@ -51,6 +51,10 @@ class GamePlayController extends Controller
                 $updateMessage = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme! Die nächste Show ist am '.Carbon::parse($nextScheduledLiveShow->scheduled_at)->format('d.m.Y H:i').'Uhr statt.';
             }
         }
+        // if shceduled
+        if ($liveShow->status == 'scheduled') {
+            $updateMessage = 'Die Live-Sendung ist geplant. Die Show startet am '.Carbon::parse($liveShow->scheduled_at)->format('d.m.Y H:i').'Uhr.';
+        }
 
         return view('live-show', compact('liveShow', 'isEliminated', 'galleryStreamInitial', 'updateMessage'));
     }
@@ -545,8 +549,6 @@ class GamePlayController extends Controller
         if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
-
-     
 
         $skip = request()->get('skip', 0);
         $take = request()->get('take', 100);
