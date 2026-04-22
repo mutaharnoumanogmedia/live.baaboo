@@ -664,6 +664,31 @@
 
         }
 
+        function showWinnersTabForParticipants() {
+            const playerTabLink = document.getElementById('playerTab-tab');
+            const playerTabPane = document.getElementById('playerTab');
+            const chatTabLink = document.getElementById('chatTab-tab');
+            const chatTabPane = document.getElementById('chatTab');
+
+            if (chatTabLink) {
+                chatTabLink.classList.remove('active');
+                chatTabLink.setAttribute('aria-selected', 'false');
+            }
+            if (chatTabPane) {
+                chatTabPane.classList.remove('show', 'active');
+            }
+
+            if (playerTabLink) {
+                playerTabLink.classList.add('active');
+                playerTabLink.setAttribute('aria-selected', 'true');
+            }
+            if (playerTabPane) {
+                playerTabPane.classList.add('show', 'active');
+            }
+
+            updatePlayersLeaderboard();
+        }
+
 
         $(document).ready(function() {
             // onLoadGameShow();
@@ -1475,12 +1500,10 @@
                             console.error('Error fetching prize money:', err);
                         });
                 }
-                document.getElementById('player-tab-nav-item').click();
-                document.getElementById('playerTab').click();
+               
             });
 
         }
-
 
         function showWinnerDialogDiv() {
             // Show the winner dialog
@@ -1648,6 +1671,10 @@
         channel2.bind('HideLiveShowWinnersTabEvent', function(data) {
             console.log('Hide winners tab event received:', data);
             hideWinnersTabForParticipants();
+        });
+        channel2.bind('ShowLiveShowWinnersTabEvent', function(data) {
+            console.log('Show winners tab event received:', data);
+            showWinnersTabForParticipants();
         });
 
 

@@ -12,6 +12,7 @@ use App\Events\RemoveLiveShowQuizQuestionEvent;
 use App\Events\ResetChatEvent;
 use App\Events\SetBroadcastRoomIdEvent;
 use App\Events\ShowGalleryImageEvent;
+use App\Events\ShowLiveShowWinnersTabEvent;
 use App\Events\ShowLiveShowQuizQuestionEvent;
 use App\Events\ShowPlayerAsWinnerEvent;
 use App\Events\UserBlockFromLiveShowEvent;
@@ -380,6 +381,8 @@ class LiveShowController extends Controller
         }
 
         $liveShow->update(['winners_announced' => true]);
+        ShowLiveShowWinnersTabEvent::dispatch((string) $liveShow->id);
+
 
         return response()->json([
             'success' => true,
@@ -496,6 +499,17 @@ class LiveShowController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Winners tab hidden for participants.',
+        ]);
+    }
+
+    public function showWinnersTab($id): JsonResponse
+    {
+        $liveShow = LiveShow::findOrFail($id);
+        ShowLiveShowWinnersTabEvent::dispatch((string) $liveShow->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Winners tab shown for participants.',
         ]);
     }
 

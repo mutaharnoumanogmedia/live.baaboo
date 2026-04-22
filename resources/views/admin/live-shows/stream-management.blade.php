@@ -176,6 +176,11 @@
                                                          Updating…
                                                      </span>
                                                  </button>
+                                                <button type="button"
+                                                    class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm my-2"
+                                                    onclick="showWinnerTab()">
+                                                    <i class="fas fa-eye me-2"></i> Show winner tab
+                                                </button>
                                                  <button type="button"
                                                      class="btn btn-outline-warning w-100 py-2 fw-bold text-white shadow-sm my-2"
                                                      onclick="hideWinnerTab()">
@@ -1662,6 +1667,39 @@
                          });
                  });
              }
+
+            function showWinnerTab() {
+                streamSwalConfirm({
+                    title: 'Show winner tab?',
+                    text: 'Participants will be switched to the winners tab in the live show.',
+                    confirmButtonText: 'Yes, show tab',
+                }).then(function(result) {
+                    if (!result.isConfirmed) {
+                        return;
+                    }
+                    fetch(`{{ route('admin.live-shows.stream-management.show-winners-tab', ['id' => $liveShow->id]) }}`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                            },
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                streamSwalSuccess(data.message || 'The winners tab is now shown for participants.',
+                                    'Winners tab shown');
+                            } else {
+                                streamSwalError(data.message || 'Could not show the winners tab.',
+                                    'Request failed');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error showing winners tab:', error);
+                            streamSwalError('Could not show the winners tab. Please try again.', 'Request failed');
+                        });
+                });
+            }
          </script>
          <script>
              document.addEventListener('DOMContentLoaded', function() {
