@@ -902,12 +902,9 @@ class LiveShowController extends Controller
     public function viewDetails($id)
     {
         $liveShow = LiveShow::with(['creator', 'winnerPrizes', 'quizzes.options'])->findOrFail($id);
+        $quizService = new LiveShowQuizService;
 
-        $players = $liveShow->users()
-            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at'])
-            ->orderByDesc('user_live_shows.is_winner')
-            ->orderByDesc('user_live_shows.score')
-            ->get();
+        $players = $quizService->getSortedPlayers($liveShow);
 
         $totalQuestions = $liveShow->quizzes->count();
 
@@ -954,11 +951,8 @@ class LiveShowController extends Controller
     {
         $liveShow = LiveShow::findOrFail($id);
 
-        $players = $liveShow->users()
-            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'created_at'])
-            ->orderByDesc('user_live_shows.is_winner')
-            ->orderByDesc('user_live_shows.score')
-            ->get();
+        $quizService = new LiveShowQuizService;
+        $players = $quizService->getSortedPlayers($liveShow);
 
         $totalQuestions = $liveShow->quizzes()->count();
 
@@ -999,7 +993,9 @@ class LiveShowController extends Controller
     public function exportWinnersCSV($id)
     {
         $liveShow = LiveShow::findOrFail($id);
-        $winners = $liveShow->users()->where('is_winner', true)->orderByDesc('user_live_shows.score')->get();
+        $quizService = new LiveShowQuizService;
+        $winners = $quizService->getSortedPlayers($liveShow)->where('pivot.is_winner', true);
+
         $csv = fopen('php://temp', 'w');
         fputcsv($csv, ['#', 'Name', 'Email', 'Score',  'Is Winner', 'Prize Won', 'Status', 'Joined At']);
         foreach ($winners as $index => $winner) {

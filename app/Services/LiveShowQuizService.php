@@ -2,17 +2,14 @@
 
 namespace App\Services;
 
+use App\Models\LiveShow;
 use App\Models\LiveShowQuiz;
-
 use App\Models\UserQuizResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
-
+use Illuminate\Support\Facades\DB;
 
 class LiveShowQuizService
 {
-
-
     public function calculateResponseStatistics(LiveShowQuiz $quiz): Collection
     {
         // Get statistics only for options that have at least one response
@@ -34,10 +31,25 @@ class LiveShowQuizService
 
             return (object) [
                 'quiz_option_id' => $option->id,
-                'option_text'    => $option->option_text, // Include option text for context
+                'option_text' => $option->option_text, // Include option text for context
                 'total_response_for_option' => $stats ? (int) $stats->total_response_for_option : 0,
-                'percentage'     => $stats ? round((float) $stats->percentage, 2) : 0.0,
+                'percentage' => $stats ? round((float) $stats->percentage, 2) : 0.0,
             ];
         });
+    }
+
+    /**
+     * Get sorted players for a live show, with pivot data.
+     */
+    public function getSortedPlayers(LiveShow $liveShow): Collection
+    {
+        return $liveShow->users()
+            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at'])
+            ->get()
+            ->sortByDesc(function ($user) {
+                // Use the accessor in UserLiveShow model for score
+                return $user->pivot->score;
+            })
+            ->values();
     }
 }

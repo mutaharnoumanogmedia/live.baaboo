@@ -14,6 +14,7 @@ use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use App\Models\Viewer;
 use App\Services\AffiliateAPIService;
+use App\Services\LiveShowQuizService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -545,59 +546,18 @@ class GamePlayController extends Controller
             return response()->json(['message' => 'Live show not found.'], 404);
         }
 
-        // $usersWithScores = $liveShow->users()
-        //     ->with(['quizResponses' => function ($query) use ($liveShowId) {
-        //         $query->whereHas('userQuiz.quiz', function ($q) use ($liveShowId) {
-        //             $q->where('live_show_id', $liveShowId);
-        //         });
-        //     }])
-        //     ->wherePivot('status', 'registered')
-        //     ->get()
-        //     ->map(function ($user) use ($liveShowId) {
-        //         // Calculate total score
-        //         $score = $user->pivot->score ?? 0;
-        //         // Find the user's quiz responses for this live show and calculate total seconds_to_submit
-        //         $userQuizResponses = $user->quizResponses()
-        //             ->whereHas('userQuiz', function ($q) use ($liveShowId) {
-        //                 $q->where('live_show_id', $liveShowId);
-        //             })
-        //             ->get();
-
-        //         $totalMilliSecondsToSubmit = $userQuizResponses->sum('seconds_to_submit');
-        //         $firstResponseTime = $userQuizResponses->min('created_at') ?? now();
-
-        //         return [
-        //             'id' => $user->id,
-        //             'name' => $user->name,
-        //             'score' => $score,
-        //             'is_winner' => $user->pivot->is_winner ?? false,
-        //             'total_seconds_to_submit' => $totalMilliSecondsToSubmit,
-        //             'first_response_time' => $firstResponseTime,
-        //         ];
-        //     })
-        //     ->sort(function ($a, $b) {
-        //         // Sort by score descending, then by total_seconds_to_submit ascending
-        //         if ($a['score'] === $b['score']) {
-        //             return $a['total_seconds_to_submit'] <=> $b['total_seconds_to_submit'];
-        //         }
-
-        //         return $b['score'] <=> $a['score'];
-        //     })
-        //     ->values();
-
-        // return response()->json(['users' => $usersWithScores], 200);
+     
 
         $skip = request()->get('skip', 0);
         $take = request()->get('take', 100);
 
         $totalUsers = $liveShow->users()->count();
+        $quizService = new LiveShowQuizService;
+        $users = $quizService->getSortedPlayers($liveShow);
 
-        $users = $liveShow->users()
-            ->withPivot(['score', 'status', 'is_winner', 'created_at', 'last_active', 'is_online', 'prize_won'])
-            ->orderByDesc('user_live_shows.score')
+        $users = $users
             ->skip($skip)
             ->take($take)
-            ->get()
             ->map(function ($user) use ($liveShowId) {
                 return [
                     'id' => $user->id,
