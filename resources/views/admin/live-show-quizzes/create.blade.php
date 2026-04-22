@@ -9,7 +9,7 @@
                 <label>Live Show</label>
                 <select name="live_show_id" class="form-control" required>
                     @foreach ($liveShows as $id => $title)
-                        <option value="{{ $id }}">{{ $title }}</option>
+                        <option value="{{ $id }}" {{ isset($_GET['live_show_id']) && $_GET['live_show_id'] == $id ? 'selected' : '' }}>{{ $title }}</option>
                     @endforeach
                 </select>
             </div>
