@@ -1976,7 +1976,7 @@
                         vid.play().catch(function(e) {
                             console.error('Error playing video:', e);
                         });
-                    }, 500);
+                    }, 1000);
 
                 };
 
