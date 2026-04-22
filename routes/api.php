@@ -128,11 +128,11 @@ Route::post('/live-show/{id}/quizzes/{quizId}/remove-quiz-question', function (\
     return response()->json(['message' => 'Quiz question removed successfully!']);
 });
 
-Route::get('live-show/{id}/get-live-show-quizzes', function ($id) {
+// Route::get('live-show/{id}/get-live-show-quizzes', function ($id) {
 
-    $liveShow = \App\Models\LiveShow::findOrFail($id);
-    $quizzes = $liveShow->quizzes()->with('options')->get();
+//     $liveShow = \App\Models\LiveShow::findOrFail($id);
+//     $quizzes = $liveShow->quizzes()->with('options')->get();
 
-    return response()->json($quizzes);
+//     return response()->json($quizzes);
 
-})->name('api.get-live-show-quizzes');
+// })->name('api.get-live-show-quizzes');

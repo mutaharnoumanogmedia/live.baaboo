@@ -534,6 +534,7 @@
         const VAPID_PUBLIC_KEY = "{{ env('VAPID_PUBLIC_KEY') }}";
         const csrfToken = "{{ csrf_token() }}";
 
+
         let isLoggedIn = {{ Auth::guard('web')->check() ? 'true' : 'false' }};
         let userId = {{ Auth::guard('web')->check() ? Auth::guard('web')->user()->id : -1 }};
         console.log("initial val of issLoggedIn ", isLoggedIn, userId);
@@ -1224,7 +1225,7 @@
             $(".option-result-container").css("display", "none");
 
             console.log('Showing quiz question:', quiz, 'with timer:', timer);
-            toggleQuiz("hide");
+            toggleQuiz("remove");
             appendQuizQuestion(quiz);
             startTimer(timer, evaluateAnswerWithTimeToSubmit);
             quizMode = false;
@@ -2109,69 +2110,69 @@
         // Auto-trigger quiz questions after login for live show id 1004
 
 
-        if (typeof {{ $liveShow->id }} !== 'undefined' && {{ $liveShow->id }} == 1004) {
+        // if (typeof {{ $liveShow->id }} !== 'undefined' && {{ $liveShow->id }} == 1004) {
 
-            function autoShowQuizQuestions() {
-                setTimeout(() => {
-                    // Fetch quizzes with options (quizzes = questions)
-                    fetch('{{ url('api/live-show/' . $liveShow->id . '/get-live-show-quizzes') }}')
-                        .then(response => response.json())
-                        .then(quizzes => {
-                            if (!Array.isArray(quizzes) || quizzes.length === 0) {
-                                console.log("No quiz questions received");
-                                return;
-                            }
-                            let idx = 0;
+        //     function autoShowQuizQuestions() {
+        //         setTimeout(() => {
+        //             // Fetch quizzes with options (quizzes = questions)
+        //             fetch('{{ url('api/live-show/' . $liveShow->id . '/get-live-show-quizzes') }}')
+        //                 .then(response => response.json())
+        //                 .then(quizzes => {
+        //                     if (!Array.isArray(quizzes) || quizzes.length === 0) {
+        //                         console.log("No quiz questions received");
+        //                         return;
+        //                     }
+        //                     let idx = 0;
 
-                            function showNextQuestion() {
-                                if (idx >= quizzes.length) {
-                                    return;
-                                }
-                                const quiz = quizzes[idx];
+        //                     function showNextQuestion() {
+        //                         if (idx >= quizzes.length) {
+        //                             return;
+        //                         }
+        //                         const quiz = quizzes[idx];
 
-                                // 1. Show the quiz by hitting send-quiz-question API
-                                fetch('{{ url('api/live-show/' . $liveShow->id) }}/quizzes/' + quiz.id +
-                                        '/send-quiz-question', {
-                                            method: 'POST',
-                                            headers: {
-                                                'Content-Type': 'application/json',
-                                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                            },
-                                            body: JSON.stringify({
-                                                seconds: 10,
-                                                is_last: (idx === quizzes.length - 1)
-                                            })
-                                        })
-                                    .then(() => {
-                                        // 2. After 10 seconds, hide/remove question
-                                        setTimeout(() => {
-                                            fetch('{{ url('api/live-show/' . $liveShow->id) }}/quizzes/' +
-                                                    quiz.id + '/remove-quiz-question', {
-                                                        method: 'POST',
-                                                        headers: {
-                                                            'Content-Type': 'application/json',
-                                                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                                        }
-                                                    })
-                                                .then(() => {
-                                                    // 3. Wait 5 seconds before next
-                                                    setTimeout(() => {
-                                                        idx++;
-                                                        showNextQuestion();
-                                                    }, 5000);
-                                                });
-                                        }, 10000);
-                                    });
-                            }
+        //                         // 1. Show the quiz by hitting send-quiz-question API
+        //                         fetch('{{ url('api/live-show/' . $liveShow->id) }}/quizzes/' + quiz.id +
+        //                                 '/send-quiz-question', {
+        //                                     method: 'POST',
+        //                                     headers: {
+        //                                         'Content-Type': 'application/json',
+        //                                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        //                                     },
+        //                                     body: JSON.stringify({
+        //                                         seconds: 10,
+        //                                         is_last: (idx === quizzes.length - 1)
+        //                                     })
+        //                                 })
+        //                             .then(() => {
+        //                                 // 2. After 10 seconds, hide/remove question
+        //                                 setTimeout(() => {
+        //                                     fetch('{{ url('api/live-show/' . $liveShow->id) }}/quizzes/' +
+        //                                             quiz.id + '/remove-quiz-question', {
+        //                                                 method: 'POST',
+        //                                                 headers: {
+        //                                                     'Content-Type': 'application/json',
+        //                                                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        //                                                 }
+        //                                             })
+        //                                         .then(() => {
+        //                                             // 3. Wait 5 seconds before next
+        //                                             setTimeout(() => {
+        //                                                 idx++;
+        //                                                 showNextQuestion();
+        //                                             }, 5000);
+        //                                         });
+        //                                 }, 10000);
+        //                             });
+        //                     }
 
-                            showNextQuestion();
-                        })
-                        .catch(err => {
-                            console.error('Failed to fetch quiz questions:', err);
-                        });
-                }, 5000);
-            }
-        }
+        //                     showNextQuestion();
+        //                 })
+        //                 .catch(err => {
+        //                     console.error('Failed to fetch quiz questions:', err);
+        //                 });
+        //         }, 5000);
+        //     }
+        // }
         document.addEventListener('DOMContentLoaded', function() {
             if ("{{ $liveShow->id }}" == 1004 && isLoggedIn) {
                 autoShowQuizQuestions();

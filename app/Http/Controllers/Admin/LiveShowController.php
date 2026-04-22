@@ -389,6 +389,27 @@ class LiveShowController extends Controller
         ]);
     }
 
+    public function unannounceWinners(Request $request, $liveShowId): JsonResponse
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::check()], 401);
+        }
+
+        $liveShow = LiveShow::find($liveShowId);
+        if (! $liveShow) {
+            return response()->json(['success' => false, 'message' => 'Live show not found.'], 404);
+        }
+
+        $liveShow->update(['winners_announced' => false]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Winners announcement has been cleared. You can announce winners again when ready.',
+            'winners_announced' => false,
+        ]);
+    }
+
     public function apiGetLiveShowMessages($id)
     {
         $liveShow = LiveShow::findOrFail($id);

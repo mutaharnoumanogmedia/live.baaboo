@@ -70,6 +70,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // updateWinners
     Route::post('live-shows/stream-management/{liveShowId}/update-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'updateWinners'])->name('live-shows.update-winners');
+    Route::post('live-shows/stream-management/{liveShowId}/unannounce-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'unannounceWinners'])->name('live-shows.unannounce-winners');
 
     Route::post('live-shows/{id}/block-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'blockUser'])->name('live-shows.block-user');
     Route::post('live-shows/{id}/unblock-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'unblockUser'])->name('live-shows.unblock-user');

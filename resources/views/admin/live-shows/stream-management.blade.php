@@ -16,6 +16,10 @@
                      class="btn btn-outline-secondary">
                      <i class="fas fa-edit me-1"></i> Edit
                  </a>
+                 <a target="_blank" href="{{ route('admin.live-shows.view-details', $liveShow->id) }}"
+                     class="btn btn-outline-info">
+                     <i class="fas fa-info-circle me-1"></i> Details
+                 </a>
                  <button class="btn btn-outline-danger" id="resetGameButton">
                      <i class="fas fa-undo me-1"></i> Reset
                  </button>
@@ -158,6 +162,20 @@
                                                      Winners have been announced. Winner notification emails have been
                                                      queued for the winners.
                                                  </p>
+                                                 <button type="button" id="unannounceWinnersBtn"
+                                                     class="btn btn-outline-secondary w-100 py-2 fw-bold shadow-sm my-2 @if (!$liveShow->winners_announced) d-none @endif"
+                                                     onclick="unannounceWinners()">
+                                                     <span id="unannounceWinnersBtnLabel"
+                                                         class="unannounce-winners-btn-label">
+                                                         <i class="fas fa-undo me-2"></i> Un-announce winners
+                                                     </span>
+                                                     <span id="unannounceWinnersBtnLoader"
+                                                         class="unannounce-winners-btn-loader d-none">
+                                                         <i class="fas fa-spinner fa-spin me-2"
+                                                             aria-hidden="true"></i>
+                                                         Updating…
+                                                     </span>
+                                                 </button>
                                                  <button type="button"
                                                      class="btn btn-outline-warning w-100 py-2 fw-bold text-white shadow-sm my-2"
                                                      onclick="hideWinnerTab()">
@@ -1441,6 +1459,110 @@
                      ack.classList.remove('d-none');
                  }
                  liveShowWinnersAnnounced = true;
+                 const unBtn = document.getElementById('unannounceWinnersBtn');
+                 if (unBtn) {
+                     unBtn.classList.remove('d-none');
+                     unBtn.disabled = false;
+                 }
+             }
+
+             function setUnannounceWinnersLoading(isLoading) {
+                 const btn = document.getElementById('unannounceWinnersBtn');
+                 const label = document.getElementById('unannounceWinnersBtnLabel');
+                 const loader = document.getElementById('unannounceWinnersBtnLoader');
+                 if (!btn || !label || !loader) {
+                     return;
+                 }
+                 if (isLoading) {
+                     btn.disabled = true;
+                     label.classList.add('d-none');
+                     loader.classList.remove('d-none');
+                 } else {
+                     loader.classList.add('d-none');
+                     label.classList.remove('d-none');
+                     btn.disabled = false;
+                 }
+             }
+
+             function applyUnannounceWinnersCompleted() {
+                 const btn = document.getElementById('announceWinnersBtn');
+                 const label = document.getElementById('announceWinnersBtnContent');
+                 const loader = document.getElementById('announceWinnersBtnLoader');
+                 const done = document.getElementById('announceWinnersBtnDone');
+                 const ack = document.getElementById('announceWinnersAckMessage');
+                 const unBtn = document.getElementById('unannounceWinnersBtn');
+                 liveShowWinnersAnnounced = false;
+                 if (btn) {
+                     btn.disabled = false;
+                 }
+                 if (label) {
+                     label.classList.remove('d-none');
+                 }
+                 if (loader) {
+                     loader.classList.add('d-none');
+                 }
+                 if (done) {
+                     done.classList.add('d-none');
+                 }
+                 if (ack) {
+                     ack.classList.add('d-none');
+                 }
+                 if (unBtn) {
+                     unBtn.classList.add('d-none');
+                     unBtn.disabled = false;
+                 }
+             }
+
+             function unannounceWinners() {
+                 if (!liveShowWinnersAnnounced) {
+                     return;
+                 }
+                 streamSwalConfirm({
+                     title: 'Un-announce winners?',
+                     text: 'This clears the “winners announced” flag so you can run announce winners again. It does not remove winner assignments from players.',
+                     confirmButtonText: 'Yes, un-announce',
+                 }).then(function(result) {
+                     if (!result.isConfirmed) {
+                         return;
+                     }
+                     setUnannounceWinnersLoading(true);
+                     fetch(`{{ route('admin.live-shows.unannounce-winners', ['liveShowId' => $liveShow->id]) }}`, {
+                             method: 'POST',
+                             headers: {
+                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                 'Accept': 'application/json',
+                             },
+                         })
+                         .then(function(response) {
+                             return response.json().then(function(data) {
+                                 return {
+                                     ok: response.ok,
+                                     status: response.status,
+                                     data: data
+                                 };
+                             });
+                         })
+                         .then(function(result) {
+                             setUnannounceWinnersLoading(false);
+                             if (!result.ok) {
+                                 streamSwalError(
+                                     (result.data && result.data.message) ? result.data.message :
+                                     'Could not update winners announcement status.',
+                                     'Update failed');
+                                 return;
+                             }
+                             applyUnannounceWinnersCompleted();
+                             streamSwalSuccess(
+                                 (result.data && result.data.message) ? result.data.message :
+                                 'Winners announcement cleared.',
+                                 'Updated');
+                         })
+                         .catch(function(error) {
+                             console.error('Error unannouncing winners:', error);
+                             setUnannounceWinnersLoading(false);
+                             streamSwalError('Could not update winners announcement status.', 'Update failed');
+                         });
+                 });
              }
 
              function updateWinners() {
