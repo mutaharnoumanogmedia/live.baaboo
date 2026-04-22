@@ -2000,6 +2000,31 @@
             overlay.style.display = "flex";
         }
 
+        // If the gallery overlay video element is shown, check if it is paused and play it
+        // This listener ensures that when the overlay is made visible, the video auto-plays if paused
+        const galleryOverlay = document.getElementById('galleryOverlayModal');
+        const galleryVideo = document.getElementById('galleryOverlayVideo');
+        if (galleryOverlay && galleryVideo) {
+            // Listen for overlay being shown
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (
+                        mutation.attributeName === "style" &&
+                        galleryOverlay.style.display === "flex" &&
+                        galleryVideo.style.display === "block"
+                    ) {
+                        // Video is visible in overlay, check/play if paused
+                        setTimeout(() => {
+                            if (galleryVideo.paused) {
+                                galleryVideo.play().catch(() => {}); // Attempt play, ignore errors
+                            }
+                        }, 100); // Small delay to ensure rendering
+                    }
+                });
+            });
+            observer.observe(galleryOverlay, { attributes: true, attributeFilter: ['style'] });
+        }
+
         function appendUnmuteIcon(videoEl) {
             // Keep only one icon at a time
             let existing = videoEl.parentNode.querySelector('.unmute-center-icon');
