@@ -2005,6 +2005,7 @@
         const galleryOverlay = document.getElementById('galleryOverlayModal');
         const galleryVideo = document.getElementById('galleryOverlayVideo');
         if (galleryOverlay && galleryVideo) {
+            console.log('Gallery overlay and video found, setting up observer');
             // Listen for overlay being shown
             const observer = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
