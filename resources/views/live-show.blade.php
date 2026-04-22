@@ -1476,7 +1476,7 @@
             // Your Laravel broadcast event (drop the dot)
             channelShowWinner.bind('ShowPlayerAsWinnerEvent', function(data) {
                 toggleQuiz("remove");
-
+                
 
                 console.log('Winner Event:', data);
                 // AJAX request to fetch prize money for this user

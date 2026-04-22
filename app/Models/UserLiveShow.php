@@ -27,20 +27,38 @@ class UserLiveShow extends Pivot
     // change the score , calculate from the user_quiz_responses table sum of response_score
     public function getScoreAttribute()
     {
-        return round($this->userQuizResponses()->sum('response_score'), 2);
+        $userId = $this->user_id;
+        $liveShowId = $this->live_show_id;
+
+        $sum = \DB::table('user_quiz_responses')
+            ->join('live_show_quizzes', 'user_quiz_responses.quiz_id', '=', 'live_show_quizzes.id')
+            ->where('user_quiz_responses.user_id', $userId)
+            ->where('live_show_quizzes.live_show_id', $liveShowId)
+            ->sum('user_quiz_responses.response_score');
+
+        return round($sum, 2);
+   
     }
+
     public function userQuizResponses()
     {
-        return $this->hasMany(UserQuizResponse::class, 'user_id', 'user_id');
+        return $this->hasMany(UserQuizResponse::class, 'user_id', 'user_id')
+            ->whereHas('quiz', function ($query) {
+                $query->where('live_show_id', $this->live_show_id);
+            });
+
     }
+
     public function userQuiz()
     {
         return $this->hasOne(UserQuiz::class, 'user_id', 'user_id');
     }
+
     public function liveShow()
     {
         return $this->belongsTo(LiveShow::class, 'live_show_id');
     }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
