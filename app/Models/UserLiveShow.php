@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class UserLiveShow extends Pivot
@@ -20,8 +19,14 @@ class UserLiveShow extends Pivot
         'is_winner',
         'prize_won',
         'is_online',
-        'created_at'
+        'created_at',
     ];
+
     public $timestamps = true;
 
+    // change the score , calculate from the user_quiz_responses table sum of response_score
+    public function getScoreAttribute()
+    {
+        return $this->userQuizResponses()->sum('response_score');
+    }
 }

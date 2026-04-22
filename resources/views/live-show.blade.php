@@ -1643,7 +1643,7 @@
 
         // Your Laravel broadcast event (drop the dot)
         channel2.bind('LiveShowMessageEvent', function(data) {
-            console.log('new message:', data.data);
+            // console.log('new message:', data.data);
             addOverlayMessage('@' + data.data.user.name, data.data.message);
         });
         channel2.bind('HideLiveShowWinnersTabEvent', function(data) {
