@@ -33,7 +33,7 @@ class LiveShowQuizController extends Controller
     {
         $liveShows = LiveShow::pluck('title', 'id');
 
-        return view('admin.live-show-quizzes.form', compact('liveShows'));
+        return view('admin.live-show-quizzes.create', compact('liveShows'));
     }
 
     public function store(Request $request)
