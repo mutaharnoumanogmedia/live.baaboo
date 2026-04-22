@@ -29,7 +29,7 @@ class ShowPlayerAsWinnerEvent implements ShouldBroadcast
 
     public function broadcastOn()
     {
-        return new Channel('live-show-winner-user.'.$this->liveShowId);
+        return new Channel('live-show-winner-user.'.$this->liveShowId.'.'.$this->userId);
     }
 
     public function broadcastAs()

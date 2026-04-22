@@ -1444,7 +1444,7 @@
         function playerAsWinnerEventTrigger() {
             var channelShowWinner = pusher.subscribe(
                 // 'live-show-winner-user.' + '{{ $liveShow->id }}' + '.' + userId
-                'live-show-winner-user.{{ $liveShow->id }}'
+                'live-show-winner-user.{{ $liveShow->id }}.' + userId
             );
             // System subscription event
             channelShowWinner.bind('pusher:subscription_succeeded', function() {
@@ -1454,28 +1454,31 @@
             channelShowWinner.bind('ShowPlayerAsWinnerEvent', function(data) {
                 console.log('Winner Event:', data);
                 // AJAX request to fetch prize money for this user
-                fetch("{{ url('live-show/' . $liveShow->id . '/user-prize') }}?user_id=" + userId, {
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(prizeData => {
-                        console.log('Prize data:', prizeData);
-                        if (prizeData.success && prizeData.prize !== undefined && prizeData.prize !=
-                            'n/a' && prizeData.is_winner == true) {
-                            document.getElementById('prizeAmount').textContent = prizeData.prize;
-                            fireConfetti();
-                            // addOverlayMessage('@System', 'Congratulations! You have won ' + prizeData.prize);
-                            showWinnerDialogDiv();
-                        }
-                        document.getElementById('playerTab-tab').click();
+                if (userId && isLoggedIn) {
+                    fetch("{{ url('live-show/' . $liveShow->id . '/user-prize') }}?user_id=" + userId, {
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(prizeData => {
+                            console.log('Prize data:', prizeData);
+                            if (prizeData.success && prizeData.prize !== undefined && prizeData.prize !=
+                                'n/a' && prizeData.is_winner == true) {
+                                document.getElementById('prizeAmount').textContent = prizeData.prize;
+                                fireConfetti();
+                                // addOverlayMessage('@System', 'Congratulations! You have won ' + prizeData.prize);
+                                showWinnerDialogDiv();
+                            }
 
-                    })
-                    .catch((err) => {
-                        console.error('Error fetching prize money:', err);
-                    });
+                        })
+                        .catch((err) => {
+                            console.error('Error fetching prize money:', err);
+                        });
+                }
+                document.getElementById('playerTab-tab').click();
+
 
 
 
@@ -1515,8 +1518,10 @@
                 }
             });
         }
+
+        playerAsWinnerEventTrigger()
+
         @if (Auth::guard('web')->check())
-            playerAsWinnerEventTrigger()
             userBlockedFromLiveShowEventTrigger()
         @endif
     </script>
