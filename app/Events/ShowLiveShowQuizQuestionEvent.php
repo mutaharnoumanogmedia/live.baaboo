@@ -12,9 +12,8 @@ class ShowLiveShowQuizQuestionEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $queue = 'low';
-
-    public $delay = 10;
+    public $queue = 'high';
+    public $delay = 5;
 
     /**
      * Create a new event instance.

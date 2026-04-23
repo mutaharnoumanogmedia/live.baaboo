@@ -14,8 +14,6 @@ class ShowLiveShowWinnersTabEvent implements ShouldBroadcast
 
     public $queue = 'high';
 
-    public $delay = 10;
-
     public string $liveShowId;
 
     public function __construct(string $liveShowId)

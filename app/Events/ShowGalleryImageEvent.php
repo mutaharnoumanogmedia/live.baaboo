@@ -14,8 +14,6 @@ class ShowGalleryImageEvent implements ShouldBroadcast
 
     public $queue = 'high';
 
-    public $delay = 10;
-
     public function __construct(
         public string $liveShowId,
         public string $url,

@@ -12,7 +12,8 @@ class HideGalleryImageEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
     public $queue = 'high';
-    public $delay = 10;
+    public $delay = 5;
+
     public function __construct(
         public string $liveShowId
     ) {}
