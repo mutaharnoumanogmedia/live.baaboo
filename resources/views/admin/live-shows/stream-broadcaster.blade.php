@@ -48,6 +48,13 @@
                 display: none !important;
             }
         }
+
+        .zg_autoplay_wrapper {
+            position: absolute !important;
+            top:50px !important;
+
+        }
+
     </style>
 </head>
 
@@ -142,8 +149,7 @@
             zp.joinRoom({
                 container: document.querySelector("#root"),
 
-                videoResolutionList: [ZegoUIKitPrebuilt.VideoResolution_360P],
-                videoResolutionDefault: ZegoUIKitPrebuilt.VideoResolution_360P,
+
                 scenario: {
                     mode: ZegoUIKitPrebuilt.LiveStreaming,
                     config: {

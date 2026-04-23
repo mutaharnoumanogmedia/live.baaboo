@@ -54,10 +54,9 @@
         #ZegoRoomFooter {
             display: none !important;
         }
-
         .zg_autoplay_wrapper {
             position: absolute !important;
-            top: 50px !important;
+            top:50px !important;
 
         }
     </style>
@@ -130,7 +129,7 @@
         const zp = ZegoUIKitPrebuilt.create(TOKEN);
         zp.joinRoom({
             container: document.querySelector("#root"),
-           
+
             scenario: {
                 mode: ZegoUIKitPrebuilt.LiveStreaming,
                 config: {
@@ -166,7 +165,7 @@
             showLeaveRoomConfirmDialog: false, // Exit immediately without popup
             translateLanguage: 'German',
             // language: 'German',
-
+           
             innerText: {
                 roomLiveNotStarted: "The broadcast hasn't started yet.", // Fixes your specific issue
                 roomEmpty: "The host has left the room.",
