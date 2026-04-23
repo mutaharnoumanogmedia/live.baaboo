@@ -1615,7 +1615,7 @@
                     if (data.correctOptionId == stat.quiz_option_id) {
                         // console.log("green for correct applying");
 
-                        bar.style.background = '#28a74580'; // Green for correct
+                        bar.style.background = '#28a745'; // Green for correct
                     }
                 } catch (e) {
                     console.error('Error revealing responses:', stat);

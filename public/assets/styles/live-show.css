@@ -206,11 +206,13 @@ body .end-show {
 }
 
 .option-result-bar {
-    height: 40px;
+    height: 55px;
     background: #1e8fff48;
     width: 0;
     transition: width 0.4s ease-in-out;
     border-radius: 12px;
+    margin-top: -8px;
+    margin-left: -7px;
 }
 
 .video-container {
