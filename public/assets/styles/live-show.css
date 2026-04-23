@@ -59,9 +59,9 @@ select {
 
 body .end-show {
     color: rgb(255, 255, 255);
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     position: absolute;
-    top: 50%;
+    top: 20%;
     width: 100%;
     text-align: center;
 }
