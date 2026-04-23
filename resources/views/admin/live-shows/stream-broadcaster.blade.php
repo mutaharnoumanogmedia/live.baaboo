@@ -11,14 +11,55 @@
             object-fit: cover !important;
         }
 
-        #zego_left_notify_wrapper, #zego_right_notify_wrapper {
+        #zego_left_notify_wrapper,
+        #zego_right_notify_wrapper {
             display: none !important;
         }
+
+        #page-qr-wrapper {
+            width: 120px;
+            height: auto;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 99999;
+            background: rgba(255, 255, 255, 0.97);
+            padding: 8px 16px 12px 16px;
+            border-radius: 10px;
+        }
+
+        #page-qr-code {
+            width: 110px;
+            height: 110px;
+        }
+
+        #page-qr-code canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        #page-qr-code img {
+            width: 100%;
+            height: 100%;
+        }
+
+        @media (max-width: 768px) {
+            #page-qr-wrapper {
+                display: none !important;
+            }
+        }
+
+    
+
     </style>
 </head>
 
 
 <body>
+    <div id="page-qr-wrapper">
+        <div id="page-qr-code"></div>
+        <div id="page-qr-label">Scan to open the same broadcasting panel in your phone</div>
+    </div>
     <div id="root"></div>
 </body>
 <script src="https://resource.ZEGOCLOUD.com/prebuilt/crypto-js.js"></script>
@@ -104,6 +145,7 @@
             zp.joinRoom({
                 container: document.querySelector("#root"),
 
+
                 scenario: {
                     mode: ZegoUIKitPrebuilt.LiveStreaming,
                     config: {
@@ -137,6 +179,26 @@
             // Optionally decide whether to still join room or not
         }
     }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+
+<script>
+    window.onload = window.onload || function() {};
+    window.onload = (function(origOnload) {
+        return async function() {
+            if (typeof origOnload === "function") await origOnload();
+
+            // Generate QR for current page URL
+            if (document.getElementById('page-qr-code')) {
+                new QRCode(document.getElementById("page-qr-code"), {
+                    text: window.location.href,
+                    width: 110,
+                    height: 110
+                });
+            }
+        };
+    })(window.onload);
 </script>
 
 

@@ -54,6 +54,11 @@
         #ZegoRoomFooter {
             display: none !important;
         }
+        .zg_autoplay_wrapper {
+            position: absolute !important;
+            top:50px !important;
+
+        }
     </style>
 </head>
 
