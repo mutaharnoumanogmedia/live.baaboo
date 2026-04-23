@@ -13,14 +13,14 @@
             height: 100vh;
         }
 
-        /* #root video {
-            object-fit: contain !important;
+        #root video {
+            object-fit: cover !important;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-        } */
+        }
         
 
 
