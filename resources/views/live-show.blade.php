@@ -1617,7 +1617,7 @@
 
                         bar.style.background = '#28a745'; // Green for correct
                         //make the option label border green
-                        label.style.borderColor = '#28a745';
+                        label.parentElement.style.borderColor = '#28a745';
                         // label.style.color = '#28a745';
                     }
                 } catch (e) {
