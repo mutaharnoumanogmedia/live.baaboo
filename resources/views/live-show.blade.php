@@ -173,6 +173,19 @@
             overflow: hidden !important;
             pointer-events: none !important;
         }
+
+        #root video {
+            object-fit: contain !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .quiz-mode #root video {
+            object-fit: cover !important;
+        }
     </style>
 </head>
 
@@ -271,8 +284,7 @@
             <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
                 <img id="galleryOverlayImage" src="" alt=""
                     style="max-width:100vw; max-height:90vh; object-fit:contain; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;">
-                <video id="galleryOverlayVideo" src="" autoplay muted playsinline
-                    preload="metadata"
+                <video id="galleryOverlayVideo" src="" autoplay muted playsinline preload="metadata"
                     poster=""
                     style="max-width:100vw; max-height:90vh; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;"></video>
             </div>
@@ -2027,7 +2039,10 @@
                     }
                 });
             });
-            observer.observe(galleryOverlay, { attributes: true, attributeFilter: ['style'] });
+            observer.observe(galleryOverlay, {
+                attributes: true,
+                attributeFilter: ['style']
+            });
         }
 
         function appendUnmuteIcon(videoEl) {
@@ -2119,7 +2134,7 @@
                 playback_started_at: data.playback_started_at ?? null,
                 video_duration_seconds: data.video_duration_seconds != null ? data.video_duration_seconds :
                     null,
-                    thumbnail_url: data.thumbnail_url ?? null
+                thumbnail_url: data.thumbnail_url ?? null
             });
         });
 
