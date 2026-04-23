@@ -14,7 +14,7 @@
         }
 
         #root video {
-            object-fit: cover !important;
+            object-fit: contain !important;
             position: fixed;
             top: 0;
             left: 0;
@@ -54,9 +54,10 @@
         #ZegoRoomFooter {
             display: none !important;
         }
+
         .zg_autoplay_wrapper {
             position: absolute !important;
-            top:50px !important;
+            top: 50px !important;
 
         }
     </style>
@@ -129,7 +130,8 @@
         const zp = ZegoUIKitPrebuilt.create(TOKEN);
         zp.joinRoom({
             container: document.querySelector("#root"),
-
+            videoResolutionList: [ZegoUIKitPrebuilt.VideoResolution_360P],
+            videoResolutionDefault: ZegoUIKitPrebuilt.VideoResolution_360P,
             scenario: {
                 mode: ZegoUIKitPrebuilt.LiveStreaming,
                 config: {
@@ -165,7 +167,7 @@
             showLeaveRoomConfirmDialog: false, // Exit immediately without popup
             translateLanguage: 'German',
             // language: 'German',
-           
+
             innerText: {
                 roomLiveNotStarted: "The broadcast hasn't started yet.", // Fixes your specific issue
                 roomEmpty: "The host has left the room.",
