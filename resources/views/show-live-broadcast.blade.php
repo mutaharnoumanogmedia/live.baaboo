@@ -129,7 +129,8 @@
         const zp = ZegoUIKitPrebuilt.create(TOKEN);
         zp.joinRoom({
             container: document.querySelector("#root"),
-
+            videoResolutionList: [ZegoUIKitPrebuilt.VideoResolution_360P],
+            videoResolutionDefault: ZegoUIKitPrebuilt.VideoResolution_360P,
             scenario: {
                 mode: ZegoUIKitPrebuilt.LiveStreaming,
                 config: {
