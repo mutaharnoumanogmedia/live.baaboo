@@ -173,7 +173,7 @@
             overflow: hidden !important;
             pointer-events: none !important;
         }
-
+/* 
         #root video {
             object-fit: contain !important;
             position: fixed;
@@ -185,7 +185,7 @@
 
         .quiz-mode #root video {
             object-fit: cover !important;
-        }
+        } */
     </style>
 </head>
 
