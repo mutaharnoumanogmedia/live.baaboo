@@ -142,6 +142,7 @@ class MediaGalleryController extends Controller
             'media' => [
                 'id' => $media->id,
                 'url' => $media->url,
+                'thumbnail_url' => $media->thumbnail,
                 'type' => $media->type,
                 'title' => $media->title,
             ],
@@ -498,7 +499,8 @@ class MediaGalleryController extends Controller
             $state->url,
             $state->media_type,
             $playbackIso,
-            $state->video_duration_seconds
+            $state->video_duration_seconds,
+            $state->galleryMedia->thumbnail ?? null
         );
     }
 

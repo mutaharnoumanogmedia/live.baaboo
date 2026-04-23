@@ -21,7 +21,8 @@ class ShowGalleryImageEvent implements ShouldBroadcast
         public string $url,
         public string $type,
         public ?string $playbackStartedAt = null,
-        public ?int $videoDurationSeconds = null
+        public ?int $videoDurationSeconds = null,
+        public ?string $thumbnailUrl = null
     ) {}
 
     public function broadcastOn(): Channel
@@ -39,6 +40,7 @@ class ShowGalleryImageEvent implements ShouldBroadcast
         $data = [
             'url' => $this->url,
             'type' => $this->type,
+            'thumbnail_url' => $this->thumbnailUrl,
         ];
         if ($this->playbackStartedAt !== null) {
             $data['playback_started_at'] = $this->playbackStartedAt;

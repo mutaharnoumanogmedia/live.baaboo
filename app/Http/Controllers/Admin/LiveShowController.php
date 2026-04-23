@@ -12,8 +12,8 @@ use App\Events\RemoveLiveShowQuizQuestionEvent;
 use App\Events\ResetChatEvent;
 use App\Events\SetBroadcastRoomIdEvent;
 use App\Events\ShowGalleryImageEvent;
-use App\Events\ShowLiveShowWinnersTabEvent;
 use App\Events\ShowLiveShowQuizQuestionEvent;
+use App\Events\ShowLiveShowWinnersTabEvent;
 use App\Events\ShowPlayerAsWinnerEvent;
 use App\Events\UserBlockFromLiveShowEvent;
 use App\Http\Controllers\Controller;
@@ -383,7 +383,6 @@ class LiveShowController extends Controller
         $liveShow->update(['winners_announced' => true]);
         ShowLiveShowWinnersTabEvent::dispatch((string) $liveShow->id);
 
-
         return response()->json([
             'success' => true,
             'message' => 'Winners have been announced. Winner notification emails have been queued for the winners.',
@@ -570,8 +569,10 @@ class LiveShowController extends Controller
             (string) $liveShow->id,
             $media->path,
             $media->type,
+
             $playbackStartedAt?->toIso8601String(),
-            null
+            null,
+            $media->thumbnail ?? null
         );
 
         return response()->json([
@@ -620,7 +621,7 @@ class LiveShowController extends Controller
             $users = $usersQuery
                 ->skip($skip)
                 ->take($take)
-              
+
                 ->map(function ($user) use ($id) {
                     return [
                         'id' => $user->id,

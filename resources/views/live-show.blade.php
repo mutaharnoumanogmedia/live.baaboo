@@ -272,6 +272,8 @@
                 <img id="galleryOverlayImage" src="" alt=""
                     style="max-width:100vw; max-height:90vh; object-fit:contain; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;">
                 <video id="galleryOverlayVideo" src="" autoplay muted playsinline
+                    preload="metadata"
+                    poster=""
                     style="max-width:100vw; max-height:90vh; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;"></video>
             </div>
         </div>
@@ -1954,6 +1956,8 @@
                 const seekTo = galleryPlaybackOffsetSeconds(playbackAt, durationSec);
                 vid.src = src;
                 vid.style.display = "block";
+                vid.poster = opts.thumbnail_url ?? "";
+
                 img.src = "";
 
                 const applySeekAndPlay = function() {
@@ -2114,7 +2118,8 @@
                 src: data.url,
                 playback_started_at: data.playback_started_at ?? null,
                 video_duration_seconds: data.video_duration_seconds != null ? data.video_duration_seconds :
-                    null
+                    null,
+                    thumbnail_url: data.thumbnail_url ?? null
             });
         });
 
