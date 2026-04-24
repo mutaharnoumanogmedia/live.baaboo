@@ -880,7 +880,7 @@
                     .then(data => {
                         // console.log('Quiz submission response:', data);
                         if (data.success) {
-                            console.log('Quiz submitted successfully:', data);
+                            console.log('Quiz submitted successfully.');
                             // Show correct/incorrect feedback
                             //using some instead of forEach to break the loop when correct answer is found, converting nodelist to array
 
