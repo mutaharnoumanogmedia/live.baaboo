@@ -149,7 +149,8 @@
                                                      </span>
                                                      <span id="announceWinnersBtnLoader"
                                                          class="announce-winners-btn-loader d-none">
-                                                         <i class="fas fa-spinner fa-spin me-2" aria-hidden="true"></i>
+                                                         <i class="fas fa-spinner fa-spin me-2"
+                                                             aria-hidden="true"></i>
                                                          Announcing…
                                                      </span>
                                                      <span id="announceWinnersBtnDone"
@@ -176,14 +177,14 @@
                                                          Updating…
                                                      </span>
                                                  </button>
-                                                <button type="button"
-                                                    class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm my-2"
-                                                    onclick="showWinnerTab()">
-                                                    <i class="fas fa-eye me-2"></i> Show winner tab
-                                                </button>
+                                                 <button type="button"
+                                                     class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm my-2"
+                                                     onclick="showWinnerTab(this)">
+                                                     <i class="fas fa-eye me-2"></i> Show winner tab
+                                                 </button>
                                                  <button type="button"
                                                      class="btn btn-outline-warning w-100 py-2 fw-bold text-white shadow-sm my-2"
-                                                     onclick="hideWinnerTab()">
+                                                     onclick="hideWinnerTab(this)">
                                                      <i class="fas fa-eye-slash me-2"></i> Hide winner tab
                                                  </button>
 
@@ -227,7 +228,7 @@
                  <div class="card border-0 shadow-sm mb-4">
                      <div class="card-body position-relative">
                          <div class="row">
-                             <div class="col-lg-6 ">
+                             <div class="col-lg-7 ">
                                  <div class="p-3   rounded bg-dark">
                                      <h5 class="mb-0 fw-bold text-center mb-3">Quiz Questions</h5>
                                      <div class="question-slider ">
@@ -301,14 +302,14 @@
                                                                              <i class="fas fa-play me-2"></i> Start
                                                                          </button>
                                                                          <button type="button"
-                                                                             onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }})"
+                                                                             onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }}, this)"
                                                                              class="btn btn-info px-3 text-white">
-                                                                             <i class="fas fa-chart-bar me-2"></i> Show
-                                                                             Responses
+                                                                             <i class="fas fa-chart-bar me-2"></i>
+                                                                             Show Responses
                                                                          </button>
                                                                          <button class="btn btn-danger px-3"
                                                                              type="button"
-                                                                             onclick="removeQuiz({{ $quiz->id }})">
+                                                                             onclick="removeQuiz({{ $quiz->id }}, this)">
                                                                              <i class="fas fa-times me-2"></i> Hide
                                                                          </button>
 
@@ -328,12 +329,12 @@
                                      </div>
                                  </div>
                              </div>
-                             <div class="col-lg-6">
+                             <div class="col-lg-5">
                                  <h5 class="mb-0 fw-bold text-center mb-3">Gallery Media</h5>
                                  <div class="p-3 border border-light rounded bg-dark">
                                      <div class="w-100">
-                                         <div class="d-flex justify-content-between align-items-center mb-2">
-                                             <h6 class="text-muted small text-uppercase fw-bold mb-0">
+                                         <div class="mb-2">
+                                             <h6 class="text-muted small text-uppercase fw-bold mb-">
                                                  Attached to this stream</h6>
 
                                              <button type="button" class="btn btn-sm btn-outline-primary"
@@ -350,18 +351,7 @@
                                          <div id="gallery-attached-list" class="table-responsive mb-3"
                                              style="max-height: 520px; overflow-y: auto;">
                                              <table class="table table-sm table-dark table-hover align-middle mb-0">
-                                                 <thead>
-                                                     <tr>
-                                                         <th scope="col" style="width: 30px;"></th>
-                                                         <th scope="col" style="width: 40px;">#</th>
-                                                         <th scope="col" style="width: 45px;">Thumb</th>
-                                                         <th scope="col">Title</th>
-                                                         <th scope="col" style="width: 65px;">Type</th>
-                                                         <th scope="col"
-                                                             style="min-width: 160px; text-align: right;">
-                                                             Actions</th>
-                                                     </tr>
-                                                 </thead>
+
                                                  <tbody id="attached-media-list">
 
                                                  </tbody>
@@ -750,6 +740,33 @@
                  }, options));
              }
 
+             // Generic helper: toggle a busy/loading state on any action button.
+             // Saves the original markup the first time, swaps it for a spinner,
+             // and restores it (and re-enables the button) when busy=false.
+             function setBtnBusy(btn, busy, busyText) {
+                 if (!btn) return;
+                 if (busy) {
+                     if (btn.dataset.busyActive === '1') return;
+                     btn.dataset.busyActive = '1';
+                     btn.dataset.originalHtml = btn.innerHTML;
+                     btn.dataset.originalDisabled = btn.disabled ? '1' : '0';
+                     btn.disabled = true;
+                     btn.setAttribute('aria-busy', 'true');
+                     var spinner = '<i class="fas fa-spinner fa-spin me-1" aria-hidden="true"></i>';
+                     btn.innerHTML = spinner + (busyText || 'Working\u2026');
+                 } else {
+                     if (btn.dataset.busyActive !== '1') return;
+                     if (typeof btn.dataset.originalHtml === 'string') {
+                         btn.innerHTML = btn.dataset.originalHtml;
+                     }
+                     btn.disabled = btn.dataset.originalDisabled === '1';
+                     btn.removeAttribute('aria-busy');
+                     delete btn.dataset.busyActive;
+                     delete btn.dataset.originalHtml;
+                     delete btn.dataset.originalDisabled;
+                 }
+             }
+
              document.addEventListener('DOMContentLoaded', function() {
                  fetchAndAppendPlayers();
 
@@ -813,11 +830,11 @@
              });
 
              // Refresh the currently visible player window every 30 seconds.
-             setInterval(() => {
-                 if (liveShowStatus == 'live') {
-                     refreshVisiblePlayers();
-                 }
-             }, 30000);
+             //  setInterval(() => {
+             //      if (liveShowStatus == 'live') {
+             //          refreshVisiblePlayers();
+             //      }
+             //  }, 30000);
 
              function fetchChatMessages() {
                  // Simulate an API call to fetch chat messages
@@ -1288,7 +1305,7 @@
 
 
              // Function to display a countdown timer in the div#quizTimer and hide it after countdown finishes
-             function showQuizTimer(seconds) {
+             function showQuizTimer(seconds, quizId) {
                  if (!timerDiv) return;
 
                  let timeLeft = parseInt(seconds, 10);
@@ -1315,7 +1332,9 @@
 
                          // Fetch players list 5 seconds after timer finishes
                          setTimeout(() => {
+                             console.log('viewing responses after timer finishes..');
                              refreshVisiblePlayers();
+                             viewResponses('{{ $liveShow->id }}', quizId, null);
                          }, 5000);
                      }
                  }, 1000);
@@ -1337,6 +1356,8 @@
                  const formData = new FormData(form);
                  const seconds = formData.get('seconds');
                  const isLast = formData.get('is_last') ? true : false;
+                 const startBtn = form.querySelector('button[type="submit"]');
+                 setBtnBusy(startBtn, true, 'Starting\u2026');
 
                  fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/quizzes/${quizId}/send-quiz-question`, {
                          method: 'POST',
@@ -1352,8 +1373,12 @@
                      })
                      .catch(error => {
                          console.error('Error sending quiz question:', error);
+                         streamSwalError('Could not start the quiz. Please try again.', 'Start failed');
+                     })
+                     .finally(() => {
+                         setBtnBusy(startBtn, false);
+                         showQuizTimer(seconds, quizId);
                      });
-                 showQuizTimer(seconds);
              }
          </script>
 
@@ -1388,8 +1413,8 @@
 
 
 
-             function removeQuiz(quizId) {
-
+             function removeQuiz(quizId, btn) {
+                 setBtnBusy(btn, true, 'Hiding\u2026');
                  fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/quizzes/${quizId}/remove-quiz-question`, {
                          method: 'POST',
                          headers: {
@@ -1399,12 +1424,14 @@
                      })
                      .then(response => response.json())
                      .then(data => {
-                         //  console.log('Quiz question removed:', data);
                          hideQuizTimer();
-                         // Optionally, remove the quiz from the UI
                      })
                      .catch(error => {
                          console.error('Error removing quiz question:', error);
+                         streamSwalError('Could not hide the quiz question. Please try again.', 'Hide failed');
+                     })
+                     .finally(() => {
+                         setBtnBusy(btn, false);
                      });
              }
 
@@ -1635,7 +1662,7 @@
                  });
              }
 
-             function hideWinnerTab() {
+             function hideWinnerTab(btn) {
                  streamSwalConfirm({
                      title: 'Hide winner tab?',
                      text: 'Participants will no longer see the winners tab in the live show.',
@@ -1644,6 +1671,7 @@
                      if (!result.isConfirmed) {
                          return;
                      }
+                     setBtnBusy(btn, true, 'Hiding\u2026');
                      fetch(`{{ route('admin.live-shows.stream-management.hide-winners-tab', ['id' => $liveShow->id]) }}`, {
                              method: 'POST',
                              headers: {
@@ -1664,42 +1692,49 @@
                          .catch(error => {
                              console.error('Error hiding winners tab:', error);
                              streamSwalError('Could not hide the winners tab. Please try again.', 'Request failed');
+                         })
+                         .finally(() => {
+                             setBtnBusy(btn, false);
                          });
                  });
              }
 
-            function showWinnerTab() {
-                streamSwalConfirm({
-                    title: 'Show winner tab?',
-                    text: 'Participants will be switched to the winners tab in the live show.',
-                    confirmButtonText: 'Yes, show tab',
-                }).then(function(result) {
-                    if (!result.isConfirmed) {
-                        return;
-                    }
-                    fetch(`{{ route('admin.live-shows.stream-management.show-winners-tab', ['id' => $liveShow->id]) }}`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json',
-                            },
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                streamSwalSuccess(data.message || 'The winners tab is now shown for participants.',
-                                    'Winners tab shown');
-                            } else {
-                                streamSwalError(data.message || 'Could not show the winners tab.',
-                                    'Request failed');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error showing winners tab:', error);
-                            streamSwalError('Could not show the winners tab. Please try again.', 'Request failed');
-                        });
-                });
-            }
+             function showWinnerTab(btn) {
+                 streamSwalConfirm({
+                     title: 'Show winner tab?',
+                     text: 'Participants will be switched to the winners tab in the live show.',
+                     confirmButtonText: 'Yes, show tab',
+                 }).then(function(result) {
+                     if (!result.isConfirmed) {
+                         return;
+                     }
+                     setBtnBusy(btn, true, 'Showing\u2026');
+                     fetch(`{{ route('admin.live-shows.stream-management.show-winners-tab', ['id' => $liveShow->id]) }}`, {
+                             method: 'POST',
+                             headers: {
+                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                 'Accept': 'application/json',
+                             },
+                         })
+                         .then(response => response.json())
+                         .then(data => {
+                             if (data.success) {
+                                 streamSwalSuccess(data.message || 'The winners tab is now shown for participants.',
+                                     'Winners tab shown');
+                             } else {
+                                 streamSwalError(data.message || 'Could not show the winners tab.',
+                                     'Request failed');
+                             }
+                         })
+                         .catch(error => {
+                             console.error('Error showing winners tab:', error);
+                             streamSwalError('Could not show the winners tab. Please try again.', 'Request failed');
+                         })
+                         .finally(() => {
+                             setBtnBusy(btn, false);
+                         });
+                 });
+             }
          </script>
          <script>
              document.addEventListener('DOMContentLoaded', function() {
@@ -1763,7 +1798,11 @@
              }
 
 
-             function viewResponses(liveShowId, quizId) {
+             function viewResponses(liveShowId, quizId, btn = null) {
+
+                 if (btn) {
+                     setBtnBusy(btn, true, 'Loading\u2026');
+                 }
                  fetch(`{{ url('admin/live-shows') }}/${liveShowId}/get-users-quiz-responses/${quizId}`, {
                          method: 'GET',
                          headers: {
@@ -1772,8 +1811,7 @@
                          },
                      }).then(response => response.json())
                      .then(data => {
-                         //  console.log('Quiz responses:', data);
-                         // Handle displaying the responses in the UI
+                         console.log('responses fetched:', data);
                          let stats = data.statistics;
                          stats.forEach(stat => {
                              let bar = document.getElementById(`option-result-bar-${stat.quiz_option_id}`);
@@ -1788,6 +1826,10 @@
                      })
                      .catch(error => {
                          console.error('Error fetching quiz responses:', error);
+                         streamSwalError('Could not load quiz responses. Please try again.', 'Load failed');
+                     })
+                     .finally(() => {
+                         setBtnBusy(btn, false);
                      });
              }
 
@@ -1917,7 +1959,7 @@
 
              function galleryShowOnStream(mediaId, btn) {
                  if (!btn) return;
-                 btn.disabled = true;
+                 setBtnBusy(btn, true, 'Showing\u2026');
                  fetch(galleryShowOnStreamUrl, {
                          method: 'POST',
                          headers: {
@@ -1932,21 +1974,15 @@
                      .then(r => r.json())
                      .then(data => {
                          if (data.success) {
-                             const label = btn.querySelector('i');
-                             if (label) {
-                                 const orig = label.className;
-                                 label.className = 'fas fa-check';
-                                 setTimeout(() => {
-                                     label.className = orig;
-                                 }, 800);
-                             }
-                             //update gallery show status to showing
                              updateGalleryShowStatus('showing');
                          }
                      })
-                     .catch(err => console.error('Show on stream error:', err))
+                     .catch(err => {
+                         console.error('Show on stream error:', err);
+                         streamSwalError('Could not show this item on stream. Please try again.', 'Show failed');
+                     })
                      .finally(() => {
-                         btn.disabled = false;
+                         setBtnBusy(btn, false);
                      });
              }
              //funtion to turn tr class of current button closet tr to table-success and other's without any class
@@ -1967,7 +2003,7 @@
 
              function galleryHideOnStream(btn) {
                  if (!btn) return;
-                 btn.disabled = true;
+                 setBtnBusy(btn, true, 'Hiding\u2026');
                  fetch(galleryHideOnStreamUrl, {
                          method: 'POST',
                          headers: {
@@ -1979,23 +2015,16 @@
                      .then(r => r.json())
                      .then(data => {
                          if (data.success) {
-                             const label = btn.querySelector('i');
-                             if (label) {
-                                 const orig = label.className;
-                                 label.className = 'fas fa-check';
-                                 setTimeout(() => {
-                                     label.className = orig;
-                                 }, 800);
-                             }
-                             //update gallery show status to hidden
                              updateGalleryShowStatus('hidden');
                          }
                      })
-                     .catch(err => console.error('Hide on stream error:', err))
+                     .catch(err => {
+                         console.error('Hide on stream error:', err);
+                         streamSwalError('Could not hide this item on stream. Please try again.', 'Hide failed');
+                     })
                      .finally(() => {
-                         btn.disabled = false;
+                         setBtnBusy(btn, false);
                      });
-
              }
 
              function galleryAttach(mediaId, btn) {
@@ -2152,62 +2181,63 @@
 
              function attachGalleryMediaItemRow(data, idx) {
                  return `
-                <tr class="gallery-media-card"
-                    data-media-id="${data.id}" data-attached="1">
-                    <td class="drag-handle text-center" style="cursor: grab;">
-                        <i class="fas fa-grip-vertical text-muted"></i>
-                    </td>
-                    <td class="row-index text-muted small">
-                        ${idx + 1}
-                    </td>
-                    <td class="p-1">
-                        <img src="${data.is_image ? data.path : (data.thumbnail ?? data.path)}"
-                            alt=""
-                            style="width: 34px; height: 34px; object-fit: cover; border-radius: 4px; border: 1px solid #555;">
-                    </td>
-                    <td>
-                        <span class="d-block" style="max-width: 370px;">
-                            ${data.title || '—'}
-                        </span>
-                    </td>
-                    <td>
-                        <span class="badge ${data.type === 'video' ? 'bg-primary' : 'bg-warning text-dark'}">
-                            ${data.type ?? ''}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="d-flex gap-2 flex-wrap justify-content-end">
-                            <button type="button"
-                                class="btn btn-sm btn-success gallery-show-on-stream-btn"
-                                onclick="galleryShowOnStream('${data.id}', this)"
-                                data-media-id="${data.id}"
-                                title="Show on live stream">
-                                <i class="fas fa-tv"></i>
-                                Show
-                            </button>
-                            <button type="button"
-                                class="btn btn-sm btn-warning gallery-hide-on-stream-btn me-3"
-                                onclick="galleryHideOnStream(this)"
-                                data-media-id="${data.id}"
-                                title="Hide on live stream">
-                                <i class="fas fa-eye-slash"></i>
-                                Hide
-                            </button>
-                            <button type="button"
-                                class="btn btn-sm btn-outline-danger gallery-detach-btn"
-                                data-media-id="${data.id}"
-                                title="Remove from stream"
-                                onclick="galleryDetach('${data.id}', this)">
-                                <i class="fas fa-times"></i>
-                            </button>
-                            <button type="button"
-                                class="btn btn-sm btn-secondary" title="Preview"
-                                onclick="openMediaPreviewModal('${data.is_image ? data.path : (data.thumbnail ?? data.path)}')">
-                                <i class="fas fa-eye"></i>
-                            </button>
+                <tr class="gallery-media-card" data-media-id="${data.id}" data-attached="1">
+                    <td colspan="100" style="padding:0; border:none;">
+                        <div class="  d-flex    gap-2 py-3 px-2">
+                             
+                                  <div class="drag-handle mb-2" style="cursor: grab;">
+                                <i class="fas fa-grip-vertical text-muted"></i>
+                                </div>
+                            
+                          <div class="    ">
+                                <img src="${data.is_image ? data.path : (data.thumbnail ?? data.path)}"
+                                    alt=""
+                                    style="width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid #555;">
+
+                                    <span class="badge ${data.type === 'video' ? 'bg-primary' : 'bg-warning text-dark'}">
+                                    ${data.type ?? ''}
+                                </span>
+                                <div class="mb-1   fw-semibold" style="width:100%;">
+                                ${data.title || '—'}
+                            </div>
+                            
+                            <div class="d-flex gap-2 flex-wrap   mt-1">
+                                <button type="button"
+                                    class="btn btn-sm btn-success gallery-show-on-stream-btn"
+                                    onclick="galleryShowOnStream('${data.id}', this)"
+                                    data-media-id="${data.id}"
+                                    title="Show on live stream">
+                                    <i class="fas fa-tv"></i>
+                                    Show
+                                </button>
+                                <button type="button"
+                                    class="btn btn-sm btn-warning gallery-hide-on-stream-btn"
+                                    onclick="galleryHideOnStream(this)"
+                                    data-media-id="${data.id}"
+                                    title="Hide on live stream">
+                                    <i class="fas fa-eye-slash"></i>
+                                    Hide
+                                </button>
+                                <button type="button"
+                                    class="btn btn-sm btn-outline-danger gallery-detach-btn"
+                                    data-media-id="${data.id}"
+                                    title="Remove from stream"
+                                    onclick="galleryDetach('${data.id}', this)">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button type="button"
+                                    class="btn btn-sm btn-secondary" title="Preview"
+                                    onclick="openMediaPreviewModal('${data.is_image ? data.path : (data.thumbnail ?? data.path)}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            </div>
+                            
+                             
                         </div>
                     </td>
                 </tr>
+           
             `;
              }
 
@@ -2362,13 +2392,7 @@
                          })
                      }).then(r => r.json()).then(data => {
                          if (data.success) {
-                             //  console.log('Attach media item success:', data);
-                             // //append the media item to the attached media list
-                             // const attachedMediaList = document.getElementById('attached-media-list');
-                             // if (attachedMediaList) {
-                             //     attachedMediaList.insertAdjacentHTML('beforeend', attachGalleryMediaItemRow(data.media, data.idx !== undefined ? data.idx : 0));
-                             // }
-                             //close the select media modal
+
                              const selectMediaModal = document.getElementById('select-media-modal');
                              if (selectMediaModal) {
                                  const modalInstance = bootstrap.Modal.getInstance(selectMediaModal) || new bootstrap.Modal(

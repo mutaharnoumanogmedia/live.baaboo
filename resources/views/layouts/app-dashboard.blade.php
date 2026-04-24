@@ -26,186 +26,301 @@
 
     @include('partials.gtm', ['part' => 'head'])
 
+    <style>
+        /* Top navbar layout (replaces SB Admin sidebar) */
+        .app-topnav-fixed {
+            padding-top: 5px;
+        }
+
+        .app-topnav {
+            min-height: 60px;
+            z-index: 1040;
+        }
+
+        .app-topnav .navbar-nav .nav-link {
+            padding-left: .85rem;
+            padding-right: .85rem;
+            font-weight: 500;
+            border-radius: .375rem;
+            transition: background-color .15s ease-in-out, color .15s ease-in-out;
+        }
+
+        .app-topnav .navbar-nav .nav-link:hover,
+        .app-topnav .navbar-nav .nav-link:focus {
+            background-color: rgba(255, 255, 255, .08);
+            color: #fff;
+        }
+
+        .app-topnav .navbar-nav .nav-link.active {
+            background-color: rgba(13, 110, 253, .25);
+            color: #fff;
+        }
+
+        .app-topnav .dropdown-menu {
+            border: 0;
+            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
+            border-radius: .5rem;
+            padding: .35rem;
+        }
+
+        .app-topnav .dropdown-item {
+            border-radius: .375rem;
+            padding: .5rem .75rem;
+        }
+
+        .app-topnav .dropdown-item:hover,
+        .app-topnav .dropdown-item:focus {
+            background-color: rgba(13, 110, 253, .1);
+        }
+
+        .app-topnav .form-check-label {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #app-layout-content {
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 64px);
+        }
+
+        #app-layout-content > .container-fluid {
+            flex: 1 1 auto;
+        }
+
+        /* Collapsed (mobile) menu adjustments */
+        @media (max-width: 991.98px) {
+            .app-topnav .navbar-collapse {
+                max-height: calc(100vh - 60px);
+                overflow-y: auto;
+                padding-bottom: .75rem;
+            }
+
+            .app-topnav .navbar-nav .nav-link {
+                padding: .6rem .75rem;
+            }
+
+            .app-topnav .dropdown-menu {
+                box-shadow: none;
+                background-color: rgba(255, 255, 255, .05);
+                margin-left: .75rem;
+            }
+
+            .app-topnav .dropdown-item {
+                color: #e9ecef;
+            }
+
+            .app-topnav .dropdown-item:hover,
+            .app-topnav .dropdown-item:focus {
+                background-color: rgba(255, 255, 255, .1);
+                color: #fff;
+            }
+        }
+    </style>
+
 </head>
 
-<body class="sb-nav-fixed">
+<body class="app-topnav-fixed">
     @include('partials.gtm', ['part' => 'body'])
-    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-        <!-- Navbar Brand-->
-        <a class="navbar-brand ps-3" href="{{ route('admin.dashboard') }}">
-            {{ env('APP_NAME') }}
-        </a>
-        <!-- Sidebar Toggle-->
-        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
-                class="fas fa-bars"></i></button>
 
-        <!-- Navbar-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top app-topnav shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="{{ route('admin.dashboard') }}">
+                {{ env('APP_NAME') }}
+            </a>
 
-        <ul class="navbar-nav d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0"">
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button"
-                    data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i>
-                    {{ Auth::user()->name }}
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                    <li><a class="dropdown-item" href="{{ route('admin.settings.index') }}">App Settings</a></li>
-                    <li><a class="dropdown-item" href="{{ route('admin.password.form') }}">Change Password</a></li>
-                    <li>
-                        <hr class="dropdown-divider" />
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#appPrimaryNav" aria-controls="appPrimaryNav" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="appPrimaryNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
+                            href="{{ route('admin.dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                        </a>
                     </li>
-                    <li><a class="dropdown-item" href="javascript:void(0)"
-                            onclick="document.getElementById('logout-form').submit();">Logout</a></li>
+
+                    @can('can-manage-live-shows')
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.live-shows.*') ? 'active' : '' }}"
+                                href="{{ route('admin.live-shows.index') }}">
+                                <i class="bi bi-camera-video-fill me-1"></i> Live Streams
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('can-manage-quiz-questions')
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.live-show-quizzes.*') ? 'active' : '' }}"
+                                href="{{ route('admin.live-show-quizzes.index') }}">
+                                <i class="bi bi-question-circle-fill me-1"></i> Quiz Questions
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('can-manage-media-gallery')
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.media-gallery.*') ? 'active' : '' }}"
+                                href="{{ route('admin.media-gallery.index') }}">
+                                <i class="bi bi-images me-1"></i> Media Gallery
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('can-manage-players')
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.players.*') ? 'active' : '' }}"
+                                href="{{ route('admin.players.index') }}">
+                                <i class="bi bi-people-fill me-1"></i> Players
+                            </a>
+                        </li>
+                    @endcan
+
+                    @can('can-manage-analytics')
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.analytics.*') ? 'active' : '' }}"
+                                href="{{ route('admin.analytics.index') }}">
+                                <i class="bi bi-graph-up-arrow me-1"></i> Analytics
+                            </a>
+                        </li>
+                    @endcan
+
+                    @canany(['can-manage-settings', 'can-manage-gtm', 'can-manage-push-notifications'])
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle {{ request()->routeIs(['admin.settings.*', 'admin.gtm.*', 'admin.push-notifications.*']) ? 'active' : '' }}"
+                                href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                <i class="bi bi-sliders me-1"></i> Settings
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
+                                @can('can-manage-settings')
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.settings.index') }}">
+                                            <i class="bi bi-sliders me-2"></i> App Settings
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('can-manage-gtm')
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.gtm.index') }}">
+                                            <i class="bi bi-google me-2"></i> Google Tag Manager
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('can-manage-push-notifications')
+                                    <li>
+                                        <a class="dropdown-item"
+                                            href="{{ route('admin.push-notifications.index') }}">
+                                            <i class="bi bi-bell-fill me-2"></i> Push Notifications
+                                        </a>
+                                    </li>
+                                @endcan
+                            </ul>
+                        </li>
+                    @endcanany
+
+                    @canany(['can-manage-users', 'can-manage-roles', 'can-manage-permissions'])
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle {{ request()->routeIs(['admin.users.*', 'admin.roles.*', 'admin.permissions.*']) ? 'active' : '' }}"
+                                href="#" id="accessDropdown" role="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                <i class="bi bi-shield-lock-fill me-1"></i> Access Control
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="accessDropdown">
+                                @can('can-manage-users')
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.users.index') }}">
+                                            <i class="bi bi-person-badge-fill me-2"></i> In App Users
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('can-manage-roles')
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.roles.index') }}">
+                                            <i class="bi bi-shield-lock-fill me-2"></i> Roles
+                                        </a>
+                                    </li>
+                                @endcan
+                                @can('can-manage-permissions')
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.permissions.index') }}">
+                                            <i class="bi bi-key-fill me-2"></i> Permissions
+                                        </a>
+                                    </li>
+                                @endcan
+                            </ul>
+                        </li>
+                    @endcanany
                 </ul>
-            </li>
-        </ul>
-        <!-- Navbar-->
 
-    </nav>
-    <div id="layoutSidenav">
-        <div id="layoutSidenav_nav">
-            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
-                <div class="sb-sidenav-menu">
-                    <div class="nav">
-                        <div class="sb-sidenav-menu-heading">Core</div>
-
-                        <a class="nav-link" href="{{ route('admin.dashboard') }}">
-                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
-                            Dashboard
-                        </a>
-
-                        @can('can-manage-live-shows')
-                            <a class="nav-link" href="{{ route('admin.live-shows.index') }}">
-                                <div class="sb-nav-link-icon"><i class="bi bi-camera-video-fill"></i></div>
-                                Live Streams
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <ul class="navbar-nav">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" id="navbarUserDropdown"
+                                href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user fa-fw me-1"></i>
+                                <span class="text-truncate" style="max-width: 160px;">{{ Auth::user()->name }}</span>
                             </a>
-                        @endcan
-
-                        @can('can-manage-quiz-questions')
-                            <a class="nav-link" href="{{ route('admin.live-show-quizzes.index') }}">
-                                <div class="sb-nav-link-icon"><i class="bi bi-question-circle-fill"></i></div>
-                                Quiz Questions
-                            </a>
-                        @endcan
-
-                        @can('can-manage-media-gallery')
-                            <a class="nav-link" href="{{ route('admin.media-gallery.index') }}">
-                                <div class="sb-nav-link-icon"><i class="bi bi-images"></i></div>
-                                Media Gallery
-                            </a>
-                        @endcan
-
-                        @can('can-manage-players')
-                            <a class="nav-link" href="{{ route('admin.players.index') }}">
-                                <div class="sb-nav-link-icon"><i class="bi bi-people-fill"></i></div>
-                                Players
-                            </a>
-                        @endcan
-
-                        @can('can-manage-analytics')
-                            <a class="nav-link" href="{{ route('admin.analytics.index') }}">
-                                <div class="sb-nav-link-icon"><i class="bi bi-graph-up-arrow"></i></div>
-                                Analytics
-                            </a>
-                        @endcan
-
-                        @can('can-manage-settings')
-                            <a class="nav-link" href="{{ route('admin.settings.index') }}">
-                                <div class="sb-nav-link-icon"><i class="bi bi-sliders"></i></div>
-                                App Settings
-                            </a>
-                        @endcan
-                        @can('can-manage-gtm')
-                            <a class="nav-link" href="{{ route('admin.gtm.index') }}">
-                                <div class="sb-nav-link-icon"><i class="bi bi-google"></i></div>
-                                Google Tag Manager
-                            </a>
-                        @endcan
-                        @can('can-manage-settings')
-                            <a class="nav-link" href="{{ route('admin.password.form') }}">
-                                <div class="sb-nav-link-icon"><i class="bi bi-gear-fill"></i></div>
-                                Change Password
-                            </a>
-                        @endcan
-                        @can('can-manage-push-notifications')
-                            <a class="nav-link" href="{{ route('admin.push-notifications.index') }}">
-                                <div class="sb-nav-link-icon"><i class="bi bi-bell-fill"></i></div>
-                                Push Notifications
-                            </a>
-                        @endcan
-
-                        <div class="sb-sidenav-menu-heading">Access Control</div>
-                        @can('can-manage-users')
-                            <a class="nav-link" href="{{ route('admin.users.index') }}">
-                                <div class="sb-nav-link-icon"><i class="bi bi-person-badge-fill"></i></div>
-                                In App Users
-                            </a>
-                        @endcan
-                        @can('can-manage-roles')
-                            <a class="nav-link" href="{{ route('admin.roles.index') }}">
-                                <div class="sb-nav-link-icon"><i class="bi bi-shield-lock-fill"></i></div>
-                                Roles
-                            </a>
-                        @endcan
-                        @can('can-manage-permissions')
-                            <a class="nav-link" href="{{ route('admin.permissions.index') }}">
-                                <div class="sb-nav-link-icon"><i class="bi bi-key-fill"></i></div>
-                                Permissions
-                            </a>
-                        @endcan
-
-                        <a class="nav-link mt-4" href="#"
-                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                            <div class="sb-nav-link-icon"><i class="bi bi-box-arrow-right"></i></div>
-                            Logout
-                        </a>
-
-
-
-
-                        {{-- <div class="sb-sidenav-menu-heading">Interface</div>
-                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse"
-                            data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
-                            <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-                            Layouts
-                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                        </a> --}}
-
-                    </div>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
+                                @can('can-manage-settings')
+                                    <li>
+                                        <a class="dropdown-item" href="{{ route('admin.settings.index') }}">
+                                            <i class="bi bi-sliders me-2"></i> App Settings
+                                        </a>
+                                    </li>
+                                @endcan
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('admin.password.form') }}">
+                                        <i class="bi bi-gear-fill me-2"></i> Change Password
+                                    </a>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="javascript:void(0)"
+                                        onclick="document.getElementById('logout-form').submit();">
+                                        <i class="bi bi-box-arrow-right me-2"></i> Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
                 </div>
-                <div class="sb-sidenav-footer">
-                    <div class="small">Logged in as:</div>
-                    {{ Auth::user()->name }}
-                </div>
-            </nav>
-        </div>
-        <div id="layoutSidenav_content">
-            <div class="container-fluid">
-                @if (isset($header))
-                    <header class="page-header">
-                        {{ $header ?? '' }}
-                    </header>
-                @endif
-                <main id="main-content" class="">
-                    {{ $slot }}
-                </main>
             </div>
-            <footer class="py-4 bg-light mt-auto">
-                <div class="container-fluid px-4">
-                    <div class="d-flex align-items-center justify-content-between small">
-                        <div class="text-muted">Copyright &copy; {{ env('APP_NAME') }} {{ date('Y') }}</div>
-                        <div>
-                            <a href="#">Privacy Policy</a>
-                            &middot;
-                            <a href="#">Terms &amp; Conditions</a>
-                        </div>
+        </div>
+    </nav>
+
+    <div id="app-layout-content">
+        <div class="container-fluid">
+            @if (isset($header))
+                <header class="page-header">
+                    {{ $header ?? '' }}
+                </header>
+            @endif
+            <main id="main-content">
+                {{ $slot }}
+            </main>
+        </div>
+        <footer class="py-4 bg-light mt-auto">
+            <div class="container-fluid px-4">
+                <div class="d-flex align-items-center justify-content-between small">
+                    <div class="text-muted">Copyright &copy; {{ env('APP_NAME') }} {{ date('Y') }}</div>
+                    <div>
+                        <a href="#">Privacy Policy</a>
+                        &middot;
+                        <a href="#">Terms &amp; Conditions</a>
                     </div>
                 </div>
-            </footer>
-        </div>
-
-        <form action="{{ route('logout') }}" id="logout-form" method="post"></form>
-
+            </div>
+        </footer>
     </div>
+
+    <form action="{{ route('logout') }}" id="logout-form" method="post"></form>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
