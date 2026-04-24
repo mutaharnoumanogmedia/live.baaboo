@@ -263,6 +263,18 @@ class GamePlayController extends Controller
     public function submitQuiz(Request $request, $liveShowId)
     {
         $user = Auth::guard('web')->user();
+        if (! $user) {
+            return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::guard('web')->check()], 401);
+        }
+        $liveShow = LiveShow::find($liveShowId);
+        if (! $liveShow) {
+            return response()->json(['message' => 'Live show not found.'], 404);
+        }
+
+        if ($liveShow->status != 'live') {
+            return response()->json(['message' => 'Live show is not live.'], 403);
+        }
+
         $totalMilliSecondsToSubmit = (float) ($request->milliseconds_to_submit ?? 0);
         if ($totalMilliSecondsToSubmit <= 0) {
             // Backward compatibility for older clients still sending seconds_to_submit.
@@ -272,15 +284,6 @@ class GamePlayController extends Controller
 
         // $responseScore = $this->calculateScoreFromMilliseconds($totalMilliSecondsToSubmit);
         $totalSecondsToSubmit = max($totalMilliSecondsToSubmit / 1000, 0.001);
-
-        if (! $user) {
-            return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::guard('web')->check()], 401);
-        }
-
-        $liveShow = LiveShow::find($liveShowId);
-        if (! $liveShow) {
-            return response()->json(['message' => 'Live show not found.'], 404);
-        }
 
         $quizId = $request->quiz_id;
         $option = $request->option;
@@ -307,19 +310,30 @@ class GamePlayController extends Controller
             );
         }
 
-        $userQuiz = UserQuiz::firstOrCreate(
-            [
-                'user_id' => $user->id,
-                'live_show_id' => $liveShow->id,
-                'quiz_id' => $quizId,
-            ],
-            [
-                'created_at' => now(),
-            ]
-        );
         // if user already eliminated , do not process quiz
         if ($userPivot && $userPivot->pivot->status === 'eliminated') {
             return response()->json(['success' => false, 'message' => 'User is eliminated and cannot submit quiz.'], 403);
+        }
+
+        // $userQuiz = UserQuiz::firstOrCreate(
+        //     [
+        //         'user_id' => $user->id,
+        //         'live_show_id' => $liveShow->id,
+        //         'quiz_id' => $quizId,
+        //     ],
+        //     [
+        //         'created_at' => now(),
+        //     ]
+        // );
+
+        $userQuiz = UserQuiz::where('user_id', $user->id)->where('live_show_id', $liveShow->id)->where('quiz_id', $quizId)->first();
+        if (! $userQuiz) {
+            $userQuiz = UserQuiz::create([
+                'user_id' => $user->id,
+                'live_show_id' => $liveShow->id,
+                'quiz_id' => $quizId,
+                'created_at' => now(),
+            ]);
         }
 
         // Here you would typically check the option against the correct answer stored in the database.
