@@ -327,7 +327,10 @@ class GamePlayController extends Controller
         // );
 
         $userQuiz = UserQuiz::where('user_id', $user->id)->where('live_show_id', $liveShow->id)->where('quiz_id', $quizId)->first();
-        if (! $userQuiz) {
+        if ($userQuiz) {
+            // prevent duplicate quiz
+            return response()->json(['success' => false, 'message' => 'You have already answered this quiz.'], 403);
+        } else {
             $userQuiz = UserQuiz::create([
                 'user_id' => $user->id,
                 'live_show_id' => $liveShow->id,
