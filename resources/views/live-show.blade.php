@@ -173,7 +173,8 @@
             overflow: hidden !important;
             pointer-events: none !important;
         }
-/* 
+
+        /*
         #root video {
             object-fit: contain !important;
             position: fixed;
@@ -786,7 +787,7 @@
                     </div>
                     <div class="quiz-options row">
                         ${quiz.options.map((option, index) =>
-                        `<div class="mb-3 quiz-option col-md-12 position-relative">  <div class="option-result-container " style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}">${numberToLetter(index)}. ${option.option_text}</label>  </div> `).join('')}
+                        `<div class="mb-3 quiz-option col-md-12 position-relative" id="quiz-option-${option.id}">  <div class="option-result-container " id="option-result-container-${option.id}" style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}" class="quiz-option-label">${numberToLetter(index)}. ${option.option_text}</label>  </div> `).join('')}
                     </div>
              </div>
             `;
@@ -853,7 +854,7 @@
         function submitQuiz() {
 
 
-            const selected = document.querySelector('input[name="option"]:checked');
+            const selected = document.querySelector('input[name="option"]:checked') ?? -1;
             if (selected) {
                 // console.log('Selected option:', selected.value);
 
@@ -861,7 +862,7 @@
                 document.querySelectorAll('input[name="option"]').forEach(option => {
                     option.disabled = true;
                 });
-                const option = selected.value;
+                const option = selected.value ?? -1;
                 // console.log('Submitting option:', option);
 
                 fetch('{{ url('live-show/' . $liveShow->id . '/submit-quiz') }}', {
@@ -900,7 +901,7 @@
                                 registerModal.show();
                                 uncheckAndEnableOptions();
                             } else {
-                                alert(data.message || 'Failed to submit quiz. Please try again.');
+                                console.warn(data.message || 'Failed to submit quiz. Please try again.');
                             }
                         }
                     })
@@ -1602,8 +1603,11 @@
 
             stats.forEach(stat => {
                 try {
+                    let quizOptionDiv = document.getElementById(`quiz-option-${stat.quiz_option_id}`);
                     let bar = document.getElementById(`option-result-bar-${stat.quiz_option_id}`);
                     let label = document.getElementById(`option-result-label-${stat.quiz_option_id}`);
+
+                    let correctQuizOptionDiv = document.getElementById(`quiz-option-${data.correctOptionId}`);
                     if (bar) {
                         bar.style.width = `${stat.percentage}%`;
                     }
@@ -1612,14 +1616,15 @@
                     }
                     //make correct option green
                     // console.log('Correct option id:', data.correctOptionId, 'Current option id:', stat.quiz_option_id);
-                    if (data.correctOptionId == stat.quiz_option_id) {
-                        // console.log("green for correct applying");
+                    // if (data.correctOptionId == stat.quiz_option_id) {
+                    // console.log("green for correct applying");
 
-                        bar.style.background = '#28a745'; // Green for correct
-                        //make the option label border green
-                        label.style.border = '2px solid #28a745';
-                        // label.style.color = '#28a745';
+                    // Find the parent .quiz-option of the bar and add class 'correct' to it
+                    if (correctQuizOptionDiv) {
+                        correctQuizOptionDiv.classList.add('correct');
                     }
+
+                    // }
                 } catch (e) {
                     console.error('Error revealing responses:', stat);
                 }
@@ -1995,7 +2000,7 @@
                         vid.play().catch(function(e) {
                             console.error('Error playing video:', e);
                         });
-                    }, 1000);
+                    }, 300);
 
                 };
 
@@ -2149,6 +2154,17 @@
             document.addEventListener('DOMContentLoaded', hydrateGalleryOverlayFromServer);
         } else {
             hydrateGalleryOverlayFromServer();
+        }
+
+
+        //hide the gallery video when it is completed after 1 second of finish playing
+
+        if (galleryVideo) {
+            galleryVideo.addEventListener('ended', function() {
+                setTimeout(() => {
+                    hideGalleryOverlay();
+                }, 1000);
+            });
         }
 
         //if request has ?preview=true, then don't show playButtonOverlay

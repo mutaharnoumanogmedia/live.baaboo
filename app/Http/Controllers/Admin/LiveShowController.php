@@ -577,6 +577,7 @@ class LiveShowController extends Controller
 
         return response()->json([
             'success' => true,
+            'total_seconds' => $media->total_seconds,
             'message' => 'Image shown on stream.',
         ]);
     }
@@ -782,6 +783,8 @@ class LiveShowController extends Controller
         $quiz_id
     ): JsonResponse {
 
+        $triggerEvent = $request->input('triggerEvent', 0);
+
         // 1. VALIDATION & DATA FETCHING
         $liveShow = LiveShow::find($id);
         if (! $liveShow) {
@@ -803,8 +806,10 @@ class LiveShowController extends Controller
         $correctOption = $quiz->options->firstWhere('is_correct', true);
         $correctOptionId = $correctOption ? $correctOption->id : null;
 
-        // 2. BROADCASTING
-        LiveShowQuizUserResponses::dispatch((string) $liveShow->id, (string) $quiz->id, $statistics, $correctOptionId);
+        if ($triggerEvent == 1) {
+            // 2. BROADCASTING
+            LiveShowQuizUserResponses::dispatch((string) $liveShow->id, (string) $quiz->id, $statistics, $correctOptionId);
+        }
 
         // The controller's job is to format the final JSON response
         return response()->json([

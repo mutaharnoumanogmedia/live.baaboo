@@ -185,11 +185,11 @@
                         <h5 class="text-white mb-0"><i class="fas fa-users me-2"></i>Players & Responses</h5>
                         <div class="w-100">
                             <a href="{{ route('admin.live-shows.export-participants-csv', $liveShow->id) }}"
-                                class="btn btn-outline-success btn-sm">
+                                class="btn btn-success btn-sm">
                                 <i class="fas fa-file-csv me-1"></i> Export All Participants CSV
                             </a>
                             <a href="{{ route('admin.live-shows.export-winners-csv', $liveShow->id) }}"
-                                class="btn btn-outline-primary btn-sm ms-2">
+                                class="btn btn-primary btn-sm ms-2">
                                 <i class="fas fa-trophy me-1"></i> Export Winners CSV
                             </a>
                         </div>
@@ -261,7 +261,7 @@
                             <span><i class="fas fa-clipboard-list me-1"></i> <span id="responsesTitle">Select a player
                                     to view responses</span></span>
                             <div id="responsesActions" style="display:none;">
-                                <a href="#" id="exportPlayerCsvBtn" class="btn btn-outline-success btn-sm">
+                                <a href="#" id="exportPlayerCsvBtn" class="btn btn-success btn-sm">
                                     <i class="fas fa-file-csv me-1"></i> Export Player CSV
                                 </a>
                             </div>

@@ -1,5 +1,8 @@
  <x-app-dashboard-layout>
+     @php
 
+         $broadcasterUrl = route('admin.live-shows.stream-management.broadcaster', [$liveShow->id]);
+     @endphp
 
      <div class="container-fluid  min-vh-100">
          <div class=" d-flex justify-content-between align-items-center py-3 bg-dark rounded mb-1 p-3">
@@ -206,26 +209,30 @@
                                  </div>
                              </div>
                              <div class="col-md-7 text-center">
-                                 <div style="width: 480px; height: 720px; padding: 5px; overflow: hidden; border: 1px solid #ccc;border-radius: 10px;">
+                                 <div
+                                     style="width: 480px; height: 720px; padding: 5px; overflow: hidden; border: 1px solid #ccc;border-radius: 10px;">
                                      <div id="">
                                          <button class="btn btn-outline-primary mb-2" type="button"
-                                             onclick="document.querySelector('#broadcasterIframe').src = document.querySelector('#broadcasterIframe').src;"
+                                             onclick="document.querySelector('#broadcasterIframe').src = '{{ $broadcasterUrl }}';"
                                              style=" ">
                                              <i class="fas fa-sync-alt me-1"></i> Refresh Broadcast
                                          </button>
-                                     <a
-                                         class="btn btn-outline-info mb-2"
-                                         href="{{ route('admin.live-shows.stream-management.broadcaster', [$liveShow->id]) }}"
-                                         target="_blank"
-                                         style="margin-left: 10px;"
-                                     >
-                                         <i class="fas fa-external-link-alt me-1"></i> Open in New Tab
-                                     </a>
-                                
+                                         <button class="btn btn-outline-danger mb-2" type="button"
+                                             id="disableBroadcastBtn"
+                                             onclick="document.querySelector('#broadcasterIframe').src = '';">
+                                             <i class="fas fa-ban me-1"></i> Disable Broadcast
+                                         </button>
+
+
+                                         <a class="btn btn-outline-info mb-2"
+                                             href="{{ route('admin.live-shows.stream-management.broadcaster', [$liveShow->id]) }}"
+                                             target="_blank" style="margin-left: 10px;">
+                                             <i class="fas fa-external-link-alt me-1"></i> Open in New Tab
+                                         </a>
+
                                      </div>
 
-                                     <iframe id="broadcasterIframe"
-                                         src="{{ route('admin.live-shows.stream-management.broadcaster', [$liveShow->id]) }}"
+                                     <iframe id="broadcasterIframe" src="{{ $broadcasterUrl }}"
                                          style="width: 960px; height: 1440px; transform: scale(0.5); transform-origin: 0 0; border: none;">
                                      </iframe>
                                  </div>
@@ -357,14 +364,12 @@
                                                  title="Hide image/video overlay on live stream ">
                                                  <i class="fas fa-eye-slash"></i> Hide on stream
                                              </button>
-                                         <button type="button"
-                                             class="btn btn-sm btn-outline-success  mt-2"
-                                             title="Refresh gallery items"
-                                             onclick="fetchGalleryMediaItems()">
-                                             <i class="fas fa-sync-alt"></i> Refresh gallery
-                                         </button>
-                                    
-                                             
+                                             <button type="button" class="btn btn-sm btn-outline-success  mt-2"
+                                                 title="Refresh gallery items" onclick="fetchGalleryMediaItems()">
+                                                 <i class="fas fa-sync-alt"></i> Refresh gallery
+                                             </button>
+
+
                                          </div>
                                          <div id="gallery-attached-list" class="table-responsive mb-3"
                                              style="max-height: 520px; overflow-y: auto;">
@@ -1813,16 +1818,22 @@
 
 
              function viewResponses(liveShowId, quizId, btn = null) {
-
+                 let triggerEvent = 0;
                  if (btn) {
                      setBtnBusy(btn, true, 'Loading\u2026');
                  }
-                 fetch(`{{ url('admin/live-shows') }}/${liveShowId}/get-users-quiz-responses/${quizId}`, {
+                 if (btn != null) {
+                     triggerEvent = 1;
+                 } else {
+                     triggerEvent = 0;
+                 }
+                 fetch(`{{ url('admin/live-shows') }}/${liveShowId}/get-users-quiz-responses/${quizId}?triggerEvent=${triggerEvent}`, {
                          method: 'GET',
                          headers: {
                              'X-CSRF-TOKEN': '{{ csrf_token() }}',
                              'Accept': 'application/json',
                          },
+
                      }).then(response => response.json())
                      .then(data => {
                          console.log('responses fetched:', data);
@@ -1989,6 +2000,11 @@
                      .then(data => {
                          if (data.success) {
                              updateGalleryShowStatus('showing');
+                             if(data.total_seconds) {
+                                setTimeout(() => {
+                                    galleryHideOnStream(btn);
+                                }, data.total_seconds * 1000 + 5000);
+                             }
                          }
                      })
                      .catch(err => {

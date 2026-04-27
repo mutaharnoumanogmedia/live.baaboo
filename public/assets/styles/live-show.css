@@ -621,15 +621,16 @@ body .end-show {
     transform: translateY(-2px);
 }
 
-.quiz-option.correct input[type="radio"]:checked + label {
-    background: #28a74580;
-    border-color: #28a74580;
+.quiz-option.correct input[type="radio"]:checked + label,
+.quiz-option.correct input[type="radio"]:disabled + label {
+    background: #28a745;
+    border-color: #28a745;
     color: white;
 }
 
 .quiz-option.correct label {
-    background: #28a74580;
-    border-color: #28a74580;
+    background: #28a745;
+    border-color: #28a745;
     color: white;
 }
 

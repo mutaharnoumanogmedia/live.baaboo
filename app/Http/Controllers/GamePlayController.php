@@ -359,13 +359,31 @@ class GamePlayController extends Controller
                     'is_correct' => $quizOption->is_correct,
                     'seconds_to_submit' => $totalSecondsToSubmit,
                     'response_score' => $responseScore,
-
                     'user_response' => $quizOption->option_text,
                     'created_at' => now(),
                 ]
             );
         }
         if (! $quizOption) {
+            // just create a quiz entry
+            $userQuiz = UserQuiz::create([
+                'user_id' => $user->id,
+                'live_show_id' => $liveShow->id,
+                'quiz_id' => $quizId,
+                'created_at' => now(),
+            ]);
+            UserQuizResponse::create([
+
+                'user_id' => $user->id,
+                'quiz_id' => $quizId,
+                'user_quiz_id' => $userQuiz->id,
+                'quiz_option_id' => null,
+                'is_correct' => false,
+                'seconds_to_submit' => 10,
+                'response_score' => 0,
+                'user_response' => 'Invalid option',
+            ]);
+
             return response()->json(['success' => false, 'message' => 'Invalid quiz option.'], 422);
         }
         $currentScore = $liveShow->users()->where('user_id', $user->id)->first()->pivot->score ?? 0;

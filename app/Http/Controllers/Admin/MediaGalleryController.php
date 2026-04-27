@@ -55,6 +55,7 @@ class MediaGalleryController extends Controller
             'file' => 'required|file|mimetypes:video/mp4,video/mpeg,video/quicktime,image/jpeg,image/png,image/webp|max:204800', // 200 MB limit
             'custom_name' => 'nullable|string|max:255',
             'thumbnail' => 'nullable|file|mimes:jpeg,jpg,png|max:1024',
+            'total_seconds' => 'nullable|integer|min:0',
         ]);
 
         $file = $request->file('file');
@@ -67,6 +68,7 @@ class MediaGalleryController extends Controller
 
         $thumbnailFullUrl = null;
         $tempThumbPath = null;
+
 
         // 2. Video thumbnail: prefer client-captured JPEG/PNG, else FFmpeg
         if ($isVideo) {
@@ -130,6 +132,7 @@ class MediaGalleryController extends Controller
             'mime_type' => $mimeType,
             'title' => $title,
             'thumbnail' => $thumbnailFullUrl, // Will be null for images
+            'total_seconds' => $isVideo ? $request->input('total_seconds') : null,
         ]);
 
         // 5. Cleanup temp thumbnail if it exists

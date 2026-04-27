@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('user_quiz_responses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_quiz_id')->constrained('user_quizzes')->onDelete('no action');
-            $table->foreignId('quiz_option_id')->constrained('quiz_options')->onDelete('no action');
+            $table->foreignId('quiz_option_id')->nullable()->constrained('quiz_options')->onDelete('no action');
             $table->foreignId('quiz_id')->constrained('live_show_quizzes')->onDelete('no action');
             $table->foreignId('user_id')->constrained('users')->onDelete('no action');
             $table->boolean('is_correct')->default(false);

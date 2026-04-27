@@ -121,6 +121,35 @@
                 });
             }
 
+            /**
+             * Read the duration (in seconds) from a video File via metadata.
+             * Resolves to an integer number of seconds, or null if unavailable.
+             */
+            function getVideoDurationSeconds(file) {
+                return new Promise((resolve) => {
+                    const video = document.createElement('video');
+                    video.preload = 'metadata';
+                    video.muted = true;
+                    video.playsInline = true;
+                    video.setAttribute('playsinline', '');
+                    const url = URL.createObjectURL(file);
+
+                    const cleanup = (val) => {
+                        URL.revokeObjectURL(url);
+                        video.remove();
+                        resolve(val);
+                    };
+
+                    video.onloadedmetadata = () => {
+                        const d = video.duration;
+                        cleanup(Number.isFinite(d) && d > 0 ? Math.round(d) : null);
+                    };
+                    video.onerror = () => cleanup(null);
+
+                    video.src = url;
+                });
+            }
+
             document.addEventListener('DOMContentLoaded', function() {
                 const dz = new Dropzone('#gallery-dropzone', {
                     url: '{{ route('admin.media-gallery.upload') }}',
@@ -167,8 +196,16 @@
                                 }).catch(() => {
                                     file.clientThumbnailBlob = null;
                                 });
+
+                                file._durationPromise = getVideoDurationSeconds(file).then((secs) => {
+                                    file.clientDurationSeconds = secs;
+                                    return secs;
+                                }).catch(() => {
+                                    file.clientDurationSeconds = null;
+                                });
                             } else {
                                 file._thumbPromise = Promise.resolve();
+                                file._durationPromise = Promise.resolve();
                             }
                         });
 
@@ -176,8 +213,13 @@
                             // Append filename from the input if present
                             const filename = file.filenameInput ? file.filenameInput.value : '';
                             formData.append('custom_name', filename);
+                            
                             if (file.clientThumbnailBlob instanceof Blob) {
                                 formData.append('thumbnail', file.clientThumbnailBlob, 'thumbnail.jpg');
+                            }
+
+                            if (Number.isFinite(file.clientDurationSeconds) && file.clientDurationSeconds > 0) {
+                                formData.append('total_seconds', file.clientDurationSeconds);
                             }
                         });
 
@@ -207,7 +249,10 @@
                             const pending = dropzoneInstance.getFilesWithStatus(Dropzone.ADDED);
                             confirmBtn.disabled = true;
                             try {
-                                await Promise.all(pending.map((f) => f._thumbPromise || Promise.resolve()));
+                                await Promise.all(pending.flatMap((f) => [
+                                    f._thumbPromise || Promise.resolve(),
+                                    f._durationPromise || Promise.resolve(),
+                                ]));
                             } finally {
                                 confirmBtn.disabled = false;
                             }

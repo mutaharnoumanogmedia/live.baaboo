@@ -18,6 +18,7 @@ class GalleryMedia extends Model
         'mime_type',
         'title',
         'thumbnail',
+        'total_seconds',
     ];
 
     public function liveShows()
