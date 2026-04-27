@@ -5,7 +5,6 @@
          <div class=" d-flex justify-content-between align-items-center py-3 bg-dark rounded mb-1 p-3">
              <div>
                  <h4 class="mb-0 fw-bold  ">{{ $liveShow->title }}</h4>
-
              </div>
              <div class="btn-group shadow-sm">
                  <a target="_blank" class="btn btn-outline-primary"
@@ -27,6 +26,18 @@
          </div>
          <div class="row g-4">
              <div class="col-lg-2">
+                 <label class="small text-muted d-block mb-2">Join via QR Code</label>
+                 <div id="qrcode" class=" p-2 rounded"></div>
+                 <div class="mt-1 d-flex   mb-3">
+                     <a href="{{ url('live-show-play/' . $liveShow->id) }}" target="_blank"
+                         class="text-decoration-none small text-truncate d-block  ">
+                         {{ url('live-show-play/' . $liveShow->id) }}
+                     </a>
+                     <button type="button" class="btn btn-sm btn-link" id="copyLiveShowLinkBtn"
+                         data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link to clipboard">
+                         <i class="fas fa-copy"></i>
+                     </button>
+                 </div>
                  <div class="card border-0 shadow-sm h-100">
                      <div class="card-header  border-bottom py-3">
                          <h6 class="mb-0 fw-bold text-uppercase small text-muted">
@@ -55,27 +66,42 @@
                                      id="fetchPlayersButton">
                                      <i class="fas fa-sync"></i> Refresh Players
                                  </button>
+                                 <a href="{{ route('admin.live-shows.export-all-users-as-csv', $liveShow->id) }}"
+                                     title="Export Users" class="btn btn-primary btn-sm" id="exportUsersBtn"
+                                     data-bs-toggle="tooltip" data-bs-placement="top">
+                                     <i class="fas fa-file-export"></i>
+                                 </a>
                              </div>
                          </div>
                          <div class="d-flex justify-content-between align-items-center px-2 pb-2 small text-muted">
                              <span id="playersSearchSummary">Showing players</span>
-                             <a href="{{ route('admin.live-shows.export-all-users-as-csv', $liveShow->id) }}"
-                                 title="Export Users" class="btn btn-primary btn-sm" id="exportUsersBtn"
-                                 data-bs-toggle="tooltip" data-bs-placement="top">
-                                 <i class="fas fa-file-export"></i>
-                             </a>
+
                          </div>
-                         <ul class="list-group list-group-flush" id="activePlayersList"
+                         <table class="table table-sm table-dark table-hover align-middle mb-0"
                              style=" overflow-y: scroll; max-height: 80vh; padding-bottom: 30px;">
-                             <li class="list-group-item d-flex align-items-center border-0 px-3">
-                                 <span class="position-relative me-3">
-                                     <div class="bg-secondary rounded-circle" style="width: 32px; height: 32px;"></div>
-                                     <span
-                                         class="position-absolute bottom-0 end-0 p-1 bg-success border border-light rounded-circle"></span>
-                                 </span>
-                                 <div class="small fw-medium">Loading...</div>
-                             </li>
-                         </ul>
+                             <thead>
+                                 <tr>
+                                     <th>Player</th>
+                                     <th>Score</th>
+                                     <th>Actions</th>
+                                 </tr>
+                             </thead>
+                             <tbody id="activePlayersList">
+                                 <tr class="bg-dark align-middle">
+                                     <td>
+                                         <span class="position-relative me-3">
+                                             <div class="bg-secondary rounded-circle"
+                                                 style="width: 32px; height: 32px;">
+                                             </div>
+                                             <span
+                                                 class="position-absolute bottom-0 end-0 p-1 bg-success border border-light rounded-circle"></span>
+                                         </span>
+                                         <div class="small fw-medium">Loading...</div>
+                                     </td>
+                                 </tr>
+                             </tbody>
+
+                         </table>
                          <div class="p-2 border-top">
                              <button type="button" class="btn btn-outline-primary btn-sm w-100 d-none"
                                  id="loadMorePlayersButton">
@@ -88,138 +114,122 @@
 
              <main class="col-lg-7">
                  <div class="card border-0 shadow-sm mb-4">
-
-
                      <div class="card-body ">
                          <div class="row align-items-center">
-
-                             <div class="col-md-6 text-center">
-                                 <label class="small text-muted d-block mb-2">Join via QR Code</label>
-                                 <div id="qrcode" class="mx-auto p-2  border rounded"
-                                     style="width: 180px; height: 180px;"></div>
-                                 <div class="mt-4 d-flex justify-content-center align-items-center">
-                                     <a href="{{ url('live-show-play/' . $liveShow->id) }}" target="_blank"
-                                         class="text-decoration-none small text-truncate d-block px-3">
-                                         {{ url('live-show-play/' . $liveShow->id) }}
-
-                                     </a>
-
-                                     <button type="button" class="btn btn-sm btn-link" id="copyLiveShowLinkBtn"
-                                         data-bs-toggle="tooltip" data-bs-placement="top"
-                                         title="Copy link to clipboard">
-                                         <i class="fas fa-copy"></i>
-                                     </button>
-                                     <script>
-                                         document.addEventListener('DOMContentLoaded', function() {
-                                             const btn = document.getElementById('copyLiveShowLinkBtn');
-                                             if (btn) {
-                                                 btn.addEventListener('click', function() {
-                                                     const link = "{{ url('live-show-play/' . $liveShow->id) }}";
-                                                     navigator.clipboard.writeText(link).then(function() {
-                                                         btn.setAttribute('data-bs-original-title', 'Copied!');
-                                                         var tooltip = bootstrap.Tooltip.getOrCreateInstance(btn);
-                                                         tooltip.show();
-                                                         setTimeout(() => {
-                                                             btn.setAttribute('data-bs-original-title',
-                                                                 'Copy link to clipboard');
-                                                             tooltip.hide();
-                                                         }, 1200);
-                                                     });
-                                                 });
-                                             }
-                                         });
-                                     </script>
+                             <div class="col-lg-5">
+                                 <div class="col-md-12">
+                                     <div class="card border-0 shadow-sm">
+                                         <div class="card-body">
+                                             <h6 class="text-muted small text-uppercase fw-bold mb-3">Show Status
+                                             </h6>
+                                             <form action="" method="post" id="live-show-status-form"
+                                                 class="d-flex gap-2">
+                                                 <select class="form-select fw-bold" id="liveShowStatusSelect"
+                                                     onchange="updateLiveShowStatus(this.value)">
+                                                     >
+                                                     <option value="scheduled"
+                                                         {{ $liveShow->status == 'scheduled' ? 'selected' : '' }}>⏳
+                                                         Scheduled</option>
+                                                     <option value="live"
+                                                         {{ $liveShow->status == 'live' ? 'selected' : '' }}>🟢
+                                                         Live</option>
+                                                     <option value="completed"
+                                                         {{ $liveShow->status == 'completed' ? 'selected' : '' }}>
+                                                         🔴
+                                                         Completed
+                                                     </option>
+                                                 </select>
+                                                 {{-- <button type="submit"
+                                                       class="btn btn-dark text-nowrap px-3">Update</button> --}}
+                                             </form>
+                                         </div>
+                                     </div>
                                  </div>
-                             </div>
-
-                             <div class="col-lg-6">
-                                 <div class="row ">
-                                     <div class="col-md-12 mb-3">
-                                         <div class="card border-0 shadow-sm">
-                                             <div class="card-body">
-                                                 <h6 class="text-muted small text-uppercase fw-bold mb-3">Winners
-                                                     Ceremony</h6>
-                                                 <button type="button" id="announceWinnersBtn"
-                                                     class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm my-2"
-                                                     onclick="updateWinners()"
-                                                     @if ($liveShow->winners_announced) disabled aria-disabled="true" @endif>
-                                                     <span id="announceWinnersBtnContent"
-                                                         class="announce-winners-btn-label @if ($liveShow->winners_announced) d-none @endif">
-                                                         <i class="fas fa-trophy me-2"></i> Announce Winners
-                                                     </span>
-                                                     <span id="announceWinnersBtnLoader"
-                                                         class="announce-winners-btn-loader d-none">
-                                                         <i class="fas fa-spinner fa-spin me-2"
-                                                             aria-hidden="true"></i>
-                                                         Announcing…
-                                                     </span>
-                                                     <span id="announceWinnersBtnDone"
-                                                         class="announce-winners-btn-done @if (!$liveShow->winners_announced) d-none @endif">
-                                                         <i class="fas fa-check me-2"></i> Winners announced
-                                                     </span>
-                                                 </button>
-                                                 <p id="announceWinnersAckMessage"
-                                                     class="small text-success mb-0 mt-2 px-1 @if (!$liveShow->winners_announced) d-none @endif">
-                                                     Winners have been announced. Winner notification emails have been
-                                                     queued for the winners.
-                                                 </p>
-                                                 <button type="button" id="unannounceWinnersBtn"
-                                                     class="btn btn-outline-secondary w-100 py-2 fw-bold shadow-sm my-2 @if (!$liveShow->winners_announced) d-none @endif"
-                                                     onclick="unannounceWinners()">
-                                                     <span id="unannounceWinnersBtnLabel"
-                                                         class="unannounce-winners-btn-label">
-                                                         <i class="fas fa-undo me-2"></i> Un-announce winners
-                                                     </span>
-                                                     <span id="unannounceWinnersBtnLoader"
-                                                         class="unannounce-winners-btn-loader d-none">
-                                                         <i class="fas fa-spinner fa-spin me-2"
-                                                             aria-hidden="true"></i>
-                                                         Updating…
-                                                     </span>
-                                                 </button>
+                                 <div class="col-md-12 mb-3">
+                                     <div class="card border-0 shadow-sm">
+                                         <div class="card-body">
+                                             <h6 class="text-muted small text-uppercase fw-bold mb-3">
+                                                 Winners Ceremony
+                                             </h6>
+                                             <button type="button" id="announceWinnersBtn"
+                                                 class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm my-2"
+                                                 onclick="updateWinners()"
+                                                 @if ($liveShow->winners_announced) disabled aria-disabled="true" @endif>
+                                                 <span id="announceWinnersBtnContent"
+                                                     class="announce-winners-btn-label @if ($liveShow->winners_announced) d-none @endif">
+                                                     <i class="fas fa-trophy me-2"></i> Announce Winners
+                                                 </span>
+                                                 <span id="announceWinnersBtnLoader"
+                                                     class="announce-winners-btn-loader d-none">
+                                                     <i class="fas fa-spinner fa-spin me-2" aria-hidden="true"></i>
+                                                     Announcing…
+                                                 </span>
+                                                 <span id="announceWinnersBtnDone"
+                                                     class="announce-winners-btn-done @if (!$liveShow->winners_announced) d-none @endif">
+                                                     <i class="fas fa-check me-2"></i> Winners announced
+                                                 </span>
+                                             </button>
+                                             <p id="announceWinnersAckMessage"
+                                                 class="small text-success mb-0 mt-2 px-1 @if (!$liveShow->winners_announced) d-none @endif">
+                                                 Winners have been announced. Winner notification emails have been
+                                                 queued for the winners.
+                                             </p>
+                                             <button type="button" id="unannounceWinnersBtn"
+                                                 class="btn btn-outline-secondary w-100 py-2 fw-bold shadow-sm my-2 @if (!$liveShow->winners_announced) d-none @endif"
+                                                 onclick="unannounceWinners()">
+                                                 <span id="unannounceWinnersBtnLabel"
+                                                     class="unannounce-winners-btn-label">
+                                                     <i class="fas fa-undo me-2"></i> Un-announce winners
+                                                 </span>
+                                                 <span id="unannounceWinnersBtnLoader"
+                                                     class="unannounce-winners-btn-loader d-none">
+                                                     <i class="fas fa-spinner fa-spin me-2" aria-hidden="true"></i>
+                                                     Updating…
+                                                 </span>
+                                             </button>
+                                             <div class="d-flex gap-2 mt-3">
                                                  <button type="button"
-                                                     class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm my-2"
+                                                     class="btn btn-warning   py-2 fw-bold text-white shadow-sm my-2"
                                                      onclick="showWinnerTab(this)">
                                                      <i class="fas fa-eye me-2"></i> Show winner tab
                                                  </button>
                                                  <button type="button"
-                                                     class="btn btn-outline-warning w-100 py-2 fw-bold text-white shadow-sm my-2"
+                                                     class="btn btn-outline-warning   py-2 fw-bold text-white shadow-sm my-2"
                                                      onclick="hideWinnerTab(this)">
                                                      <i class="fas fa-eye-slash me-2"></i> Hide winner tab
                                                  </button>
+                                             </div>
 
-                                             </div>
-                                         </div>
-                                     </div>
-                                     <div class="col-md-12">
-                                         <div class="card border-0 shadow-sm">
-                                             <div class="card-body">
-                                                 <h6 class="text-muted small text-uppercase fw-bold mb-3">Show Status
-                                                 </h6>
-                                                 <form action="" method="post" id="live-show-status-form"
-                                                     class="d-flex gap-2">
-                                                     <select class="form-select fw-bold" id="liveShowStatusSelect"
-                                                         onchange="updateLiveShowStatus(this.value)">
-                                                         >
-                                                         <option value="scheduled"
-                                                             {{ $liveShow->status == 'scheduled' ? 'selected' : '' }}>⏳
-                                                             Scheduled</option>
-                                                         <option value="live"
-                                                             {{ $liveShow->status == 'live' ? 'selected' : '' }}>🟢
-                                                             Live</option>
-                                                         <option value="completed"
-                                                             {{ $liveShow->status == 'completed' ? 'selected' : '' }}>
-                                                             🔴
-                                                             Completed
-                                                         </option>
-                                                     </select>
-                                                     {{-- <button type="submit"
-                                                         class="btn btn-dark text-nowrap px-3">Update</button> --}}
-                                                 </form>
-                                             </div>
+
                                          </div>
                                      </div>
                                  </div>
+                             </div>
+                             <div class="col-md-7 text-center">
+                                 <div style="width: 480px; height: 720px; padding: 5px; overflow: hidden; border: 1px solid #ccc;border-radius: 10px;">
+                                     <div id="">
+                                         <button class="btn btn-outline-primary mb-2" type="button"
+                                             onclick="document.querySelector('#broadcasterIframe').src = document.querySelector('#broadcasterIframe').src;"
+                                             style=" ">
+                                             <i class="fas fa-sync-alt me-1"></i> Refresh Broadcast
+                                         </button>
+                                     <a
+                                         class="btn btn-outline-info mb-2"
+                                         href="{{ route('admin.live-shows.stream-management.broadcaster', [$liveShow->id]) }}"
+                                         target="_blank"
+                                         style="margin-left: 10px;"
+                                     >
+                                         <i class="fas fa-external-link-alt me-1"></i> Open in New Tab
+                                     </a>
+                                
+                                     </div>
+
+                                     <iframe id="broadcasterIframe"
+                                         src="{{ route('admin.live-shows.stream-management.broadcaster', [$liveShow->id]) }}"
+                                         style="width: 960px; height: 1440px; transform: scale(0.5); transform-origin: 0 0; border: none;">
+                                     </iframe>
+                                 </div>
+
                              </div>
                          </div>
                      </div>
@@ -337,16 +347,24 @@
                                              <h6 class="text-muted small text-uppercase fw-bold mb-">
                                                  Attached to this stream</h6>
 
-                                             <button type="button" class="btn btn-sm btn-outline-primary"
+                                             <button type="button" class="btn btn-sm btn-outline-primary mt-2"
                                                  title="Attach media from gallery" data-bs-toggle="modal"
                                                  data-bs-target="#select-media-modal">
                                                  <i class="fas fa-plus"></i> Add from gallery
                                              </button>
                                              <button type="button"
-                                                 class="btn btn-sm btn-outline-secondary gallery-hide-on-stream-btn"
-                                                 title="Hide image/video overlay on live stream">
+                                                 class="btn btn-sm btn-outline-secondary gallery-hide-on-stream-btn mt-2"
+                                                 title="Hide image/video overlay on live stream ">
                                                  <i class="fas fa-eye-slash"></i> Hide on stream
                                              </button>
+                                         <button type="button"
+                                             class="btn btn-sm btn-outline-success  mt-2"
+                                             title="Refresh gallery items"
+                                             onclick="fetchGalleryMediaItems()">
+                                             <i class="fas fa-sync-alt"></i> Refresh gallery
+                                         </button>
+                                    
+                                             
                                          </div>
                                          <div id="gallery-attached-list" class="table-responsive mb-3"
                                              style="max-height: 520px; overflow-y: auto;">
@@ -829,12 +847,6 @@
                  updateAdminChatUi(isChatEnabled);
              });
 
-             // Refresh the currently visible player window every 30 seconds.
-             //  setInterval(() => {
-             //      if (liveShowStatus == 'live') {
-             //          refreshVisiblePlayers();
-             //      }
-             //  }, 30000);
 
              function fetchChatMessages() {
                  // Simulate an API call to fetch chat messages
@@ -1101,7 +1113,7 @@
              function setPlayersLoading() {
                  const activePlayerUlElement = document.getElementById('activePlayersList');
                  activePlayerUlElement.innerHTML =
-                     '<li class="list-group-item bg-dark text-white d-flex align-items-center justify-content-center"><i class="fas fa-spinner fa-spin me-2"></i> Loading...</li>';
+                     '<tr class="bg-dark align-middle"><td colspan="3"><i class="fas fa-spinner fa-spin me-2"></i> Loading...</td></tr>';
              }
 
              function updatePlayerListMeta() {
@@ -1127,22 +1139,23 @@
                  const prizeWon = escapeHtml(player.prize_won ?? '');
                  const playerShowUrl = `{{ url('admin/players') }}/${player.id}`;
 
-                 return `<li class="list-group-item bg-dark d-flex justify-content-between align-items-center">
-                    <div class='text-white'>
+                 return `<tr class="bg-dark align-middle">
+                    <td class='text-white'>
                         ${index}.
                         <strong class='${player.status != 'eliminated' ? 'text-white' : 'text-secondary'}'>${playerName}</strong>
                         <span class="ms-2 ${player.is_online == 1 ? 'text-success' : 'text-secondary'}">
                             <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
                         </span>
-                        <span class='ms-2 text-white'>${player.score !== null ? ` ${player.score}` : ''}</span>
+                       
                         ${player.is_winner ? '<i class="bi bi-trophy-fill text-warning"></i>' : ''}
                         <div class='text-white small text-secondary'>${playerEmail}</div>
                         <div class='text-white'>
-                            ${player.is_winner && prizeWon ? `Prize:<br> <span class='badge bg-primary'> ${prizeWon} </span>` : ''}
+                            ${player.is_winner && prizeWon ? `Prize:  <span class='badge bg-primary'> ${prizeWon} </span>` : ''}
                         </div>
-                    </div>
+                    </td>
+                    <td class='text-white '>${player.score !== null ? ` ${player.score}` : ''}</td>
 
-                    <div>
+                    <td>
                         <div class="dropdown">
                             <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="playerDropdownMenuButton${player.id}" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-three-dots"></i>
@@ -1173,8 +1186,9 @@
                                 </li>
                             </ul>
                         </div>
-                    </div>
-                </li>`;
+                    </td>
+                </tr>`;
+
              }
 
              function appendPlayerList(data, options = {}) {
@@ -1189,7 +1203,7 @@
 
                  if (data.users.length === 0 && !append) {
                      activePlayersList.innerHTML =
-                         '<li class="list-group-item bg-dark text-white">No players found.</li>';
+                         '<tr class="bg-dark align-middle"><td colspan="3">No players found.</td></tr>';
                      return;
                  }
 
@@ -1901,8 +1915,8 @@
                  // Syntax: new QRCode(element, options);
                  const qrcode = new QRCode(qrcodeContainer, {
                      text: dataToEncode,
-                     width: 160,
-                     height: 160,
+                     width: 120,
+                     height: 120,
                      colorDark: "#000000",
                      colorLight: "#ffffff",
                      correctLevel: QRCode.CorrectLevel.H // High error correction level
@@ -2440,6 +2454,26 @@
                      streamSwalError('Preview iframe not found.', 'Mute Preview');
                  }
              }
+         </script>
+         <script>
+             document.addEventListener('DOMContentLoaded', function() {
+                 const btn = document.getElementById('copyLiveShowLinkBtn');
+                 if (btn) {
+                     btn.addEventListener('click', function() {
+                         const link = "{{ url('live-show-play/' . $liveShow->id) }}";
+                         navigator.clipboard.writeText(link).then(function() {
+                             btn.setAttribute('data-bs-original-title', 'Copied!');
+                             var tooltip = bootstrap.Tooltip.getOrCreateInstance(btn);
+                             tooltip.show();
+                             setTimeout(() => {
+                                 btn.setAttribute('data-bs-original-title',
+                                     'Copy link to clipboard');
+                                 tooltip.hide();
+                             }, 1200);
+                         });
+                     });
+                 }
+             });
          </script>
          <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
          <style>

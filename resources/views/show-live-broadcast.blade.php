@@ -124,7 +124,9 @@
             showTextChat: false, // Disables the chat/message input
             showInRoomMessageButton: false, // Hides the chat icon
             showUserList: false, // Hides the viewer count/list
-            language: 'German'
+            language: 'German',
+            showMirror: true,
+            fillMode: "cover",
         }
 
         const zp = ZegoUIKitPrebuilt.create(TOKEN);

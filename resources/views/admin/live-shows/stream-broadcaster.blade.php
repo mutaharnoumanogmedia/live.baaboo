@@ -2,10 +2,7 @@
 
 <head>
     <style>
-        #root {
-            width: 100vw;
-            height: 100vh;
-        }
+ 
 
         #root video {
             object-fit: cover !important;
@@ -126,7 +123,7 @@
                     showUserList: false,
                     showPreJoinView: false,
                     showUserJoinAndLeave: false,
-                    showMirror: false,
+                    showMirror: true,
                     fillMode: "cover",
 
                 };
@@ -140,7 +137,7 @@
                     showUserList: false,
                     showPreJoinView: false,
                     showUserJoinAndLeave: false,
-                    showMirror: false,
+                    showMirror: true,
                     fillMode: "cover",
                 };
             }
@@ -148,8 +145,8 @@
             const zp = ZegoUIKitPrebuilt.create(TOKEN);
             zp.joinRoom({
                 container: document.querySelector("#root"),
-                videoResolutionList: [ZegoUIKitPrebuilt.VideoResolution_360P],
-                videoResolutionDefault: ZegoUIKitPrebuilt.VideoResolution_360P,
+                videoResolutionList: [ZegoUIKitPrebuilt.VideoResolution_540P],
+                videoResolutionDefault: ZegoUIKitPrebuilt.VideoResolution_540P,
 
 
                 scenario: {
