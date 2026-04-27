@@ -384,7 +384,15 @@ class GamePlayController extends Controller
                 'user_response' => 'Invalid option',
             ]);
 
-            return response()->json(['success' => false, 'message' => 'Invalid quiz option.'], 422);
+            return response()->json([
+                'success' => true,
+                'message' => 'Incorrect option selected.',
+                'is_correct' => false,
+                // 'selected_option_id' => $quizOption->id,
+                // 'correct_option_id' => $correctOption->id,
+                // 'score' => $currentScore,
+
+            ], 200);
         }
         $currentScore = $liveShow->users()->where('user_id', $user->id)->first()->pivot->score ?? 0;
 
