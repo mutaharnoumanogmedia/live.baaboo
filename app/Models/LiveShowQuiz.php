@@ -8,13 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 class LiveShowQuiz extends Model
 {
     use HasFactory;
-    protected $fillable = ['live_show_id', 'question', 'created_by'];
+
+    protected $fillable = ['live_show_id', 'question', 'created_by', 'has_shown'];
+
+    protected $casts = [
+        'has_shown' => 'boolean',
+    ];
 
     public function liveShow()
     {
         return $this->belongsTo(LiveShow::class);
     }
-    
+
     public function options()
     {
         return $this->hasMany(QuizOption::class, 'quiz_id');

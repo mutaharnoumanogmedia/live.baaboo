@@ -244,19 +244,20 @@ class LiveShowController extends Controller
         ]);
 
         $liveShow = LiveShow::findOrFail($id);
-        // $quiz = $liveShow->quizzes()
+        $quizModel = $liveShow->quizzes()->where('id', $quizId)->first();
 
-        //     ->where('id', $quizId)
-        //     ->with(['options' => function ($query) {
-        //         $query->select('id', 'quiz_id', 'option_text'); // exclude is_correct
-        //     }])
-        //     ->first();
-
-        $quiz = LiveShowQuiz::where('id', $quizId)->first()->toArray();
-
-        if (! $quiz) {
+        if (! $quizModel) {
             return response()->json(['message' => 'Quiz not found for this live show.'], 404);
         }
+
+        if ($quizModel->has_shown) {
+            return response()->json([
+                'message' => 'This question has already been shown.',
+                'already_shown' => true,
+            ], 422);
+        }
+
+        $quiz = $quizModel->toArray();
         $quizOptions = QuizOption::where('quiz_id', $quizId)->select('id', 'quiz_id', 'option_text')->get()->toArray();
 
         // Attach quiz options directly to $quiz object for broadcasting
@@ -273,7 +274,12 @@ class LiveShowController extends Controller
         // Broadcast the quiz question to users
         ShowLiveShowQuizQuestionEvent::dispatch($quiz, (string) $liveShow->id, $request->seconds ?? 10, $request->is_last ?? false, $quizQuestionIndex + 1);
 
-        return response()->json(['message' => 'Quiz question sent successfully!']);
+        $quizModel->update(['has_shown' => true]);
+
+        return response()->json([
+            'message' => 'Quiz question sent successfully!',
+            'has_shown' => true,
+        ]);
     }
 
     public function removeQuizQuestion(Request $request, $id, $quizId)

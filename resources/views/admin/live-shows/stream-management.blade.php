@@ -294,6 +294,7 @@
                                                              <form method="POST"
                                                                  id="quiz-timer-form-{{ $quiz->id }}"
                                                                  onsubmit="submitQuizTimerForm(event, {{ $quiz->id }})"
+                                                                data-has-shown="{{ $quiz->has_shown ? 1 : 0 }}"
                                                                  class="row g-2 align-items-center justify-content-center">
                                                                  @csrf
                                                                  <div class="col-auto">
@@ -1376,6 +1377,13 @@
                  const seconds = formData.get('seconds');
                  const isLast = formData.get('is_last') ? true : false;
                  const startBtn = form.querySelector('button[type="submit"]');
+                const hasShown = form.dataset.hasShown === '1';
+
+                if (hasShown) {
+                    streamSwalWarning('This question has already been shown.', 'Already shown');
+                    return;
+                }
+
                  setBtnBusy(startBtn, true, 'Starting\u2026');
 
                  fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/quizzes/${quizId}/send-quiz-question`, {
@@ -1386,17 +1394,37 @@
                          },
                          body: formData
                      })
-                     .then(response => response.json())
+                    .then(async response => {
+                        const data = await response.json();
+                        if (!response.ok) {
+                            const error = new Error(data.message || 'Could not start quiz');
+                            error.status = response.status;
+                            error.data = data;
+                            throw error;
+                        }
+
+                        return data;
+                    })
                      .then(data => {
                          console.log('Quiz question sent:', data);
+                        form.dataset.hasShown = data?.has_shown ? '1' : form.dataset.hasShown;
+                        showQuizTimer(seconds, quizId);
                      })
                      .catch(error => {
                          console.error('Error sending quiz question:', error);
-                         streamSwalError('Could not start the quiz. Please try again.', 'Start failed');
+
+                        if (error?.status === 422 || error?.data?.already_shown) {
+                            form.dataset.hasShown = '1';
+                            streamSwalWarning(error?.data?.message || 'This question has already been shown.',
+                                'Already shown');
+                            return;
+                        }
+
+                        streamSwalError(error?.message || 'Could not start the quiz. Please try again.',
+                            'Start failed');
                      })
                      .finally(() => {
                          setBtnBusy(startBtn, false);
-                         showQuizTimer(seconds, quizId);
                      });
              }
          </script>
