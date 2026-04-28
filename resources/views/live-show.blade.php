@@ -194,7 +194,7 @@
     <div class="main-container">
         <!-- Single-Tab Restriction Overlay -->
         <div id="inactiveTabOverlay">
-            <div class="inactive-tab-content">
+            <div class="inactive-tab-content d-none" id="inactiveTabContent">
                 <div class="inactive-tab-icon">
                     <i class="fas fa-tv"></i>
                 </div>
@@ -1602,8 +1602,14 @@
             document.body.innerHTML = '';
             document.body.style.backgroundColor = '#000';
             const endDiv = document.createElement('div');
+            endDiv.style.textAlign = 'center';
+            endDiv.style.marginTop = '100px';
+            endDiv.style.marginLeft = 'auto';
+            endDiv.style.marginRight = 'auto';
+            endDiv.style.width = '100%';
+            endDiv.style.padding = '20px';
             endDiv.className = 'end-show';
-            endDiv.innerHTML = messageText;
+            endDiv.innerHTML = messageText + `<br>Weitere Infos: <a href="https://badabing.show" class="text-white" target="_blank">badabing.show</a>`;
             document.body.appendChild(endDiv);
         }
 
@@ -2306,6 +2312,7 @@
                     });
                 }
                 overlay.style.display = 'none';
+                document.getElementById('inactiveTabContent').classList.add('d-none');
                 if (typeof pusher !== 'undefined' && pusher.connection &&
                     pusher.connection.state !== 'connected') {
                     pusher.connect();
@@ -2314,6 +2321,11 @@
 
             function showInactiveOverlay() {
                 overlay.style.display = 'flex';
+
+                //after 1 second, show the inactive tab content
+                setTimeout(function() {
+                    document.getElementById('inactiveTabContent').classList.remove('d-none');
+                }, 1000);
                 if (typeof pusher !== 'undefined') {
                     pusher.disconnect();
                 }

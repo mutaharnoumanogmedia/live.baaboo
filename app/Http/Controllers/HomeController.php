@@ -24,7 +24,34 @@ class HomeController extends Controller
             ->with('users')
             ->first();
 
-        return view('index', compact('currentLiveShow'));
+        $scheduleShows = LiveShow::query()
+            ->whereIn('status', ['live', 'scheduled'])
+            ->whereNotNull('scheduled_at')
+            ->where('scheduled_at', '>=', now())
+            ->orderBy('scheduled_at', 'asc')
+            ->notTestShow()
+            ->get();
+
+        $defaultCarouselDescription = 'Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!';
+
+        $scheduleData = [
+            'carousel_items' => $scheduleShows->map(function (LiveShow $show) use ($defaultCarouselDescription) {
+                $dt = $show->scheduled_at->copy()->timezone(config('app.timezone'));
+
+                return [
+                    'badge' => $show->status === 'live' ? 'LIVE' : 'BALD',
+                    'date' => $dt->format('d.m.Y').' um '.$dt->format('H:i').' Uhr',
+                    'title' => $show->title ?: 'Quiz&Speed Game Show',
+                    'description' => $show->description ?: $defaultCarouselDescription,
+                    'meta' => [
+                        ['icon' => 'bulls-eye-icon.png', 'label' => 'Wissen + Speed'],
+                        ['icon' => 'gift-icon.png', 'label' => 'Geldpreise & Gutscheine'],
+                    ],
+                ];
+            })->values()->all(),
+        ];
+
+        return view('index', compact('currentLiveShow', 'scheduleData'));
     }
 
     public function thankYouForYourParticipation($userName)

@@ -897,88 +897,7 @@
     @push('scripts')
         <script>
             var assetPath = "{{ asset('images/') }}";
-            var scheduleData = {
-                "carousel_items": [
-
-                    // {
-                    //     "badge": "BALD",
-                    //     "date": "09.04.2026 um 20:00 Uhr",
-                    //     "title": "Die große Premiere 2.0",
-                    //     "description": "Die allererste Badabing Game Show - sei von Anfang an dabei und sichere Dir die ersten Gewinne!",
-                    //     "meta": [{
-                    //             "icon": "bulls-eye-icon.png",
-                    //             "label": "Wissen + Speed"
-                    //         },
-                    //         {
-                    //             "icon": "gift-icon.png",
-                    //             "label": "Premieren-Preise"
-                    //         }
-                    //     ]
-                    // },
-                    // {
-                    //     "badge": "BALD",
-                    //     "date": "16.04.2026 um 20:00 Uhr",
-                    //     "title": "Quiz&Speed Game Show",
-                    //     "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
-                    //     "meta": [{
-                    //             "icon": "bulls-eye-icon.png",
-                    //             "label": "Wissen + Speed"
-                    //         },
-                    //         {
-                    //             "icon": "gift-icon.png",
-                    //             "label": "Geldpreise & Gutscheine"
-                    //         }
-                    //     ]
-                    // },
-                    // {
-                    //     "badge": "BALD",
-                    //     "date": "23.04.2026 um 20:00 Uhr",
-                    //     "title": "Quiz&Speed Game Show",
-                    //     "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
-                    //     "meta": [{
-                    //             "icon": "bulls-eye-icon.png",
-                    //             "label": "Wissen + Speed"
-                    //         },
-                    //         {
-                    //             "icon": "gift-icon.png",
-                    //             "label": "Geldpreise & Gutscheine"
-                    //         }
-                    //     ]
-                    // },
-                    {
-                        "badge": "BALD",
-                        "date": "30.04.2026 um 20:00 Uhr",
-                        "title": "Quiz&Speed Game Show",
-                        "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
-                        "meta": [{
-                                "icon": "bulls-eye-icon.png",
-                                "label": "Wissen + Speed"
-                            },
-                            {
-                                "icon": "gift-icon.png",
-                                "label": "Geldpreise & Gutscheine"
-                            }
-                        ]
-                    },
-
-
-                    {
-                        "badge": "BALD",
-                        "date": "07.05.2026 um 20:00 Uhr",
-                        "title": "Quiz&Speed Game Show",
-                        "description": "Teste Dein Wissen und Deine Schnelligkeit und sichere Dir die Chance auf echte Gewinne!",
-                        "meta": [{
-                                "icon": "bulls-eye-icon.png",
-                                "label": "Wissen + Speed"
-                            },
-                            {
-                                "icon": "gift-icon.png",
-                                "label": "Geldpreise & Gutscheine"
-                            }
-                        ]
-                    }
-                ]
-            }
+            var scheduleData = @json($scheduleData ?? ['carousel_items' => []]);
 
             // Initialize Slick Slider for the Schedule Carousel
             $(document).ready(function() {
@@ -988,7 +907,7 @@
                 $('#schedule-carousel').empty();
 
                 // Loop through scheduleData
-                if (window.scheduleData && Array.isArray(scheduleData.carousel_items)) {
+                if (scheduleData && Array.isArray(scheduleData.carousel_items)) {
                     scheduleData.carousel_items.forEach(function(show) {
                         var $card = $(
                             '<div class="show-card-container"> <div class="mb-3 show-card"></div></div>');
@@ -1029,26 +948,28 @@
                         $('#schedule-carousel').append($card);
                     });
 
-                    $('#schedule-carousel').slick({
-                        dots: true,
-                        arrows: true,
-                        infinite: false,
-                        slidesToShow: 3,
-                        slidesToScroll: 1,
-                        responsive: [{
-                                breakpoint: 992,
-                                settings: {
-                                    slidesToShow: 2
+                    if (scheduleData.carousel_items.length) {
+                        $('#schedule-carousel').slick({
+                            dots: true,
+                            arrows: true,
+                            infinite: false,
+                            slidesToShow: 3,
+                            slidesToScroll: 1,
+                            responsive: [{
+                                    breakpoint: 992,
+                                    settings: {
+                                        slidesToShow: 2
+                                    }
+                                },
+                                {
+                                    breakpoint: 768,
+                                    settings: {
+                                        slidesToShow: 1
+                                    }
                                 }
-                            },
-                            {
-                                breakpoint: 768,
-                                settings: {
-                                    slidesToShow: 1
-                                }
-                            }
-                        ]
-                    });
+                            ]
+                        });
+                    }
                 }
             });
         </script>

@@ -61,7 +61,6 @@ body .end-show {
     color: rgb(255, 255, 255);
     font-size: 2.2rem;
     position: absolute;
-    top: 20%;
     width: 100%;
     text-align: center;
 }
@@ -196,7 +195,7 @@ body .end-show {
 
 .option-result-label {
     position: absolute;
-    top: 6px;
+    top: 8px;
     right: 0%;
     transform: translateX(-50%);
     font-size: 16px;
@@ -617,20 +616,29 @@ body .end-show {
 
 .quiz-option input[type="radio"]:checked + label {
     color: #000;
+    background: #fff !important;
     border: 3px solid var(--primary-color);
     transform: translateY(-2px);
 }
 
 .quiz-option.correct input[type="radio"]:checked + label,
 .quiz-option.correct input[type="radio"]:disabled + label {
-    background: #28a745;
-    border-color: #28a745;
-    color: white;
+    background: #bce9b6  !important;
+   border-width: 5px !important;
+}
+
+input[type="radio"]:disabled + label {
+    background: #f0f0f0;
+    border-color: #ddd;
+    color: #aaa;
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.7;
 }
 
 .quiz-option.correct label {
-    background: #28a745;
-    border-color: #28a745;
+    background: #bce9b6 ;
+    border-color: #bce9b6 ;
     color: white;
 }
 
@@ -729,15 +737,6 @@ body .main-container.quiz-mode {
     .navbar-expand-lg {
         justify-content: space-between;
     }
-}
-
-input[type="radio"]:disabled + label {
-    background: #f0f0f0;
-    border-color: #ddd;
-    color: #aaa;
-    cursor: not-allowed;
-    pointer-events: none;
-    opacity: 0.7;
 }
 
 .btn-register {

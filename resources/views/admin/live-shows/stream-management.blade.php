@@ -242,12 +242,19 @@
                      </div>
                  </div>
 
+                 <button type="button" id="quizQuestionsFullscreenBackdrop"
+                     class="quiz-questions-fullscreen-backdrop"
+                     aria-hidden="true" tabindex="-1" title="Close expanded view"></button>
+
                  <div class="card border-0 shadow-sm mb-4 " id="quiz-questions-container-card">
                      <div class="card-header p-0">
-                         <button type="button" class="btn btn-outline-secondary py-2 fw-bold shadow-sm mx-1"
+                         <button type="button" id="quizQuestionsFullscreenToggleBtn"
+                             class="btn btn-outline-secondary py-2 fw-bold shadow-sm mx-1 float-end"
                              title="Maximize"
-                             onclick="document.getElementById('quiz-questions-container-card').classList.toggle('fullscreen')">
-                             <i class="fas fa-expand"></i>
+                             onclick="toggleQuizQuestionsFullscreen(event)"
+                             aria-expanded="false">
+                             <i class="fas fa-expand" aria-hidden="true"></i>
+                             <span class="visually-hidden">Toggle expanded quiz panel</span>
                          </button>
 
 
@@ -751,24 +758,52 @@
 
              .question-slider-timer-text {
                  position: absolute;
-                 top: 1.75rem;
-                 right: 3.75rem;
+                 top: 50%;
+                 left: 50%;
+                 transform: translate(-50%, -50%);
                  font-size: 3.75rem;
                  font-weight: 700;
                  line-height: 1;
                  color: #f8f9fa;
                  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
                  letter-spacing: 0.02em;
+                 background: rgba(10, 10, 10, 0.34);
+                 
+                 border-radius: 50%;
+                 padding: 0.5em 1em;
+            
              }
 
              /* Optional: Basic styles for fullscreen effect */
+             body.quiz-questions-fullscreen-open {
+                 overflow: hidden;
+             }
+
+             .quiz-questions-fullscreen-backdrop {
+                 display: none;
+                 position: fixed;
+                 inset: 0;
+                 z-index: 1990;
+                 margin: 0;
+                 padding: 0;
+                 border: 0;
+                 background: rgba(15, 23, 42, 0.62);
+                 cursor: pointer;
+                 appearance: none;
+             }
+
+             .quiz-questions-fullscreen-backdrop.is-visible {
+                 display: block;
+             }
+
              #quiz-questions-container-card.fullscreen {
                  position: fixed;
                  top: 100px;
-                 
-                 z-index: 999;
-                 width: 80%;
                  z-index: 2000;
+                 width: 80%;
+                 max-width: 1200px;
+                 left: 50%;
+                 transform: translateX(-50%);
                  background: #fff;
                  box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
                  overflow: auto;
@@ -801,6 +836,65 @@
              var pusher = new Pusher('{{ env('PUSHER_APP_KEY', '2a66d003a7ded9fe567a') }}', {
                  cluster: '{{ env('PUSHER_APP_CLUSTER', 'eu') }}',
              });
+
+             function toggleQuizQuestionsFullscreen(evt) {
+                 evt && evt.stopPropagation();
+                 const card = document.getElementById('quiz-questions-container-card');
+                 const backdrop = document.getElementById('quizQuestionsFullscreenBackdrop');
+                 const toggleBtn = document.getElementById('quizQuestionsFullscreenToggleBtn');
+                 if (!card || !backdrop) {
+                     return;
+                 }
+
+                 const willExpand = !card.classList.contains('fullscreen');
+                 card.classList.toggle('fullscreen', willExpand);
+                 backdrop.classList.toggle('is-visible', willExpand);
+                 document.body.classList.toggle('quiz-questions-fullscreen-open', willExpand);
+
+                 backdrop.setAttribute('aria-hidden', willExpand ? 'false' : 'true');
+                 if (toggleBtn) {
+                     toggleBtn.setAttribute('aria-expanded', willExpand ? 'true' : 'false');
+                     toggleBtn.title = willExpand ? 'Exit expanded view' : 'Maximize';
+                     const icon = toggleBtn.querySelector('i');
+                     if (icon) {
+                         icon.className = willExpand ? 'fas fa-compress' : 'fas fa-expand';
+                     }
+                 }
+
+                 if (window.jQuery && typeof jQuery.fn.slick === 'function') {
+                     setTimeout(function() {
+                         var $sl = jQuery('.question-slider');
+                         if ($sl.hasClass('slick-initialized')) {
+                             $sl.slick('setPosition');
+                         }
+                     }, 0);
+                 }
+             }
+
+             (function bindQuizFullscreenBackdrop() {
+                 const backdrop = document.getElementById('quizQuestionsFullscreenBackdrop');
+                 if (backdrop) {
+                     backdrop.addEventListener('click', function() {
+                         const card = document.getElementById('quiz-questions-container-card');
+                         if (card && card.classList.contains('fullscreen')) {
+                             toggleQuizQuestionsFullscreen({
+                                 stopPropagation: function() {}
+                             });
+                         }
+                     });
+                 }
+                 document.addEventListener('keydown', function(e) {
+                     if (e.key !== 'Escape') {
+                         return;
+                     }
+                     const card = document.getElementById('quiz-questions-container-card');
+                     if (card && card.classList.contains('fullscreen')) {
+                         toggleQuizQuestionsFullscreen({
+                             stopPropagation: function() {}
+                         });
+                     }
+                 });
+             })();
 
              function streamSwalSuccess(message, title) {
                  return Swal.fire({

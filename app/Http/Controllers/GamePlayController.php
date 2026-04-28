@@ -48,7 +48,7 @@ class GamePlayController extends Controller
         if ($liveShow->status == 'completed') {
             $nextScheduledLiveShow = LiveShow::where('status', 'scheduled')->orderBy('scheduled_at', 'asc')->first();
             if ($nextScheduledLiveShow) {
-                $updateMessage = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme! Die nächste Show ist am '.Carbon::parse($nextScheduledLiveShow->scheduled_at)->format('d.m.Y H:i').'Uhr statt.';
+                $updateMessage = 'Die Live-Übertragung ist beendet. Vielen Dank für deine Teilnahme! Die nächste Show findet am  '.Carbon::parse($nextScheduledLiveShow->scheduled_at)->format('d.F Y \u\m H:i').'Uhr statt.';
             }
         }
         // if shceduled
@@ -330,7 +330,7 @@ class GamePlayController extends Controller
         if ($userQuiz) {
             // prevent duplicate quiz
             return response()->json(['success' => false, 'message' => 'Du hast dieses Quiz bereits beantwortet.'], 403);
-       
+
         } else {
             $userQuiz = UserQuiz::create([
                 'user_id' => $user->id,
