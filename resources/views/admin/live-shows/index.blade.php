@@ -19,6 +19,7 @@
                                 <th>ID</th>
                                 <th>Title</th>
                                 <th>Date</th>
+                                <th>Total Players</th>
                                 <th>Status</th>
                                 <th>Is Test Show</th>
                                 <th>Actions</th>
@@ -30,6 +31,7 @@
                                     <td>{{ $loop->index + 1 }}</td>
                                     <td>{{ $show->title }}</td>
                                     <td>{{ $show->scheduled_at }}</td>
+                                    <td>{{ $show->users->count() }}</td>
                                     <td>
                                         @if ($show->status === 'completed')
                                             <span class="badge bg-success">Completed</span>
