@@ -242,7 +242,16 @@
                      </div>
                  </div>
 
-                 <div class="card border-0 shadow-sm mb-4">
+                 <div class="card border-0 shadow-sm mb-4 " id="quiz-questions-container-card">
+                     <div class="card-header p-0">
+                         <button type="button" class="btn btn-outline-secondary py-2 fw-bold shadow-sm mx-1"
+                             title="Maximize"
+                             onclick="document.getElementById('quiz-questions-container-card').classList.toggle('fullscreen')">
+                             <i class="fas fa-expand"></i>
+                         </button>
+
+
+                     </div>
                      <div class="card-body position-relative">
                          <div class="row">
                              <div class="col-lg-7 ">
@@ -317,7 +326,8 @@
                                                                      @endif
                                                                      <div class="col-auto">
                                                                          <div class="btn-group shadow-sm">
-                                                                             <button type="{{ $quiz->has_shown ? 'button' : 'submit' }}"
+                                                                             <button
+                                                                                 type="{{ $quiz->has_shown ? 'button' : 'submit' }}"
                                                                                  class="btn btn-success px-3"
                                                                                  data-quiz-start
                                                                                  @if ($quiz->has_shown) disabled
@@ -325,7 +335,8 @@
                                                                                  @if ($quiz->has_shown)
                                                                                      Question shown
                                                                                  @else
-                                                                                     <i class="fas fa-play me-2"></i> Show
+                                                                                     <i class="fas fa-play me-2"></i>
+                                                                                     Show
                                                                                  @endif
                                                                              </button>
                                                                              <button type="button"
@@ -636,79 +647,7 @@
      </div>
 
 
-     <style>
-         /* Custom Styling for the Admin Dashboard */
-         .bg-soft-info {
-             background-color: #e0f2fe;
-         }
 
-         .nav-tabs .nav-link {
-             color: #64748b;
-             border-radius: 0;
-         }
-
-         .nav-tabs .nav-link.active {
-             color: #0d6efd;
-             border-bottom: 2px solid #0d6efd !important;
-         }
-
-         .list-group-item:hover {
-             background-color: #f8fafc;
-         }
-
-         .progress-bar {
-             transition: width 0.6s ease;
-         }
-
-         /* Custom Scrollbar */
-         ::-webkit-scrollbar {
-             width: 6px;
-         }
-
-         ::-webkit-scrollbar-track {
-             background: #f1f1f1;
-         }
-
-         ::-webkit-scrollbar-thumb {
-             background: #cbd5e1;
-             border-radius: 10px;
-         }
-
-         ::-webkit-scrollbar-thumb:hover {
-             background: #94a3b8;
-         }
-
-         .question-slider-wrap {
-             position: relative;
-         }
-
-         .question-slider-timer-overlay {
-             position: absolute;
-             inset: 0;
-             z-index: 10;
-             display: none;
-             background: rgba(255, 255, 255, 0.14);
-             border-radius: 0.375rem;
-             pointer-events: auto;
-             margin-left: -5%;
-             width: 110%;
-             margin-top: -5%;
-             height: 110%;
-
-         }
-
-         .question-slider-timer-text {
-             position: absolute;
-             top: 1.75rem;
-             right: 3.75rem;
-             font-size: 3.75rem;
-             font-weight: 700;
-             line-height: 1;
-             color: #f8f9fa;
-             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
-             letter-spacing: 0.02em;
-         }
-     </style>
 
      @push('styles')
          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.min.css">
@@ -747,6 +686,97 @@
              .slick-initialized .slick-slide {
                  min-height: 500px !important;
                  min-width: 500px !important;
+             }
+         </style>
+         <style>
+             /* Custom Styling for the Admin Dashboard */
+             .bg-soft-info {
+                 background-color: #e0f2fe;
+             }
+
+             .nav-tabs .nav-link {
+                 color: #64748b;
+                 border-radius: 0;
+             }
+
+             .nav-tabs .nav-link.active {
+                 color: #0d6efd;
+                 border-bottom: 2px solid #0d6efd !important;
+             }
+
+             .list-group-item:hover {
+                 background-color: #f8fafc;
+             }
+
+             .progress-bar {
+                 transition: width 0.6s ease;
+             }
+
+             /* Custom Scrollbar */
+             ::-webkit-scrollbar {
+                 width: 6px;
+             }
+
+             ::-webkit-scrollbar-track {
+                 background: #f1f1f1;
+             }
+
+             ::-webkit-scrollbar-thumb {
+                 background: #cbd5e1;
+                 border-radius: 10px;
+             }
+
+             ::-webkit-scrollbar-thumb:hover {
+                 background: #94a3b8;
+             }
+
+             .question-slider-wrap {
+                 position: relative;
+             }
+
+             .question-slider-timer-overlay {
+                 position: absolute;
+                 inset: 0;
+                 z-index: 10;
+                 display: none;
+                 background: rgba(255, 255, 255, 0.14);
+                 border-radius: 0.375rem;
+                 pointer-events: auto;
+                 margin-left: -5%;
+                 width: 110%;
+                 margin-top: -5%;
+                 height: 110%;
+
+             }
+
+             .question-slider-timer-text {
+                 position: absolute;
+                 top: 1.75rem;
+                 right: 3.75rem;
+                 font-size: 3.75rem;
+                 font-weight: 700;
+                 line-height: 1;
+                 color: #f8f9fa;
+                 text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+                 letter-spacing: 0.02em;
+             }
+
+             /* Optional: Basic styles for fullscreen effect */
+             #quiz-questions-container-card.fullscreen {
+                 position: fixed;
+                 top: 100px;
+                 
+                 z-index: 999;
+                 width: 80%;
+                 z-index: 2000;
+                 background: #fff;
+                 box-shadow: 0 0 40px rgba(0, 0, 0, 0.3);
+                 overflow: auto;
+             }
+
+             #quiz-questions-container-card.fullscreen .card-header,
+             #quiz-questions-container-card.fullscreen .card-body {
+                 border-radius: 0 !important;
              }
          </style>
      @endpush
