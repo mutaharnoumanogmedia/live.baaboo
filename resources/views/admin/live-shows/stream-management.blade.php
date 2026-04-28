@@ -248,102 +248,113 @@
                              <div class="col-lg-7 ">
                                  <div class="p-3   rounded bg-dark">
                                      <h5 class="mb-0 fw-bold text-center mb-3">Quiz Questions</h5>
-                                     <div class="question-slider ">
-                                         @foreach ($liveShow->quizzes as $index => $quiz)
-                                             <div class="px-2">
-                                                 <div class="card border mb-3">
-                                                     <div class="card-body" style="height: auto; overflow-y:scroll">
-                                                         <div class="text-center mb-4 fw-bold">
-                                                             <div class="mb-2">Question {{ $index + 1 }} /
-                                                                 {{ $liveShow->quizzes->count() }}</div>
-                                                             <div class="fw-bold h3">{{ $quiz->question }}</div>
-                                                         </div>
+                                     <div class="position-relative question-slider-wrap">
+                                         <div class="question-slider ">
+                                             @foreach ($liveShow->quizzes as $index => $quiz)
+                                                 <div class="px-2">
+                                                     <div class="card border mb-3">
+                                                         <div class="card-body"
+                                                             style="height: auto; overflow-y:scroll">
+                                                             <div class="text-center mb-4 fw-bold">
+                                                                 <div class="mb-2">Question {{ $index + 1 }} /
+                                                                     {{ $liveShow->quizzes->count() }}</div>
+                                                                 <div class="fw-bold h3">{{ $quiz->question }}</div>
+                                                             </div>
 
-                                                         @if ($quiz->options)
-                                                             <div class="row g-3 mb-4">
-                                                                 @foreach ($quiz->options as $option)
-                                                                     <div class="col-md-12">
-                                                                         <div
-                                                                             class="p-3 border rounded @if ($option->is_correct) border-success @endif">
+                                                             @if ($quiz->options)
+                                                                 <div class="row g-3 mb-4">
+                                                                     @foreach ($quiz->options as $option)
+                                                                         <div class="col-md-12">
                                                                              <div
-                                                                                 class="d-flex justify-content-between mb-2">
-                                                                                 <span
-                                                                                     class="fw-bold @if ($option->is_correct) text-success @endif">
-                                                                                     {{ $option->option_text }}
-                                                                                     @if ($option->is_correct)
-                                                                                         <i
-                                                                                             class="fas fa-check-circle ms-1"></i>
-                                                                                     @endif
-                                                                                 </span>
-                                                                                 <span class="small fw-bold"
-                                                                                     id="option-result-label-{{ $option->id }}">0%</span>
-                                                                             </div>
-                                                                             <div class="progress"
-                                                                                 style="height: 8px;">
-                                                                                 <div id="option-result-bar-{{ $option->id }}"
-                                                                                     class="progress-bar @if ($option->is_correct) bg-success @else bg-primary @endif"
-                                                                                     role="progressbar"
-                                                                                     style="width: 0%">
+                                                                                 class="p-3 border rounded @if ($option->is_correct) border-success @endif">
+                                                                                 <div
+                                                                                     class="d-flex justify-content-between mb-2">
+                                                                                     <span
+                                                                                         class="fw-bold @if ($option->is_correct) text-success @endif">
+                                                                                         {{ $option->option_text }}
+                                                                                         @if ($option->is_correct)
+                                                                                             <i
+                                                                                                 class="fas fa-check-circle ms-1"></i>
+                                                                                         @endif
+                                                                                     </span>
+                                                                                     <span class="small fw-bold"
+                                                                                         id="option-result-label-{{ $option->id }}">0%</span>
+                                                                                 </div>
+                                                                                 <div class="progress"
+                                                                                     style="height: 8px;">
+                                                                                     <div id="option-result-bar-{{ $option->id }}"
+                                                                                         class="progress-bar @if ($option->is_correct) bg-success @else bg-primary @endif"
+                                                                                         role="progressbar"
+                                                                                         style="width: 0%">
+                                                                                     </div>
                                                                                  </div>
                                                                              </div>
                                                                          </div>
-                                                                     </div>
-                                                                 @endforeach
-                                                             </div>
-
-                                                             <form method="POST"
-                                                                 id="quiz-timer-form-{{ $quiz->id }}"
-                                                                 onsubmit="submitQuizTimerForm(event, {{ $quiz->id }})"
-                                                                data-has-shown="{{ $quiz->has_shown ? 1 : 0 }}"
-                                                                 class="row g-2 align-items-center justify-content-center">
-                                                                 @csrf
-                                                                 <div class="col-auto">
-                                                                     <div class="input-group">
-                                                                         <span class="input-group-text bg-white"><i
-                                                                                 class="fas fa-stopwatch text-muted"></i></span>
-                                                                         <input type="number" min="1"
-                                                                             name="seconds"
-                                                                             id="timer-{{ $quiz->id }}"
-                                                                             value="10"
-                                                                             class="form-control text-center fw-bold"
-                                                                             style="width: 80px;" required>
-                                                                     </div>
+                                                                     @endforeach
                                                                  </div>
-                                                                 @if ($loop->last)
-                                                                     <input type="hidden" name="is_last"
-                                                                         value="1">
-                                                                 @endif
-                                                                 <div class="col-auto">
-                                                                     <div class="btn-group shadow-sm">
-                                                                         <button type="submit"
-                                                                             class="btn btn-success px-3">
-                                                                             <i class="fas fa-play me-2"></i> Start
-                                                                         </button>
-                                                                         <button type="button"
-                                                                             onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }}, this)"
-                                                                             class="btn btn-info px-3 text-white">
-                                                                             <i class="fas fa-chart-bar me-2"></i>
-                                                                             Show Responses
-                                                                         </button>
-                                                                         <button class="btn btn-danger px-3"
-                                                                             type="button"
-                                                                             onclick="removeQuiz({{ $quiz->id }}, this)">
-                                                                             <i class="fas fa-times me-2"></i> Hide
-                                                                         </button>
 
+                                                                 <form method="POST"
+                                                                     id="quiz-timer-form-{{ $quiz->id }}"
+                                                                     onsubmit="submitQuizTimerForm(event, {{ $quiz->id }})"
+                                                                     data-has-shown="{{ $quiz->has_shown ? 1 : 0 }}"
+                                                                     class="row g-2 align-items-center justify-content-center">
+                                                                     @csrf
+                                                                     <div class="col-auto">
+                                                                         <div class="input-group">
+                                                                             <span class="input-group-text bg-white"><i
+                                                                                     class="fas fa-stopwatch text-muted"></i></span>
+                                                                             <input type="number" min="1"
+                                                                                 name="seconds"
+                                                                                 id="timer-{{ $quiz->id }}"
+                                                                                 value="10"
+                                                                                 class="form-control text-center fw-bold"
+                                                                                 style="width: 80px;" required>
+                                                                         </div>
                                                                      </div>
-                                                                 </div>
-                                                             </form>
-                                                         @endif
+                                                                     @if ($loop->last)
+                                                                         <input type="hidden" name="is_last"
+                                                                             value="1">
+                                                                     @endif
+                                                                     <div class="col-auto">
+                                                                         <div class="btn-group shadow-sm">
+                                                                             <button type="{{ $quiz->has_shown ? 'button' : 'submit' }}"
+                                                                                 class="btn btn-success px-3"
+                                                                                 data-quiz-start
+                                                                                 @if ($quiz->has_shown) disabled
+                                                                                 aria-disabled="true" @endif>
+                                                                                 @if ($quiz->has_shown)
+                                                                                     Question shown
+                                                                                 @else
+                                                                                     <i class="fas fa-play me-2"></i> Show
+                                                                                 @endif
+                                                                             </button>
+                                                                             <button type="button"
+                                                                                 onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }}, this)"
+                                                                                 class="btn btn-info px-3 text-white">
+                                                                                 <i class="fas fa-chart-bar me-2"></i>
+                                                                                 Show Responses
+                                                                             </button>
+                                                                             <button class="btn btn-danger px-3"
+                                                                                 type="button"
+                                                                                 onclick="removeQuiz({{ $quiz->id }}, this)">
+                                                                                 <i class="fas fa-times me-2"></i> Hide
+                                                                             </button>
+
+                                                                         </div>
+                                                                     </div>
+                                                                 </form>
+                                                             @endif
+                                                         </div>
                                                      </div>
                                                  </div>
-                                             </div>
-                                         @endforeach
-                                     </div>
-
-                                     <div id="quizTimer"
-                                         style=" position: absolute; bottom: 120px; right: 100px;   padding: 10px; border: 1px solid transparent; border-radius: 50%; z-index: 1000;width: 100px;height: 100px;display: none;align-items: center;justify-content: center; font-size: 3rem;font-weight: bold; text-align: center; background: url('{{ asset('/images/clock.png') }}') no-repeat center center; background-size: contain;">
-                                         <span id="quizTimerText" style="color: #000;margin-top: 10px;">0</span>
+                                             @endforeach
+                                         </div>
+                                         <div id="questionSliderTimerOverlay" class="question-slider-timer-overlay"
+                                             style="display: none;" role="status" aria-live="polite"
+                                             aria-hidden="true">
+                                             <span id="questionSliderTimerText"
+                                                 class="question-slider-timer-text">0</span>
+                                         </div>
                                      </div>
                                  </div>
                              </div>
@@ -665,6 +676,37 @@
 
          ::-webkit-scrollbar-thumb:hover {
              background: #94a3b8;
+         }
+
+         .question-slider-wrap {
+             position: relative;
+         }
+
+         .question-slider-timer-overlay {
+             position: absolute;
+             inset: 0;
+             z-index: 10;
+             display: none;
+             background: rgba(255, 255, 255, 0.14);
+             border-radius: 0.375rem;
+             pointer-events: auto;
+             margin-left: -5%;
+             width: 110%;
+             margin-top: -5%;
+             height: 110%;
+
+         }
+
+         .question-slider-timer-text {
+             position: absolute;
+             top: 1.75rem;
+             right: 3.75rem;
+             font-size: 3.75rem;
+             font-weight: 700;
+             line-height: 1;
+             color: #f8f9fa;
+             text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+             letter-spacing: 0.02em;
          }
      </style>
 
@@ -1321,36 +1363,38 @@
                  });
              }
 
-             const timerDiv = document.querySelector('#quizTimer');
+             const questionSliderTimerOverlay = document.getElementById('questionSliderTimerOverlay');
+             const questionSliderTimerText = document.getElementById('questionSliderTimerText');
 
-
-             // Function to display a countdown timer in the div#quizTimer and hide it after countdown finishes
+             // Light overlay on the question slider + top-right countdown; hidden when done
              function showQuizTimer(seconds, quizId) {
-                 if (!timerDiv) return;
+                 if (!questionSliderTimerOverlay || !questionSliderTimerText) return;
 
                  let timeLeft = parseInt(seconds, 10);
-                 timerDiv.style.display = 'flex';
-                 timerDiv.querySelector('#quizTimerText').innerText = timeLeft;
-
-                 // Clear any previous timer to avoid stacking
-                 if (timerDiv._quizTimerInterval) {
-                     clearInterval(timerDiv._quizTimerInterval);
+                 if (Number.isNaN(timeLeft) || timeLeft < 0) {
+                     timeLeft = 0;
                  }
 
+                 questionSliderTimerOverlay.style.display = 'block';
+                 questionSliderTimerOverlay.setAttribute('aria-hidden', 'false');
+                 questionSliderTimerText.textContent = String(timeLeft);
 
+                 if (questionSliderTimerOverlay._quizTimerInterval) {
+                     clearInterval(questionSliderTimerOverlay._quizTimerInterval);
+                 }
 
-                 timerDiv._quizTimerInterval = setInterval(function() {
+                 questionSliderTimerOverlay._quizTimerInterval = setInterval(function() {
                      timeLeft--;
                      if (timeLeft > 0) {
-                         timerDiv.querySelector('#quizTimerText').innerText = timeLeft;
+                         questionSliderTimerText.textContent = String(timeLeft);
                      } else {
-                         timerDiv.querySelector('#quizTimerText').innerText = '0';
-                         clearInterval(timerDiv._quizTimerInterval);
+                         questionSliderTimerText.textContent = '0';
+                         clearInterval(questionSliderTimerOverlay._quizTimerInterval);
                          setTimeout(() => {
-                             timerDiv.style.display = 'none';
-                         }, 500); // Give a short delay before hiding
+                             questionSliderTimerOverlay.style.display = 'none';
+                             questionSliderTimerOverlay.setAttribute('aria-hidden', 'true');
+                         }, 500);
 
-                         // Fetch players list 5 seconds after timer finishes
                          setTimeout(() => {
                              console.log('viewing responses after timer finishes..');
                              refreshVisiblePlayers();
@@ -1362,13 +1406,28 @@
              }
 
              function hideQuizTimer() {
-                 timerDiv.querySelector('#quizTimerText').innerText = '0';
-                 clearInterval(timerDiv._quizTimerInterval);
+                 if (!questionSliderTimerOverlay || !questionSliderTimerText) return;
+
+                 questionSliderTimerText.textContent = '0';
+                 if (questionSliderTimerOverlay._quizTimerInterval) {
+                     clearInterval(questionSliderTimerOverlay._quizTimerInterval);
+                 }
                  setTimeout(() => {
-                     timerDiv.style.display = 'none';
-                 }, 500); // Give a short delay before hiding
+                     questionSliderTimerOverlay.style.display = 'none';
+                     questionSliderTimerOverlay.setAttribute('aria-hidden', 'true');
+                 }, 500);
              }
 
+             function markQuizQuestionAsShown(form) {
+                 const btn = form.querySelector('[data-quiz-start]');
+                 if (!btn) {
+                     return;
+                 }
+                 btn.type = 'button';
+                 btn.disabled = true;
+                 btn.setAttribute('aria-disabled', 'true');
+                 btn.innerHTML = 'Question shown';
+             }
 
              function submitQuizTimerForm(event, quizId) {
                  event.preventDefault();
@@ -1376,13 +1435,13 @@
                  const formData = new FormData(form);
                  const seconds = formData.get('seconds');
                  const isLast = formData.get('is_last') ? true : false;
-                 const startBtn = form.querySelector('button[type="submit"]');
-                const hasShown = form.dataset.hasShown === '1';
+                 const startBtn = form.querySelector('[data-quiz-start]');
+                 const hasShown = form.dataset.hasShown === '1';
 
-                if (hasShown) {
-                    streamSwalWarning('This question has already been shown.', 'Already shown');
-                    return;
-                }
+                 if (hasShown) {
+                     streamSwalWarning('This question has already been shown.', 'Already shown');
+                     return;
+                 }
 
                  setBtnBusy(startBtn, true, 'Starting\u2026');
 
@@ -1394,37 +1453,40 @@
                          },
                          body: formData
                      })
-                    .then(async response => {
-                        const data = await response.json();
-                        if (!response.ok) {
-                            const error = new Error(data.message || 'Could not start quiz');
-                            error.status = response.status;
-                            error.data = data;
-                            throw error;
-                        }
+                     .then(async response => {
+                         const data = await response.json();
+                         if (!response.ok) {
+                             const error = new Error(data.message || 'Could not start quiz');
+                             error.status = response.status;
+                             error.data = data;
+                             throw error;
+                         }
 
-                        return data;
-                    })
+                         return data;
+                     })
                      .then(data => {
                          console.log('Quiz question sent:', data);
-                        form.dataset.hasShown = data?.has_shown ? '1' : form.dataset.hasShown;
-                        showQuizTimer(seconds, quizId);
+                         form.dataset.hasShown = data?.has_shown ? '1' : form.dataset.hasShown;
+                         showQuizTimer(seconds, quizId);
                      })
                      .catch(error => {
                          console.error('Error sending quiz question:', error);
 
-                        if (error?.status === 422 || error?.data?.already_shown) {
-                            form.dataset.hasShown = '1';
-                            streamSwalWarning(error?.data?.message || 'This question has already been shown.',
-                                'Already shown');
-                            return;
-                        }
+                         if (error?.status === 422 || error?.data?.already_shown) {
+                             form.dataset.hasShown = '1';
+                             streamSwalWarning(error?.data?.message || 'This question has already been shown.',
+                                 'Already shown');
+                             return;
+                         }
 
-                        streamSwalError(error?.message || 'Could not start the quiz. Please try again.',
-                            'Start failed');
+                         streamSwalError(error?.message || 'Could not start the quiz. Please try again.',
+                             'Start failed');
                      })
                      .finally(() => {
                          setBtnBusy(startBtn, false);
+                         if (form.dataset.hasShown === '1') {
+                             markQuizQuestionAsShown(form);
+                         }
                      });
              }
          </script>
@@ -2028,10 +2090,10 @@
                      .then(data => {
                          if (data.success) {
                              updateGalleryShowStatus('showing');
-                             if(data.total_seconds) {
-                                setTimeout(() => {
-                                    galleryHideOnStream(btn);
-                                }, data.total_seconds * 1000 + 5000);
+                             if (data.total_seconds) {
+                                 setTimeout(() => {
+                                     galleryHideOnStream(btn);
+                                 }, data.total_seconds * 1000 + 5000);
                              }
                          }
                      })

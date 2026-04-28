@@ -843,6 +843,7 @@ class LiveShowController extends Controller
         // Detach all users from the live show
         $liveShow->users()->detach();
         $liveShow->update(['winners_announced' => false]);
+        LiveShowQuiz::where('live_show_id', $liveShowId)->update(['has_shown' => false]);
 
         event(new GameResetEvent($liveShowId));
 
