@@ -616,8 +616,8 @@ body .end-show {
 } */
 
 .quiz-option input[type="radio"]:checked + label {
-    color: #fff;
-    background: var(--primary-color);
+    color: #000;
+    border: 3px solid var(--primary-color);
     transform: translateY(-2px);
 }
 
