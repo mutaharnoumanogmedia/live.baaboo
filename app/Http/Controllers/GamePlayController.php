@@ -329,7 +329,8 @@ class GamePlayController extends Controller
         $userQuiz = UserQuiz::where('user_id', $user->id)->where('live_show_id', $liveShow->id)->where('quiz_id', $quizId)->first();
         if ($userQuiz) {
             // prevent duplicate quiz
-            return response()->json(['success' => false, 'message' => 'You have already answered this quiz.'], 403);
+            return response()->json(['success' => false, 'message' => 'Du hast dieses Quiz bereits beantwortet.'], 403);
+       
         } else {
             $userQuiz = UserQuiz::create([
                 'user_id' => $user->id,
@@ -595,7 +596,7 @@ class GamePlayController extends Controller
 
         $skip = request()->get('skip', 0);
         $take = request()->get('take', 100);
-         
+
         $totalUsers = $liveShow->users()->count();
         $quizService = new LiveShowQuizService;
 
@@ -604,9 +605,10 @@ class GamePlayController extends Controller
         $users = $users
             ->skip($skip)
             ->take($take)
-            ->map(function ($user) use ($liveShowId) {
+            ->map(function ($user, $index) use ($liveShowId, $liveShow) {
                 return [
                     'id' => $user->id,
+                    'position' => $this->formatPosition($index + 1, $liveShow->winners_announced),
                     'name' => $user->name,
                     'email' => $user->email,
                     'is_online' => $user->pivot->is_online,
@@ -627,6 +629,23 @@ class GamePlayController extends Controller
         }
 
         return response()->json(['users' => $users, 'totalUsers' => $totalUsers, 'you' => $you ?? null]);
+    }
+
+    private function formatPosition(int $rank, bool $winnersAnnounced): string
+    {
+        if (! $winnersAnnounced) {
+            return '<i class="fas fa-user-circle text-primary ms-2" ></i>';
+        }
+        if (in_array($rank % 100, [11, 12, 13], true)) {
+            return $rank.'th';
+        }
+
+        return $rank.match ($rank % 10) {
+            1 => 'st',
+            2 => 'nd',
+            3 => 'rd',
+            default => 'th',
+        };
     }
 
     private function isMaxPlayersReached(LiveShow $liveShow): bool

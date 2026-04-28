@@ -576,8 +576,8 @@
 
         function updatePlayersLeaderboard() {
 
- 
-            
+
+
             //fetch users list with scores
             return fetch('{{ url('live-show/' . $liveShow->id . '/get-live-show-users-with-scores') }}')
                 .then(response => response.json())
@@ -589,27 +589,27 @@
                     const playersListContainer = document.getElementById('players-leaderbord');
                     playersListContainer.innerHTML = '';
                     const you = data.you;
-                    if (you) {
-                        //add a player-list-item on top of the list
-                        const youDiv = document.createElement('div');
-                        youDiv.className =
-                            'player-list-item d-flex justify-content-between align-items-center mb-2 p-2 rounded bg-light border border-1';
-                        youDiv.innerHTML = `
-                <div>
-                    <span style="margin-right: 20px;">
-                        <i class="fas fa-user-circle text-primary ms-2" title="You"></i>
-                        </span>
-                            <strong>${you.name} (You)</strong>
+                    //     if (you) {
+                    //         //add a player-list-item on top of the list
+                    //         const youDiv = document.createElement('div');
+                    //         youDiv.className =
+                    //             'player-list-item shadow-lg sticky-bottom bg-white d-flex justify-content-between align-items-center mb-2 p-2 rounded bg-light border border-1';
+                    //         youDiv.innerHTML = `
+                // <div>
+                //     <span style="margin-right: 20px;">
+                //         <i class="fas fa-user-circle text-primary ms-2" title="You"></i>
+                //         </span>
+                //             <strong>${you.name} (You)</strong>
 
-                            <span class="trophy-icon">${you.is_winner ? '<i class="fas fa-trophy" title="Winner"></i>' : ''}</span>
-                        </div>
-                        <div class="score-text">
-                            ${you.score ? Math.round(you.score) : 0}
-                       
-                        </div>
-                                    `;
-                        playersListContainer.appendChild(youDiv);
-                    }
+                //             <span class="trophy-icon">${you.is_winner ? '<i class="fas fa-trophy" title="Winner"></i>' : ''}</span>
+                //         </div>
+                //         <div class="score-text">
+                //             ${you.score ? Math.round(you.score) : 0}
+
+                //         </div>
+                //                     `;
+                    //         playersListContainer.appendChild(youDiv);
+                    //     }
 
                     users.forEach((user, index) => {
                         let winnerBgColorClass = '';
@@ -630,7 +630,8 @@
                         }
                         const userDiv = document.createElement('div');
                         userDiv.className =
-                            'player-list-item d-flex justify-content-between align-items-center mb-2 p-2 rounded ';
+                            'player-list-item d-flex justify-content-between align-items-center mb-2 p-2 rounded ' +
+                            (user.id == userId ? 'sticky-position' : '');
                         if (user.score > 0 && user.is_winner) {
                             userDiv.className += ` ${winnerBgColorClass}`;
                         }
@@ -638,7 +639,7 @@
                         userDiv.innerHTML = `
 
                         <div>
-                    <span style="margin-right: 20px;">${toOrdinalSup(index + 1)}</span>
+                    <span style="margin-right: 20px;">${user.position}</span>
                              ${user.name} ${user.id == userId ? '(You)' : ''} 
 
                             <span class="trophy-icon">${user.is_winner ? '<i class="fas fa-trophy " title="Winner"></i>' : ''}</span>
@@ -654,7 +655,6 @@
                     document.getElementById('user-count').innerHTML = totalUsers;
                 })
                 .catch(error => console.error('Error fetching players with scores:', error));
-
 
         }
 
@@ -909,7 +909,9 @@
                                 registerModal.show();
                                 uncheckAndEnableOptions();
                             } else {
+                                const message = data.message || 'Failed to submit quiz. Please try again.';
                                 console.warn(data.message || 'Failed to submit quiz. Please try again.');
+                                appendQuestionResponseStatus('warning', message);
                             }
                         }
                     })
@@ -1077,7 +1079,9 @@
         @if ($liveShow->status == 'live')
             setInterval(
                 function() {
-                    updatePlayersLeaderboard();
+                    if (!winnerAnnounced) {
+                        // updatePlayersLeaderboard();
+                    }
 
                 }, 30000);
         @endif
@@ -1391,11 +1395,11 @@
         }
 
 
-        function appendQuestionResponseStatus(type) {
+        function appendQuestionResponseStatus(type, message = '') {
             const evaluationDiv = document.getElementById('evaluationStatus');
             let alertClass = 'alert-info';
 
-            let message = ``;
+            let messageText = message || ``;
 
             if (type === 'success') {
                 alertClass = 'text-success';
@@ -1407,7 +1411,7 @@
 
             } else {
                 alertClass = 'text-warning';
-                message = `<i class="fas fa-exclamation-circle me-2"></i> {{ __('de.quiz.wrong') }}`;
+                messageText = `<i class="fas fa-exclamation-circle me-2"></i> ${messageText} `;
                 // updateEliminatedStatus();
 
             }
@@ -1708,7 +1712,7 @@
         });
         channel2.bind('ShowLiveShowWinnersTabEvent', function(data) {
             console.log('Show winners tab event received:', data);
-             showWinnersTabForParticipants();
+            showWinnersTabForParticipants();
         });
 
 

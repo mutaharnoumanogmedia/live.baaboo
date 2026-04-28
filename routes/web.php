@@ -92,30 +92,33 @@ require __DIR__.'/auth.php';
 Route::get('{name}', [HomeController::class, 'registerUserViaForm'])->name('register-user-via-form');
 
 // a route to add 1000 users to given live show id
-Route::get('/test/live-show/{id}/add-users/{count}', function ($id, $count) {
-    $liveShow = LiveShow::find($id);
-    if (! $liveShow) {
-        return response()->json(['message' => 'Live show not found'], 404);
-    }
-    // create 1000 users
-    for ($i = 0; $i < $count; $i++) {
-        try {
-            $userName = 'test'.rand(100000, 999999);
-            $user = User::create([
-                'name' => $userName,
-                'email' => $userName.'@test.baaboo.com',
-                'password' => bcrypt('baaboo123'),
-                'user_name' => $userName,
-                'agree_for_terms' => 1,
-                'agree_for_email' => 1,
-                'is_affiliate' => 1,
-            ]);
-            // add users to live show
-            $liveShow->users()->attach($user->id);
-        } catch (\Exception $e) {
-            \Log::error('Error adding user to live show: '.$e->getMessage());
-        }
-    }
+if (env('APP_ENV') == 'local') {
 
-    return response()->json(['message' => '1000 users added to live show'], 200);
-});
+    Route::get('/test/live-show/{id}/add-users/{count}', function ($id, $count) {
+        $liveShow = LiveShow::find($id);
+        if (! $liveShow) {
+            return response()->json(['message' => 'Live show not found'], 404);
+        }
+        // create 1000 users
+        for ($i = 0; $i < $count; $i++) {
+            try {
+                $userName = 'test'.rand(100000, 999999);
+                $user = User::create([
+                    'name' => $userName,
+                    'email' => $userName.'@test.baaboo.com',
+                    'password' => bcrypt('baaboo123'),
+                    'user_name' => $userName,
+                    'agree_for_terms' => 1,
+                    'agree_for_email' => 1,
+                    'is_affiliate' => 1,
+                ]);
+                // add users to live show
+                $liveShow->users()->attach($user->id);
+            } catch (\Exception $e) {
+                \Log::error('Error adding user to live show: '.$e->getMessage());
+            }
+        }
+
+        return response()->json(['message' => $count.' users added to live show'], 200);
+    });
+}

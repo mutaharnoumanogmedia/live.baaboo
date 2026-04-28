@@ -606,7 +606,7 @@ class LiveShowController extends Controller
 
             $totalUsers = $liveShow->users()->count();
             $quizService = new LiveShowQuizService;
-            $players = $quizService->getSortedPlayers($liveShow);
+            $players = $quizService->getSortedByScore($liveShow);
 
             $usersQuery = $players
                 ->when($search !== '', function ($query) use ($search) {

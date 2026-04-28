@@ -55,15 +55,12 @@ class LiveShowQuizService
             ->values();
     }
 
-    public function getSortedByJoinedAtPlayers(LiveShow $liveShow): Collection
+    public function getSortedByScore(LiveShow $liveShow): Collection
     {
         return $liveShow->users()
             ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at'])
             ->get()
-            ->sortBy(function ($user) {
-                // Use the accessor in UserLiveShow model for score
-                return $user->pivot->created_at;
-            })
+            ->sortByDesc(fn ($user) => $user->pivot->score)
             ->values();
     }
 }
