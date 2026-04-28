@@ -595,9 +595,10 @@ class GamePlayController extends Controller
 
         $skip = request()->get('skip', 0);
         $take = request()->get('take', 100);
-
+         
         $totalUsers = $liveShow->users()->count();
         $quizService = new LiveShowQuizService;
+
         $users = $quizService->getSortedPlayers($liveShow);
 
         $users = $users

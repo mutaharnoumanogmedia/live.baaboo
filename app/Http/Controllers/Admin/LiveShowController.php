@@ -404,6 +404,7 @@ class LiveShowController extends Controller
         }
 
         $liveShow->update(['winners_announced' => false]);
+        $liveShow->users()->update(['is_winner' => false]);
 
         return response()->json([
             'success' => true,

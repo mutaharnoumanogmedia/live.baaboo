@@ -14,7 +14,7 @@ class ShowPlayerAsWinnerEvent implements ShouldBroadcast
 
     public $queue = 'high';
 
-    public $delay = 10;
+    
 
     public $userId;
 

@@ -544,6 +544,8 @@
         let isChatEnabled = {{ $liveShow->chat_enabled ? 'true' : 'false' }};
         let isUserBlockedFromChat = false;
 
+        let winnerAnnounced = {{ $liveShow->winners_announced ? 'true' : 'false' }};
+
         const zegoLiveRoot = document.getElementById('zego-live-root');
 
         const VAPID_PUBLIC_KEY = "{{ env('VAPID_PUBLIC_KEY') }}";
@@ -574,8 +576,10 @@
 
         function updatePlayersLeaderboard() {
 
+ 
+            
             //fetch users list with scores
-            fetch('{{ url('live-show/' . $liveShow->id . '/get-live-show-users-with-scores') }}')
+            return fetch('{{ url('live-show/' . $liveShow->id . '/get-live-show-users-with-scores') }}')
                 .then(response => response.json())
                 .then(data => {
                     const users = data.users;
@@ -603,7 +607,7 @@
                             ${you.score ? Math.round(you.score) : 0}
                        
                         </div>
-            `;
+                                    `;
                         playersListContainer.appendChild(youDiv);
                     }
 
@@ -633,7 +637,7 @@
 
                         userDiv.innerHTML = `
 
-                        <div >
+                        <div>
                     <span style="margin-right: 20px;">${toOrdinalSup(index + 1)}</span>
                              ${user.name} ${user.id == userId ? '(You)' : ''} 
 
@@ -680,6 +684,8 @@
         }
 
         function showWinnersTabForParticipants() {
+
+
             const playerTabLink = document.getElementById('playerTab-tab');
             const playerTabPane = document.getElementById('playerTab');
             const chatTabLink = document.getElementById('chatTab-tab');
@@ -701,7 +707,9 @@
                 playerTabPane.classList.add('show', 'active');
             }
 
-            updatePlayersLeaderboard();
+            updatePlayersLeaderboard()
+
+
         }
 
 
@@ -1510,6 +1518,7 @@
                                 document.getElementById('prizeAmount').textContent = prizeData.prize;
                                 fireConfetti();
                                 // addOverlayMessage('@System', 'Congratulations! You have won ' + prizeData.prize);
+                                showWinnersTabForParticipants();
                                 showWinnerDialogDiv();
                             }
 
@@ -1699,7 +1708,7 @@
         });
         channel2.bind('ShowLiveShowWinnersTabEvent', function(data) {
             console.log('Show winners tab event received:', data);
-            showWinnersTabForParticipants();
+             showWinnersTabForParticipants();
         });
 
 
