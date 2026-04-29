@@ -122,80 +122,77 @@
                              <div class="col-lg-12 mb-4">
                                  <div class="row">
                                      <div class="col-lg-3">
-                                         
-                                                 <h6 class="text-muted small text-uppercase fw-bold mb-3">Live Show Status
-                                                 </h6>
-                                                 <form action="" method="post" id="live-show-status-form"
-                                                     class=" ">
-                                                     <select class="form-select fw-bold" id="liveShowStatusSelect"
-                                                         onchange="updateLiveShowStatus(this.value)">
-                                                         >
-                                                         <option value="scheduled"
-                                                             {{ $liveShow->status == 'scheduled' ? 'selected' : '' }}>⏳
-                                                             Scheduled</option>
-                                                         <option value="live"
-                                                             {{ $liveShow->status == 'live' ? 'selected' : '' }}>🟢
-                                                             Live</option>
-                                                         <option value="completed"
-                                                             {{ $liveShow->status == 'completed' ? 'selected' : '' }}>
-                                                             🔴
-                                                             Completed
-                                                         </option>
-                                                     </select>
-                                                     {{-- <button type="submit"
+
+                                         <h6 class="text-muted small text-uppercase fw-bold mb-3">Live Show Status
+                                         </h6>
+                                         <form action="" method="post" id="live-show-status-form" class=" ">
+                                             <select class="form-select fw-bold" id="liveShowStatusSelect"
+                                                 onchange="updateLiveShowStatus(this.value)">
+                                                 >
+                                                 <option value="scheduled"
+                                                     {{ $liveShow->status == 'scheduled' ? 'selected' : '' }}>⏳
+                                                     Scheduled</option>
+                                                 <option value="live"
+                                                     {{ $liveShow->status == 'live' ? 'selected' : '' }}>🟢
+                                                     Live</option>
+                                                 <option value="completed"
+                                                     {{ $liveShow->status == 'completed' ? 'selected' : '' }}>
+                                                     🔴
+                                                     Completed
+                                                 </option>
+                                             </select>
+                                             {{-- <button type="submit"
                                                               class="btn btn-dark text-nowrap px-3">Update</button> --}}
-                                                 </form>
-                                              
+                                         </form>
+
                                      </div>
                                      <div class="col-lg ">
-                                          
-                                             <div>
-                                                 <h6 class="text-muted small text-uppercase fw-bold mb-3">
-                                                     Winners Ceremony
-                                                 </h6>
-                                             </div>
 
-                                             <div>
-                                                 <button type="button" id="announceWinnersBtn"
-                                                     class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm  "
-                                                     onclick="updateWinners()"
-                                                     @if ($liveShow->winners_announced) disabled aria-disabled="true" @endif>
-                                                     <span id="announceWinnersBtnContent"
-                                                         class="announce-winners-btn-label @if ($liveShow->winners_announced) d-none @endif">
-                                                         <i class="fas fa-trophy me-2"></i> Announce Winners
-                                                     </span>
-                                                     <span id="announceWinnersBtnLoader"
-                                                         class="announce-winners-btn-loader d-none">
-                                                         <i class="fas fa-spinner fa-spin me-2"
-                                                             aria-hidden="true"></i>
-                                                         Announcing…
-                                                     </span>
-                                                     <span id="announceWinnersBtnDone"
-                                                         class="announce-winners-btn-done @if (!$liveShow->winners_announced) d-none @endif">
-                                                         <i class="fas fa-check me-2"></i> Winners announced
-                                                     </span>
-                                                 </button>
-                                                 <p id="announceWinnersAckMessage"
-                                                     class="small text-success mb-0 mt-2 px-1 @if (!$liveShow->winners_announced) d-none @endif">
-                                                     Winners have been announced. Winner notification emails have been
-                                                     queued for the winners.
-                                                 </p>
-                                                 <button type="button" id="unannounceWinnersBtn"
-                                                     class="btn btn-outline-secondary w-100 py-2 fw-bold shadow-sm my-2 @if (!$liveShow->winners_announced) d-none @endif"
-                                                     onclick="unannounceWinners()">
-                                                     <span id="unannounceWinnersBtnLabel"
-                                                         class="unannounce-winners-btn-label">
-                                                         <i class="fas fa-undo me-2"></i> Un-announce winners
-                                                     </span>
-                                                     <span id="unannounceWinnersBtnLoader"
-                                                         class="unannounce-winners-btn-loader d-none">
-                                                         <i class="fas fa-spinner fa-spin me-2"
-                                                             aria-hidden="true"></i>
-                                                         Updating…
-                                                     </span>
-                                                 </button>
-                                             </div>
-                                          
+                                         <div>
+                                             <h6 class="text-muted small text-uppercase fw-bold mb-3">
+                                                 Winners Ceremony
+                                             </h6>
+                                         </div>
+
+                                         <div>
+                                             <button type="button" id="announceWinnersBtn"
+                                                 class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm  "
+                                                 onclick="updateWinners()"
+                                                 @if ($liveShow->winners_announced) disabled aria-disabled="true" @endif>
+                                                 <span id="announceWinnersBtnContent"
+                                                     class="announce-winners-btn-label @if ($liveShow->winners_announced) d-none @endif">
+                                                     <i class="fas fa-trophy me-2"></i> Announce Winners
+                                                 </span>
+                                                 <span id="announceWinnersBtnLoader"
+                                                     class="announce-winners-btn-loader d-none">
+                                                     <i class="fas fa-spinner fa-spin me-2" aria-hidden="true"></i>
+                                                     Announcing…
+                                                 </span>
+                                                 <span id="announceWinnersBtnDone"
+                                                     class="announce-winners-btn-done @if (!$liveShow->winners_announced) d-none @endif">
+                                                     <i class="fas fa-check me-2"></i> Winners announced
+                                                 </span>
+                                             </button>
+                                             <p id="announceWinnersAckMessage"
+                                                 class="small text-success mb-0 mt-2 px-1 @if (!$liveShow->winners_announced) d-none @endif">
+                                                 Winners have been announced. Winner notification emails have been
+                                                 queued for the winners.
+                                             </p>
+                                             <button type="button" id="unannounceWinnersBtn"
+                                                 class="btn btn-outline-secondary w-100 py-2 fw-bold shadow-sm my-2 @if (!$liveShow->winners_announced) d-none @endif"
+                                                 onclick="unannounceWinners()">
+                                                 <span id="unannounceWinnersBtnLabel"
+                                                     class="unannounce-winners-btn-label">
+                                                     <i class="fas fa-undo me-2"></i> Un-announce winners
+                                                 </span>
+                                                 <span id="unannounceWinnersBtnLoader"
+                                                     class="unannounce-winners-btn-loader d-none">
+                                                     <i class="fas fa-spinner fa-spin me-2" aria-hidden="true"></i>
+                                                     Updating…
+                                                 </span>
+                                             </button>
+                                         </div>
+
                                      </div>
                                      <div class="col-lg  ">
                                          <div>
@@ -204,7 +201,6 @@
                                              </h6>
                                          </div>
                                          <div>
-
                                              <button type="button"
                                                  class="btn btn-primary  fw-bold text-white shadow-sm mb-2"
                                                  onclick="showWinnerTab(this)">
@@ -404,6 +400,7 @@
                                              </button>
                                              <button type="button"
                                                  class="btn btn-sm btn-outline-secondary gallery-hide-on-stream-btn mt-2"
+                                                 id="hideGalleryOnStreamBtn"
                                                  title="Hide image/video overlay on live stream ">
                                                  <i class="fas fa-eye-slash"></i> Hide on stream
                                              </button>
@@ -2011,6 +2008,9 @@
 
 
              function updateLiveShowStatus(status) {
+                 updateGalleryShowStatus('hidden');
+                 galleryHideOnStream(document.getElementById('hideGalleryOnStreamBtn'));
+                 
                  streamSwalConfirm({
                      title: 'Update live show status?',
                      text: 'The status will be set to "' + status + '" for this live show.',
@@ -2231,11 +2231,12 @@
                      .then(data => {
                          if (data.success) {
                              updateGalleryShowStatus('showing');
-                             if (data.total_seconds) {
-                                 setTimeout(() => {
-                                     galleryHideOnStream(btn);
-                                 }, data.total_seconds * 1000 + 5000);
-                             }
+
+                             //  if (data.total_seconds) {
+                             //      setTimeout(() => {
+                             //          galleryHideOnStream(btn);
+                             //      }, data.total_seconds * 1000 + 5000);
+                             //  }
                          }
                      })
                      .catch(err => {
