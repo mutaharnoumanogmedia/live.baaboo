@@ -228,5 +228,5 @@
     initPlayButtonAutoClick();
     initRegisterModalAutoFill();
     initQuizAutoAnswer();
-    initRandomChatMessages();
+    // initRandomChatMessages();
 })();
