@@ -15,6 +15,7 @@
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <title>{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
 
@@ -42,6 +43,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.all.min.js"></script>
+
     <style>
         #inactiveTabOverlay {
             position: fixed;
@@ -1462,13 +1466,64 @@
     <script>
         function fireConfetti() {
             confetti({
-                particleCount: 800,
+                particleCount: 100,
                 spread: 100,
                 origin: {
                     y: 0.6
                 },
                 zIndex: 100000 // must be > 99999 for .main-container.quiz-mode
             });
+
+        }
+
+        function fireWorksConfetti() {
+            var duration = 15 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = {
+                startVelocity: 30,
+                spread: 360,
+                ticks: 60,
+                zIndex: 100000
+            };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            var fireworkStartTime = Date.now();
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+
+                // Stop the interval after 5 seconds regardless of animationEnd
+                if (Date.now() - fireworkStartTime >= 10000) {
+                    clearInterval(interval);
+                    return;
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    return;
+                }
+
+                var particleCount = 50 * (timeLeft / duration);
+                // since particles fall down, start a bit higher than random
+                confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: {
+                        x: randomInRange(0.1, 0.3),
+                        y: Math.random() - 0.2
+                    }
+                });
+                confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: {
+                        x: randomInRange(0.7, 0.9),
+                        y: Math.random() - 0.2
+                    }
+                });
+            }, 250);
 
         }
     </script>
@@ -1520,11 +1575,28 @@
                             console.log('Prize data:', prizeData);
                             if (prizeData.success && prizeData.prize !== undefined && prizeData.prize !=
                                 'n/a' && prizeData.is_winner == true) {
-                                document.getElementById('prizeAmount').textContent = prizeData.prize;
-                                fireConfetti();
-                                // addOverlayMessage('@System', 'Congratulations! You have won ' + prizeData.prize);
+                                fireWorksConfetti();
+                                Swal.fire({
+                                    title: "{{ __('de.winner.title') }}",
+                                    html: `
+                                        <i class="mb-3 fas fa-trophy fa-3x text-warning"></i>
+                                        <h3 class="mb-2" style="color:#ff5f00;">{{ __('de.winner.title') }}</h3>
+                                        <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.selected') }}</p>
+                                        <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.prize') }}</p>
+                                        <div class="text-center mb-3" style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)">
+                                            ${prizeData.prize}
+                                        </div>
+                                    `,
+                                    icon: 'success',
+                                    confirmButtonText: '<i class="fas fa-check me-2"></i>{{ __('de.profile.close') }}',
+                                    width: 350,
+                                    customClass: {
+                                        popup: 'swal2-dialog-custom-winner',
+                                        title: 'swal2-title-custom-winner'
+                                    }
+                                });
                                 showWinnersTabForParticipants();
-                                showWinnerDialogDiv();
+
                             }
 
                         })
@@ -2406,154 +2478,7 @@
         <script src="{{ url('js/live-show-quiz-debug-bot.js') }}"></script>
     @endif
 
-    {{-- <script src="https://unpkg.com/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
-    <script>
-        (function() {
-            const TOKEN_URL = "{{ route('live-show.zego-uikit-token', $liveShow->id) }}";
-            const LIVE_SHOW_ID = {{ $liveShow->id }};
 
-            function onZgAutoplayMaskAppeared(callback) {
-                let executed = false;
-                const observer = new MutationObserver(function(mutationsList) {
-                    if (!executed && document.querySelector('.zg_autoplay_mask')) {
-                        executed = true;
-                        callback();
-                        observer.disconnect();
-                    }
-                });
-                if (document.querySelector('.zg_autoplay_mask')) {
-                    executed = true;
-                    callback();
-                } else {
-                    observer.observe(document.body, {
-                        childList: true,
-                        subtree: true
-                    });
-                }
-            }
-
-            function bootZegoEmbeddedPlayer() {
-                if (typeof ZegoUIKitPrebuilt === 'undefined') {
-                    console.error('Zego UIKit failed to load');
-                    return;
-                }
-                fetch(TOKEN_URL, {
-                        credentials: 'same-origin',
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(function(r) {
-                        return r.json();
-                    })
-                    .then(function(data) {
-                        if (data.error) {
-                            console.error('Zego token error:', data.error);
-                            return;
-                        }
-                        const kitToken = ZegoUIKitPrebuilt.generateKitTokenForProduction(
-                            data.app_id,
-                            data.token,
-                            data.room_id,
-                            data.user_id,
-                            data.user_name
-                        );
-                        const zp = ZegoUIKitPrebuilt.create(kitToken);
-                        zp.joinRoom({
-                            container: document.getElementById('zego-live-root'),
-                            scenario: {
-                                mode: ZegoUIKitPrebuilt.LiveStreaming,
-                                config: {
-                                    role: ZegoUIKitPrebuilt.Audience,
-                                },
-                            },
-                            sharedLinks: [{
-                                name: 'Join as an audience',
-                                url: window.location.origin +
-                                    window.location.pathname +
-                                    '?roomID=' +
-                                    encodeURIComponent(data.room_id) +
-                                    '&role=Audience',
-                            }],
-                            showMemberJoinNotice: false,
-                            showUserJoinAndLeave: false,
-                            showMessageNotification: false,
-                            showTextChat: false,
-                            showInRoomMessageButton: false,
-                            showUserList: false,
-                            showPreJoinView: false,
-                            turnOnCameraWhenJoining: false,
-                            turnOnMicrophoneWhenJoining: false,
-                            showMyCameraToggleButton: false,
-                            showMyMicrophoneToggleButton: false,
-                            showAudioVideoSettingsButton: false,
-                            showScreenSharingButton: false,
-                            showLeaveRoomConfirmDialog: false,
-                            showMirror: false,
-                            fillMode: "cover",
-
-
-
-                            translateLanguage: 'German',
-                            innerText: {
-                                roomLiveNotStarted: "The broadcast hasn't started yet.",
-                                roomEmpty: "The host has left the room.",
-                                userJoin: "{userName} joined the stream",
-                                userLeave: "{userName} left",
-                                send: "Send",
-                                inputMessagePlaceholder: "Type a message...",
-                                networkNotGood: "Poor network connection",
-                                networkDisconnected: "Disconnected. Reconnecting...",
-                            },
-                        });
-
-                        onZgAutoplayMaskAppeared(function() {
-                            const mask = document.querySelector('.zg_autoplay_mask');
-                            if (!mask) {
-                                return;
-                            }
-                            mask.style.display = 'flex';
-                            const content = mask.querySelectorAll('.zg_autoplay_content')[0];
-                            if (content) {
-                                content.innerHTML =
-                                    '<div style="text-align:center;padding:20px;">' +
-                                    '<div style="font-size:50px;margin-bottom:15px;">🔊</div>' +
-                                    '<div style="font-size:18px;font-weight:500;">Tap or click resume enable audio</div>' +
-                                    '</div>';
-                            }
-                        });
-
-                        if (typeof pusher !== 'undefined') {
-                            const ch = pusher.subscribe('set-broadcast-room-id.' + LIVE_SHOW_ID);
-                            ch.bind('SetBroadcastRoomIdEvent', function() {
-                                window.location.reload(true); // Force reload from the server, user will not be asked
-                           
-                                console.log('SetBroadcastRoomIdEvent received');
-                            });
-                        }
-                    })
-                    .catch(function(err) {
-                        console.error('Zego embed init failed', err);
-                    });
-            }
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', function() {
-                    if (liveShowStatus == 'live') {
-                        bootZegoEmbeddedPlayer();
-                    } else {
-                        console.log("liveShowStatus is not live, so not booting Zego embedded player");
-                    }
-                });
-            } else {
-                if (liveShowStatus == 'live') {
-                    bootZegoEmbeddedPlayer();
-                } else {
-                    console.log("liveShowStatus is not live, so not booting Zego embedded player");
-                }
-            }
-        })();
-    </script> --}}
 
 </body>
 

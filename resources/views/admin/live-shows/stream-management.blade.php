@@ -121,9 +121,9 @@
                          <div class="row align-items-center">
                              <div class="col-lg-12 mb-4">
                                  <div class="row">
-                                     <div class="col-lg-4">
+                                     <div class="col-lg-3">
                                          
-                                                 <h6 class="text-muted small text-uppercase fw-bold mb-3">Show Status
+                                                 <h6 class="text-muted small text-uppercase fw-bold mb-3">Live Show Status
                                                  </h6>
                                                  <form action="" method="post" id="live-show-status-form"
                                                      class=" ">
@@ -147,7 +147,7 @@
                                                  </form>
                                               
                                      </div>
-                                     <div class="col-lg-4">
+                                     <div class="col-lg ">
                                           
                                              <div>
                                                  <h6 class="text-muted small text-uppercase fw-bold mb-3">
@@ -197,23 +197,23 @@
                                              </div>
                                           
                                      </div>
-                                     <div class="col-lg-4  ">
+                                     <div class="col-lg  ">
                                          <div>
                                              <h6 class="text-muted small text-uppercase fw-bold mb-3">
-                                                 Winners Ceremony
+                                                 Player Tab Management
                                              </h6>
                                          </div>
                                          <div>
 
                                              <button type="button"
-                                                 class="btn btn-warning  fw-bold text-white shadow-sm "
+                                                 class="btn btn-primary  fw-bold text-white shadow-sm mb-2"
                                                  onclick="showWinnerTab(this)">
-                                                 <i class="fas fa-eye me-2"></i> Show winner tab
+                                                 <i class="fas fa-eye me-2"></i> Show Player tab
                                              </button>
                                              <button type="button"
-                                                 class="btn btn-outline-warning   fw-bold text-white shadow-sm "
+                                                 class="btn btn-outline-secondary   fw-bold text-white shadow-sm mb-2"
                                                  onclick="hideWinnerTab(this)">
-                                                 <i class="fas fa-eye-slash me-2"></i> Hide winner tab
+                                                 <i class="fas fa-eye-slash me-2"></i> Hide Player tab
                                              </button>
                                          </div>
                                      </div>

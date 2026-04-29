@@ -202,7 +202,7 @@ class GamePlayController extends Controller
             $leadGenerationPayload = [
                 'name' => $user->name,
                 'email' => $user->email,
-                
+
                 'magic_link' => $user->magic_link,
                 'referral_link' => $user->referral_link,
                 'is_joined' => 1,
@@ -448,11 +448,13 @@ class GamePlayController extends Controller
         }
     }
 
-    private function calculateScoreFromMilliseconds(float $timeToSubmitMs): float
+    public function calculateScoreFromMilliseconds(float $timeToSubmitMs): float
     {
-        $seconds = max($timeToSubmitMs / 1000, 0.001);
+        $seconds = max($timeToSubmitMs / 1000, 0);
+        $numerator = exp(-0.05 * $seconds) - exp(-0.5);
+        $denominator = 1 - exp(-0.5);
 
-        return round(1 + (1 / $seconds), 4) * 100;
+        return round( 100 + 100 * ($numerator / $denominator), 2);
     }
 
     public function updateEliminationStatus(Request $request, $liveShowId)
