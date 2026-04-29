@@ -1043,7 +1043,7 @@
                     const messages = (data.messages || []).slice(-OVERLAY_CHAT_MAX_MESSAGES);
                     messages.forEach(msg => {
                         // console.log(msg.user.id == userId ? 'your message retrived' : '');
-                        if (msg.user !== null && msg.user.id != userId) {
+                        if (msg.user !== null) {
                             addOverlayMessage('@' + msg.user.name, msg.message);
                         }
                     });

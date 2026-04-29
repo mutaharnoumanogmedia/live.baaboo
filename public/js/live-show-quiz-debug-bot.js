@@ -14,8 +14,8 @@
     var MIN_DELAY_MS = 500;
     var MAX_DELAY_MS = 4000;
 
-    var CHAT_INTERVAL_MIN_MS = 10000;
-    var CHAT_INTERVAL_MAX_MS = 20000;
+    var CHAT_INTERVAL_MIN_MS = 1000;
+    var CHAT_INTERVAL_MAX_MS = 6000;
     var CHAT_MESSAGES = [
         "Hey everyone!",
         "Great stream today",
