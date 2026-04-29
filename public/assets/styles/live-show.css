@@ -623,9 +623,9 @@ body .end-show {
 
 .quiz-option.correct input[type="radio"]:checked + label,
 .quiz-option.correct input[type="radio"]:disabled + label {
-    background: #bce9b6  !important;
+    background: #00ff37   !important;
    border-width: 5px !important;
-   border-color: #bce9b6 !important;
+   border-color: #00ff37  !important;
    color: #000 !important;
 }
 
@@ -639,8 +639,8 @@ input[type="radio"]:disabled + label {
 }
 
 .quiz-option.correct label {
-    background: #bce9b6 ;
-    border-color: #bce9b6 ;
+    background: #00ff37 ;
+    border-color: #00ff37 ;
     color: white;
 }
 
