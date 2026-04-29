@@ -14,6 +14,7 @@ use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use App\Models\Viewer;
 use App\Services\AffiliateAPIService;
+use App\Services\LeadGenerationService;
 use App\Services\LiveShowQuizService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -198,6 +199,17 @@ class GamePlayController extends Controller
             }
 
             // $this->triggerOnlineUsersEvent($liveShowId);
+            $leadGenerationPayload = [
+                'name' => $user->name,
+                'email' => $user->email,
+                
+                'magic_link' => $user->magic_link,
+                'referral_link' => $user->referral_link,
+                'is_joined' => 1,
+            ];
+            $leadGenerationResponse = (new LeadGenerationService)->leadGeneration($leadGenerationPayload);
+            \Log::info('Lead generation request sent successfully', $leadGenerationPayload);
+            \Log::info('Lead generation response', $leadGenerationResponse);
 
             return response()->json(['success' => true, 'message' => 'User registered successfully.', 'user' => $user, 'authStatus' => Auth::guard('web')->check()]);
         } catch (\Exception $e) {
