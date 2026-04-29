@@ -3,16 +3,16 @@
         <h2 class="font-semibold text-xl text-gray-800 py-3 mb-1">
             {{ __('Live Shows') }}
 
-            <a href="{{ route('admin.live-shows.create') }}" class="btn btn-success btn-sm mx-4">
+            <a href="{{ route('admin.live-shows.create') }}" class="btn btn-success btn-sm mx-4 float-end">
                 New Live Show
             </a>
         </h2>
     </x-slot>
 
     <div class="py-6">
-        <div class="container-fluid">
+        <div class="container">
             <div class="card">
-                <div class="card-body bg-dark text-light">
+                <div class="card-body bg-dark text-light table-responsive">
                     <table id="liveShowsTable" class="table table-striped table-borderless table-dark data-table">
                         <thead>
                             <tr>

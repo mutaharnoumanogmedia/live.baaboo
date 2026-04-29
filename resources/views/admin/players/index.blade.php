@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-6">
-        <div class="container-fluid">
+        <div class="container">
             <div class="card">
                 <div class="card-header">
                     <form action="{{ route('admin.players.index') }}" method="get">
