@@ -894,12 +894,12 @@
                             //using some instead of forEach to break the loop when correct answer is found, converting nodelist to array
 
 
-                            if (data.is_correct) {
-                                appendQuestionResponseStatus('success');
-                                fireConfetti();
-                            } else {
-                                appendQuestionResponseStatus('fail');
-                            }
+                            // if (data.is_correct) {
+                            //     appendQuestionResponseStatus('success');
+                            //     fireConfetti();
+                            // } else {
+                            //     appendQuestionResponseStatus('fail');
+                            // }
                         } else {
                             //if authStatus
                             if (data.message && data.message == "unauthorized") {
@@ -1462,11 +1462,12 @@
     <script>
         function fireConfetti() {
             confetti({
-                particleCount: 300,
+                particleCount: 800,
                 spread: 100,
                 origin: {
                     y: 0.6
-                }
+                },
+                zIndex: 100000 // must be > 99999 for .main-container.quiz-mode
             });
 
         }
@@ -1609,7 +1610,8 @@
             endDiv.style.width = '100%';
             endDiv.style.padding = '20px';
             endDiv.className = 'end-show';
-            endDiv.innerHTML = messageText + `<br>Weitere Infos: <a href="https://badabing.show" class="text-white" target="_blank">badabing.show</a>`;
+            endDiv.innerHTML = messageText +
+                `<br>Weitere Infos: <a href="https://badabing.show" class="text-white" target="_blank">badabing.show</a>`;
             document.body.appendChild(endDiv);
         }
 
@@ -1641,6 +1643,17 @@
                     // Find the parent .quiz-option of the bar and add class 'correct' to it
                     if (correctQuizOptionDiv) {
                         correctQuizOptionDiv.classList.add('correct');
+
+                        //if checked option is the correct option, fire confetti
+                        if (document.querySelector('input[name="option"]:checked').value == data.correctOptionId) {
+                            console.log('Checked option:', document.querySelector('input[name="option"]:checked')
+                                .value, 'Correct option:', data.correctOptionId);
+
+                            fireConfetti();
+                            appendQuestionResponseStatus('success');
+                        } else {
+                            appendQuestionResponseStatus('fail');
+                        }
                     }
 
                     // }

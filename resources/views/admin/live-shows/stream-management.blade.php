@@ -119,11 +119,10 @@
                  <div class="card border-0 shadow-sm mb-4">
                      <div class="card-body ">
                          <div class="row align-items-center">
-                             <div class="col-lg-12">
+                             <div class="col-lg-12 mb-4">
                                  <div class="row">
                                      <div class="col-lg-4">
-                                         <div class="card border-0 shadow-sm">
-                                             <div class="card-body">
+                                         
                                                  <h6 class="text-muted small text-uppercase fw-bold mb-3">Show Status
                                                  </h6>
                                                  <form action="" method="post" id="live-show-status-form"
@@ -146,11 +145,10 @@
                                                      {{-- <button type="submit"
                                                               class="btn btn-dark text-nowrap px-3">Update</button> --}}
                                                  </form>
-                                             </div>
-                                         </div>
+                                              
                                      </div>
                                      <div class="col-lg-4">
-                                         <div class="card-body">
+                                          
                                              <div>
                                                  <h6 class="text-muted small text-uppercase fw-bold mb-3">
                                                      Winners Ceremony
@@ -197,11 +195,27 @@
                                                      </span>
                                                  </button>
                                              </div>
-                                         </div>
+                                          
                                      </div>
-                                     <div class="col-lg-4">
+                                     <div class="col-lg-4  ">
+                                         <div>
+                                             <h6 class="text-muted small text-uppercase fw-bold mb-3">
+                                                 Winners Ceremony
+                                             </h6>
+                                         </div>
+                                         <div>
 
-                                        
+                                             <button type="button"
+                                                 class="btn btn-warning  fw-bold text-white shadow-sm "
+                                                 onclick="showWinnerTab(this)">
+                                                 <i class="fas fa-eye me-2"></i> Show winner tab
+                                             </button>
+                                             <button type="button"
+                                                 class="btn btn-outline-warning   fw-bold text-white shadow-sm "
+                                                 onclick="hideWinnerTab(this)">
+                                                 <i class="fas fa-eye-slash me-2"></i> Hide winner tab
+                                             </button>
+                                         </div>
                                      </div>
                                  </div>
                              </div>
@@ -209,7 +223,7 @@
 
 
 
-                             <div class="col-md-7 text-center d-flex justify-content-center align-items-center">
+                             {{-- <div class="col-md-7 text-center d-flex justify-content-center align-items-center">
                                  <div
                                      style="padding: 0px; overflow: hidden; border: 1px solid #ccc;border-radius: 10px;">
                                      <div id="">
@@ -238,7 +252,7 @@
                                      </iframe>
                                  </div>
 
-                             </div>
+                             </div> --}}
                          </div>
                      </div>
                  </div>
