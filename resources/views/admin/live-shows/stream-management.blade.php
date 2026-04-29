@@ -243,16 +243,14 @@
                  </div>
 
                  <button type="button" id="quizQuestionsFullscreenBackdrop"
-                     class="quiz-questions-fullscreen-backdrop"
-                     aria-hidden="true" tabindex="-1" title="Close expanded view"></button>
+                     class="quiz-questions-fullscreen-backdrop" aria-hidden="true" tabindex="-1"
+                     title="Close expanded view"></button>
 
                  <div class="card border-0 shadow-sm mb-4 " id="quiz-questions-container-card">
                      <div class="card-header p-0">
                          <button type="button" id="quizQuestionsFullscreenToggleBtn"
-                             class="btn btn-outline-secondary py-2 fw-bold shadow-sm mx-1 float-end"
-                             title="Maximize"
-                             onclick="toggleQuizQuestionsFullscreen(event)"
-                             aria-expanded="false">
+                             class="btn btn-outline-secondary py-2 fw-bold shadow-sm mx-1 float-end" title="Maximize"
+                             onclick="toggleQuizQuestionsFullscreen(event)" aria-expanded="false">
                              <i class="fas fa-expand" aria-hidden="true"></i>
                              <span class="visually-hidden">Toggle expanded quiz panel</span>
                          </button>
@@ -270,11 +268,11 @@
                                                  <div class="px-2">
                                                      <div class="card border mb-3">
                                                          <div class="card-body"
-                                                             style="height: auto; overflow-y:scroll">
+                                                             style="height: auto; overflow-y:hidden">
                                                              <div class="text-center mb-4 fw-bold">
                                                                  <div class="mb-2">Question {{ $index + 1 }} /
                                                                      {{ $liveShow->quizzes->count() }}</div>
-                                                                 <div class="fw-bold h3">{{ $quiz->question }}</div>
+                                                                 <div class=" h3">{{ $quiz->question }}</div>
                                                              </div>
 
                                                              @if ($quiz->options)
@@ -761,17 +759,21 @@
                  top: 50%;
                  left: 50%;
                  transform: translate(-50%, -50%);
-                 font-size: 3.75rem;
+                 font-size: 5.75rem;
                  font-weight: 700;
                  line-height: 1;
                  color: #f8f9fa;
                  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
                  letter-spacing: 0.02em;
                  background: rgba(10, 10, 10, 0.34);
-                 
                  border-radius: 50%;
                  padding: 0.5em 1em;
-            
+                 height: 200px;
+                 width: 200px;
+                 display: flex;
+                 align-items: center;
+                 justify-content: center;
+
              }
 
              /* Optional: Basic styles for fullscreen effect */
