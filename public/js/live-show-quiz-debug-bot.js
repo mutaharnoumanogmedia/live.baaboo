@@ -4,6 +4,7 @@
  * - Play overlay: clicks #playButton shortly after load (dismisses tap-to-play overlay).
  * - Register modal: when #registerModal opens, fills a unique random email, checks terms, submits.
  * - Quiz: watches #quizSection and picks a random answer after a random delay (before timer ends).
+ * - Chat: every 10–20s, picks a random line from a fixed list, fills #chatInput, clicks #send-btn-overlay.
  *
  * Do not use in production against real competitions.
  */
@@ -12,6 +13,31 @@
 
     var MIN_DELAY_MS = 500;
     var MAX_DELAY_MS = 4000;
+
+    var CHAT_INTERVAL_MIN_MS = 10000;
+    var CHAT_INTERVAL_MAX_MS = 20000;
+    var CHAT_MESSAGES = [
+        "Hey everyone!",
+        "Great stream today",
+        "Love this live show",
+        "Hello from the chat",
+        "Nice energy here",
+        "Having fun watching",
+        "Shoutout to the host",
+        "This is awesome",
+        "Good vibes only",
+        "Thanks for the content",
+        "Enjoying the show",
+        "Who else is here?",
+        "Let's go!",
+        "Such a fun session",
+        "Appreciate you all",
+        "Streaming looks smooth",
+        "Chat is moving fast",
+        "Happy to be here",
+        "Keep it up!",
+        "Best part of my day",
+    ];
 
     var lastQuizId = null;
 
@@ -135,6 +161,42 @@
         setTimeout(tryClick, 300);
     }
 
+    function initRandomChatMessages() {
+        function scheduleNext() {
+            var delay = randomBetween(
+                CHAT_INTERVAL_MIN_MS,
+                CHAT_INTERVAL_MAX_MS,
+            );
+            setTimeout(function tick() {
+                var input = document.getElementById("chatInput");
+                var sendBtn = document.getElementById("send-btn-overlay");
+                if (!input || !sendBtn) {
+                    console.warn(
+                        "[live-show quiz debug bot] chat input/send not found — stopping chat loop",
+                    );
+                    return;
+                }
+                if (input.disabled || sendBtn.disabled) {
+                    setTimeout(tick, 1500);
+                    return;
+                }
+                var msg =
+                    CHAT_MESSAGES[
+                        Math.floor(Math.random() * CHAT_MESSAGES.length)
+                    ];
+                input.value = msg;
+                input.dispatchEvent(new Event("input", { bubbles: true }));
+                console.warn(
+                    "[live-show quiz debug bot] chat — sending: " + msg,
+                );
+                sendBtn.click();
+                scheduleNext();
+            }, delay);
+        }
+
+        scheduleNext();
+    }
+
     function initQuizAutoAnswer() {
         var section = document.getElementById("quizSection");
         if (!section) {
@@ -166,4 +228,5 @@
     initPlayButtonAutoClick();
     initRegisterModalAutoFill();
     initQuizAutoAnswer();
+    initRandomChatMessages();
 })();

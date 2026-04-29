@@ -977,6 +977,9 @@
             $chatInput.disabled = true;
             document.querySelector('#send-btn-overlay').disabled = true;
 
+
+            addOverlayMessage('@You', message);
+            $chatInput.value = '';
             if (message) {
                 //ajax
                 $.ajax({
@@ -990,8 +993,7 @@
                     },
                     success: function(response) {
                         // Handle success
-                        // addOverlayMessage('@You', message);
-                        $chatInput.value = '';
+
                         $chatInput.disabled = false;
                         document.querySelector('#send-btn-overlay').disabled = false;
                     },
@@ -1040,8 +1042,8 @@
                     overlayChat.innerHTML = ''; // Clear existing messages
                     const messages = (data.messages || []).slice(-OVERLAY_CHAT_MAX_MESSAGES);
                     messages.forEach(msg => {
-                        // console.log('msg:', msg);
-                        if (msg.user !== null) {
+                        // console.log(msg.user.id == userId ? 'your message retrived' : '');
+                        if (msg.user !== null && msg.user.id != userId) {
                             addOverlayMessage('@' + msg.user.name, msg.message);
                         }
                     });
@@ -1795,7 +1797,9 @@
         // Your Laravel broadcast event (drop the dot)
         channel2.bind('LiveShowMessageEvent', function(data) {
             // console.log('new message:', data.data);
-            addOverlayMessage('@' + data.data.user.name, data.data.message);
+            if (data.data.user.id != userId) {
+                addOverlayMessage('@' + data.data.user.name, data.data.message);
+            }
         });
         channel2.bind('HideLiveShowWinnersTabEvent', function(data) {
             console.log('Hide winners tab event received:', data);
