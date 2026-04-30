@@ -1142,8 +1142,12 @@
                 alert('Unser Chat macht gerade kurz Pause – hier ist heute richtig was los!');
                 return;
             }
+            let message = $chatInput.value;
 
-            let message = $chatInput.value.trim();
+            message = sanitizeMessageText(message);
+            message = message.trim();
+
+
             if (!message || message.length == 0 || message == '') {
                 return;
             }
@@ -1153,7 +1157,6 @@
             document.querySelector('#send-btn-overlay').disabled = true;
 
             //sanitize the message
-            message = sanitizeMessageText(message);
 
 
 
@@ -2510,8 +2513,8 @@
             text = text.replace(/<\/?[^>]+(>|$)/g, '');
 
             // htmlspecialchars() — &, <, >, ", ' (ENT_QUOTES default in PHP 8.1+)
-            
-            
+
+
 
             return text;
         }
@@ -2524,5 +2527,6 @@
 
 
 </body>
+
 
 </html>
