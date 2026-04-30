@@ -246,7 +246,7 @@
             <div class="alert-next-show" style="">
                 Nächste Show:
                 <span class="d-block d-lg-inline">
-                    {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H') . ' Uhr' : 'Nicht festgelegt' }}</span>
+                    {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.F Y \u\m H:i') . ' Uhr' : 'Nicht festgelegt' }}</span>
             </div>
 
             <div class="hero-countdown mt-3 mb-2   mx-auto"
