@@ -11,8 +11,8 @@
 (function () {
     "use strict";
 
-    var MIN_DELAY_MS = 500;
-    var MAX_DELAY_MS = 4000;
+    var MIN_DELAY_MS = 200;
+    var MAX_DELAY_MS = 2000;
 
     var CHAT_INTERVAL_MIN_MS = 1000;
     var CHAT_INTERVAL_MAX_MS = 6000;
