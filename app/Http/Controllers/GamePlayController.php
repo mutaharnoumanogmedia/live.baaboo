@@ -454,7 +454,7 @@ class GamePlayController extends Controller
         $numerator = exp(-0.05 * $seconds) - exp(-0.5);
         $denominator = 1 - exp(-0.5);
 
-        return round( 100 + 100 * ($numerator / $denominator), 2);
+        return round(100 + 100 * ($numerator / $denominator), 2);
     }
 
     public function updateEliminationStatus(Request $request, $liveShowId)
@@ -479,6 +479,13 @@ class GamePlayController extends Controller
 
     public function postMessage(Request $request, $liveShowId)
     {
+        $validator = Validator::make($request->all(), [
+            'message' => ['required', 'string', 'min:1', 'max:500'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['messages' => $validator->errors()->all()], 422);
+        }
         $user = Auth::guard('web')->user();
         if (! $user) {
             return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::guard('web')->check()], 401);
@@ -534,12 +541,12 @@ class GamePlayController extends Controller
             'success' => true,
             'message' => 'Message sent successfully.',
             'data' => $message,
-            'user' => $user,
+            'user' => ['id' => $user->id, 'name' => $user->name],
             'event' => $event,
         ], 200);
     }
 
-    public function heartReaction($liveShowId)
+    public function heartReaction(int $liveShowId)
     {
         $user = Auth::guard('web')->user();
         if (! $user) {
@@ -567,8 +574,14 @@ class GamePlayController extends Controller
             return response()->json(['message' => 'Live show not found.'], 404);
         }
 
-        $messages = LiveShowMessages::with('user')->where('live_show_id', $liveShowId)->where('is_removed', false)->orderBy('created_at', 'asc')
-            ->skip(0)->take(100)->get();
+        $messages = LiveShowMessages::with('user:id,name')
+            ->where('live_show_id', $liveShowId)
+            ->where('is_removed', false)
+            ->orderBy('created_at', 'desc')
+            ->take(100)
+            ->get()
+            ->reverse()
+            ->values();
 
         return response()->json(['messages' => $messages], 200);
     }

@@ -578,10 +578,188 @@
             cluster: '{{ env('PUSHER_APP_CLUSTER', 'eu') }}',
         });
 
+
+
+        // Example: call after user interaction
+        var channelUpdateLiveShow = pusher.subscribe('live-show.{{ $liveShow->id }}');
+        // System subscription event
+        channelUpdateLiveShow.bind('pusher:subscription_succeeded', function() {
+            console.log('Update Live Show Subscribed successfully!');
+        });
+        // Your Laravel broadcast event (drop the dot)
+        channelUpdateLiveShow.bind('UpdateLiveShowEvent', function(data) {
+            console.log('Update Live Show:', data);
+            location.reload();
+
+        });
+
+
+        function emptyTheBodyWithEndShow(messageText = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme!') {
+            document.body.innerHTML = '';
+            document.body.style.backgroundColor = '#000';
+            const endDiv = document.createElement('div');
+            endDiv.style.textAlign = 'center';
+            endDiv.style.marginTop = '100px';
+            endDiv.style.marginLeft = 'auto';
+            endDiv.style.marginRight = 'auto';
+            endDiv.style.width = '100%';
+            endDiv.style.padding = '20px';
+            endDiv.className = 'end-show';
+            endDiv.innerHTML = messageText +
+                `<br>Weitere Infos: <a href="https://badabing.show" class="text-white" target="_blank">badabing.show</a>`;
+            document.body.appendChild(endDiv);
+        }
+
+
+        function revealResponses(data) {
+            $(".option-result-container").css("display", "block");
+            // console.log('Quiz responses:', data);
+            // Handle displaying the responses in the UI
+            let stats = data.statistics;
+
+            stats.forEach(stat => {
+                try {
+                    let quizOptionDiv = document.getElementById(`quiz-option-${stat.quiz_option_id}`);
+                    let bar = document.getElementById(`option-result-bar-${stat.quiz_option_id}`);
+                    let label = document.getElementById(`option-result-label-${stat.quiz_option_id}`);
+
+                    let correctQuizOptionDiv = document.getElementById(`quiz-option-${data.correctOptionId}`);
+                    if (bar) {
+                        bar.style.width = `${stat.percentage}%`;
+                    }
+                    if (label) {
+                        label.textContent = `${stat.percentage}% (${stat.total_response_for_option})`;
+                    }
+                    //make correct option green
+                    // console.log('Correct option id:', data.correctOptionId, 'Current option id:', stat.quiz_option_id);
+                    // if (data.correctOptionId == stat.quiz_option_id) {
+                    // console.log("green for correct applying");
+
+                    // Find the parent .quiz-option of the bar and add class 'correct' to it
+                    if (correctQuizOptionDiv) {
+                        correctQuizOptionDiv.classList.add('correct');
+
+                        //if checked option is the correct option, fire confetti
+                        if (document.querySelector('input[name="option"]:checked').value == data.correctOptionId) {
+                            console.log('Checked option:', document.querySelector('input[name="option"]:checked')
+                                .value, 'Correct option:', data.correctOptionId);
+
+                            fireConfetti();
+                            appendQuestionResponseStatus('success');
+                        } else {
+                            appendQuestionResponseStatus('fail');
+                        }
+                    }
+
+                    // }
+                } catch (e) {
+                    console.error('Error revealing responses:', stat);
+                }
+            });
+
+        }
+
+
+
+        var channelUsersQuizResponses = pusher.subscribe('live-show.{{ $liveShow->id }}');
+        // System subscription event
+        channelUsersQuizResponses.bind('pusher:subscription_succeeded', function() {
+            // console.log('Quiz Users responses successfully!');
+        });
+        // Your Laravel broadcast event (drop the dot)
+        channelUsersQuizResponses.bind('LiveShowQuizUserResponses', function(data) {
+            // console.log('User Responses:', data);
+            revealResponses(data);
+        });
+
+
+        @if ($liveShow->status != 'live')
+            emptyTheBodyWithEndShow('{{ $updateMessage }}');
+        @endif
+
+
+
+
+        var channelGameReset = pusher.subscribe('live-show.{{ $liveShow->id }}');
+        // System subscription event
+        channelGameReset.bind('pusher:subscription_succeeded', function() {
+            // console.log('Game reset channel subscribed successfully!');
+        });
+        // Your Laravel broadcast event (drop the dot)
+        channelGameReset.bind('GameResetEvent', function(data) {
+            // console.log('Game reset event received:', data);
+
+
+            // FORCE LOGOUT OR REDIRECT
+            localStorage.clear();
+            sessionStorage.clear();
+
+            fetch('{{ route('livestream.logout', [$liveShow->id]) }}', {
+                    method: 'POST',
+                })
+                .then(data => {
+                    // Fetch was successful → now reload
+                    alert('The game has been reset by the admin. You will be redirected.');
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+
+
+        var channel2 = pusher.subscribe('live-show.{{ $liveShow->id }}');
+
+        // System subscription event
+        channel2.bind('pusher:subscription_succeeded', function() {
+            // console.log('Subscribed message event successfully!');
+        });
+
+        // Your Laravel broadcast event (drop the dot)
+        channel2.bind('LiveShowMessageEvent', function(data) {
+            // console.log('new message:', data.data);
+            if (data.data.user.id != userId) {
+                addOverlayMessage('@' + data.data.user.name, data.data.message);
+            }
+        });
+        channel2.bind('HideLiveShowWinnersTabEvent', function(data) {
+            console.log('Hide winners tab event received:', data);
+            hideWinnersTabForParticipants();
+        });
+        channel2.bind('ShowLiveShowWinnersTabEvent', function(data) {
+            console.log('Show winners tab event received:', data);
+            showWinnersTabForParticipants();
+        });
+
+
+        var channelChatStatus = pusher.subscribe('live-show-chat-status.{{ $liveShow->id }}');
+        channelChatStatus.bind('pusher:subscription_succeeded', function() {
+            console.log('Chat status channel subscribed successfully!');
+        });
+        channelChatStatus.bind('LiveShowChatStatusUpdatedEvent', function(data) {
+            console.log('Chat status updated:', data);
+            applyChatStatus(!!data.chatEnabled, true);
+        });
+
+        $(document).ready(function() {
+            // onLoadGameShow();
+            // Initialize Pusher
+            fetchMessages();
+            updatePlayersLeaderboard();
+            updateChatComposerState();
+
+            if (isLoggedIn) {
+                checkIfUserBlockedFromLiveShow();
+            }
+        });
+
+
+
+
+
+
+
         function updatePlayersLeaderboard() {
-
-
-
             //fetch users list with scores
             return fetch('{{ url('live-show/' . $liveShow->id . '/get-live-show-users-with-scores') }}')
                 .then(response => response.json())
@@ -717,17 +895,7 @@
         }
 
 
-        $(document).ready(function() {
-            // onLoadGameShow();
-            // Initialize Pusher
-            fetchMessages();
-            updatePlayersLeaderboard();
-            updateChatComposerState();
 
-            if (isLoggedIn) {
-                checkIfUserBlockedFromLiveShow();
-            }
-        });
         // Toggle quiz mode
         function toggleQuiz(action) {
             //scroll to top
@@ -1002,7 +1170,7 @@
                         console.error(xhr.responseText);
                         //if message ==  "Too Many Attempts."
                         if (xhr.responseJSON?.message == "Too Many Attempts.") {
-                            alert('Du kannst nur 5 Nachrichten pro Minute senden 🙂');
+                            alert('Du kannst nur 40 Nachrichten pro Minute senden 🙂');
                             $chatInput.disabled = false;
                             document.querySelector('#send-btn-overlay').disabled = false;
 
@@ -1649,177 +1817,7 @@
         @endif
     </script>
 
-    <script>
-        // Example: call after user interaction
 
-
-        var channelUpdateLiveShow = pusher.subscribe('live-show.{{ $liveShow->id }}');
-        // System subscription event
-        channelUpdateLiveShow.bind('pusher:subscription_succeeded', function() {
-            console.log('Update Live Show Subscribed successfully!');
-        });
-        // Your Laravel broadcast event (drop the dot)
-        channelUpdateLiveShow.bind('UpdateLiveShowEvent', function(data) {
-            console.log('Update Live Show:', data);
-            location.reload();
-
-            // if (data.status && data.status != 'live') {
-            //     emptyTheBodyWithEndShow(data.updateMessage);
-            // } else {
-            //     //reload the page to reflect the changes
-            //     location.reload();
-            // }
-            // emptyTheBodyWithEndShow();
-        });
-
-
-        function emptyTheBodyWithEndShow(messageText = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme!') {
-            document.body.innerHTML = '';
-            document.body.style.backgroundColor = '#000';
-            const endDiv = document.createElement('div');
-            endDiv.style.textAlign = 'center';
-            endDiv.style.marginTop = '100px';
-            endDiv.style.marginLeft = 'auto';
-            endDiv.style.marginRight = 'auto';
-            endDiv.style.width = '100%';
-            endDiv.style.padding = '20px';
-            endDiv.className = 'end-show';
-            endDiv.innerHTML = messageText +
-                `<br>Weitere Infos: <a href="https://badabing.show" class="text-white" target="_blank">badabing.show</a>`;
-            document.body.appendChild(endDiv);
-        }
-
-
-        function revealResponses(data) {
-            $(".option-result-container").css("display", "block");
-            // console.log('Quiz responses:', data);
-            // Handle displaying the responses in the UI
-            let stats = data.statistics;
-
-            stats.forEach(stat => {
-                try {
-                    let quizOptionDiv = document.getElementById(`quiz-option-${stat.quiz_option_id}`);
-                    let bar = document.getElementById(`option-result-bar-${stat.quiz_option_id}`);
-                    let label = document.getElementById(`option-result-label-${stat.quiz_option_id}`);
-
-                    let correctQuizOptionDiv = document.getElementById(`quiz-option-${data.correctOptionId}`);
-                    if (bar) {
-                        bar.style.width = `${stat.percentage}%`;
-                    }
-                    if (label) {
-                        label.textContent = `${stat.percentage}% (${stat.total_response_for_option})`;
-                    }
-                    //make correct option green
-                    // console.log('Correct option id:', data.correctOptionId, 'Current option id:', stat.quiz_option_id);
-                    // if (data.correctOptionId == stat.quiz_option_id) {
-                    // console.log("green for correct applying");
-
-                    // Find the parent .quiz-option of the bar and add class 'correct' to it
-                    if (correctQuizOptionDiv) {
-                        correctQuizOptionDiv.classList.add('correct');
-
-                        //if checked option is the correct option, fire confetti
-                        if (document.querySelector('input[name="option"]:checked').value == data.correctOptionId) {
-                            console.log('Checked option:', document.querySelector('input[name="option"]:checked')
-                                .value, 'Correct option:', data.correctOptionId);
-
-                            fireConfetti();
-                            appendQuestionResponseStatus('success');
-                        } else {
-                            appendQuestionResponseStatus('fail');
-                        }
-                    }
-
-                    // }
-                } catch (e) {
-                    console.error('Error revealing responses:', stat);
-                }
-            });
-
-        }
-
-
-
-        var channelUsersQuizResponses = pusher.subscribe('live-show.{{ $liveShow->id }}');
-        // System subscription event
-        channelUsersQuizResponses.bind('pusher:subscription_succeeded', function() {
-            // console.log('Quiz Users responses successfully!');
-        });
-        // Your Laravel broadcast event (drop the dot)
-        channelUsersQuizResponses.bind('LiveShowQuizUserResponses', function(data) {
-            // console.log('User Responses:', data);
-            revealResponses(data);
-        });
-
-
-        @if ($liveShow->status != 'live')
-            emptyTheBodyWithEndShow('{{ $updateMessage }}');
-        @endif
-
-
-
-
-        var channelGameReset = pusher.subscribe('live-show.{{ $liveShow->id }}');
-        // System subscription event
-        channelGameReset.bind('pusher:subscription_succeeded', function() {
-            // console.log('Game reset channel subscribed successfully!');
-        });
-        // Your Laravel broadcast event (drop the dot)
-        channelGameReset.bind('GameResetEvent', function(data) {
-            // console.log('Game reset event received:', data);
-
-
-            // FORCE LOGOUT OR REDIRECT
-            localStorage.clear();
-            sessionStorage.clear();
-
-            fetch('{{ route('livestream.logout', [$liveShow->id]) }}', {
-                    method: 'POST',
-                })
-                .then(data => {
-                    // Fetch was successful → now reload
-                    alert('The game has been reset by the admin. You will be redirected.');
-                    location.reload();
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        });
-
-
-        var channel2 = pusher.subscribe('live-show.{{ $liveShow->id }}');
-
-        // System subscription event
-        channel2.bind('pusher:subscription_succeeded', function() {
-            // console.log('Subscribed message event successfully!');
-        });
-
-        // Your Laravel broadcast event (drop the dot)
-        channel2.bind('LiveShowMessageEvent', function(data) {
-            // console.log('new message:', data.data);
-            if (data.data.user.id != userId) {
-                addOverlayMessage('@' + data.data.user.name, data.data.message);
-            }
-        });
-        channel2.bind('HideLiveShowWinnersTabEvent', function(data) {
-            console.log('Hide winners tab event received:', data);
-            hideWinnersTabForParticipants();
-        });
-        channel2.bind('ShowLiveShowWinnersTabEvent', function(data) {
-            console.log('Show winners tab event received:', data);
-            showWinnersTabForParticipants();
-        });
-
-
-        var channelChatStatus = pusher.subscribe('live-show-chat-status.{{ $liveShow->id }}');
-        channelChatStatus.bind('pusher:subscription_succeeded', function() {
-            console.log('Chat status channel subscribed successfully!');
-        });
-        channelChatStatus.bind('LiveShowChatStatusUpdatedEvent', function(data) {
-            console.log('Chat status updated:', data);
-            applyChatStatus(!!data.chatEnabled, true);
-        });
-    </script>
 
 
     <script>

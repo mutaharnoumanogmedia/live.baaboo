@@ -4,11 +4,11 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class LiveShowMessageEvent implements ShouldBroadcast
+class LiveShowMessageEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -19,9 +19,9 @@ class LiveShowMessageEvent implements ShouldBroadcast
      */
     public $data;
 
-    public $queue = 'high';
+    // public $queue = 'low';
 
-    public $delay = 5;
+    // public $delay = 5;
 
     public function __construct($data)
     {
