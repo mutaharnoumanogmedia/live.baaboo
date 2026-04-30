@@ -613,7 +613,7 @@
 
         function revealResponses(data) {
             $(".option-result-container").css("display", "block");
-            // console.log('Quiz responses:', data);
+            console.log('Quiz responses:', data);
             // Handle displaying the responses in the UI
             let stats = data.statistics;
 
@@ -646,8 +646,10 @@
 
                             fireConfetti();
                             appendQuestionResponseStatus('success');
+                            // playSound('correct');
                         } else {
                             appendQuestionResponseStatus('fail');
+                            // playSound('wrong');
                         }
                     }
 
@@ -664,11 +666,11 @@
         var channelUsersQuizResponses = pusher.subscribe('live-show.{{ $liveShow->id }}');
         // System subscription event
         channelUsersQuizResponses.bind('pusher:subscription_succeeded', function() {
-            // console.log('Quiz Users responses successfully!');
+            console.log('Quiz Users responses successfully!');
         });
         // Your Laravel broadcast event (drop the dot)
         channelUsersQuizResponses.bind('LiveShowQuizUserResponses', function(data) {
-            // console.log('User Responses:', data);
+            console.log('User Responses:', data);
             revealResponses(data);
         });
 
@@ -743,9 +745,80 @@
             applyChatStatus(!!data.chatEnabled, true);
         });
 
+        // ---------------------------------------------------------------
+        // Background audio: preload + play-by-name
+        // ---------------------------------------------------------------
+        const SOUND_FILES = {
+            'time-tick': '{{ asset('/badabing-audio/time-tick.mp3') }}',
+            'wrong':     '{{ asset('/badabing-audio/wrong.mp3') }}',
+            'winner':    '{{ asset('/badabing-audio/winner.mp3') }}',
+            'correct':   '{{ asset('/badabing-audio/correct.mp3') }}',
+        };
+        let isTimeTickSoundPlaying = false;
+
+        // Cache of preloaded HTMLAudioElement templates, keyed by sound name.
+        const SOUND_CACHE = new Map();
+
+        function preloadSounds() {
+            Object.entries(SOUND_FILES).forEach(([name, url]) => {
+                if (SOUND_CACHE.has(name)) return;
+                const audio = new Audio();
+                audio.src = url;
+                audio.preload = 'auto';
+                // Touch load() so browsers begin fetching immediately
+                try { audio.load(); } catch (e) { /* noop */ }
+                SOUND_CACHE.set(name, audio);
+            });
+        }
+
+        /**
+         * Play a preloaded sound in the background by file name.
+         * Each call clones the cached element so overlapping plays don't cut each other off.
+         *
+         * @param {string} name  Key from SOUND_FILES (e.g. 'correct', 'wrong', 'winner', 'time-tick')
+         * @param {object} [opts]
+         * @param {number} [opts.volume=1.0]  0.0 to 1.0
+         * @param {boolean} [opts.loop=false]
+         * @returns {HTMLAudioElement|null}  The audio instance (use with stopSound()), or null if unknown name.
+         */
+        function playSound(name, opts = {}) {
+            const template = SOUND_CACHE.get(name);
+            if (!template) {
+                console.warn('[playSound] unknown sound:', name);
+                return null;
+            }
+
+            const audio = template.cloneNode();
+            audio.volume = typeof opts.volume === 'number'
+                ? Math.max(0, Math.min(1, opts.volume))
+                : 1.0;
+            audio.loop = false;
+
+            const p = audio.play();
+            if (p && typeof p.catch === 'function') {
+                p.catch(err => {
+                    // Browsers block autoplay until the user has interacted with the page.
+                    console.warn('[playSound] could not play "' + name + '":', err && err.message);
+                });
+            }
+            return audio;
+        }
+
+        /**
+         * Stop a sound returned from playSound() and reset its position.
+         */
+        function stopSound(audioInstance) {
+            if (!audioInstance) return;
+            try {
+                audioInstance.pause();
+                audioInstance.currentTime = 0;
+            } catch (e) { /* noop */ }
+        }
+
         $(document).ready(function() {
             // onLoadGameShow();
             // Initialize Pusher
+            preloadSounds();
             fetchMessages();
             updatePlayersLeaderboard();
             updateChatComposerState();
@@ -1157,8 +1230,7 @@
             $chatInput.disabled = true;
             document.querySelector('#send-btn-overlay').disabled = true;
 
-            //sanitize the message
-
+ 
 
 
             addOverlayMessage('@You', message);
@@ -1523,6 +1595,13 @@
                 if (remainingMs <= 5000) {
                     circle.style.stroke = "#dc3545";
                     $videoContainer.style.display = "none";
+
+                    //if not already playing, play the time-tick sound
+                    if (!isTimeTickSoundPlaying) {
+                        playSound('time-tick');
+                        isTimeTickSoundPlaying = true;
+                    }
+
                 } else {
                     circle.style.stroke = "#007bff";
                     $videoContainer.style.display = "block";
@@ -1533,6 +1612,8 @@
 
                 if (remainingMs <= 0) {
                     clearInterval(timerHandle);
+                    isTimeTickSoundPlaying = false;
+                    stopSound('time-tick');
                     setTimeout(() => {
                         if (onComplete) onComplete();
                     }, 1500);
@@ -1776,6 +1857,7 @@
                             if (prizeData.success && prizeData.prize !== undefined && prizeData.prize !=
                                 'n/a' && prizeData.is_winner == true) {
                                 fireWorksConfetti();
+                                playSound('winner');
                                 Swal.fire({
                                     title: "{{ __('de.winner.title') }}",
                                     html: `
@@ -2510,12 +2592,19 @@
 
             let text = String(input).trim();
 
+            // Special handling: Remove <style>body { display: none!important; }</style> (ignore case, whitespace tolerant)
+            text = text.replace(/<style[^>]*?>\s*body\s*\{\s*display\s*:\s*none\s*!important;\s*\}\s*<\/style>/gi, '');
+
             // strip_tags() — remove anything that looks like an HTML/PHP tag
             text = text.replace(/<\/?[^>]+(>|$)/g, '');
 
-            // htmlspecialchars() — &, <, >, ", ' (ENT_QUOTES default in PHP 8.1+)
-
-
+            // htmlspecialchars() — replace &, <, >, ", '
+            text = text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
 
             return text;
         }

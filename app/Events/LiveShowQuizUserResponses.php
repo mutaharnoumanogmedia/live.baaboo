@@ -12,9 +12,9 @@ class LiveShowQuizUserResponses implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $queue = 'low';
+    public $queue = 'high';
 
-    public $delay = 10;
+    public $delay = 5;
 
     /**
      * Create a new event instance.
