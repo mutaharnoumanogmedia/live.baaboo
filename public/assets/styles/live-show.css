@@ -403,7 +403,7 @@ body .end-show {
 /* TikTok-style overlay chat */
 .overlay-chat {
     z-index: 5;
-    padding: 10px 00px 0px 0px;
+    padding: 10px 5px 5px 10px;
     opacity: 0.7;
     overflow-y: scroll;
     scrollbar-width: none;
@@ -443,7 +443,7 @@ body .end-show {
 }
 
 .chat-message-overlay .message-text {
-    font-size: 0.75rem;
+    font-size: 1rem;
     color: white;
     margin-top: 2px;
 }
@@ -623,10 +623,10 @@ body .end-show {
 
 .quiz-option.correct input[type="radio"]:checked + label,
 .quiz-option.correct input[type="radio"]:disabled + label {
-    background: #00ff37   !important;
-   border-width: 5px !important;
-   border-color: #00ff37  !important;
-   color: #000 !important;
+    background: #00ff37 !important;
+    border-width: 5px !important;
+    border-color: #00ff37 !important;
+    color: #000 !important;
 }
 
 input[type="radio"]:disabled + label {
@@ -639,8 +639,8 @@ input[type="radio"]:disabled + label {
 }
 
 .quiz-option.correct label {
-    background: #00ff37 ;
-    border-color: #00ff37 ;
+    background: #00ff37;
+    border-color: #00ff37;
     color: white;
 }
 
