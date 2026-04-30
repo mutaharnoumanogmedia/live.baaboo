@@ -244,7 +244,8 @@
                                     {{ $item->title ?: $item->original_name }}
                                 </div>
                                 <div class="media-item-meta">
-                                    {{ number_format($item->file_size / 1024, 1) }} KB · 
+                                    {{ number_format($item->file_size / (1024 * 1024), 2) }} MB · 
+                               
                                     {{ $item->total_seconds ? $item->total_seconds . 's' : '' }}
                                     <span
                                         class="media-tag   {{ $item->type === 'video' ? 'media-type-video' : 'media-type-image' }}">
