@@ -484,7 +484,7 @@ class GamePlayController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['messages' => $validator->errors()->all()], 422);
+            return response()->json(['messages' => $validator->errors()->all()], 200);
         }
         $user = Auth::guard('web')->user();
         if (! $user) {
@@ -510,7 +510,7 @@ class GamePlayController extends Controller
         $messageText = htmlspecialchars($messageText);
 
         if (! $messageText || strlen(trim($messageText)) == 0) {
-            return response()->json(['message' => 'Message cannot be empty.'], 422);
+            return response()->json(['message' => 'Message cannot be empty.'], 200);
         }
 
         // Save the message to the database
@@ -521,7 +521,6 @@ class GamePlayController extends Controller
         $message->is_removed = false;
         $message->created_at = now();
         $message->save();
-
         // Broadcast the message to other users (you can implement this using events and broadcasting)
         $event = LiveShowMessageEvent::dispatch([
             'id' => $message->id,

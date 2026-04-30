@@ -1142,8 +1142,8 @@
                 alert('Unser Chat macht gerade kurz Pause – hier ist heute richtig was los!');
                 return;
             }
-           
-            const message = $chatInput.value.trim();
+
+            let message = $chatInput.value.trim();
             if (!message || message.length == 0 || message == '') {
                 return;
             }
@@ -1151,6 +1151,10 @@
 
             $chatInput.disabled = true;
             document.querySelector('#send-btn-overlay').disabled = true;
+
+            //sanitize the message
+            message = sanitizeMessageText(message);
+
 
 
             addOverlayMessage('@You', message);
@@ -1238,10 +1242,24 @@
             }
             const messageDiv = document.createElement('div');
             messageDiv.className = 'chat-message-overlay';
-            messageDiv.innerHTML = `
-                <div class="message-user">${user}</div>
-                <div class="message-text">${text}</div>
-            `;
+            // messageDiv.innerHTML = `
+        //     <div class="message-user">${user}</div>
+        //     <div class="message-text">` + text + `</div>
+        // `;
+            const messageUser = document.createElement('div');
+            messageUser.className = 'message-user';
+            messageUser.textContent = user;
+            messageDiv.appendChild(messageUser);
+
+            const messageText = document.createElement('div');
+            messageText.className = 'message-text';
+
+            messageText.innerHTML = text;
+            messageDiv.appendChild(messageText);
+
+
+
+
             overlayChat.appendChild(messageDiv);
             trimOverlayChatToMax(overlayChat);
             overlayChat.scrollTop = overlayChat.scrollHeight;
@@ -2482,6 +2500,21 @@
                 // return confirmationMessage; // For modern browsers
             }
         });
+
+        function sanitizeMessageText(input) {
+            if (input == null) return '';
+
+            let text = String(input).trim();
+
+            // strip_tags() — remove anything that looks like an HTML/PHP tag
+            text = text.replace(/<\/?[^>]+(>|$)/g, '');
+
+            // htmlspecialchars() — &, <, >, ", ' (ENT_QUOTES default in PHP 8.1+)
+            
+            
+
+            return text;
+        }
     </script>
 
     @if (request()->boolean('debug_bot') && $liveShow->is_test_show)
