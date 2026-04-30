@@ -750,9 +750,9 @@
         // ---------------------------------------------------------------
         const SOUND_FILES = {
             'time-tick': '{{ asset('/badabing-audio/time-tick.mp3') }}',
-            'wrong':     '{{ asset('/badabing-audio/wrong.mp3') }}',
+            'wrong':     '{{ asset('/badabing-audio/wrong-sound.mp3') }}',
             'winner':    '{{ asset('/badabing-audio/winner.mp3') }}',
-            'correct':   '{{ asset('/badabing-audio/correct.mp3') }}',
+            'correct':   '{{ asset('/badabing-audio/correct-sound.mp3') }}',
         };
         let isTimeTickSoundPlaying = false;
 
