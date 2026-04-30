@@ -146,7 +146,7 @@
                                 @if (isset($currentLiveShow) && $currentLiveShow->status == 'scheduled')
                                     @if ($currentLiveShow->scheduled_at)
                                         <div class="schedule-highlight">
-                                            {{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H') }}
+                                            {{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.F Y \u\m H:i') }}
                                             Uhr
                                         </div>
                                     @endif
