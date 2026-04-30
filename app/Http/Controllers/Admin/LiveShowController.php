@@ -940,7 +940,7 @@ class LiveShowController extends Controller
         $liveShow = LiveShow::with(['creator', 'winnerPrizes', 'quizzes.options'])->findOrFail($id);
         $quizService = new LiveShowQuizService;
 
-        $players = $quizService->getSortedPlayers($liveShow);
+        $players = $quizService->getSortedByScore($liveShow);
 
         $totalQuestions = $liveShow->quizzes->count();
 
