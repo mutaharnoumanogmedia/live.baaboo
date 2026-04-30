@@ -1145,11 +1145,12 @@
             let message = $chatInput.value;
 
             message = sanitizeMessageText(message);
-            message = message.trim();
 
 
             if (!message || message.length == 0 || message == '') {
+                alert('Ungültige Nachricht')
                 return;
+           
             }
 
 
