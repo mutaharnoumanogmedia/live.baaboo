@@ -1165,6 +1165,7 @@
                         // Handle success
 
                         $chatInput.disabled = false;
+                        $chatInput.focus();
                         document.querySelector('#send-btn-overlay').disabled = false;
                     },
                     error: function(xhr) {
