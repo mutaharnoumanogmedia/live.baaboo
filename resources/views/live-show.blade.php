@@ -1142,7 +1142,12 @@
                 alert('Unser Chat macht gerade kurz Pause – hier ist heute richtig was los!');
                 return;
             }
+           
             const message = $chatInput.value.trim();
+            if (!message || message.length == 0 || message == '') {
+                return;
+            }
+
 
             $chatInput.disabled = true;
             document.querySelector('#send-btn-overlay').disabled = true;
