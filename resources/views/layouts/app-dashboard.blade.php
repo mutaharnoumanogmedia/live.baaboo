@@ -84,7 +84,7 @@
             min-height: calc(100vh - 64px);
         }
 
-        #app-layout-content > .container-fluid {
+        #app-layout-content>.container-fluid {
             flex: 1 1 auto;
         }
 
@@ -129,9 +129,8 @@
                 {{ env('APP_NAME') }}
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#appPrimaryNav" aria-controls="appPrimaryNav" aria-expanded="false"
-                aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#appPrimaryNav"
+                aria-controls="appPrimaryNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -213,8 +212,7 @@
                                 @endcan
                                 @can('can-manage-push-notifications')
                                     <li>
-                                        <a class="dropdown-item"
-                                            href="{{ route('admin.push-notifications.index') }}">
+                                        <a class="dropdown-item" href="{{ route('admin.push-notifications.index') }}">
                                             <i class="bi bi-bell-fill me-2"></i> Push Notifications
                                         </a>
                                     </li>
@@ -342,7 +340,13 @@
 
     <script>
         $(document).ready(function() {
-            $('.data-table').DataTable();
+            $('.data-table').DataTable({
+                "pageLength": 20,
+                "lengthMenu": [
+                    [10, 20, 50, -1],
+                    [10, 20, 50, "All"]
+                ]
+            });
         });
     </script>
 
