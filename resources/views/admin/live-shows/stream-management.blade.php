@@ -1638,11 +1638,17 @@
                  console.log('Subscribed message event successfully!');
              });
 
-             channel2.bind('LiveShowMessageEvent', function(data) {
+             var channelChatMessages = pusher.subscribe('live-show-chat-messages.{{ $liveShow->id }}');
+             channelChatMessages.bind('pusher:subscription_succeeded', function() {
+                 console.log('Chat messages channel subscribed successfully!');
+             });
+
+             channelChatMessages.bind('LiveShowChatMessagesEvent', function(data) {
                  //  console.log('new message:', data.data);
                  appendSingleMessage(data.data);
              });
 
+          
              var channelResetChat = pusher.subscribe('live-show.{{ $liveShow->id }}');
              channelResetChat.bind('pusher:subscription_succeeded', function() {
                  console.log('Reset chat channel subscribed successfully!');
