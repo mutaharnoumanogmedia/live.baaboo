@@ -715,8 +715,10 @@
             // console.log('Subscribed message event successfully!');
         });
 
+
+        var channelChatMessages = pusher.subscribe('live-show-chat-messages.{{ $liveShow->id }}');
         // Your Laravel broadcast event (drop the dot)
-        channel2.bind('LiveShowMessageEvent', function(data) {
+        channelChatMessages.bind('LiveShowChatMessagesEvent', function(data) {
             // console.log('new message:', data.data);
             if (data.data.user.id != userId) {
                 addOverlayMessage('@' + data.data.user.name, data.data.message);

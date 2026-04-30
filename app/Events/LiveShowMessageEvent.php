@@ -35,12 +35,12 @@ class LiveShowMessageEvent implements ShouldBroadcastNow
      */
     public function broadcastOn()
     {
-        return new Channel('live-show.'.$this->data['live_show_id']);
+        return new Channel('live-show-chat-messages.'.$this->data['live_show_id']);
     }
 
     public function broadcastAs()
     {
-        return 'LiveShowMessageEvent';
+        return 'LiveShowChatMessagesEvent';
     }
     // public function broadcastWith()
     // {
