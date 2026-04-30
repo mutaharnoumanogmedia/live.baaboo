@@ -480,7 +480,7 @@ class GamePlayController extends Controller
     public function postMessage(Request $request, $liveShowId)
     {
         $validator = Validator::make($request->all(), [
-            'message' => ['required', 'string', 'min:1', 'max:500'],
+            'message' => ['required', 'string', 'min:1', 'max:200'],
         ]);
 
         if ($validator->fails()) {
