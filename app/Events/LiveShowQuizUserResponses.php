@@ -14,7 +14,7 @@ class LiveShowQuizUserResponses implements ShouldBroadcast
 
     public $queue = 'high';
 
-    public $delay = 5;
+    // public $delay = 5;
 
     /**
      * Create a new event instance.

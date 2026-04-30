@@ -646,10 +646,10 @@
 
                             fireConfetti();
                             appendQuestionResponseStatus('success');
-                            // playSound('correct');
+                            playSound('correct');
                         } else {
                             appendQuestionResponseStatus('fail');
-                            // playSound('wrong');
+                            playSound('wrong');
                         }
                     }
 
@@ -791,7 +791,7 @@
             const audio = template.cloneNode();
             audio.volume = typeof opts.volume === 'number'
                 ? Math.max(0, Math.min(1, opts.volume))
-                : 1.0;
+                : 0.8;
             audio.loop = false;
 
             const p = audio.play();
