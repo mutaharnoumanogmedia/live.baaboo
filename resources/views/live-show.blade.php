@@ -418,7 +418,7 @@
                         <div class="bottom-chat-input">
 
                             <div class="input-group chat-input-group">
-                                <input type="text" maxlength="120"
+                                <input type="text" maxlength="200"
                                     placeholder="{{ __('de.main_ui.placeholder_message') }}" id="chatInput">
                                 <button type="button" id="send-btn-overlay" onclick="sendMessage()">
                                     <i class="fas fa-paper-plane"></i>
