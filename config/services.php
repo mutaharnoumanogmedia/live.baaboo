@@ -30,5 +30,15 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    'zego' => [
+        'video' => [
+            'app_id' => env('ZEGO_APP_ID'),
+            'server_secret' => env('ZEGO_SERVER_SECRET'),
+        ],
+        'chat' => [
+            'app_id' => env('ZEGO_CHAT_APP_ID'),
+            'server_secret' => env('ZEGO_CHAT_SERVER_SECRET'),
+        ],
+    ],
 
 ];

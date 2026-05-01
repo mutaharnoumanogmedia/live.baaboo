@@ -213,7 +213,14 @@ class HomeController extends Controller
 
         // take the lastest live show
         $liveShow = LiveShow::whereIn('status', ['live', 'scheduled'])
-            ->where('scheduled_at', '>=', now())
+
+            ->where(function ($query) {
+                $query->where('status', 'live')
+                    ->orWhere(function ($q) {
+                        $q->where('status', 'scheduled')
+                            ->whereDate('scheduled_at', '>=', now()->toDateString());
+                    });
+            })
             ->orderBy('scheduled_at', 'asc')
 
             ->notTestShow()

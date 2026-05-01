@@ -46,6 +46,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.15.10/dist/sweetalert2.all.min.js"></script>
 
+    {{-- ZEGOCLOUD ZIM (In-App Chat) Web SDK - exposes window.ZIM --}}
+    {{-- <script src="https://unpkg.com/zego-zim-web@2.29.0/index.js"></script> --}}
+
     <style>
         #inactiveTabOverlay {
             position: fixed;
@@ -191,6 +194,123 @@
         .quiz-mode #root video {
             object-fit: cover !important;
         } */
+
+        /* ============================================================
+           ZEGOCLOUD ZIM Chat tab styles (#zegoChatTab / #zimkit-container)
+           ============================================================ */
+        .zego-chat-wrapper {
+            width: 100%;
+            height: 600px;
+            max-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+        }
+
+        .zimkit-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #f8f9fb;
+            border-top: 1px solid #ececec;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .zimkit-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 12px;
+            font-size: 0.9rem;
+            color: #555;
+            background: #fff8e6;
+            border-bottom: 1px solid #f1e3b8;
+        }
+
+        .zimkit-status.is-error {
+            background: #fdecea;
+            color: #b3261e;
+            border-bottom-color: #f5c2bd;
+        }
+
+        .zimkit-status.is-ready {
+            background: #e8f5ee;
+            color: #1d6b3a;
+            border-bottom-color: #c2e6d0;
+        }
+
+        .zimkit-messages {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .zimkit-message {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 14px;
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+            font-size: 0.92rem;
+            line-height: 1.35;
+            word-wrap: break-word;
+            align-self: flex-start;
+        }
+
+        .zimkit-message.is-self {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #ff8a4c 0%, #ff5f00 100%);
+            color: #fff;
+        }
+
+        .zimkit-message .zimkit-author {
+            display: block;
+            font-size: 0.72rem;
+            opacity: 0.7;
+            margin-bottom: 2px;
+        }
+
+        .zimkit-input-bar {
+            display: flex;
+            gap: 8px;
+            padding: 10px;
+            background: #fff;
+            border-top: 1px solid #ececec;
+        }
+
+        .zimkit-input-bar input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #d5d7dc;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .zimkit-input-bar input:focus {
+            border-color: #ff5f00;
+            box-shadow: 0 0 0 2px rgba(255, 95, 0, 0.15);
+        }
+
+        .zimkit-input-bar button {
+            border: none;
+            background: linear-gradient(135deg, #ff8a4c 0%, #ff5f00 100%);
+            color: #fff;
+            padding: 0 18px;
+            border-radius: 999px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .zimkit-input-bar button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
@@ -437,6 +557,17 @@
 
                     </div>
                 </div>
+                {{-- ZEGOCLOUD ZIM Chat tab (parallel to the existing chat for A/B testing) --}}
+                {{-- <div class="tab-pane fade" id="zegoChatTab" role="tabpanel" aria-labelledby="zegoChatTab-tab">
+                    <div class="zego-chat-wrapper">
+                        <div id="zimkit-container" class="zimkit-container">
+                            <div class="zimkit-status" id="zimkit-status">
+                                <i class="fas fa-spinner fa-spin me-2"></i>
+                                <span>Connecting to ZEGO chat…</span>
+                            </div>
+                        </div>
+                    </div>
+                </div> --}}
                 <div class="tab-pane fade " id="playerTab" role="tabpanel" aria-labelledby="playerTab-tab">
                     <!-- Player List -->
                     <div class="container-fluid ">
@@ -473,6 +604,16 @@
                         <small class="mt-1">{{ __('de.main_ui.chat') }}</small>
                     </a>
                 </li>
+
+                {{-- 3) ZEGO Chat (parallel to existing chat for A/B testing) --}}
+                {{-- <li class="nav-item flex-fill" role="presentation">
+                    <a class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
+                        id="zegoChatTab-tab" data-bs-toggle="tab" href="#zegoChatTab" role="tab"
+                        aria-controls="zegoChatTab" aria-selected="false">
+                        <i class="fas fa-bolt fs-5"></i>
+                        <small class="mt-1">ZEGO</small>
+                    </a>
+                </li> --}}
 
                 <!-- 3) Players -->
                 <li class="nav-item flex-fill" role="presentation" id="player-tab-nav-item">
@@ -658,6 +799,7 @@
                     console.error('Error revealing responses:', stat);
                 }
             });
+            updatePlayersLeaderboard();
 
         }
 
@@ -750,9 +892,9 @@
         // ---------------------------------------------------------------
         const SOUND_FILES = {
             'time-tick': '{{ asset('/badabing-audio/time-tick.mp3') }}',
-            'wrong':     '{{ asset('/badabing-audio/wrong-sound.mp3') }}',
-            'winner':    '{{ asset('/badabing-audio/winner.mp3') }}',
-            'correct':   '{{ asset('/badabing-audio/correct-sound.mp3') }}',
+            'wrong': '{{ asset('/badabing-audio/wrong-sound.mp3') }}',
+            'winner': '{{ asset('/badabing-audio/winner.mp3') }}',
+            'correct': '{{ asset('/badabing-audio/correct-sound.mp3') }}',
         };
         let isTimeTickSoundPlaying = false;
 
@@ -766,7 +908,11 @@
                 audio.src = url;
                 audio.preload = 'auto';
                 // Touch load() so browsers begin fetching immediately
-                try { audio.load(); } catch (e) { /* noop */ }
+                try {
+                    audio.load();
+                } catch (e) {
+                    /* noop */
+                }
                 SOUND_CACHE.set(name, audio);
             });
         }
@@ -789,9 +935,9 @@
             }
 
             const audio = template.cloneNode();
-            audio.volume = typeof opts.volume === 'number'
-                ? Math.max(0, Math.min(1, opts.volume))
-                : 0.8;
+            audio.volume = typeof opts.volume === 'number' ?
+                Math.max(0, Math.min(1, opts.volume)) :
+                0.8;
             audio.loop = false;
 
             const p = audio.play();
@@ -812,7 +958,9 @@
             try {
                 audioInstance.pause();
                 audioInstance.currentTime = 0;
-            } catch (e) { /* noop */ }
+            } catch (e) {
+                /* noop */
+            }
         }
 
         $(document).ready(function() {
@@ -823,9 +971,12 @@
             updatePlayersLeaderboard();
             updateChatComposerState();
 
+           
+
             if (isLoggedIn) {
                 checkIfUserBlockedFromLiveShow();
             }
+            
         });
 
 
@@ -846,27 +997,7 @@
                     const playersListContainer = document.getElementById('players-leaderbord');
                     playersListContainer.innerHTML = '';
                     const you = data.you;
-                    //     if (you) {
-                    //         //add a player-list-item on top of the list
-                    //         const youDiv = document.createElement('div');
-                    //         youDiv.className =
-                    //             'player-list-item shadow-lg sticky-bottom bg-white d-flex justify-content-between align-items-center mb-2 p-2 rounded bg-light border border-1';
-                    //         youDiv.innerHTML = `
-                // <div>
-                //     <span style="margin-right: 20px;">
-                //         <i class="fas fa-user-circle text-primary ms-2" title="You"></i>
-                //         </span>
-                //             <strong>${you.name} (You)</strong>
 
-                //             <span class="trophy-icon">${you.is_winner ? '<i class="fas fa-trophy" title="Winner"></i>' : ''}</span>
-                //         </div>
-                //         <div class="score-text">
-                //             ${you.score ? Math.round(you.score) : 0}
-
-                //         </div>
-                //                     `;
-                    //         playersListContainer.appendChild(youDiv);
-                    //     }
 
                     users.forEach((user, index) => {
                         let winnerBgColorClass = '';
@@ -1223,14 +1354,14 @@
             if (!message || message.length == 0 || message == '') {
                 alert('Ungültige Nachricht')
                 return;
-           
+
             }
 
 
             $chatInput.disabled = true;
             document.querySelector('#send-btn-overlay').disabled = true;
 
- 
+
 
 
             addOverlayMessage('@You', message);
@@ -1985,6 +2116,7 @@
             console.log('Tap to play clicked');
             document.getElementById('playButtonOverlay').style.display = 'none';
 
+
             onLoadGameShow();
 
         });
@@ -1998,8 +2130,12 @@
                 showRegisterModal();
             }
 
-            vid.play();
-            vid.muted = false;
+            if (vid.src != '') {
+                vid.play();
+                vid.muted = false;
+            }
+
+
 
             if (zegoLiveRoot) {
                 const video = zegoLiveRoot.querySelector('video');
@@ -2180,17 +2316,19 @@
             const src = opts.src || opts.url;
             const playbackAt = opts.playback_started_at ?? null;
             const durationSec = opts.video_duration_seconds != null ? Number(opts.video_duration_seconds) : null;
-
-
-            img.style.display = "none";
             vid.style.display = "none";
+            img.style.display = "none";
+
+
 
             if (type === "image") {
+
                 img.src = src;
                 img.style.display = "block";
                 vid.pause();
                 vid.src = "";
             } else if (type === "video") {
+
                 const seekTo = galleryPlaybackOffsetSeconds(playbackAt, durationSec);
                 vid.src = src;
                 vid.style.display = "block";
@@ -2608,6 +2746,275 @@
 
             return text;
         }
+
+        /* ============================================================
+         * ZEGOCLOUD ZIM (In-App Chat) integration
+         * ------------------------------------------------------------
+         * - Token + config are fetched from /api/chat/token (Laravel).
+         * - The ZEGO server secret is NEVER exposed to the browser.
+         * - Init/login API is wrapped in `window.zimkit` so the calling
+         *   surface mirrors the spec requested in the brief:
+         *
+         *     zimkit.init(appID);
+         *     zimkit.login({ userID, userName, token });
+         *
+         *   Internally it uses the official zego-zim-web SDK (window.ZIM).
+         * - The chat UI is rendered inside #zimkit-container, scoped to a
+         *   per-live-show ZIM "room" so all viewers chat together.
+         * ============================================================ */
+        // (function () {
+        //     const LIVE_SHOW_ID = @json((string) $liveShow->id);
+        //     const ROOM_ID = 'liveshow-' + LIVE_SHOW_ID;
+        //     const ROOM_NAME = @json($liveShow->title ?? 'Live Show');
+        //     const TOKEN_ENDPOINT = '{{ url('api/chat/token') }}';
+
+        //     const $container = document.getElementById('zimkit-container');
+        //     const $statusEl = document.getElementById('zimkit-status');
+
+        //     if (!$container) {
+        //         return;
+        //     }
+
+        //     const setStatus = (text, kind) => {
+        //         if (!$statusEl) return;
+        //         $statusEl.textContent = '';
+        //         const icon = document.createElement('i');
+        //         icon.className = kind === 'error'
+        //             ? 'fas fa-triangle-exclamation me-2'
+        //             : kind === 'ready'
+        //                 ? 'fas fa-check-circle me-2'
+        //                 : 'fas fa-spinner fa-spin me-2';
+        //         $statusEl.appendChild(icon);
+        //         $statusEl.appendChild(document.createTextNode(text));
+        //         $statusEl.className = 'zimkit-status' + (kind === 'error' ? ' is-error' : kind === 'ready' ? ' is-ready' : '');
+        //     };
+
+        //     const hideStatus = () => {
+        //         if ($statusEl) $statusEl.style.display = 'none';
+        //     };
+
+        //     // The user must be authenticated to obtain a token.
+        //     if (typeof isLoggedIn !== 'undefined' && isLoggedIn !== true) {
+        //         setStatus('Please join the show to use ZEGO chat.', 'error');
+        //         return;
+        //     }
+
+        //     // Bail out if the SDK script failed to load.
+        //     if (typeof window.ZIM === 'undefined') {
+        //         setStatus('ZEGO chat SDK failed to load. Please refresh the page.', 'error');
+        //         console.error('[ZegoChat] window.ZIM is undefined - is the zego-zim-web CDN script loaded?');
+        //         return;
+        //     }
+
+        //     /**
+        //      * Build the in-tab chat UI (messages list + input bar) inside
+        //      * #zimkit-container. Returns helper functions used by the SDK
+        //      * callbacks below.
+        //      */
+        //     const buildUI = () => {
+        //         const messagesEl = document.createElement('div');
+        //         messagesEl.className = 'zimkit-messages';
+        //         messagesEl.id = 'zimkit-messages';
+
+        //         const inputBar = document.createElement('form');
+        //         inputBar.className = 'zimkit-input-bar';
+        //         inputBar.id = 'zimkit-input-bar';
+        //         inputBar.innerHTML = `
+    //             <input type="text" id="zimkit-input" maxlength="500" autocomplete="off"
+    //                 placeholder="Send a message…" />
+    //             <button type="submit" id="zimkit-send-btn" disabled>
+    //                 <i class="fas fa-paper-plane"></i>
+    //             </button>
+    //         `;
+
+        //         $container.appendChild(messagesEl);
+        //         $container.appendChild(inputBar);
+
+        //         const $input = inputBar.querySelector('#zimkit-input');
+        //         const $sendBtn = inputBar.querySelector('#zimkit-send-btn');
+
+        //         const renderMessage = (text, authorName, authorId, isSelf) => {
+        //             const el = document.createElement('div');
+        //             el.className = 'zimkit-message' + (isSelf ? ' is-self' : '');
+        //             const author = document.createElement('span');
+        //             author.className = 'zimkit-author';
+        //             author.textContent = isSelf ? 'You' : (authorName || authorId || 'Guest');
+        //             const body = document.createElement('div');
+        //             body.textContent = text;
+        //             el.appendChild(author);
+        //             el.appendChild(body);
+        //             messagesEl.appendChild(el);
+        //             messagesEl.scrollTop = messagesEl.scrollHeight;
+        //         };
+
+        //         return { messagesEl, inputBar, $input, $sendBtn, renderMessage };
+        //     };
+
+        //     /**
+        //      * Plug-and-play wrapper around the official zego-zim-web SDK.
+        //      * Exposes the simplified API requested in the brief.
+        //      */
+        //     window.zimkit = (function () {
+        //         let zim = null;
+        //         let appConfig = null;
+        //         let currentUser = null;
+
+        //         return {
+        //             /**
+        //              * Initialize the ZIM SDK with the given AppID. Safe to call once.
+        //              */
+        //             init(appID) {
+        //                 if (zim) return zim;
+        //                 appConfig = { appID: Number(appID) };
+        //                 window.ZIM.create(appConfig);
+        //                 zim = window.ZIM.getInstance();
+        //                 zim.on('error', (_, errorInfo) => {
+        //                     console.error('[ZegoChat] SDK error', errorInfo);
+        //                     setStatus('Chat error: ' + (errorInfo && errorInfo.message || 'unknown'), 'error');
+        //                 });
+        //                 zim.on('connectionStateChanged', (_, info) => {
+        //                     console.debug('[ZegoChat] connection state', info);
+        //                 });
+        //                 zim.on('tokenWillExpire', async () => {
+        //                     try {
+        //                         const fresh = await fetchTokenConfig();
+        //                         await zim.renewToken(fresh.token);
+        //                     } catch (e) {
+        //                         console.error('[ZegoChat] token renewal failed', e);
+        //                     }
+        //                 });
+        //                 return zim;
+        //             },
+
+
+        //             async login(userInfo) {
+        //                 if (!zim) {
+        //                     throw new Error('zimkit.init(appID) must be called before login()');
+        //                 }
+        //                 currentUser = { userID: String(userInfo.userID), userName: String(userInfo.userName) };
+        //                 await zim.login(currentUser, userInfo.token);
+        //                 return currentUser;
+        //             },
+
+        //             instance() {
+        //                 return zim;
+        //             },
+
+        //             user() {
+        //                 return currentUser;
+        //             },
+        //         };
+        //     })();
+
+        //     /**
+        //      * Fetch token + config from the Laravel API.
+        //      */
+        //     const fetchTokenConfig = async () => {
+        //         const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        //         const headers = {
+        //             'Accept': 'application/json',
+        //             'X-Requested-With': 'XMLHttpRequest',
+        //         };
+        //         if (csrfMeta) headers['X-CSRF-TOKEN'] = csrfMeta.getAttribute('content');
+
+        //         const res = await fetch(TOKEN_ENDPOINT, {
+        //             method: 'GET',
+        //             credentials: 'same-origin',
+        //             headers,
+        //         });
+        //         if (!res.ok) {
+        //             const body = await res.json().catch(() => ({}));
+        //             throw new Error(body.error || ('Token request failed with status ' + res.status));
+        //         }
+        //         return res.json();
+        //     };
+
+        //     /**
+        //      * Bootstrap: fetch token, init SDK, login, render UI, enter room.
+        //      * Lazy-runs only the first time the user opens the ZEGO chat tab.
+        //      */
+        //     let bootstrapPromise = null;
+        //     const bootstrap = () => {
+        //         if (bootstrapPromise) return bootstrapPromise;
+
+        //         bootstrapPromise = (async () => {
+        //             setStatus('Connecting to ZEGO chat…');
+
+        //             const config = await fetchTokenConfig();
+        //             if (!config || !config.token || !config.appID) {
+        //                 throw new Error('Invalid token response from server.');
+        //             }
+
+        //             window.zimkit.init(config.appID);
+        //             await window.zimkit.login({
+        //                 userID: config.userID,
+        //                 userName: config.userName,
+        //                 token: config.token,
+        //             });
+
+        //             const { renderMessage, $input, $sendBtn, inputBar } = buildUI();
+        //             const zim = window.zimkit.instance();
+        //             const me = window.zimkit.user();
+
+        //             zim.on('roomMessageReceived', (_, { messageList }) => {
+        //                 for (const msg of messageList) {
+        //                     const text = (msg && msg.message) || '';
+        //                     const authorId = msg && msg.senderUserID;
+        //                     if (authorId === me.userID) continue; // already echoed locally
+        //                     renderMessage(text, msg && msg.senderUserName, authorId, false);
+        //                 }
+        //             });
+
+        //             try {
+        //                 await zim.enterRoom({ roomID: ROOM_ID, roomName: ROOM_NAME });
+        //             } catch (err) {
+        //                 // Room might already be entered (e.g. from a previous reconnect) - that's fine.
+        //                 if (!err || err.code !== 6000121) {
+        //                     throw err;
+        //                 }
+        //             }
+
+        //             $sendBtn.disabled = false;
+        //             inputBar.addEventListener('submit', async (e) => {
+        //                 e.preventDefault();
+        //                 const text = $input.value.trim();
+        //                 if (!text) return;
+        //                 $sendBtn.disabled = true;
+        //                 try {
+        //                     const messageObj = { type: 1, message: text };
+        //                     await zim.sendRoomMessage(messageObj, ROOM_ID, { priority: 1 });
+        //                     renderMessage(text, me.userName, me.userID, true);
+        //                     $input.value = '';
+        //                 } catch (err) {
+        //                     console.error('[ZegoChat] send failed', err);
+        //                 } finally {
+        //                     $sendBtn.disabled = false;
+        //                     $input.focus();
+        //                 }
+        //             });
+
+        //             setStatus('Connected as ' + me.userName, 'ready');
+        //             setTimeout(hideStatus, 1500);
+        //         })().catch((err) => {
+        //             console.error('[ZegoChat] bootstrap failed', err);
+        //             setStatus('Could not start ZEGO chat: ' + (err && err.message || 'unknown error'), 'error');
+        //             bootstrapPromise = null; // allow retry on next tab open
+        //         });
+
+        //         return bootstrapPromise;
+        //     };
+
+        //     // Kick off the connection the first time the ZEGO tab is opened to
+        //     // avoid spinning up a SDK connection users may never use.
+        //     const $zegoTabBtn = document.getElementById('zegoChatTab-tab');
+        //     if ($zegoTabBtn) {
+        //         $zegoTabBtn.addEventListener('shown.bs.tab', bootstrap, { once: false });
+        //         $zegoTabBtn.addEventListener('click', bootstrap);
+        //     } else {
+        //         // Tab nav not present (e.g. unauthenticated) - try anyway.
+        //         bootstrap();
+        //     }
+        // })();
     </script>
 
     @if (request()->boolean('debug_bot') && $liveShow->is_test_show)

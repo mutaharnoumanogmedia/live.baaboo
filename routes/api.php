@@ -8,6 +8,7 @@ use App\Http\Controllers\GamePlayController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PushNotificationController;
 use App\Http\Controllers\User\LiveShowController as UserLiveShowController;
+//use App\Http\Controllers\ZegoChatController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +25,20 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
+});
+
+/*
+|--------------------------------------------------------------------------
+| ZEGOCLOUD In-App Chat (ZIM)
+|--------------------------------------------------------------------------
+|
+| Endpoint that returns a short-lived Token04 for the authenticated user so
+| the browser SDK (zego-zim-web) can connect to ZIM. The server secret is
+| never exposed to the client.
+|
+*/
+Route::middleware(['auth:sanctum'])->prefix('chat')->group(function () {
+    Route::get('/token', [ZegoChatController::class, 'getToken'])->name('api.chat.token');
 });
 
 Route::prefix('live-show')->group(function () {
