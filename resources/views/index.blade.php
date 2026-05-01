@@ -1,6 +1,6 @@
 <x-guest-layout>
     <!-- Live Show Banner -->
-    @if (isset($currentLiveShow) && $currentLiveShow)
+    @if (isset($currentLiveShow) && $currentLiveShow && false)
         <style>
             /* Updated banner styles */
             .live-show-banner {

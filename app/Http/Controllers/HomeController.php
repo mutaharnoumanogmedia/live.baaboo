@@ -17,7 +17,7 @@ class HomeController extends Controller
     public function index()
     {
 
-        $currentLiveShow = LiveShow::whereIn('status', ['live', 'scheduled'])
+        $currentLiveShow = LiveShow::query()
             ->where(function ($query) {
                 $query->where('status', 'live')
                     ->orWhere(function ($q) {
@@ -212,8 +212,7 @@ class HomeController extends Controller
         Auth::guard('web')->login($user);
 
         // take the lastest live show
-        $liveShow = LiveShow::whereIn('status', ['live', 'scheduled'])
-
+        $liveShow = LiveShow::query()
             ->where(function ($query) {
                 $query->where('status', 'live')
                     ->orWhere(function ($q) {
