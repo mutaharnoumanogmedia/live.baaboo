@@ -270,7 +270,7 @@
                      </div>
                      <div class="card-body position-relative">
                          <div class="row">
-                             <div class="col-lg-7 ">
+                             <div class="col-lg ">
                                  <div class="p-3   rounded bg-dark">
                                      <h5 class="mb-0 fw-bold text-center mb-3">Quiz Questions</h5>
                                      <div class="position-relative question-slider-wrap">
