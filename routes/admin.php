@@ -56,6 +56,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::post('live-shows/stream-management/{id}/save-room-id', [\App\Http\Controllers\Admin\LiveShowController::class, 'saveRoomID'])->name('live-shows.stream-management.save-room-id');
 
+    Route::get('live-shows/stream-management/{id}/attached-media', [\App\Http\Controllers\Admin\LiveShowController::class, 'getAttachedMedia'])->name('live-shows.stream-management.attached-media');
+
     Route::post('live-shows/stream-management/{id}/quizzes/{quizId}/send-quiz-question', [\App\Http\Controllers\Admin\LiveShowController::class, 'sendQuizQuestion'])->name('live-shows.stream-management.send-quiz-question');
 
     Route::post('live-shows/stream-management/{id}/quizzes/{quizId}/remove-quiz-question', [\App\Http\Controllers\Admin\LiveShowController::class, 'removeQuizQuestion'])->name('live-shows.stream-management.remove-quiz-question');

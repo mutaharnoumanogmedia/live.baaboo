@@ -857,6 +857,46 @@ class LiveShowController extends Controller
         return view('admin.live-shows.stream-broadcaster', compact('liveShow'));
     }
 
+    /**
+     * Return the gallery media attached to a live show, used by the broadcaster
+     * page to render a media picker for the canvas video overlay.
+     *
+     * Optional query params:
+     *   ?type=video|image  filter by media type (defaults to video)
+     */
+    public function getAttachedMedia(Request $request, $id): JsonResponse
+    {
+       
+        $allowedTypes = ['video', 'image'];
+
+        $liveShow = LiveShow::findOrFail($id);
+
+        $query = $liveShow->galleryMedia()->whereIn("type", $allowedTypes);
+
+        $items = $query->get()->map(function (GalleryMedia $m) {
+            return [
+                'id' => $m->id,
+                'type' => $m->type,
+                'title' => $m->title,
+                'original_name' => $m->original_name,
+                'url' => $m->url,
+                'thumbnail' => $m->thumbnail,
+                'total_seconds' => $m->total_seconds,
+                'mime_type' => $m->mime_type,
+                'file_size' => $m->file_size,
+                'sort_order' => $m->pivot->sort_order ?? null,
+                'path' => $m->path,
+            ];
+        });
+
+        return response()->json([
+            'live_show_id' => $liveShow->id,
+            'type' => $allowedTypes,
+            'count' => $items->count(),
+            'media' => $items,
+        ]);
+    }
+
     public function saveRoomID(Request $request, $id)
     {
         $request->validate([

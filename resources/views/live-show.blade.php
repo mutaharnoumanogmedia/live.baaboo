@@ -2487,30 +2487,30 @@
             });
         }
 
-        var channelGalleryImage = pusher.subscribe('live-show.{{ $liveShow->id }}');
-        channelGalleryImage.bind('pusher:subscription_succeeded', function() {
-            console.log('Gallery image channel subscribed successfully!');
-        });
-        channelGalleryImage.bind('ShowGalleryImageEvent', function(data) {
-            showGalleryOverlay({
-                type: data.type,
-                src: data.url,
-                playback_started_at: data.playback_started_at ?? null,
-                video_duration_seconds: data.video_duration_seconds != null ? data.video_duration_seconds :
-                    null,
-                thumbnail_url: data.thumbnail_url ?? null
-            });
-        });
+        // var channelGalleryImage = pusher.subscribe('live-show.{{ $liveShow->id }}');
+        // channelGalleryImage.bind('pusher:subscription_succeeded', function() {
+        //     console.log('Gallery image channel subscribed successfully!');
+        // });
+        // channelGalleryImage.bind('ShowGalleryImageEvent', function(data) {
+        //     showGalleryOverlay({
+        //         type: data.type,
+        //         src: data.url,
+        //         playback_started_at: data.playback_started_at ?? null,
+        //         video_duration_seconds: data.video_duration_seconds != null ? data.video_duration_seconds :
+        //             null,
+        //         thumbnail_url: data.thumbnail_url ?? null
+        //     });
+        // });
 
-        channelGalleryImage.bind('HideGalleryImageEvent', function() {
-            hideGalleryOverlay();
-        });
+        // channelGalleryImage.bind('HideGalleryImageEvent', function() {
+        //     hideGalleryOverlay();
+        // });
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', hydrateGalleryOverlayFromServer);
-        } else {
-            hydrateGalleryOverlayFromServer();
-        }
+        // if (document.readyState === 'loading') {
+        //     document.addEventListener('DOMContentLoaded', hydrateGalleryOverlayFromServer);
+        // } else {
+        //     hydrateGalleryOverlayFromServer();
+        // }
 
 
         //hide the gallery video when it is completed after 1 second of finish playing
