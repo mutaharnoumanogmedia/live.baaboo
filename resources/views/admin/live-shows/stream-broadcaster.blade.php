@@ -1028,8 +1028,8 @@
             window.BroadcastOverlay.play(data.url, {
                 position: 'fullscreen',
                 size: 1,
-                loop: true,
-                muted: true,
+                loop: false,
+                muted: false,
             });
         } else {
             console.error("[Pusher] No URL received in ShowGalleryImageEvent");
