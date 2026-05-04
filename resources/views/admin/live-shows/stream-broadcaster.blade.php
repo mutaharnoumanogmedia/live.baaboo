@@ -405,12 +405,33 @@
                     constraints.audio || true) : true,
             });
 
-            // Camera preview <video> (off-DOM, just used as canvas drawImage source).
+            // Hidden host container kept in the DOM so video decoders don't get
+            // background-tab throttled the way fully off-DOM <video> elements do.
+            let hiddenHost = document.getElementById('broadcast-hidden-media');
+            if (!hiddenHost) {
+                hiddenHost = document.createElement('div');
+                hiddenHost.id = 'broadcast-hidden-media';
+                hiddenHost.style.cssText = [
+                    'position:fixed',
+                    'left:-9999px',
+                    'top:-9999px',
+                    'width:2px',
+                    'height:2px',
+                    'opacity:0.01',
+                    'pointer-events:none',
+                    'overflow:hidden',
+                ].join(';');
+                document.body.appendChild(hiddenHost);
+            }
+
+            // Camera preview <video> (in-DOM but off-screen, used as canvas drawImage source).
             const cameraVideoEl = document.createElement('video');
             cameraVideoEl.srcObject = sourceStream;
             cameraVideoEl.muted = true;
             cameraVideoEl.autoplay = true;
             cameraVideoEl.playsInline = true;
+            cameraVideoEl.style.cssText = 'width:2px;height:2px;';
+            hiddenHost.appendChild(cameraVideoEl);
             try {
                 await cameraVideoEl.play();
             } catch (_) {
@@ -423,6 +444,8 @@
             overlayVideoEl.playsInline = true;
             overlayVideoEl.preload = 'auto';
             overlayVideoEl.muted = false;
+            overlayVideoEl.style.cssText = 'width:2px;height:2px;';
+            hiddenHost.appendChild(overlayVideoEl);
 
             // Canvas where camera + overlay get composited every frame.
             const canvas = document.createElement('canvas');
@@ -504,10 +527,48 @@
 
                     ctx.drawImage(overlayVideoEl, ox, oy, ow, oh);
                 }
-
-                requestAnimationFrame(drawFrame);
             }
-            requestAnimationFrame(drawFrame);
+
+            // ── Background-resilient frame ticker ──────────────────
+            // requestAnimationFrame is throttled (or paused) in hidden tabs,
+            // which freezes the canvas-captureStream feed for the audience.
+            // A Web Worker setInterval keeps ticking regardless of tab focus.
+            const tickerSrc = `
+                let id = null;
+                onmessage = (e) => {
+                    if (e && e.data && e.data.type === 'start') {
+                        clearInterval(id);
+                        id = setInterval(() => postMessage('tick'), 1000 / e.data.fps);
+                    } else if (e && e.data === 'stop') {
+                        clearInterval(id);
+                        id = null;
+                    }
+                };
+            `;
+            let frameTicker = null;
+            try {
+                const blob = new Blob([tickerSrc], { type: 'application/javascript' });
+                frameTicker = new Worker(URL.createObjectURL(blob));
+                frameTicker.onmessage = () => {
+                    try { drawFrame(); } catch (e) { /* swallow per-frame errors */ }
+                };
+                frameTicker.postMessage({ type: 'start', fps: TARGET_FPS });
+            } catch (e) {
+                console.warn('[Pipeline] Worker ticker unavailable, falling back to rAF:', e);
+                const rafLoop = () => { drawFrame(); requestAnimationFrame(rafLoop); };
+                requestAnimationFrame(rafLoop);
+            }
+
+            // Belt-and-braces: when the tab becomes visible again, force a few
+            // immediate redraws and try to resume any media that paused.
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState !== 'visible') return;
+                try { cameraVideoEl.play().catch(() => {}); } catch (_) {}
+                if (overlayState.visible) {
+                    try { overlayVideoEl.play().catch(() => {}); } catch (_) {}
+                }
+                for (let i = 0; i < 3; i++) drawFrame();
+            });
 
             // ── Video track ────────────────────────────────────────
             const canvasStream = canvas.captureStream(TARGET_FPS);
@@ -758,18 +819,35 @@
                         role
                     },
                 },
-                // --- ADD THIS SECTION BELOW ---
+                // --- Connection state handling ---------------------------------
+                // Background-tab throttling can cause brief DISCONNECTED blips.
+                // Let Zego try to reconnect on its own first; only force a full
+                // page reload if we really stay disconnected for a long time.
                 onInRoomStateChanged: (state) => {
                     console.log("Connection state:", state);
-                    if (state === 'DISCONNECTED') {
-                        console.warn("Network timeout (1002099). Reconnecting...");
-                        // Short delay to allow network to stabilize, then refresh
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 2000);
+                    if (state === 'CONNECTED') {
+                        window.__lastZegoConnectedAt = Date.now();
+                        if (window.__zegoReloadTimer) {
+                            clearTimeout(window.__zegoReloadTimer);
+                            window.__zegoReloadTimer = null;
+                        }
+                        return;
+                    }
+                    if (state === 'DISCONNECTED' || state === 'RECONNECTING') {
+                        if (window.__zegoReloadTimer) return;
+                        console.warn("Zego disconnected; waiting for reconnect before reloading.");
+                        window.__zegoReloadTimer = setTimeout(() => {
+                            const lastOk = window.__lastZegoConnectedAt || 0;
+                            if (Date.now() - lastOk > 30000) {
+                                console.warn("Zego still disconnected after grace period, reloading.");
+                                window.location.reload();
+                            } else {
+                                window.__zegoReloadTimer = null;
+                            }
+                        }, 30000);
                     }
                 },
-                // ------------------------------
+                // ---------------------------------------------------------------
                 sharedLinks: [{
                     name: 'Join as an audience',
                     url: window.location.origin +
