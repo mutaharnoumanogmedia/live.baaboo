@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\RegistrationWelcomeMail;
 use App\Models\LiveShow;
 use App\Models\User;
+use App\Services\LeadGenerationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -233,6 +234,19 @@ class HomeController extends Controller
         if ($liveShow->users()->count() >= $liveShow->max_players) {
             return redirect()->route('index')->with('error', 'Die maximale Anzahl an Teilnehmern wurde erreicht.');
         }
+
+        $leadGenerationPayload = [
+            'name' => $user->name,
+            'email' => $user->email,
+
+            'magic_link' => $user->magic_link,
+            'referral_link' => $user->referral_link,
+            'is_joined' => 1,
+        ];
+        $leadGenerationResponse = (new LeadGenerationService())->leadGeneration($leadGenerationPayload);
+        \Log::info('Lead generation request sent successfully', $leadGenerationPayload);
+        \Log::info('Lead generation response', $leadGenerationResponse);
+
         $liveShow->users()->syncWithoutDetaching([
             $user->id => [
                 'is_online' => 1,
@@ -241,6 +255,8 @@ class HomeController extends Controller
                 'last_active_at' => now(),
             ],
         ]);
+
+        // add to active campaign
 
         return redirect()->route('live-show', ['id' => $liveShow->id])->with('success', 'You have been logged in successfully');
     }
