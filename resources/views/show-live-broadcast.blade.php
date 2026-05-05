@@ -125,7 +125,7 @@
             showInRoomMessageButton: false, // Hides the chat icon
             showUserList: false, // Hides the viewer count/list
             language: 'German',
-            showMirror: true,
+            showMirror: false,
             fillMode: "cover",
         }
 

@@ -4,7 +4,16 @@
     <style>
         #root video {
             object-fit: cover !important;
+
         }
+
+        #root
+        [id^="zg-rtc-player"],
+        [id*="zg-rtc-player"] {
+            transform: scaleX(-1) !important;
+
+        }
+
 
         #zego_left_notify_wrapper,
         #zego_right_notify_wrapper {
@@ -547,15 +556,27 @@
             `;
             let frameTicker = null;
             try {
-                const blob = new Blob([tickerSrc], { type: 'application/javascript' });
+                const blob = new Blob([tickerSrc], {
+                    type: 'application/javascript'
+                });
                 frameTicker = new Worker(URL.createObjectURL(blob));
                 frameTicker.onmessage = () => {
-                    try { drawFrame(); } catch (e) { /* swallow per-frame errors */ }
+                    try {
+                        drawFrame();
+                    } catch (e) {
+                        /* swallow per-frame errors */
+                    }
                 };
-                frameTicker.postMessage({ type: 'start', fps: TARGET_FPS });
+                frameTicker.postMessage({
+                    type: 'start',
+                    fps: TARGET_FPS
+                });
             } catch (e) {
                 console.warn('[Pipeline] Worker ticker unavailable, falling back to rAF:', e);
-                const rafLoop = () => { drawFrame(); requestAnimationFrame(rafLoop); };
+                const rafLoop = () => {
+                    drawFrame();
+                    requestAnimationFrame(rafLoop);
+                };
                 requestAnimationFrame(rafLoop);
             }
 
@@ -563,9 +584,13 @@
             // immediate redraws and try to resume any media that paused.
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState !== 'visible') return;
-                try { cameraVideoEl.play().catch(() => {}); } catch (_) {}
+                try {
+                    cameraVideoEl.play().catch(() => {});
+                } catch (_) {}
                 if (overlayState.visible) {
-                    try { overlayVideoEl.play().catch(() => {}); } catch (_) {}
+                    try {
+                        overlayVideoEl.play().catch(() => {});
+                    } catch (_) {}
                 }
                 for (let i = 0; i < 3; i++) drawFrame();
             });
@@ -788,7 +813,7 @@
                     showUserList: false,
                     showPreJoinView: false,
                     showUserJoinAndLeave: false,
-                    showMirror: true,
+                    showMirror: false,
                     fillMode: "cover",
                 };
             } else {
@@ -839,7 +864,9 @@
                         window.__zegoReloadTimer = setTimeout(() => {
                             const lastOk = window.__lastZegoConnectedAt || 0;
                             if (Date.now() - lastOk > 30000) {
-                                console.warn("Zego still disconnected after grace period, reloading.");
+                                console.warn(
+                                    "Zego still disconnected after grace period, reloading."
+                                );
                                 window.location.reload();
                             } else {
                                 window.__zegoReloadTimer = null;
