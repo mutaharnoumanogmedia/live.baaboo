@@ -601,28 +601,27 @@ class LiveShowController extends Controller
         ]);
     }
 
-    public function apiGetLiveShowUsers($id)
+    public function apiGetLiveShowUsers($id, Request $request)
     {
         $liveShow = LiveShow::findOrFail($id);
 
-        $skip = max((int) request()->get('skip', 0), 0);
-        $take = max((int) request()->get('take', 100), 1);
-        $search = trim((string) request()->get('search', ''));
-        try {
+        $skip = max((int) $request->input('skip', 0), 0);
+        $take = max((int) $request->input('take', 100), 1);
+        $search = trim((string) $request->input('search', ''));
 
+        try {
             $totalUsers = $liveShow->users()->count();
             $quizService = new LiveShowQuizService;
             $players = $quizService->getSortedByScore($liveShow);
 
-            $usersQuery = $players
-                ->when($search !== '', function ($query) use ($search) {
-                    $query->where(function ($subQuery) use ($search) {
-                        $subQuery
-                            ->where('users.name', 'like', '%'.$search.'%')
-                            ->orWhere('users.email', 'like', '%'.$search.'%')
-                            ->orWhere('users.user_name', 'like', '%'.$search.'%');
-                    });
+            $usersQuery = $players;
+            if ($search !== '') {
+                $usersQuery = $usersQuery->filter(function ($user) use ($search) {
+                    return stripos($user->name, $search) !== false
+                        || stripos($user->email, $search) !== false
+                        || stripos($user->user_name ?? '', $search) !== false;
                 });
+            }
 
             $filteredUsers = (clone $usersQuery)->count();
 
@@ -866,12 +865,12 @@ class LiveShowController extends Controller
      */
     public function getAttachedMedia(Request $request, $id): JsonResponse
     {
-       
+
         $allowedTypes = ['video', 'image'];
 
         $liveShow = LiveShow::findOrFail($id);
 
-        $query = $liveShow->galleryMedia()->whereIn("type", $allowedTypes);
+        $query = $liveShow->galleryMedia()->whereIn('type', $allowedTypes);
 
         $items = $query->get()->map(function (GalleryMedia $m) {
             return [

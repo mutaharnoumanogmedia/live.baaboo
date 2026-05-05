@@ -226,7 +226,7 @@
     }
 
     initPlayButtonAutoClick();
-    initRegisterModalAutoFill();
+    // initRegisterModalAutoFill();
     initQuizAutoAnswer();
     // initRandomChatMessages();
 })();

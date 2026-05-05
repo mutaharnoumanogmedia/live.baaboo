@@ -1403,16 +1403,15 @@
 
              function fetchActivePlayers({
                  skip = 0,
-                 take = playerPageSize
+                 take = playerPageSize,
+                 search = ''
              } = {}) {
                  const query = new URLSearchParams({
                      skip,
                      take,
+                     search,
                  });
 
-                 if (playerListState.search !== '') {
-                     query.set('search', playerListState.search);
-                 }
 
                  return fetch(`{{ url('api/live-show') }}/{{ $liveShow->id }}/get-live-show-users?${query.toString()}`)
                      .then(response => response.json())
@@ -1468,7 +1467,9 @@
 
                  return fetchActivePlayers({
                      skip: 0,
-                     take: playerListState.loadedCount
+                     take: playerListState.loadedCount,
+                     search: playerListState.search
+
                  }).then(data => {
                      playerListState.totalUsers = data.totalUsers;
                      playerListState.filteredUsers = data.filteredUsers;
@@ -1485,7 +1486,8 @@
 
                  return fetchActivePlayers({
                      skip: playerListState.loadedCount,
-                     take: playerPageSize
+                     take: playerPageSize,
+                     search: playerListState.search,
                  }).then(data => {
                      playerListState.loadedCount += data.users.length;
                      playerListState.totalUsers = data.totalUsers;
@@ -2549,7 +2551,7 @@
                      confirmButtonColor: '#3085d6',
                  }).then(function(result) {
                      if (result.isConfirmed) {
-                       radio.checked = true;
+                         radio.checked = true;
                      } else {
                          radio.checked = false;
                      }
