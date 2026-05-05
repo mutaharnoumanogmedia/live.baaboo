@@ -1648,7 +1648,7 @@
                  appendSingleMessage(data.data);
              });
 
-          
+
              var channelResetChat = pusher.subscribe('live-show.{{ $liveShow->id }}');
              channelResetChat.bind('pusher:subscription_succeeded', function() {
                  console.log('Reset chat channel subscribed successfully!');
@@ -2014,9 +2014,7 @@
 
 
              function updateLiveShowStatus(status) {
-                 updateGalleryShowStatus('hidden');
-                 galleryHideOnStream(document.getElementById('hideGalleryOnStreamBtn'));
-                 
+
                  streamSwalConfirm({
                      title: 'Update live show status?',
                      text: 'The status will be set to "' + status + '" for this live show.',
@@ -2040,6 +2038,21 @@
                              streamSwalSuccess(data.message || 'Live show status was updated.',
                                  'Status updated');
                              liveShowStatus = data.status;
+                             console.log('liveShowStatus:', liveShowStatus);
+                             //check which radio button is checked, play that media by clicking its show button
+                             if (liveShowStatus == 'live') {
+                                 console.log('liveShowStatus is live');
+                                 const playWithLiveRadio = document.querySelector(
+                                     'input[name="play_with_live"]:checked');
+                                 console.log('playWithLiveRadio:', playWithLiveRadio);
+                                 if (playWithLiveRadio) {
+                                     const mediaId = playWithLiveRadio.value;
+                                     const showBtn = document.getElementById(`show-media-btn-${mediaId}`);
+                                     if (showBtn) {
+                                         showBtn.click();
+                                     }
+                                 }
+                             }
                          },
                          error: function(xhr, status, error) {
                              console.error("Error ending live show:", error);
@@ -2474,6 +2487,7 @@
                                     class="btn btn-sm btn-success gallery-show-on-stream-btn"
                                     onclick="galleryShowOnStream('${data.id}', this)"
                                     data-media-id="${data.id}"
+                                    id="show-media-btn-${data.id}"
                                     title="Show on live stream">
                                     <i class="fas fa-tv"></i>
                                     Show
@@ -2482,6 +2496,7 @@
                                     class="btn btn-sm btn-warning gallery-hide-on-stream-btn"
                                     onclick="galleryHideOnStream(this)"
                                     data-media-id="${data.id}"
+                                    id="hide-media-btn-${data.id}"
                                     title="Hide on live stream">
                                     <i class="fas fa-eye-slash"></i>
                                     Hide
@@ -2490,14 +2505,30 @@
                                     class="btn btn-sm btn-outline-danger gallery-detach-btn"
                                     data-media-id="${data.id}"
                                     title="Remove from stream"
+                                    id="detach-media-btn-${data.id}"
                                     onclick="galleryDetach('${data.id}', this)">
                                     <i class="fas fa-times"></i>
                                 </button>
                                 <button type="button"
+                                    id="preview-media-btn-${data.id}"
                                     class="btn btn-sm btn-secondary" title="Preview"
                                     onclick="openMediaPreviewModal('${data.is_image ? data.path : (data.thumbnail ?? data.path)}')">
                                     <i class="fas fa-eye"></i>
                                 </button>
+                                <div class="form-check align-items-center d-flex">
+                                    <input 
+                                        class="form-check-input" 
+                                        type="radio" 
+                                        name="play_with_live" 
+                                        id="playWithLiveRadio_${data.id}" 
+                                        value="${data.id}"
+                                        onchange="askConfirmationWhenSelectThisMediaForLive(this)"
+                                        ${data.play_with_live ? 'checked' : ''} >
+                                    <label class="form-check-label ms-2 small" for="playWithLiveRadio_${data.id}">
+                                        Play on live start
+                                    </label>
+                                </div>
+                       
                             </div>
                             </div>
                             
@@ -2507,6 +2538,22 @@
                 </tr>
            
             `;
+             }
+
+             function askConfirmationWhenSelectThisMediaForLive(radio) {
+                 console.log('radio:', radio);
+                 streamSwalConfirm({
+                     title: 'Are you sure you want to play this media on live start?',
+                     text: 'This media will be played on live start. You can change it later.',
+                     confirmButtonText: 'Yes, play',
+                     confirmButtonColor: '#3085d6',
+                 }).then(function(result) {
+                     if (result.isConfirmed) {
+                       radio.checked = true;
+                     } else {
+                         radio.checked = false;
+                     }
+                 });
              }
 
              function allMediaItemCard(data, idx) {
