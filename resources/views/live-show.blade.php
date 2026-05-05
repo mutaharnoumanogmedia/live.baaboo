@@ -3018,7 +3018,7 @@
     </script>
 
     @if (request()->boolean('debug_bot') && $liveShow->is_test_show)
-        <script src="{{ url('js/live-show-quiz-debug-bot.js') }}"></script>
+        <script src="{{ url('js/live-show-quiz-debug-bot.js?v=' . time()) }}"></script>
     @endif
 
 
