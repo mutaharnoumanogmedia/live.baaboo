@@ -29,6 +29,7 @@ class LiveShow extends Model
 
         'start_time',
         'end_time',
+        'media_visible',
 
     ];
 
@@ -41,6 +42,7 @@ class LiveShow extends Model
         'winners_announced' => 'boolean',
         'start_time' => 'datetime',
         'end_time' => 'datetime',
+        'media_visible' => 'boolean',
     ];
 
     // scope test show

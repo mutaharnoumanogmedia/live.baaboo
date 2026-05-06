@@ -559,21 +559,19 @@ class LiveShowController extends Controller
         }
 
         $playbackStartedAt = $media->type === 'video' ? now() : null;
-
-        DB::transaction(function () use ($liveShow, $media, $playbackStartedAt) {
-            LiveShowGalleryState::updateOrCreate(
-                ['live_show_id' => $liveShow->id],
-                [
-                    'is_visible' => true,
-                    'gallery_media_id' => $media->id,
-                    'url' => $media->url,
-                    'media_type' => $media->type,
-                    'playback_started_at' => $playbackStartedAt,
-                    'video_duration_seconds' => null,
-                ]
-            );
-        });
-
+        // DB::transaction(function () use ($liveShow, $media, $playbackStartedAt) {
+        //     LiveShowGalleryState::updateOrCreate(
+        //         ['live_show_id' => $liveShow->id],
+        //         [
+        //             'is_visible' => true,
+        //             'gallery_media_id' => $media->id,
+        //             'url' => $media->url,
+        //             'media_type' => $media->type,
+        //             'playback_started_at' => $playbackStartedAt,
+        //             'video_duration_seconds' => null,
+        //         ]
+        //     );
+        // });
         ShowGalleryImageEvent::dispatch(
             (string) $liveShow->id,
             $media->path,
@@ -583,6 +581,8 @@ class LiveShowController extends Controller
             null,
             $media->thumbnail ?? null
         );
+        $liveShow->update(['media_visible' => true]);
+
         LiveShowMediaPlayed::dispatch((string) $liveShow->id);
 
         return response()->json([
@@ -595,9 +595,11 @@ class LiveShowController extends Controller
     public function hideGalleryImage($id): JsonResponse
     {
         $liveShow = LiveShow::findOrFail($id);
-        $liveShow->galleryState?->update(['is_visible' => false]);
-        HideGalleryImageEvent::dispatch((string) $liveShow->id);
+        // $liveShow->galleryState?->update(['is_visible' => false]);
+        $liveShow->update(['media_visible' => false]);
+        // HideGalleryImageEvent::dispatch((string) $liveShow->id);
         LiveShowMediaHidden::dispatch((string) $liveShow->id);
+
         return response()->json([
             'success' => true,
             'message' => 'Gallery overlay hidden on stream.',
@@ -1192,7 +1194,12 @@ class LiveShowController extends Controller
     public function mediaHidden($id)
     {
         $liveShow = LiveShow::findOrFail($id);
+        $liveShow->update(['media_visible' => false]);
+
         LiveShowMediaHidden::dispatch($liveShow->id);
+        HideGalleryImageEvent::dispatch($liveShow->id);
+
+
 
         return response()->json(['message' => 'Media hidden successfully!']);
     }
