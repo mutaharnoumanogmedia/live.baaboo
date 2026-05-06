@@ -597,7 +597,7 @@ class LiveShowController extends Controller
         $liveShow = LiveShow::findOrFail($id);
         // $liveShow->galleryState?->update(['is_visible' => false]);
         $liveShow->update(['media_visible' => false]);
-        // HideGalleryImageEvent::dispatch((string) $liveShow->id);
+        HideGalleryImageEvent::dispatch((string) $liveShow->id);
         LiveShowMediaHidden::dispatch((string) $liveShow->id);
 
         return response()->json([
