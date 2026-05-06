@@ -6,6 +6,8 @@ use App\Events\GameResetEvent;
 use App\Events\HideGalleryImageEvent;
 use App\Events\HideLiveShowWinnersTabEvent;
 use App\Events\LiveShowChatStatusUpdatedEvent;
+use App\Events\LiveShowMediaHidden;
+use App\Events\LiveShowMediaPlayed;
 use App\Events\LiveShowMessageEvent;
 use App\Events\LiveShowQuizUserResponses;
 use App\Events\RemoveLiveShowQuizQuestionEvent;
@@ -581,6 +583,7 @@ class LiveShowController extends Controller
             null,
             $media->thumbnail ?? null
         );
+        LiveShowMediaPlayed::dispatch((string) $liveShow->id);
 
         return response()->json([
             'success' => true,
@@ -594,7 +597,7 @@ class LiveShowController extends Controller
         $liveShow = LiveShow::findOrFail($id);
         $liveShow->galleryState?->update(['is_visible' => false]);
         HideGalleryImageEvent::dispatch((string) $liveShow->id);
-
+        LiveShowMediaHidden::dispatch((string) $liveShow->id);
         return response()->json([
             'success' => true,
             'message' => 'Gallery overlay hidden on stream.',
@@ -1184,5 +1187,21 @@ class LiveShowController extends Controller
         }
 
         return null;
+    }
+
+    public function mediaHidden($id)
+    {
+        $liveShow = LiveShow::findOrFail($id);
+        LiveShowMediaHidden::dispatch($liveShow->id);
+
+        return response()->json(['message' => 'Media hidden successfully!']);
+    }
+
+    public function mediaPlayed($id)
+    {
+        $liveShow = LiveShow::findOrFail($id);
+        LiveShowMediaPlayed::dispatch($liveShow->id);
+
+        return response()->json(['message' => 'Media played successfully!']);
     }
 }

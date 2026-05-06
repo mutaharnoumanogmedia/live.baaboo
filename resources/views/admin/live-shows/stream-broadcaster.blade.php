@@ -7,8 +7,7 @@
 
         }
 
-        #root
-        [id^="zg-rtc-player"],
+        #root [id^="zg-rtc-player"],
         [id*="zg-rtc-player"] {
             transform: scaleX(-1) !important;
 
@@ -397,6 +396,11 @@
 
         let pipeline = null;
         let pipelinePromise = null;
+        let overlayVideoEl = null;
+
+        const liveShowMediaHiddenUrl = '{{ route('admin.live-shows.media-hidden', $liveShow->id) }}';
+        const liveShowMediaPlayedUrl = '{{ route('admin.live-shows.media-played', $liveShow->id) }}';
+        const csrfToken = '{{ csrf_token() }}';
 
         // Overlay state, mutable from the UI controls.
         const overlayState = {
@@ -448,7 +452,7 @@
             }
 
             // The overlay <video> for whatever URL the host plays.
-            const overlayVideoEl = document.createElement('video');
+            overlayVideoEl = document.createElement('video');
             overlayVideoEl.crossOrigin = 'anonymous';
             overlayVideoEl.playsInline = true;
             overlayVideoEl.preload = 'auto';
@@ -636,6 +640,35 @@
 
             const mixedAudioTrack = audioDestination.stream.getAudioTracks()[0];
 
+            // overlayVideoEl.addEventListener('playing', () => {
+            //     //api call to dispatch LiveShowMediaPlayed event
+            //     fetch(liveShowMediaPlayedUrl, {
+            //         method: 'POST',
+            //         headers: {
+            //             'X-CSRF-TOKEN': csrfToken,
+            //             'Accept': 'application/json',
+            //             'Content-Type': 'application/json'
+            //         }
+            //     });
+            //     console.log('LiveShowMediaPlayed event dispatched successfully!');
+            // });
+
+
+            overlayVideoEl.addEventListener('ended', () => {
+                console.log('Streamed video finished!');
+
+                //api call to dispatch LiveShowMediaHidden event
+                fetch(liveShowMediaHiddenUrl, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                console.log('LiveShowMediaHidden event dispatched successfully!');
+            });
+
             return {
                 cameraVideoEl,
                 overlayVideoEl,
@@ -648,7 +681,12 @@
                 sourceStream,
                 ensureOverlayAudioWired,
             };
+
+
+
         }
+
+
 
         function getOrInitPipeline(constraints) {
             if (pipeline) return Promise.resolve(pipeline);

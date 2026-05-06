@@ -28,6 +28,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('live-shows/{live_show}/gallery-attach', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'liveShowsAttachPage'])->name('live-shows.gallery-attach');
     Route::get('live-shows/{live_show}/copy', [\App\Http\Controllers\Admin\LiveShowController::class, 'copyLiveShow'])->name('live-shows.copy');
 
+    Route::post('live-shows/{live_show}/media-hidden', [\App\Http\Controllers\Admin\LiveShowController::class, 'mediaHidden'])->name('live-shows.media-hidden');
+    Route::post('live-shows/{live_show}/media-played', [\App\Http\Controllers\Admin\LiveShowController::class, 'mediaPlayed'])->name('live-shows.media-played');
+
     Route::resource('live-show-quizzes', \App\Http\Controllers\Admin\LiveShowQuizController::class);
 
     Route::get('media-gallery', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'index'])->name('media-gallery.index');

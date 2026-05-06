@@ -2232,6 +2232,8 @@
 
              const allMediaUrl = '{{ route('admin.media-gallery.all') }}';
 
+             const liveShowMediaHiddenUrl = '{{ route('admin.live-shows.media-hidden', $liveShow->id) }}';
+
 
 
              function galleryShowOnStream(mediaId, btn) {
@@ -2308,6 +2310,10 @@
                      .finally(() => {
                          setBtnBusy(btn, false);
                      });
+
+
+
+                 console.log('LiveShowMediaHidden event dispatched successfully!');
              }
 
              function galleryAttach(mediaId, btn) {

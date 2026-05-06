@@ -525,7 +525,7 @@
 
 
     </div>
-    <div class="live-show-bottom-fixed">
+    <div class="live-show-bottom-fixed" id="liveShowBottomFixed">
         <div id="liveShowTabContainer">
 
             <div class="tab-content" id="liveShowTabsContent">
@@ -971,12 +971,12 @@
             updatePlayersLeaderboard();
             updateChatComposerState();
 
-           
+
 
             if (isLoggedIn) {
                 checkIfUserBlockedFromLiveShow();
             }
-            
+
         });
 
 
@@ -2122,10 +2122,7 @@
         });
 
         function onLoadGameShow() {
-
             // enablePush();
-
-
             if (isLoggedIn == false && window.location.search.indexOf('preview=true') === -1) {
                 showRegisterModal();
             }
@@ -2487,31 +2484,6 @@
             });
         }
 
-        // var channelGalleryImage = pusher.subscribe('live-show.{{ $liveShow->id }}');
-        // channelGalleryImage.bind('pusher:subscription_succeeded', function() {
-        //     console.log('Gallery image channel subscribed successfully!');
-        // });
-        // channelGalleryImage.bind('ShowGalleryImageEvent', function(data) {
-        //     showGalleryOverlay({
-        //         type: data.type,
-        //         src: data.url,
-        //         playback_started_at: data.playback_started_at ?? null,
-        //         video_duration_seconds: data.video_duration_seconds != null ? data.video_duration_seconds :
-        //             null,
-        //         thumbnail_url: data.thumbnail_url ?? null
-        //     });
-        // });
-
-        // channelGalleryImage.bind('HideGalleryImageEvent', function() {
-        //     hideGalleryOverlay();
-        // });
-
-        // if (document.readyState === 'loading') {
-        //     document.addEventListener('DOMContentLoaded', hydrateGalleryOverlayFromServer);
-        // } else {
-        //     hydrateGalleryOverlayFromServer();
-        // }
-
 
         //hide the gallery video when it is completed after 1 second of finish playing
 
@@ -2557,72 +2529,7 @@
         }
 
 
-        // Auto-trigger quiz questions after login for live show id 1004
 
-
-        // if (typeof {{ $liveShow->id }} !== 'undefined' && {{ $liveShow->id }} == 1004) {
-
-        //     function autoShowQuizQuestions() {
-        //         setTimeout(() => {
-        //             // Fetch quizzes with options (quizzes = questions)
-        //             fetch('{{ url('api/live-show/' . $liveShow->id . '/get-live-show-quizzes') }}')
-        //                 .then(response => response.json())
-        //                 .then(quizzes => {
-        //                     if (!Array.isArray(quizzes) || quizzes.length === 0) {
-        //                         console.log("No quiz questions received");
-        //                         return;
-        //                     }
-        //                     let idx = 0;
-
-        //                     function showNextQuestion() {
-        //                         if (idx >= quizzes.length) {
-        //                             return;
-        //                         }
-        //                         const quiz = quizzes[idx];
-
-        //                         // 1. Show the quiz by hitting send-quiz-question API
-        //                         fetch('{{ url('api/live-show/' . $liveShow->id) }}/quizzes/' + quiz.id +
-        //                                 '/send-quiz-question', {
-        //                                     method: 'POST',
-        //                                     headers: {
-        //                                         'Content-Type': 'application/json',
-        //                                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        //                                     },
-        //                                     body: JSON.stringify({
-        //                                         seconds: 10,
-        //                                         is_last: (idx === quizzes.length - 1)
-        //                                     })
-        //                                 })
-        //                             .then(() => {
-        //                                 // 2. After 10 seconds, hide/remove question
-        //                                 setTimeout(() => {
-        //                                     fetch('{{ url('api/live-show/' . $liveShow->id) }}/quizzes/' +
-        //                                             quiz.id + '/remove-quiz-question', {
-        //                                                 method: 'POST',
-        //                                                 headers: {
-        //                                                     'Content-Type': 'application/json',
-        //                                                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        //                                                 }
-        //                                             })
-        //                                         .then(() => {
-        //                                             // 3. Wait 5 seconds before next
-        //                                             setTimeout(() => {
-        //                                                 idx++;
-        //                                                 showNextQuestion();
-        //                                             }, 5000);
-        //                                         });
-        //                                 }, 10000);
-        //                             });
-        //                     }
-
-        //                     showNextQuestion();
-        //                 })
-        //                 .catch(err => {
-        //                     console.error('Failed to fetch quiz questions:', err);
-        //                 });
-        //         }, 5000);
-        //     }
-        // }
         document.addEventListener('DOMContentLoaded', function() {
             if ("{{ $liveShow->id }}" == 1004 && isLoggedIn) {
                 autoShowQuizQuestions();
@@ -3015,6 +2922,28 @@
         //         bootstrap();
         //     }
         // })();
+    </script>
+    <script>
+        var channelMediaPlayed = pusher.subscribe('live-show-media-played.' + {{ $liveShow->id }});
+        //success 
+        channelMediaPlayed.bind('pusher:subscription_succeeded', function() {
+            console.log('LiveShowMediaPlayed channel subscribed successfully!');
+        });
+        channelMediaPlayed.bind('LiveShowMediaPlayed', function(data) {
+            document.getElementById('galleryOverlayModal').style.display = 'none';
+            console.log('LiveShowMediaPlayed event received:', data);
+            document.getElementById('liveShowBottomFixed').style.display = 'none';
+        });
+
+        var channelMediaHidden = pusher.subscribe('live-show-media-hidden.' + {{ $liveShow->id }});
+        channelMediaHidden.bind('pusher:subscription_succeeded', function() {
+            console.log('LiveShowMediaHidden channel subscribed successfully!');
+        });
+        channelMediaHidden.bind('LiveShowMediaHidden', function(data) {
+            console.log('LiveShowMediaHidden event received:', data);
+            //hide overlay
+            document.getElementById('liveShowBottomFixed').style.display = 'block';
+        });
     </script>
 
     @if (request()->boolean('debug_bot') && $liveShow->is_test_show)
