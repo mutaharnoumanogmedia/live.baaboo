@@ -36,9 +36,26 @@ class PlayerController extends Controller
     {
         $base = User::role('user')->where('is_active', 1);
 
+        // Cheap unfiltered total used for the "Showing X of Y" footer.
         $totalRecords = (clone $base)->count();
 
-        $query = (clone $base)
+        // Step 1: build a SLIM filter query (no withCount/addSelect/with) — this
+        // is what's used to compute recordsFiltered. Doing the count over a
+        // query that contains correlated subqueries in the SELECT clause makes
+        // MySQL evaluate them once per row of the wrapped derived table, which
+        // becomes very slow on large tables. Keeping COUNT() lean fixes that.
+        $filterQuery = (clone $base);
+
+        $this->applyGlobalSearch($filterQuery, (string) $request->input('search.value', ''));
+        $this->applyColumnSearch($filterQuery, (array) $request->input('columns', []));
+        $this->applyCustomFilters($filterQuery, $request);
+
+        $filteredRecords = (clone $filterQuery)->count();
+
+        // Step 2: only NOW attach the heavy SELECT subqueries + relations. They
+        // run for the page slice (e.g. 100 rows) instead of the whole filtered
+        // set.
+        $dataQuery = $filterQuery
             ->select('users.*')
             ->withCount([
                 'liveShows as live_games_played',
@@ -53,21 +70,19 @@ class PlayerController extends Controller
                     ->limit(1),
             ]);
 
-        $this->applyGlobalSearch($query, (string) $request->input('search.value', ''));
-        $this->applyColumnSearch($query, (array) $request->input('columns', []));
-        $this->applyCustomFilters($query, $request);
+        $this->applyOrdering($dataQuery, $request);
 
-        $filteredRecords = (clone $query)->count();
-
-        $this->applyOrdering($query, $request);
-
+        // Backend-aligned pagination: respect DataTables `start` and `length`,
+        // default to 100 per page, and cap at 500 so a malformed request can't
+        // ask the DB to materialise the entire table in one shot.
         $start = max(0, (int) $request->input('start', 0));
-        $length = (int) $request->input('length', 20);
-        if ($length > 0) {
-            $query->offset($start)->limit($length);
+        $length = (int) $request->input('length', 100);
+        if ($length <= 0 || $length > 500) {
+            $length = 100;
         }
+        $dataQuery->offset($start)->limit($length);
 
-        $players = $query->get();
+        $players = $dataQuery->get();
 
         $data = $players->map(fn ($p) => $this->transformPlayer($p))->all();
 

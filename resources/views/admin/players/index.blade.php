@@ -219,11 +219,12 @@
                 const table = $('#playersTable').DataTable({
                     processing: true,
                     serverSide: true,
-                    searchDelay: 500,
-                    pageLength: 20,
+                    deferRender: true,
+                    searchDelay: 700,
+                    pageLength: 100,
                     lengthMenu: [
-                        [10, 20, 50, 100],
-                        [10, 20, 50, 100]
+                        [50, 100, 200, 500],
+                        [50, 100, 200, 500]
                     ],
                     order: [
                         [0, 'desc']
