@@ -116,6 +116,30 @@
                 color: #fff;
             }
         }
+
+
+        table.data-table {
+            overflow: visible;
+            /* override the hidden above */
+        }
+
+        /* DataTables wrappers */
+        .dataTables_wrapper,
+        .dataTables_scroll,
+        .dataTables_scrollBody,
+        .dataTables_scrollHead {
+            overflow: visible !important;
+        }
+
+        /* lift the active row above the next ones */
+        table.data-table tbody tr:has(.dropdown-menu.show) {
+            position: relative;
+            z-index: 1055;
+        }
+
+        .dropdown-menu {
+            z-index: 1055;
+        }
     </style>
 
 </head>
