@@ -82,7 +82,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('live-shows/{id}/unblock-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'unblockUser'])->name('live-shows.unblock-user');
 
     Route::get('players', [\App\Http\Controllers\Admin\PlayerController::class, 'index'])->name('players.index');
-    Route::get('players-data', [\App\Http\Controllers\Admin\PlayerController::class, 'data'])->name('players.data');
     Route::get('players/{id}', [\App\Http\Controllers\Admin\PlayerController::class, 'show'])->name('players.show');
 
     Route::get('live-shows/{id}/get-users-quiz-responses/{quiz_id}', [\App\Http\Controllers\Admin\LiveShowController::class, 'getUsersQuizResponses'])->name('live-shows.get-users-quiz-responses');

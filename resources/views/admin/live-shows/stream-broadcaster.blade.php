@@ -1113,6 +1113,7 @@
             muted: muteChk.checked,
         });
         setTimeout(() => setStatus('Playing: ' + label, '#86efac'), 600);
+        
     });
 
     stopBtn.addEventListener('click', () => {

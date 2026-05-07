@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Carbon\Carbon;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -16,46 +14,25 @@ class PlayerController extends Controller
         $this->middleware('permission:can-manage-players');
     }
 
-    public function index()
-    {
-        return view('admin.players.index');
-    }
-
     /**
-     * Server-side data endpoint for the players DataTable.
+     * Server-rendered, paginated players list.
      *
-     * Accepts standard DataTables 1.13 server-side params (draw, start, length,
-     * search[value], order[*], columns[*]) plus the custom filter inputs:
-     *  - filter_registered_from / filter_registered_to (Y-m-d)
-     *  - filter_last_show_from  / filter_last_show_to  (Y-m-d)
-     *  - filter_has_referrer    ('1' | '0' | '')
-     *  - filter_min_games       (int)
-     *  - filter_min_referred    (int)
+     * Recognised query string params:
+     *  - q                          (string)  global search (name/email/username)
+     *  - id, name, email, user_name (string)  per-column search inputs
+     *  - referred_by_username       (string)  per-column search on referrer
+     *  - sort                       (string)  one of the orderable columns
+     *  - direction                  (asc|desc)
+     *  - filter_registered_from / filter_registered_to  (Y-m-d)
+     *  - filter_last_show_from  / filter_last_show_to   (Y-m-d)
+     *  - filter_has_referrer        ('1' | '0' | '')
+     *  - filter_min_games           (int)
+     *  - filter_min_referred        (int)
+     *  - page                       (int)     paginator page
      */
-    public function data(Request $request): JsonResponse
+    public function index(Request $request)
     {
-        $base = User::role('user')->where('is_active', 1);
-
-        // Cheap unfiltered total used for the "Showing X of Y" footer.
-        $totalRecords = (clone $base)->count();
-
-        // Step 1: build a SLIM filter query (no withCount/addSelect/with) — this
-        // is what's used to compute recordsFiltered. Doing the count over a
-        // query that contains correlated subqueries in the SELECT clause makes
-        // MySQL evaluate them once per row of the wrapped derived table, which
-        // becomes very slow on large tables. Keeping COUNT() lean fixes that.
-        $filterQuery = (clone $base);
-
-        $this->applyGlobalSearch($filterQuery, (string) $request->input('search.value', ''));
-        $this->applyColumnSearch($filterQuery, (array) $request->input('columns', []));
-        $this->applyCustomFilters($filterQuery, $request);
-
-        $filteredRecords = (clone $filterQuery)->count();
-
-        // Step 2: only NOW attach the heavy SELECT subqueries + relations. They
-        // run for the page slice (e.g. 100 rows) instead of the whole filtered
-        // set.
-        $dataQuery = $filterQuery
+        $query = User::role('user')->where('is_active', 1)
             ->select('users.*')
             ->withCount([
                 'liveShows as live_games_played',
@@ -70,28 +47,15 @@ class PlayerController extends Controller
                     ->limit(1),
             ]);
 
-        $this->applyOrdering($dataQuery, $request);
+        $this->applyGlobalSearch($query, (string) $request->input('q', ''));
+        $this->applyColumnSearch($query, $request);
+        $this->applyCustomFilters($query, $request);
+        $this->applyOrdering($query, $request);
 
-        // Backend-aligned pagination: respect DataTables `start` and `length`,
-        // default to 100 per page, and cap at 500 so a malformed request can't
-        // ask the DB to materialise the entire table in one shot.
-        $start = max(0, (int) $request->input('start', 0));
-        $length = (int) $request->input('length', 100);
-        if ($length <= 0 || $length > 500) {
-            $length = 100;
-        }
-        $dataQuery->offset($start)->limit($length);
+        // 100 records per page, links keep all current filters/sort.
+        $players = $query->paginate(50)->withQueryString();
 
-        $players = $dataQuery->get();
-
-        $data = $players->map(fn ($p) => $this->transformPlayer($p))->all();
-
-        return response()->json([
-            'draw' => (int) $request->input('draw'),
-            'recordsTotal' => $totalRecords,
-            'recordsFiltered' => $filteredRecords,
-            'data' => $data,
-        ]);
+        return view('admin.players.index', compact('players'));
     }
 
     public function show($id)
@@ -174,37 +138,27 @@ class PlayerController extends Controller
         });
     }
 
-    private function applyColumnSearch($query, array $columns): void
+    private function applyColumnSearch($query, Request $request): void
     {
-        foreach ($columns as $column) {
-            $value = trim((string) ($column['search']['value'] ?? ''));
-            $name = $column['data'] ?? null;
+        $columnFilters = [
+            'id' => function ($q, $v) {
+                if (is_numeric($v)) {
+                    $q->where('users.id', (int) $v);
+                }
+            },
+            'name' => fn ($q, $v) => $q->where('users.name', 'like', "%{$v}%"),
+            'email' => fn ($q, $v) => $q->where('users.email', 'like', "%{$v}%"),
+            'user_name' => fn ($q, $v) => $q->where('users.user_name', 'like', "%{$v}%"),
+            'referred_by_username' => fn ($q, $v) => $q->whereHas('referredBy', function ($sub) use ($v) {
+                $sub->where('user_name', 'like', "%{$v}%")
+                    ->orWhere('name', 'like', "%{$v}%");
+            }),
+        ];
 
-            if ($value === '' || ! $name) {
-                continue;
-            }
-
-            switch ($name) {
-                case 'id':
-                    if (is_numeric($value)) {
-                        $query->where('users.id', (int) $value);
-                    }
-                    break;
-                case 'name':
-                    $query->where('users.name', 'like', "%{$value}%");
-                    break;
-                case 'email':
-                    $query->where('users.email', 'like', "%{$value}%");
-                    break;
-                case 'user_name':
-                    $query->where('users.user_name', 'like', "%{$value}%");
-                    break;
-                case 'referred_by_username':
-                    $query->whereHas('referredBy', function ($q) use ($value) {
-                        $q->where('user_name', 'like', "%{$value}%")
-                            ->orWhere('name', 'like', "%{$value}%");
-                    });
-                    break;
+        foreach ($columnFilters as $field => $apply) {
+            $value = trim((string) $request->input($field, ''));
+            if ($value !== '') {
+                $apply($query, $value);
             }
         }
     }
@@ -258,58 +212,13 @@ class PlayerController extends Controller
             'referred_users_count' => 'referred_users_count',
         ];
 
-        $columnIndex = (int) $request->input('order.0.column', 0);
-        $dir = $request->input('order.0.dir') === 'asc' ? 'asc' : 'desc';
-        $columnName = $request->input("columns.$columnIndex.data");
+        $sort = $request->input('sort', 'id');
+        $dir = $request->input('direction') === 'asc' ? 'asc' : 'desc';
 
-        if (isset($orderable[$columnName])) {
-            $query->orderBy($orderable[$columnName], $dir);
+        if (isset($orderable[$sort])) {
+            $query->orderBy($orderable[$sort], $dir);
         } else {
             $query->orderByDesc('users.id');
         }
-    }
-
-    private function transformPlayer(User $player): array
-    {
-        $referredByLabel = '-';
-        if ($player->referredBy) {
-            $referredByLabel = $player->referredBy->user_name
-                ?: ($player->referredBy->name ?: '#'.$player->referredBy->id);
-        }
-
-        $lastPlayed = $player->last_game_played_at
-            ? Carbon::parse($player->last_game_played_at)->format('Y-m-d H:i')
-            : 'Never';
-
-        return [
-            'id' => $player->id,
-            'name' => e($player->name ?? '-'),
-            'email' => e($player->email),
-            'user_name' => e($player->user_name ?? '-'),
-            'created_at' => optional($player->created_at)->format('Y-m-d H:i') ?? '-',
-            'live_games_played' => (int) $player->live_games_played,
-            'last_game_played_at' => $lastPlayed,
-            'referred_users_count' => (int) $player->referred_users_count,
-            'referred_by_username' => e($referredByLabel),
-            'is_affiliate' => $player->is_affiliate ? 'Yes' : 'No',
-            'actions' => $this->renderActions($player),
-        ];
-    }
-
-    private function renderActions(User $player): string
-    {
-        $url = e(route('admin.players.show', $player->id));
-
-        return <<<HTML
-            <div class="dropdown">
-                <button class="btn btn-secondary btn-sm dropdown-toggle" type="button"
-                    data-bs-toggle="dropdown" aria-expanded="false">
-                    Actions
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="{$url}">View Player</a></li>
-                </ul>
-            </div>
-            HTML;
     }
 }
