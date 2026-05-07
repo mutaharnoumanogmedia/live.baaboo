@@ -47,8 +47,7 @@ class GamePlayController extends Controller
         }
         $updateMessage = '';
         if ($liveShow->status == 'completed') {
-            $nextScheduledLiveShow = LiveShow::where('status', 'scheduled')->orderBy('scheduled_at', 'asc')->first();
-            dd($nextScheduledLiveShow);
+            $nextScheduledLiveShow = LiveShow::where('status', 'scheduled')->orderBy('scheduled_at', 'asc')->notTestShow()->first();
             if ($nextScheduledLiveShow) {
                 $updateMessage = 'Die Live-Übertragung ist beendet. Vielen Dank für deine Teilnahme! Die nächste Show findet am  '.Carbon::parse($nextScheduledLiveShow->scheduled_at)->format('d.F Y \u\m H:i').'Uhr statt.';
             }
