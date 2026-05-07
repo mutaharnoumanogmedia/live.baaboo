@@ -14,7 +14,7 @@
         }
 
         #root video {
-            object-fit: cover !important;
+            object-fit: contain !important;
             position: fixed;
             top: 0;
             left: 0;
