@@ -1,11 +1,12 @@
 <html>
 
 <head>
-
     <style>
         #root video {
             object-fit: contain !important;
-           
+            width: 100% !important;
+            height: 100% !important;
+
         }
 
         #root [id^="zg-rtc-player"],
