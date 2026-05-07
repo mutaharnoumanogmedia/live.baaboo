@@ -143,6 +143,16 @@
                                             <code class="text-warning">{{ $player->referralLink() }}</code>
                                         </td>
                                     </tr>
+                                    <tr>
+                                        <td>Is Affiliate</td>
+                                        <td>
+                                            @if ($player->is_affiliate)
+                                                <span class="badge bg-info">Yes</span>
+                                            @else
+                                                <span class="badge bg-secondary">No</span>
+                                            @endif
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -184,6 +194,22 @@
                                         <tr>
                                             <th>Joined At</th>
                                             <td>{{ optional($player->referredBy->created_at)->format('Y-m-d H:i') ?? '-' }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Affiliate</th>
+                                            <td>
+                                                @if ($player->referredBy->is_affiliate)
+                                                    <span class="badge bg-info">Yes</span>
+                                                @else
+                                                    <span class="badge bg-secondary">No</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Referral Link</th>
+                                            <td class="text-break">
+                                                <code class="text-warning">{{ $player->referredBy->referralLink() }}</code>
                                             </td>
                                         </tr>
                                     </tbody>
