@@ -193,7 +193,7 @@
                 // Insert loader markup (hidden by default)
                 if ($('#playersTableLoader').length === 0) {
                     $('body').append(`
-                        <div id="playersTableLoader" style="display:none; position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2000;background:rgba(0,0,0,.5);justify-content:center;align-items:center;">
+                        <div id="playersTableLoader" style="display:none; position:fixed;bottom:10vh;left:0;width:100vw;height:80vh;z-index:2000;background:rgba(0,0,0,.5);justify-content:center;align-items:center;">
                             <div class="spinner-border text-primary" style="width: 4rem; height: 4rem;" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
