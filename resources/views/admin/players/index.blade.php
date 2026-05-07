@@ -89,6 +89,7 @@
                                     <th>Last Game Played</th>
                                     <th>Referred Users</th>
                                     <th>Referred By</th>
+                                    <th>Is Affiliate</th>
                                     <th class="text-end">Actions</th>
                                 </tr>
                                 <tr class="column-search-row">
@@ -102,6 +103,7 @@
                                     <th></th>
                                     <th><input type="text" class="form-control form-control-sm"
                                             placeholder="Referrer"></th>
+                                    <th><input type="text" class="form-control form-control-sm" placeholder="Is Affiliate"></th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -251,6 +253,7 @@
                         { data: 'last_game_played_at' },
                         { data: 'referred_users_count', className: 'text-center' },
                         { data: 'referred_by_username' },
+                        {data: 'is_affiliate', className: 'text-center'},
                         { data: 'actions', orderable: false, searchable: false, className: 'text-end' }
                     ],
                 });

@@ -276,6 +276,7 @@ class PlayerController extends Controller
             'last_game_played_at' => $lastPlayed,
             'referred_users_count' => (int) $player->referred_users_count,
             'referred_by_username' => e($referredByLabel),
+            'is_affiliate' => $player->is_affiliate ? 'Yes' : 'No',
             'actions' => $this->renderActions($player),
         ];
     }
