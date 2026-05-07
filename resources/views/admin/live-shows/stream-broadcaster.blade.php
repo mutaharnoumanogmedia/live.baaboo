@@ -3,7 +3,7 @@
 <head>
     <style>
         #root video {
-            object-fit: cover !important;
+            object-fit: contain !important;
 
         }
 
