@@ -2132,10 +2132,10 @@
                 showRegisterModal();
             }
 
-            if (vid.src != '') {
-                vid.play();
-                vid.muted = false;
-            }
+            // if (vid.src != '') {
+            //     vid.play();
+            //     vid.muted = false;
+            // }
 
 
 
