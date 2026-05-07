@@ -21,7 +21,7 @@
             width: 100%;
             height: 100%;
         }
-        
+
 
 
 
@@ -55,10 +55,16 @@
         #ZegoRoomFooter {
             display: none !important;
         }
+
         .zg_autoplay_wrapper {
             position: absolute !important;
-            top:50px !important;
+            top: 50px !important;
 
+        }
+
+
+        div:has(> .unmuteVideo) {
+            display: none !important;
         }
     </style>
 </head>
@@ -169,7 +175,7 @@
             showLeaveRoomConfirmDialog: false, // Exit immediately without popup
             translateLanguage: 'German',
             // language: 'German',
-           
+
             innerText: {
                 roomLiveNotStarted: "The broadcast hasn't started yet.", // Fixes your specific issue
                 roomEmpty: "The host has left the room.",

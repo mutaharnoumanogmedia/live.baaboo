@@ -315,6 +315,9 @@
 </head>
 
 <body>
+
+    @include('partials.gtm', ['part' => 'body'])
+
     <div class="main-container">
         <!-- Single-Tab Restriction Overlay -->
         <div id="inactiveTabOverlay">
