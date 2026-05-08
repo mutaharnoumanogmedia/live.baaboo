@@ -1175,9 +1175,21 @@
 
     window.addEventListener('broadcast-overlay-error', (ev) => {
         const err = ev.detail || {};
-        const msg = (err && err.name === 'NotSupportedError') ?
-            'Cannot play this URL (codec / CORS / format).' :
-            'Playback failed: ' + (err.message || 'unknown error');
+        // const msg = (err && err.name === 'NotSupportedError') ?
+        //     'Cannot play this URL (codec / CORS / format).' :
+        //     'Playback failed: ' + (err.message || 'unknown error');
+        if (err.name === 'NotAllowedError') {
+            // Retry muted; show a "tap for sound" overlay
+            window.BroadcastOverlay.play(lastUrl, {
+                muted: true
+            });
+            // after 0.5 seconds, retry the play
+            setTimeout(() => {
+                window.BroadcastOverlay.play(lastUrl, {
+                    muted: true
+                });
+            }, 500);
+        }
         setStatus(msg, '#fca5a5');
     });
 </script>
