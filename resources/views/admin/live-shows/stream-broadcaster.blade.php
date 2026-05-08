@@ -1226,11 +1226,7 @@
                 loop: false,
                 muted: true,
             });
-            setTimeout(() => {
-                window.BroadcastOverlay.play(data.url, {
-                    muted: false,
-                });
-            }, 500);
+            
         } else {
             console.error("[Pusher] No URL received in ShowGalleryImageEvent");
         }
