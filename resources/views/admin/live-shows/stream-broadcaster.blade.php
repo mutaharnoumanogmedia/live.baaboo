@@ -1175,6 +1175,7 @@
 
     window.addEventListener('broadcast-overlay-error', (ev) => {
         const err = ev.detail || {};
+        console.log('Broadcast overlay error:', err);
         // const msg = (err && err.name === 'NotSupportedError') ?
         //     'Cannot play this URL (codec / CORS / format).' :
         //     'Playback failed: ' + (err.message || 'unknown error');
