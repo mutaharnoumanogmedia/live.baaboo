@@ -978,7 +978,7 @@
             // Optionally decide whether to still join room or not
         }
 
-        generateQRCode('{{ url('live-show-play/' . $liveShow->id) }}');
+        generateQRCode(window.location.href);
     }
 
 
