@@ -922,11 +922,18 @@
                         role
                     },
                 },
+
+                onLiveStart: (user) => {
+                    console.log("Success! The stream has officially started.");
+                    console.log("Broadcasting user details:", user);
+                    alert('continue');
+                },
                 // --- Connection state handling ---------------------------------
                 // Background-tab throttling can cause brief DISCONNECTED blips.
                 // Let Zego try to reconnect on its own first; only force a full
                 // page reload if we really stay disconnected for a long time.
                 onInRoomStateChanged: (state) => {
+
                     console.log("Connection state:", state);
                     if (state === 'CONNECTED') {
                         window.__lastZegoConnectedAt = Date.now();
@@ -963,6 +970,9 @@
                 ...config
             });
 
+
+
+
         } catch (error) {
             console.error('Error saving Room ID:', error);
             // Optionally decide whether to still join room or not
@@ -970,6 +980,7 @@
 
         generateQRCode('{{ url('live-show-play/' . $liveShow->id) }}');
     }
+
 
     function generateQRCode(link) {
         const qrcodeContainer = document.getElementById('page-qr-code');
@@ -1181,15 +1192,7 @@
         //     'Playback failed: ' + (err.message || 'unknown error');
         if (err.name === 'NotAllowedError') {
             // Retry muted; show a "tap for sound" overlay
-            window.BroadcastOverlay.play(lastUrl, {
-                muted: true
-            });
-            // after 0.5 seconds, retry the play
-            setTimeout(() => {
-                window.BroadcastOverlay.play(lastUrl, {
-                    muted: true
-                });
-            }, 500);
+            alert('Please touch the screen or click');
         }
         setStatus(msg, '#fca5a5');
     });
