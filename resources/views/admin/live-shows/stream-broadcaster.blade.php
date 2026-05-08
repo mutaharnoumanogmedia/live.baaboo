@@ -1224,7 +1224,7 @@
                 position: 'fullscreen',
                 size: 1,
                 loop: false,
-                muted: true,
+                muted: false,
             });
             
         } else {
