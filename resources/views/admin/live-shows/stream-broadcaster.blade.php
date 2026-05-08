@@ -1192,7 +1192,7 @@
         //     'Playback failed: ' + (err.message || 'unknown error');
         if (err.name === 'NotAllowedError') {
             // Retry muted; show a "tap for sound" overlay
-            alert('Please touch the screen or click');
+            
         }
         setStatus(msg, '#fca5a5');
     });
