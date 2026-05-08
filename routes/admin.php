@@ -31,6 +31,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('live-shows/{live_show}/media-hidden', [\App\Http\Controllers\Admin\LiveShowController::class, 'mediaHidden'])->name('live-shows.media-hidden');
     Route::post('live-shows/{live_show}/media-played', [\App\Http\Controllers\Admin\LiveShowController::class, 'mediaPlayed'])->name('live-shows.media-played');
 
+    Route::post('live-shows/{live_show}/inject-media-stream', [\App\Http\Controllers\Admin\LiveShowController::class, 'injectMediaStream'])->name('live-shows.inject-media-stream');
+
     Route::resource('live-show-quizzes', \App\Http\Controllers\Admin\LiveShowQuizController::class);
 
     Route::get('media-gallery', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'index'])->name('media-gallery.index');

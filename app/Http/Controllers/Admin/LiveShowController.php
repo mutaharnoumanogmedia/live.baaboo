@@ -36,6 +36,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
 
 class LiveShowController extends Controller
 {
@@ -582,6 +583,7 @@ class LiveShowController extends Controller
             $media->thumbnail ?? null
         );
         $liveShow->update(['media_visible' => true]);
+        //  $this->injectMediaStream($liveShow->stream_id, $media->path);
 
         LiveShowMediaPlayed::dispatch((string) $liveShow->id);
 
@@ -1210,5 +1212,40 @@ class LiveShowController extends Controller
         LiveShowMediaPlayed::dispatch($liveShow->id);
 
         return response()->json(['message' => 'Media played successfully!']);
+    }
+
+    public function injectMediaStream($liveShowStreamId, $galleryMediaPath)
+    {
+        // $liveShow = LiveShow::findOrFail($liveShowId);
+        // $galleryMedia = $liveShow->galleryMedia()->findOrFail($galleryMediaId);
+        $mediaUrl = $galleryMediaPath; // The media URL from your DB
+        $roomId = $liveShowStreamId; // Current live Room ID
+        $streamId = 'media_'.uniqid(); // Unique ID for this media stream
+
+        $appId = env('ZEGO_APP_ID');
+        $serverSecret = env('ZEGO_SERVER_SECRET');
+        $timestamp = time();
+        $signatureNonce = bin2hex(random_bytes(8));
+        $signature = md5($appId.$signatureNonce.$serverSecret.$timestamp);
+
+        // Call the Zego Server API directly
+        $response = Http::get('https://rtc-api.zego.im/', [
+            'api' => '1',
+            'ver' => '1',
+            'UserId' => 'media-bot-'.uniqid(),
+            'Action' => 'AddStream',
+            'AppId' => $appId,
+            'SignatureNonce' => $signatureNonce,
+            'Timestamp' => $timestamp,
+            'Signature' => $signature,
+            'SignatureVersion' =>'2.0',
+            'RoomId' => $roomId,
+            'StreamId' => $streamId,
+            'StreamUrl' => $mediaUrl, // The URL of the media you want to push
+        ]);
+
+            \Log::info('Inject Media Stream Response: ' , ['response' => $response->json(), 'mediaUrl' => $mediaUrl, 'roomId' => $roomId, 'streamId' => $streamId] );
+
+        return response()->json($response->json());
     }
 }

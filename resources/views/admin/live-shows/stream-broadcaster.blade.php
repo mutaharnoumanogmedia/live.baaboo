@@ -23,7 +23,7 @@
         [id*="zg-rtc-player"] {
             transform: scaleX(-1) !important;
 
-             
+
         }
 
 
@@ -832,6 +832,10 @@
 <script src="https://unpkg.com/@ZEGOCLOUD/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
 
 
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+
 <script>
     window.onload = async function() {
 
@@ -908,8 +912,8 @@
             const zp = ZegoUIKitPrebuilt.create(TOKEN);
             zp.joinRoom({
                 container: document.querySelector("#root"),
-                videoResolutionList: [ZegoUIKitPrebuilt.VideoResolution_720P],
-                videoResolutionDefault: ZegoUIKitPrebuilt.VideoResolution_720P,
+                videoResolutionList: [ZegoUIKitPrebuilt.VideoResolution_540P],
+                videoResolutionDefault: ZegoUIKitPrebuilt.VideoResolution_540P,
 
 
                 scenario: {
@@ -963,6 +967,18 @@
             console.error('Error saving Room ID:', error);
             // Optionally decide whether to still join room or not
         }
+
+        generateQRCode('{{ url('live-show-play/' . $liveShow->id) }}');
+    }
+
+    function generateQRCode(link) {
+        const qrcodeContainer = document.getElementById('page-qr-code');
+        qrcodeContainer.innerHTML = '';
+        new QRCode(qrcodeContainer, {
+            text: link,
+            width: 110,
+            height: 110
+        });
     }
 </script>
 
@@ -1166,26 +1182,8 @@
     });
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 
 <script>
-    window.onload = window.onload || function() {};
-    window.onload = (function(origOnload) {
-        return async function() {
-            if (typeof origOnload === "function") await origOnload();
-
-            // Generate QR for current page URL
-            if (document.getElementById('page-qr-code')) {
-                new QRCode(document.getElementById("page-qr-code"), {
-                    text: window.location.href,
-                    width: 110,
-                    height: 110
-                });
-            }
-        };
-    })(window.onload);
-
     // Listen for ShowGalleryImageEvent via Pusher/Echo or Pusher.js (frontend)
     // Assumes Pusher/Echo is already loaded and configured globally as `window.Echo` or `window.Pusher`
 
@@ -1195,6 +1193,7 @@
     Pusher.logToConsole = true;
     var pusher = new Pusher('{{ env('PUSHER_APP_KEY', '2a66d003a7ded9fe567a') }}', {
         cluster: '{{ env('PUSHER_APP_CLUSTER', 'eu') }}',
+        forceTls: true,
     });
 
     var channel = pusher.subscribe('live-show.' + liveShowId);
@@ -1220,6 +1219,44 @@
         console.log("[Pusher] HideGalleryImageEvent received");
         if (window.BroadcastOverlay) window.BroadcastOverlay.stop();
         setStatus('Overlay stopped.');
+    });
+    // Listen for Pusher channel events to observe state and failures
+
+    channel.bind('state_change', function(states) {
+        console.log('[Pusher] Connection state changed:', states);
+        setStatus('[Pusher] State: ' + (states && states.current ? states.current : JSON.stringify(states)));
+    });
+
+    channel.bind('error', function(err) {
+        console.error('[Pusher] Channel error:', err);
+        setStatus('[Pusher] Error: ' + (err && err.message ? err.message : JSON.stringify(err)));
+    });
+
+    channel.bind('unavailable', function() {
+        console.warn('[Pusher] Channel unavailable');
+        setStatus('[Pusher] Channel unavailable');
+    });
+
+    // 'subscription_error' is not a channel-level event in Pusher JS, but is a connection event.
+    // Listen for it on the Pusher instance if possible.
+    pusher.connection.bind('error', function(err) {
+        console.error('[Pusher] Connection error:', err);
+        setStatus('[Pusher] Connection error: ' + (err && err.error && err.error.data ? JSON.stringify(err.error
+            .data) : JSON.stringify(err)));
+    });
+
+    pusher.connection.bind('state_change', function(states) {
+        console.log('[Pusher] Connection state changed:', states);
+        setStatus('[Pusher] Conn State: ' + (states && states.current ? states.current : JSON.stringify(
+            states)));
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
+<script>
+    const noSleep = new NoSleep();
+    document.addEventListener('click', () => noSleep.enable(), {
+        once: true
     });
 </script>
 

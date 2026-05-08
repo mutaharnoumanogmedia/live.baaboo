@@ -2491,6 +2491,7 @@
                             </div>
                             
                             <div class="d-flex gap-2 flex-wrap   mt-1">
+                                
                                 <button type="button"
                                     class="btn btn-sm btn-success gallery-show-on-stream-btn"
                                     onclick="galleryShowOnStream('${data.id}', this)"

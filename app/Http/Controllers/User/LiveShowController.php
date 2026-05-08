@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\LiveShow;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class LiveShowController extends Controller
 {
@@ -14,10 +15,10 @@ class LiveShowController extends Controller
 
     public function index($liveShowId)
     {
-        $liveShow  = LiveShow::findOrFail($liveShowId);
+        $liveShow = LiveShow::findOrFail($liveShowId);
+
         return view('user.live-shows.index', compact('liveShow'));
     }
-
 
     public function updateOnlineStatus(Request $request, $liveShowId)
     {
@@ -25,11 +26,11 @@ class LiveShowController extends Controller
         $user = User::with('liveShows')->find($user_id);
 
         $onlineStatus = $request->is_online == 1 ? 1 : 0;
-        if (!$user) {
+        if (! $user) {
             return response()->json(['message' => 'User not found.'], 404);
         }
         $liveShow = LiveShow::find($liveShowId);
-        if (!$liveShow) {
+        if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
 
@@ -52,8 +53,10 @@ class LiveShowController extends Controller
             ->sortByDesc('score')
             ->toArray();
 
-        LiveShowOnlineUsersEvent::dispatch($updatedOnlineUsers, (string)$liveShowId);
+        LiveShowOnlineUsersEvent::dispatch($updatedOnlineUsers, (string) $liveShowId);
 
-        return response()->json(['message' => 'User status updated to ' . ($onlineStatus ? 'online' : 'offline') . '.', 'users' => $updatedOnlineUsers]);
+        return response()->json(['message' => 'User status updated to '.($onlineStatus ? 'online' : 'offline').'.', 'users' => $updatedOnlineUsers]);
     }
+
+   
 }
