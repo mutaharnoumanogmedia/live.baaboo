@@ -419,8 +419,13 @@
     (function() {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
 
-        const CANVAS_WIDTH = 1280;
-        const CANVAS_HEIGHT = 720;
+        // Set canvas dimensions responsively depending on device type
+        function isMobile() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        const CANVAS_WIDTH = isMobile() ? 360 : 1280;
+        const CANVAS_HEIGHT = isMobile() ? 640 : 720;
+
         const TARGET_FPS = 50;
 
         const origGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
