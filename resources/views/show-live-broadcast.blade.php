@@ -14,12 +14,13 @@
         }
 
         #root video {
-            object-fit: cover !important;
+            object-fit: contain !important;
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw !important;
+            height: 100vh !important;
+             
         }
 
 

@@ -3,12 +3,19 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
+        #root,
+        #root>div,
         #root video {
-            object-fit: cover !important;
-            width: 432px !important;
-            height: 933px !important;
-
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: 100%;
         }
+
+        #root video {
+            object-fit: contain !important;
+            /* or contain, depending on what you want */
+        }
+
 
         div:has(> #root video) {}
 
@@ -16,9 +23,7 @@
         [id*="zg-rtc-player"] {
             transform: scaleX(-1) !important;
 
-            display: flex;
-            justify-content: center;
-            align-items: center;
+             
         }
 
 
@@ -320,6 +325,24 @@
             margin: 8px 0 2px 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            #root video {
+                width: 100vw !important;
+                height: 100vh !important;
+            }
+
+            #overlay-toggle {
+                bottom: 80px;
+                right: 10px;
+            }
+
+            #overlay-controls {
+                bottom: 10px;
+                max-height: 70vh;
+                overflow-y: auto;
+            }
         }
     </style>
 </head>
