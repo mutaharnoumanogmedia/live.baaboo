@@ -4,16 +4,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         #root video {
-            object-fit: contain !important;
-            width: 100% !important;
-            height: 100% !important;
+            object-fit: cover !important;
+            width: 432px !important;
+            height: 933px !important;
 
         }
+
+        div:has(> #root video) {}
 
         #root [id^="zg-rtc-player"],
         [id*="zg-rtc-player"] {
             transform: scaleX(-1) !important;
 
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
 
@@ -1116,7 +1121,7 @@
             muted: muteChk.checked,
         });
         setTimeout(() => setStatus('Playing: ' + label, '#86efac'), 600);
-        
+
     });
 
     stopBtn.addEventListener('click', () => {
