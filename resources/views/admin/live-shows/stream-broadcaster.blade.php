@@ -926,7 +926,7 @@
                 onLiveStart: (user) => {
                     console.log("Success! The stream has officially started.");
                     console.log("Broadcasting user details:", user);
-                    alert('continue');
+                    // alert('cx`ontinue');
                 },
                 // --- Connection state handling ---------------------------------
                 // Background-tab throttling can cause brief DISCONNECTED blips.
@@ -1224,8 +1224,13 @@
                 position: 'fullscreen',
                 size: 1,
                 loop: false,
-                muted: false,
+                muted: true,
             });
+            setTimeout(() => {
+                window.BroadcastOverlay.play(data.url, {
+                    muted: false,
+                });
+            }, 500);
         } else {
             console.error("[Pusher] No URL received in ShowGalleryImageEvent");
         }
