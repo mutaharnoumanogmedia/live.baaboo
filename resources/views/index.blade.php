@@ -105,31 +105,31 @@
                 }
             }
 
-        @media (max-width: 991.98px) {
-            .live-show-content-container {
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-            }
-            .live-show-content-container > * {
-                display: block;
-                width: 100%;
-                justify-content: center;
-                align-items: center;
-                text-align: center;
-                margin-left: auto;
-                margin-right: auto;
-            }
+            @media (max-width: 991.98px) {
+                .live-show-content-container {
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                }
 
-            .live-show-badge{
-                width: auto;
-                border-radius: 24px;
-            }
-        }
+                .live-show-content-container>* {
+                    display: block;
+                    width: 100%;
+                    justify-content: center;
+                    align-items: center;
+                    text-align: center;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
 
+                .live-show-badge {
+                    width: auto;
+                    border-radius: 24px;
+                }
+            }
         </style>
         <div class="live-show-banner position-relative" style="overflow:visible;">
 
@@ -246,7 +246,7 @@
             <div class="alert-next-show" style="">
                 Nächste Show:
                 <span class="d-block d-lg-inline">
-                    {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.F Y \u\m H:i') . ' Uhr' : 'Nicht festgelegt' }}</span>
+                    {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->locale('de')->isoFormat('D. MMMM Y [um] HH:mm') . ' Uhr' : 'Nicht festgelegt' }}</span>
             </div>
 
             <div class="mx-auto mt-3 mb-2 hero-countdown"
