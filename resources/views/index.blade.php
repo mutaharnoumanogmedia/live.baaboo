@@ -1,6 +1,6 @@
 <x-guest-layout>
     <!-- Live Show Banner -->
-    @if (isset($currentLiveShow) && $currentLiveShow )
+    @if (isset($currentLiveShow) && $currentLiveShow && false)
         <style>
             /* Updated banner styles */
             .live-show-banner {
@@ -129,11 +129,11 @@
                 border-radius: 24px;
             }
         }
-   
+
         </style>
         <div class="live-show-banner position-relative" style="overflow:visible;">
 
-            <div class="px-4 py-2 shadow banner-announcement fs-5 text-center">
+            <div class="px-4 py-2 text-center shadow banner-announcement fs-5">
                 ✨ <span style="color:#fde901;">It's Show Time!</span> Lass dir den Spaß nicht entgehen! ✨
             </div>
 
@@ -141,7 +141,7 @@
                 <div class="row">
                     <div class="col-lg-9 ">
                         <div class="live-show-content-container">
-                            <div class="live-show-badge  ">
+                            <div class="live-show-badge ">
                                 <div class="live-dot me-2"></div>
                                 @if (isset($currentLiveShow) && $currentLiveShow->status == 'scheduled')
                                     @if ($currentLiveShow->scheduled_at)
@@ -190,10 +190,10 @@
 
 
 
-    <div class="w-100 py-2" style="background: #fde901; color: #140b63; font-weight: bold;">
+    <div class="py-2 w-100" style="background: #fde901; color: #140b63; font-weight: bold;">
         <div style="white-space: nowrap; overflow: hidden; width: 100%;">
             <div class="d-none d-lg-block">
-                <div class="marquee-text  gap-2">
+                <div class="gap-2 marquee-text">
 
                     <div>
                         @for ($i = 0; $i < 10; $i++)
@@ -237,7 +237,7 @@
             </div>
 
             <p class="hero-eyebrow">Die erste interaktive Online-Game-Show Deutschlands </p>
-            <h1 class="hero-title mb-5">
+            <h1 class="mb-5 hero-title">
                 Zuschauen war gestern.
                 <br>
                 <span class="highlight">Jetzt spielst Du mit. </span>
@@ -249,9 +249,9 @@
                     {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.F Y \u\m H:i') . ' Uhr' : 'Nicht festgelegt' }}</span>
             </div>
 
-            <div class="hero-countdown mt-3 mb-2   mx-auto"
+            <div class="mx-auto mt-3 mb-2 hero-countdown"
                 style="padding: 5px 45px !important; width: fit-content;border: 1px solid #000; background-color: #ffffe9; border-radius: 10px; ">
-                <div id="liveShowCountdown" class="d-flex justify-content-center gap-3 fs-2 fw-bold"></div>
+                <div id="liveShowCountdown" class="gap-3 d-flex justify-content-center fs-2 fw-bold"></div>
             </div>
 
 
