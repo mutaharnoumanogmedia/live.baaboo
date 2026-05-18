@@ -404,6 +404,53 @@
     </div>
 
     <div id="root"></div>
+
+
+<div id="fullscreen-go-live-overlay" style="
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(16,16,16,0.92);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+">
+    <button id="go-live-main-btn" style="
+        font-size: 2.7rem;
+        padding: 1.5em 3em;
+        border-radius: 2em;
+        border: none;
+        background: linear-gradient(90deg, #4ade80 0%, #3b82f6 100%);
+        color: #fff;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 32px 0 #0006;
+        transition: transform 0.1s;
+    ">
+        Go live
+    </button>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const overlay = document.getElementById('fullscreen-go-live-overlay');
+        const btn = document.getElementById('go-live-main-btn');
+        btn.addEventListener('click', function() {
+            // Hide the overlay
+            overlay.style.display = 'none';
+            // Find and click #ZegoLiveButton
+            const zegoBtn = document.querySelector('#ZegoLiveButton');
+            if (zegoBtn) {
+                zegoBtn.click();
+            } else {
+                // fallback: show overlay again & alert user
+                overlay.style.display = '';
+                alert('Could not find the Go Live button in the UI (#ZegoLiveButton).');
+            }
+        });
+    });
+</script>
 </body>
 <script>
     // ─────────────────────────────────────────────────────────────

@@ -25,7 +25,7 @@
         @endif
 
         <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-light py-3">
+            <div class="card-header  py-3">
                 <h5 class="mb-0 fw-bold"><i class="bi bi-google me-2"></i>GTM settings</h5>
             </div>
             <div class="card-body">

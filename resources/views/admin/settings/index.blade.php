@@ -29,7 +29,7 @@
 
             {{-- General --}}
             <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-light py-3">
+                <div class="card-header  py-3">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-gear me-2"></i>General</h5>
                 </div>
                 <div class="card-body">
@@ -61,7 +61,7 @@
 
             {{-- Quiz --}}
             <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-light py-3">
+                <div class="card-header  py-3">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-stopwatch me-2"></i>Quiz timer</h5>
                 </div>
                 <div class="card-body">
@@ -91,7 +91,7 @@
 
             {{-- Features --}}
             <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-light py-3">
+                <div class="card-header  py-3">
                     <h5 class="mb-0 fw-bold"><i class="bi bi-toggle-on me-2"></i>Features</h5>
                 </div>
                 <div class="card-body">
