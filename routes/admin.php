@@ -57,6 +57,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('live-shows/stream-management/{id}', [\App\Http\Controllers\Admin\LiveShowController::class, 'streamManagement'])->name('live-shows.stream-management');
     Route::get('live-shows/stream-broadcaster/{id}', [\App\Http\Controllers\Admin\LiveShowController::class, 'streamBroadcaster'])->name('live-shows.stream-management.broadcaster');
+
+    // Single-broadcaster lock: the broadcaster page claims ownership of the
+    // live show on load, kicking out any previously open broadcaster tab.
+    Route::post('live-shows/stream-broadcaster/{id}/claim-tab', [\App\Http\Controllers\Admin\LiveShowController::class, 'claimBroadcasterTab'])->name('live-shows.stream-management.broadcaster.claim-tab');
+    Route::get('live-shows/stream-broadcaster/{id}/active-tab', [\App\Http\Controllers\Admin\LiveShowController::class, 'getBroadcasterTab'])->name('live-shows.stream-management.broadcaster.active-tab');
+
     Route::get('live-shows/{id}/players', [\App\Http\Controllers\Admin\LiveShowController::class, 'allPlayers'])->name('live-shows.players');
 
     Route::post('live-shows/stream-management/{id}/save-room-id', [\App\Http\Controllers\Admin\LiveShowController::class, 'saveRoomID'])->name('live-shows.stream-management.save-room-id');

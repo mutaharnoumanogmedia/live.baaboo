@@ -344,6 +344,70 @@
                 overflow-y: auto;
             }
         }
+
+        /* ─── "Broadcaster opened elsewhere" overlay ─────────────────
+           Shown when this tab has been superseded by a newer broadcaster
+           tab (same browser, another browser, or another device). It
+           covers the entire page so the host cannot accidentally keep
+           streaming from the old session. */
+        #broadcasterInactiveOverlay {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 10, 10, 0.96);
+            color: #fff;
+            z-index: 100000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+            padding: 20px;
+        }
+
+        #broadcasterInactiveOverlay .card {
+            max-width: 460px;
+            text-align: center;
+            background: rgba(30, 30, 30, 0.95);
+            border-radius: 14px;
+            padding: 32px 26px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        #broadcasterInactiveOverlay .icon {
+            font-size: 44px;
+            color: #f87171;
+            margin-bottom: 14px;
+        }
+
+        #broadcasterInactiveOverlay h3 {
+            font-size: 20px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        #broadcasterInactiveOverlay p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.78);
+            line-height: 1.5;
+            margin: 0 0 22px 0;
+        }
+
+        #broadcasterInactiveOverlay button {
+            background: linear-gradient(90deg, #4ade80 0%, #3b82f6 100%);
+            color: #fff;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: filter 0.15s ease;
+        }
+
+        #broadcasterInactiveOverlay button:hover {
+            filter: brightness(1.1);
+        }
     </style>
 </head>
 
@@ -451,6 +515,27 @@
         });
     });
 </script>
+
+{{--
+    Full-screen "this broadcaster tab is no longer active" overlay.
+    Hidden by default. Shown when single-broadcaster lock JS detects that
+    a newer tab has claimed this live show (locally via BroadcastChannel
+    or globally via Pusher / polling). See the script block further down
+    that wires this up.
+--}}
+<div id="broadcasterInactiveOverlay" role="dialog" aria-live="assertive" aria-hidden="true">
+    <div class="card">
+        <div class="icon"><i class="fas fa-tv"></i></div>
+        <h3>Broadcaster opened elsewhere</h3>
+        <p>
+            This live show broadcaster has been opened in another tab or on another device.
+            Only the most recently opened broadcaster can stream at a time.
+        </p>
+        <button id="broadcasterUseHereBtn" type="button">
+            Use this tab instead
+        </button>
+    </div>
+</div>
 </body>
 <script>
     // ─────────────────────────────────────────────────────────────
@@ -957,6 +1042,9 @@
             }
 
             const zp = ZegoUIKitPrebuilt.create(TOKEN);
+            // Expose the Zego instance globally so the single-broadcaster
+            // lock script can tear it down when this tab gets superseded.
+            window.__zegoInstance = zp;
             zp.joinRoom({
                 container: document.querySelector("#root"),
                 videoResolutionList: [ZegoUIKitPrebuilt.VideoResolution_540P],
@@ -1314,6 +1402,225 @@
         setStatus('[Pusher] Conn State: ' + (states && states.current ? states.current : JSON.stringify(
             states)));
     });
+</script>
+
+{{--
+    ─────────────────────────────────────────────────────────────────────
+    Single-broadcaster lock
+    ─────────────────────────────────────────────────────────────────────
+    Only ONE browser tab (across any browser, any device) is allowed to act
+    as the broadcaster for a given live show at any time. The newest tab
+    always wins; older tabs are kicked into a blocking overlay and their
+    streaming pipeline is torn down.
+
+    How it works:
+      1.  This tab generates a unique `myTabId` at page load.
+      2.  It POSTs that id to `…/claim-tab`, which writes it into
+          `live_shows.host_browser_tab` on the server (latest wins) and
+          fires a Pusher `BroadcasterTabClaimedEvent` on the existing
+          `live-show.{id}` channel.
+      3.  Every open broadcaster tab listens for that event. If the event's
+          `tab_id` does not match the local `myTabId`, that tab has been
+          superseded → tear down Zego + media overlay + Pusher, and show
+          the full-screen "Broadcaster opened elsewhere" overlay.
+      4.  A local same-browser `BroadcastChannel` mirror gives instant
+          feedback between tabs of the same browser without waiting for a
+          Pusher round-trip.
+      5.  A 15-second polling fallback hits `…/active-tab` so we still kick
+          out throttled / background tabs that may have missed the Pusher
+          message.
+      6.  Clicking "Use this tab instead" simply reclaims and reloads, so
+          a fresh Zego session starts cleanly in this tab.
+--}}
+<script>
+    (function () {
+        // ── Configuration coming from blade ────────────────────────────
+        const LIVE_SHOW_ID   = {{ $liveShow->id }};
+        const CLAIM_URL      = '{{ route('admin.live-shows.stream-management.broadcaster.claim-tab', ['id' => $liveShow->id]) }}';
+        const ACTIVE_TAB_URL = '{{ route('admin.live-shows.stream-management.broadcaster.active-tab', ['id' => $liveShow->id]) }}';
+        const CSRF_TOKEN     = '{{ csrf_token() }}';
+        const POLL_INTERVAL_MS = 15000;
+
+        // Unique id for this browser tab. Same scheme used elsewhere in
+        // the app (see resources/views/live-show.blade.php).
+        const myTabId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        window.__broadcasterTabId = myTabId;
+
+        // Same-origin / same-browser side channel for instant supersede
+        // notifications. Falls back to no-op if the browser is old.
+        const localChannelKey = 'broadcaster_active_tab_' + LIVE_SHOW_ID;
+        const localChannel = (typeof BroadcastChannel !== 'undefined')
+            ? new BroadcastChannel(localChannelKey)
+            : null;
+
+        const inactiveOverlay = document.getElementById('broadcasterInactiveOverlay');
+        const useHereBtn      = document.getElementById('broadcasterUseHereBtn');
+
+        let superseded   = false; // true once another tab has taken over
+        let pollTimerId  = null;
+
+        // ── Helpers ────────────────────────────────────────────────────
+
+        function showInactiveOverlay() {
+            if (!inactiveOverlay) return;
+            inactiveOverlay.style.display = 'flex';
+            inactiveOverlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function hideInactiveOverlay() {
+            if (!inactiveOverlay) return;
+            inactiveOverlay.style.display = 'none';
+            inactiveOverlay.setAttribute('aria-hidden', 'true');
+        }
+
+        // Best-effort tear down of everything that produces audio/video so
+        // that an obsolete tab cannot keep broadcasting in the background.
+        function teardownBroadcastingPipeline() {
+            // 1) Stop the canvas / overlay video pipeline that mixes the
+            //    extra media into the host's stream.
+            try {
+                if (window.BroadcastOverlay && typeof window.BroadcastOverlay.stop === 'function') {
+                    window.BroadcastOverlay.stop();
+                }
+            } catch (e) { console.warn('Overlay stop failed:', e); }
+
+            // 2) Ask Zego to leave / destroy. The prebuilt SDK exposes a
+            //    `destroy()` method on the instance we created in window.onload.
+            try {
+                const zp = window.__zegoInstance;
+                if (zp) {
+                    if (typeof zp.destroy === 'function') zp.destroy();
+                    else if (typeof zp.leaveRoom === 'function') zp.leaveRoom();
+                }
+            } catch (e) { console.warn('Zego teardown failed:', e); }
+
+            // 3) Forcefully stop every active getUserMedia track so the
+            //    camera / mic indicators turn off.
+            try {
+                document.querySelectorAll('video, audio').forEach(function (el) {
+                    const stream = el.srcObject;
+                    if (stream && typeof stream.getTracks === 'function') {
+                        stream.getTracks().forEach(function (t) { try { t.stop(); } catch (_) {} });
+                    }
+                    try { el.pause(); } catch (_) {}
+                    el.srcObject = null;
+                });
+            } catch (e) { console.warn('Media element cleanup failed:', e); }
+
+            // 4) Disconnect the Pusher socket from this tab.
+            try {
+                if (typeof pusher !== 'undefined' && pusher && pusher.disconnect) {
+                    pusher.disconnect();
+                }
+            } catch (e) { console.warn('Pusher disconnect failed:', e); }
+        }
+
+        // Mark this tab as inactive and visually block further use.
+        function markAsSuperseded(reason) {
+            if (superseded) return; // already handled
+            superseded = true;
+            console.warn('[Broadcaster lock] Tab superseded:', reason || '(no reason)');
+            teardownBroadcastingPipeline();
+            showInactiveOverlay();
+
+            // Stop polling – we're no longer the owner and there's nothing
+            // useful to learn until the user clicks "Use this tab".
+            if (pollTimerId) { clearInterval(pollTimerId); pollTimerId = null; }
+
+            // If this tab was opened via window.open() from another window,
+            // browsers allow window.close(). If not, this call is a no-op
+            // (we still have the blocking overlay so the user can't keep
+            // broadcasting).
+            try { window.close(); } catch (_) {}
+        }
+
+        // POST our tab id to the server, becoming the new owner.
+        function claimBroadcasterTab() {
+            return fetch(CLAIM_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ tab_id: myTabId }),
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                console.log('[Broadcaster lock] Claimed:', data);
+                // Local mirror so any other tab in the same browser
+                // immediately knows it is no longer the active one.
+                if (localChannel) {
+                    localChannel.postMessage({ type: 'TAB_CLAIMED', tabId: myTabId });
+                }
+                return data;
+            })
+            .catch(function (err) {
+                console.error('[Broadcaster lock] Claim failed:', err);
+            });
+        }
+
+        // Polling fallback in case the Pusher event is missed (background
+        // throttling, disconnected socket, etc.).
+        function checkActiveTab() {
+            if (superseded) return;
+            fetch(ACTIVE_TAB_URL, { headers: { 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data || !data.active_tab_id) return;
+                    if (data.active_tab_id !== myTabId) {
+                        markAsSuperseded('polling found different active tab: ' + data.active_tab_id);
+                    }
+                })
+                .catch(function (err) {
+                    // Network blips shouldn't kick us out; just log.
+                    console.warn('[Broadcaster lock] Poll failed:', err);
+                });
+        }
+
+        // ── Listen for the Pusher event from any other tab/device ─────
+        // The Pusher `channel` and `pusher` globals are created earlier in
+        // this view (in the previous <script> block).
+        if (typeof channel !== 'undefined' && channel && typeof channel.bind === 'function') {
+            channel.bind('BroadcasterTabClaimedEvent', function (data) {
+                if (!data || !data.tab_id) return;
+                if (data.tab_id !== myTabId) {
+                    markAsSuperseded('pusher event from tab ' + data.tab_id);
+                }
+            });
+        }
+
+        // ── Same-browser instant supersede via BroadcastChannel ───────
+        if (localChannel) {
+            localChannel.onmessage = function (event) {
+                const msg = event && event.data;
+                if (!msg || msg.type !== 'TAB_CLAIMED') return;
+                if (msg.tabId && msg.tabId !== myTabId) {
+                    markAsSuperseded('local BroadcastChannel from tab ' + msg.tabId);
+                }
+            };
+        }
+
+        // ── "Use this tab instead" button ─────────────────────────────
+        if (useHereBtn) {
+            useHereBtn.addEventListener('click', function () {
+                // Reclaim, then hard reload so a fresh Zego session starts
+                // in this tab cleanly (the previous one was torn down).
+                claimBroadcasterTab().finally(function () {
+                    window.location.reload();
+                });
+            });
+        }
+
+        // ── Kick everything off ───────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', function () {
+            hideInactiveOverlay();
+            claimBroadcasterTab();
+            // Start polling shortly after claim so old tabs still using
+            // this URL get evicted even without Pusher.
+            pollTimerId = setInterval(checkActiveTab, POLL_INTERVAL_MS);
+        });
+    })();
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>

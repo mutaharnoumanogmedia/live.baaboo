@@ -31,6 +31,11 @@ class LiveShow extends Model
         'end_time',
         'media_visible',
 
+        // Unique identifier of the browser tab that currently owns the
+        // broadcaster page. Only the tab whose id matches this value is
+        // allowed to keep broadcasting; any other tab is "superseded".
+        'host_browser_tab',
+
     ];
 
     protected $casts = [

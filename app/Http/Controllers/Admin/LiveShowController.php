@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\BroadcasterTabClaimedEvent;
 use App\Events\GameResetEvent;
 use App\Events\HideGalleryImageEvent;
 use App\Events\HideLiveShowWinnersTabEvent;
@@ -861,6 +862,66 @@ class LiveShowController extends Controller
         $liveShow = LiveShow::with(['quizzes.options'])->findOrFail($id);
 
         return view('admin.live-shows.stream-broadcaster', compact('liveShow'));
+    }
+
+    /**
+     * Claim the broadcaster page for a given live show.
+     *
+     * The blade view generates a unique `tab_id` per browser tab and calls
+     * this endpoint as soon as the page is ready. We persist that id into
+     * `live_shows.host_browser_tab` (always overwriting whatever was there
+     * before – latest tab wins) and fire a Pusher event so any previously
+     * active broadcaster tab can immediately stop streaming and show a
+     * "Opened elsewhere" overlay.
+     *
+     * The endpoint always succeeds: the newest claim is always honoured.
+     * The client is expected to compare its own local `tab_id` against the
+     * `active_tab_id` we return (and against incoming Pusher events) to
+     * decide whether it is still the owner.
+     */
+    public function claimBroadcasterTab(Request $request, $id): JsonResponse
+    {
+        $request->validate([
+            'tab_id' => 'required|string|max:64',
+        ]);
+
+        $liveShow = LiveShow::findOrFail($id);
+
+        $tabId = (string) $request->input('tab_id');
+
+        // Replace the current owner with the newest tab.
+        $liveShow->host_browser_tab = $tabId;
+        $liveShow->save();
+
+        // Notify every open broadcaster tab on the existing pusher channel.
+        // Old tabs (whose local id != this one) will use the payload to
+        // kick themselves out.
+        event(new BroadcasterTabClaimedEvent($liveShow->id, $tabId));
+
+        return response()->json([
+            'success' => true,
+            'live_show_id' => $liveShow->id,
+            'active_tab_id' => $liveShow->host_browser_tab,
+        ]);
+    }
+
+    /**
+     * Return the currently active broadcaster tab id (if any).
+     *
+     * Used by the blade view as a polling fallback in case the Pusher
+     * `BroadcasterTabClaimedEvent` is missed (e.g. when the tab was
+     * throttled in the background and dropped the websocket). If the
+     * returned `active_tab_id` does not match the tab's locally generated
+     * id, the client treats itself as superseded.
+     */
+    public function getBroadcasterTab($id): JsonResponse
+    {
+        $liveShow = LiveShow::findOrFail($id);
+
+        return response()->json([
+            'live_show_id' => $liveShow->id,
+            'active_tab_id' => $liveShow->host_browser_tab,
+        ]);
     }
 
     /**
