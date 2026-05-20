@@ -546,7 +546,7 @@
     <div id="root"></div>
 
 
-<div id="fullscreen-go-live-overlay" style="
+{{-- <div id="fullscreen-go-live-overlay" style="
     position: fixed;
     inset: 0;
     width: 100vw;
@@ -570,9 +570,9 @@
         transition: transform 0.1s;
     ">
         Go live
-    </button>
+    </button> --}}
 </div>
-<script>
+{{-- <script>
     document.addEventListener('DOMContentLoaded', function() {
         const overlay = document.getElementById('fullscreen-go-live-overlay');
         const btn = document.getElementById('go-live-main-btn');
@@ -590,7 +590,7 @@
             }
         });
     });
-</script>
+</script> --}}
 
 <div id="broadcasterTakeoverPrompt" role="dialog" aria-live="polite" aria-hidden="true">
     <div class="card">
