@@ -408,6 +408,82 @@
         #broadcasterInactiveOverlay button:hover {
             filter: brightness(1.1);
         }
+
+        /* Shown on a newly opened tab when another tab already owns the
+           broadcaster. The user must confirm before we claim and start Zego. */
+        #broadcasterTakeoverPrompt {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 10, 10, 0.96);
+            color: #fff;
+            z-index: 100001;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+            padding: 20px;
+        }
+
+        #broadcasterTakeoverPrompt .card {
+            max-width: 480px;
+            text-align: center;
+            background: rgba(30, 30, 30, 0.95);
+            border-radius: 14px;
+            padding: 32px 26px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        #broadcasterTakeoverPrompt .icon {
+            font-size: 44px;
+            color: #fbbf24;
+            margin-bottom: 14px;
+        }
+
+        #broadcasterTakeoverPrompt h3 {
+            font-size: 20px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        #broadcasterTakeoverPrompt p {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.78);
+            line-height: 1.5;
+            margin: 0 0 22px 0;
+        }
+
+        #broadcasterTakeoverPrompt .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        #broadcasterTakeoverPrompt button {
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: filter 0.15s ease;
+        }
+
+        #broadcasterTakeoverPrompt button:hover {
+            filter: brightness(1.1);
+        }
+
+        #broadcasterTakeoverContinueBtn {
+            background: linear-gradient(90deg, #4ade80 0%, #3b82f6 100%);
+            color: #fff;
+        }
+
+        #broadcasterTakeoverCancelBtn {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
     </style>
 </head>
 
@@ -516,24 +592,33 @@
     });
 </script>
 
-{{--
-    Full-screen "this broadcaster tab is no longer active" overlay.
-    Hidden by default. Shown when single-broadcaster lock JS detects that
-    a newer tab has claimed this live show (locally via BroadcastChannel
-    or globally via Pusher / polling). See the script block further down
-    that wires this up.
---}}
+<div id="broadcasterTakeoverPrompt" role="dialog" aria-live="polite" aria-hidden="true">
+    <div class="card">
+        <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <h3>Broadcaster already open</h3>
+        <p>
+            This live show broadcaster is already open in another tab or on another device.
+            Do you want to continue here? The other session will be stopped.
+        </p>
+        <div class="actions">
+            <button id="broadcasterTakeoverContinueBtn" type="button">Continue here</button>
+            <button id="broadcasterTakeoverCancelBtn" type="button">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <div id="broadcasterInactiveOverlay" role="dialog" aria-live="assertive" aria-hidden="true">
     <div class="card">
         <div class="icon"><i class="fas fa-tv"></i></div>
         <h3>Broadcaster opened elsewhere</h3>
         <p>
             This live show broadcaster has been opened in another tab or on another device.
-            Only the most recently opened broadcaster can stream at a time.
+            Only one broadcaster tab can stream at a time.
         </p>
         <button id="broadcasterUseHereBtn" type="button">
             Use this tab instead
         </button>
+        <button id="broadcasterCloseBtn" type="button">Close</button>
     </div>
 </div>
 </body>
@@ -968,8 +1053,24 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 
+{{-- Zego must not start until the broadcaster lock allows this tab. --}}
+<script>
+    window.__broadcasterLockReady = new Promise(function (resolve, reject) {
+        window.__resolveBroadcasterLock = resolve;
+        window.__rejectBroadcasterLock = reject;
+    });
+</script>
+
 <script>
     window.onload = async function() {
+        // Wait until this tab owns the broadcaster (first tab auto-claims;
+        // additional tabs must confirm via the takeover prompt).
+        try {
+            await window.__broadcasterLockReady;
+        } catch (e) {
+            console.log('[Broadcaster lock] Streaming not started in this tab.');
+            return;
+        }
 
         function getUrlParams(url) {
             let urlStr = url.split('?')[1] || "";
@@ -1405,61 +1506,51 @@
 </script>
 
 {{--
-    ─────────────────────────────────────────────────────────────────────
     Single-broadcaster lock
-    ─────────────────────────────────────────────────────────────────────
-    Only ONE browser tab (across any browser, any device) is allowed to act
-    as the broadcaster for a given live show at any time. The newest tab
-    always wins; older tabs are kicked into a blocking overlay and their
-    streaming pipeline is torn down.
-
-    How it works:
-      1.  This tab generates a unique `myTabId` at page load.
-      2.  It POSTs that id to `…/claim-tab`, which writes it into
-          `live_shows.host_browser_tab` on the server (latest wins) and
-          fires a Pusher `BroadcasterTabClaimedEvent` on the existing
-          `live-show.{id}` channel.
-      3.  Every open broadcaster tab listens for that event. If the event's
-          `tab_id` does not match the local `myTabId`, that tab has been
-          superseded → tear down Zego + media overlay + Pusher, and show
-          the full-screen "Broadcaster opened elsewhere" overlay.
-      4.  A local same-browser `BroadcastChannel` mirror gives instant
-          feedback between tabs of the same browser without waiting for a
-          Pusher round-trip.
-      5.  A 15-second polling fallback hits `…/active-tab` so we still kick
-          out throttled / background tabs that may have missed the Pusher
-          message.
-      6.  Clicking "Use this tab instead" simply reclaims and reloads, so
-          a fresh Zego session starts cleanly in this tab.
+    ─────────────────────────
+    • First tab (no host_browser_tab yet): auto-claims and starts Zego.
+    • New tab while another is active: shows "Continue here?" and waits;
+      Zego only starts after the user confirms.
+    • Old tab after someone else claims: superseded overlay + stream teardown.
 --}}
 <script>
     (function () {
-        // ── Configuration coming from blade ────────────────────────────
         const LIVE_SHOW_ID   = {{ $liveShow->id }};
         const CLAIM_URL      = '{{ route('admin.live-shows.stream-management.broadcaster.claim-tab', ['id' => $liveShow->id]) }}';
         const ACTIVE_TAB_URL = '{{ route('admin.live-shows.stream-management.broadcaster.active-tab', ['id' => $liveShow->id]) }}';
         const CSRF_TOKEN     = '{{ csrf_token() }}';
         const POLL_INTERVAL_MS = 15000;
 
-        // Unique id for this browser tab. Same scheme used elsewhere in
-        // the app (see resources/views/live-show.blade.php).
         const myTabId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
         window.__broadcasterTabId = myTabId;
 
-        // Same-origin / same-browser side channel for instant supersede
-        // notifications. Falls back to no-op if the browser is old.
         const localChannelKey = 'broadcaster_active_tab_' + LIVE_SHOW_ID;
         const localChannel = (typeof BroadcastChannel !== 'undefined')
             ? new BroadcastChannel(localChannelKey)
             : null;
 
-        const inactiveOverlay = document.getElementById('broadcasterInactiveOverlay');
-        const useHereBtn      = document.getElementById('broadcasterUseHereBtn');
+        const takeoverPrompt   = document.getElementById('broadcasterTakeoverPrompt');
+        const takeoverContinue = document.getElementById('broadcasterTakeoverContinueBtn');
+        const takeoverCancel   = document.getElementById('broadcasterTakeoverCancelBtn');
+        const inactiveOverlay  = document.getElementById('broadcasterInactiveOverlay');
+        const useHereBtn       = document.getElementById('broadcasterUseHereBtn');
+        const closeBtn         = document.getElementById('broadcasterCloseBtn');
 
-        let superseded   = false; // true once another tab has taken over
-        let pollTimerId  = null;
+        let superseded    = false;
+        let isActiveOwner = false;
+        let pollTimerId   = null;
 
-        // ── Helpers ────────────────────────────────────────────────────
+        function showTakeoverPrompt() {
+            if (!takeoverPrompt) return;
+            takeoverPrompt.style.display = 'flex';
+            takeoverPrompt.setAttribute('aria-hidden', 'false');
+        }
+
+        function hideTakeoverPrompt() {
+            if (!takeoverPrompt) return;
+            takeoverPrompt.style.display = 'none';
+            takeoverPrompt.setAttribute('aria-hidden', 'true');
+        }
 
         function showInactiveOverlay() {
             if (!inactiveOverlay) return;
@@ -1472,20 +1563,15 @@
             inactiveOverlay.style.display = 'none';
             inactiveOverlay.setAttribute('aria-hidden', 'true');
         }
+        
 
-        // Best-effort tear down of everything that produces audio/video so
-        // that an obsolete tab cannot keep broadcasting in the background.
         function teardownBroadcastingPipeline() {
-            // 1) Stop the canvas / overlay video pipeline that mixes the
-            //    extra media into the host's stream.
             try {
                 if (window.BroadcastOverlay && typeof window.BroadcastOverlay.stop === 'function') {
                     window.BroadcastOverlay.stop();
                 }
             } catch (e) { console.warn('Overlay stop failed:', e); }
 
-            // 2) Ask Zego to leave / destroy. The prebuilt SDK exposes a
-            //    `destroy()` method on the instance we created in window.onload.
             try {
                 const zp = window.__zegoInstance;
                 if (zp) {
@@ -1494,8 +1580,6 @@
                 }
             } catch (e) { console.warn('Zego teardown failed:', e); }
 
-            // 3) Forcefully stop every active getUserMedia track so the
-            //    camera / mic indicators turn off.
             try {
                 document.querySelectorAll('video, audio').forEach(function (el) {
                     const stream = el.srcObject;
@@ -1507,7 +1591,6 @@
                 });
             } catch (e) { console.warn('Media element cleanup failed:', e); }
 
-            // 4) Disconnect the Pusher socket from this tab.
             try {
                 if (typeof pusher !== 'undefined' && pusher && pusher.disconnect) {
                     pusher.disconnect();
@@ -1515,26 +1598,17 @@
             } catch (e) { console.warn('Pusher disconnect failed:', e); }
         }
 
-        // Mark this tab as inactive and visually block further use.
         function markAsSuperseded(reason) {
-            if (superseded) return; // already handled
+            if (superseded) return;
             superseded = true;
+            isActiveOwner = false;
             console.warn('[Broadcaster lock] Tab superseded:', reason || '(no reason)');
+            hideTakeoverPrompt();
             teardownBroadcastingPipeline();
             showInactiveOverlay();
-
-            // Stop polling – we're no longer the owner and there's nothing
-            // useful to learn until the user clicks "Use this tab".
             if (pollTimerId) { clearInterval(pollTimerId); pollTimerId = null; }
-
-            // If this tab was opened via window.open() from another window,
-            // browsers allow window.close(). If not, this call is a no-op
-            // (we still have the blocking overlay so the user can't keep
-            // broadcasting).
-            try { window.close(); } catch (_) {}
         }
 
-        // POST our tab id to the server, becoming the new owner.
         function claimBroadcasterTab() {
             return fetch(CLAIM_URL, {
                 method: 'POST',
@@ -1548,8 +1622,6 @@
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 console.log('[Broadcaster lock] Claimed:', data);
-                // Local mirror so any other tab in the same browser
-                // immediately knows it is no longer the active one.
                 if (localChannel) {
                     localChannel.postMessage({ type: 'TAB_CLAIMED', tabId: myTabId });
                 }
@@ -1557,69 +1629,133 @@
             })
             .catch(function (err) {
                 console.error('[Broadcaster lock] Claim failed:', err);
+                throw err;
             });
         }
+        function closeBroadcasterTab() {
+            window.location.href = "about:blank"
+        }
 
-        // Polling fallback in case the Pusher event is missed (background
-        // throttling, disconnected socket, etc.).
-        function checkActiveTab() {
-            if (superseded) return;
-            fetch(ACTIVE_TAB_URL, { headers: { 'Accept': 'application/json' } })
+        function fetchActiveTabId() {
+            return fetch(ACTIVE_TAB_URL, { headers: { 'Accept': 'application/json' } })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
-                    if (!data || !data.active_tab_id) return;
-                    if (data.active_tab_id !== myTabId) {
-                        markAsSuperseded('polling found different active tab: ' + data.active_tab_id);
+                    return (data && data.active_tab_id) ? data.active_tab_id : null;
+                });
+        }
+
+        function activateAsOwner() {
+            isActiveOwner = true;
+            superseded = false;
+            hideTakeoverPrompt();
+            hideInactiveOverlay();
+            if (!pollTimerId) {
+                pollTimerId = setInterval(checkActiveTab, POLL_INTERVAL_MS);
+            }
+            if (typeof window.__resolveBroadcasterLock === 'function') {
+                window.__resolveBroadcasterLock();
+            }
+        }
+
+        function checkActiveTab() {
+            if (!isActiveOwner || superseded) return;
+            fetchActiveTabId()
+                .then(function (activeId) {
+                    if (activeId && activeId !== myTabId) {
+                        markAsSuperseded('polling found different active tab: ' + activeId);
                     }
                 })
                 .catch(function (err) {
-                    // Network blips shouldn't kick us out; just log.
                     console.warn('[Broadcaster lock] Poll failed:', err);
                 });
         }
 
-        // ── Listen for the Pusher event from any other tab/device ─────
-        // The Pusher `channel` and `pusher` globals are created earlier in
-        // this view (in the previous <script> block).
+        // User confirmed they want this tab to take over from another session.
+        function confirmTakeoverHere() {
+            claimBroadcasterTab()
+                .then(function () {
+                    activateAsOwner();
+                })
+                .catch(function () {
+                    alert('Could not take over the broadcaster. Please try again.');
+                });
+        }
+
+        // On load: claim only if nobody else owns the broadcaster yet.
+        function initBroadcasterLock() {
+            hideInactiveOverlay();
+            hideTakeoverPrompt();
+
+            fetchActiveTabId()
+                .then(function (activeId) {
+                    if (!activeId) {
+                        return claimBroadcasterTab().then(function () {
+                            activateAsOwner();
+                        });
+                    }
+                    if (activeId === myTabId) {
+                        activateAsOwner();
+                        return;
+                    }
+                    // Another tab/device already owns this live show — ask first.
+                    showTakeoverPrompt();
+                })
+                .catch(function (err) {
+                    console.error('[Broadcaster lock] Init failed:', err);
+                    if (typeof window.__rejectBroadcasterLock === 'function') {
+                        window.__rejectBroadcasterLock(err);
+                    }
+                });
+        }
+
         if (typeof channel !== 'undefined' && channel && typeof channel.bind === 'function') {
             channel.bind('BroadcasterTabClaimedEvent', function (data) {
-                if (!data || !data.tab_id) return;
+                console.log('[Pusher] BroadcasterTabClaimedEvent received:', data, 'myTabId:', myTabId);
+                if (data.tab_id === myTabId) return;
                 if (data.tab_id !== myTabId) {
+                    window.location.href = "about:blank"
+                }
+                if (isActiveOwner) {
                     markAsSuperseded('pusher event from tab ' + data.tab_id);
                 }
             });
         }
 
-        // ── Same-browser instant supersede via BroadcastChannel ───────
         if (localChannel) {
             localChannel.onmessage = function (event) {
                 const msg = event && event.data;
                 if (!msg || msg.type !== 'TAB_CLAIMED') return;
-                if (msg.tabId && msg.tabId !== myTabId) {
+                if (msg.tabId && msg.tabId !== myTabId && isActiveOwner) {
                     markAsSuperseded('local BroadcastChannel from tab ' + msg.tabId);
                 }
             };
         }
 
-        // ── "Use this tab instead" button ─────────────────────────────
+        if (takeoverContinue) {
+            takeoverContinue.addEventListener('click', confirmTakeoverHere);
+        }
+
+        if (takeoverCancel) {
+            takeoverCancel.addEventListener('click', function () {
+                console.log('[Broadcaster lock] takeoverCancel clicked');
+                window.location.href = "about:blank"
+ 
+                hideTakeoverPrompt();
+                if (typeof window.__rejectBroadcasterLock === 'function') {
+                    window.__rejectBroadcasterLock('user_cancelled');
+                }
+            });
+        }
+
         if (useHereBtn) {
             useHereBtn.addEventListener('click', function () {
-                // Reclaim, then hard reload so a fresh Zego session starts
-                // in this tab cleanly (the previous one was torn down).
                 claimBroadcasterTab().finally(function () {
                     window.location.reload();
                 });
             });
         }
 
-        // ── Kick everything off ───────────────────────────────────────
-        document.addEventListener('DOMContentLoaded', function () {
-            hideInactiveOverlay();
-            claimBroadcasterTab();
-            // Start polling shortly after claim so old tabs still using
-            // this URL get evicted even without Pusher.
-            pollTimerId = setInterval(checkActiveTab, POLL_INTERVAL_MS);
-        });
+        document.addEventListener('DOMContentLoaded', initBroadcasterLock);
     })();
 </script>
 
