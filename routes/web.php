@@ -56,7 +56,7 @@ Route::middleware(['auth:web'])->group(function () {
     Route::post('live-show/{id}/submit-quiz', [GamePlayController::class, 'submitQuiz'])->name('live-show.submit-quiz');
 });
 Route::get('live-show/{id}/get-live-show-users-with-scores', [GamePlayController::class, 'getLiveShowUsersWithScores']);
-Route::get('show-live-broadcast/{id}', [GamePlayController::class, 'showLiveBroadcast'])->name('show-live-broadcast');
+Route::get('live-show-broadcast/{id}', [GamePlayController::class, 'showLiveBroadcast'])->name('live-show-broadcast');
 Route::get('live-show/{id}/zego-uikit-token', [GamePlayController::class, 'zegoUIKitToken'])->name('live-show.zego-uikit-token');
 
 Route::get('/test-message-event', function () {

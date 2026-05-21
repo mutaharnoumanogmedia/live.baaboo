@@ -197,19 +197,19 @@
                                      <div class="col-lg  ">
                                          <div>
                                              <h6 class="text-muted small text-uppercase fw-bold mb-3">
-                                                 Player Tab Management
+                                                 Winner Tab Management
                                              </h6>
                                          </div>
                                          <div>
                                              <button type="button"
                                                  class="btn btn-primary  fw-bold text-white shadow-sm mb-2"
                                                  onclick="showWinnerTab(this)">
-                                                 <i class="fas fa-eye me-2"></i> Show Player tab
+                                                 <i class="fas fa-eye me-2"></i> Show Winner tab
                                              </button>
                                              <button type="button"
-                                                 class="btn btn-outline-secondary   fw-bold text-white shadow-sm mb-2"
+                                                 class="btn btn-danger   fw-bold text-white shadow-sm mb-2"
                                                  onclick="hideWinnerTab(this)">
-                                                 <i class="fas fa-eye-slash me-2"></i> Hide Player tab
+                                                 <i class="fas fa-eye-slash me-2"></i> Hide Winner tab
                                              </button>
                                          </div>
                                      </div>

@@ -546,7 +546,7 @@
     <div id="root"></div>
 
 
-{{-- <div id="fullscreen-go-live-overlay" style="
+    {{-- <div id="fullscreen-go-live-overlay" style="
     position: fixed;
     inset: 0;
     width: 100vw;
@@ -571,8 +571,8 @@
     ">
         Go live
     </button> --}}
-</div>
-{{-- <script>
+    </div>
+    {{-- <script>
     document.addEventListener('DOMContentLoaded', function() {
         const overlay = document.getElementById('fullscreen-go-live-overlay');
         const btn = document.getElementById('go-live-main-btn');
@@ -592,35 +592,35 @@
     });
 </script> --}}
 
-<div id="broadcasterTakeoverPrompt" role="dialog" aria-live="polite" aria-hidden="true">
-    <div class="card">
-        <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
-        <h3>Broadcaster already open</h3>
-        <p>
-            This live show broadcaster is already open in another tab or on another device.
-            Do you want to continue here? The other session will be stopped.
-        </p>
-        <div class="actions">
-            <button id="broadcasterTakeoverContinueBtn" type="button">Continue here</button>
-            <button id="broadcasterTakeoverCancelBtn" type="button">Cancel</button>
+    <div id="broadcasterTakeoverPrompt" role="dialog" aria-live="polite" aria-hidden="true">
+        <div class="card">
+            <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3>Broadcaster already open</h3>
+            <p>
+                This live show broadcaster is already open in another tab or on another device.
+                Do you want to continue here? The other session will be stopped.
+            </p>
+            <div class="actions">
+                <button id="broadcasterTakeoverContinueBtn" type="button">Continue here</button>
+                <button id="broadcasterTakeoverCancelBtn" type="button">Cancel</button>
+            </div>
         </div>
     </div>
-</div>
 
-<div id="broadcasterInactiveOverlay" role="dialog" aria-live="assertive" aria-hidden="true">
-    <div class="card">
-        <div class="icon"><i class="fas fa-tv"></i></div>
-        <h3>Broadcaster opened elsewhere</h3>
-        <p>
-            This live show broadcaster has been opened in another tab or on another device.
-            Only one broadcaster tab can stream at a time.
-        </p>
-        <button id="broadcasterUseHereBtn" type="button">
-            Use this tab instead
-        </button>
-        <button id="broadcasterCloseBtn" type="button">Close</button>
+    <div id="broadcasterInactiveOverlay" role="dialog" aria-live="assertive" aria-hidden="true">
+        <div class="card">
+            <div class="icon"><i class="fas fa-tv"></i></div>
+            <h3>Broadcaster opened elsewhere</h3>
+            <p>
+                This live show broadcaster has been opened in another tab or on another device.
+                Only one broadcaster tab can stream at a time.
+            </p>
+            <button id="broadcasterUseHereBtn" type="button">
+                Use this tab instead
+            </button>
+            <button id="broadcasterCloseBtn" type="button">Close</button>
+        </div>
     </div>
-</div>
 </body>
 <script>
     // ─────────────────────────────────────────────────────────────
@@ -1055,7 +1055,7 @@
 
 {{-- Zego must not start until the broadcaster lock allows this tab. --}}
 <script>
-    window.__broadcasterLockReady = new Promise(function (resolve, reject) {
+    window.__broadcasterLockReady = new Promise(function(resolve, reject) {
         window.__resolveBroadcasterLock = resolve;
         window.__rejectBroadcasterLock = reject;
     });
@@ -1148,8 +1148,8 @@
             window.__zegoInstance = zp;
             zp.joinRoom({
                 container: document.querySelector("#root"),
-                videoResolutionList: [ZegoUIKitPrebuilt.VideoResolution_540P],
-                videoResolutionDefault: ZegoUIKitPrebuilt.VideoResolution_540P,
+                videoResolutionList: [ZegoUIKitPrebuilt.VideoResolution_720P],
+                videoResolutionDefault: ZegoUIKitPrebuilt.VideoResolution_720P,
 
 
                 scenario: {
@@ -1247,6 +1247,11 @@
     const status = $('overlay-status');
     const mediaList = $('overlay-media-list');
     const mediaRefresh = $('overlay-media-refresh');
+    const galleryShowOnStreamUrl =
+        '{{ route('admin.live-shows.stream-management.show-gallery-image', ['id' => $liveShow->id]) }}';
+    const galleryCsrf = '{{ csrf_token() }}';
+    const galleryHideOnStreamUrl =
+        '{{ route('admin.live-shows.stream-management.hide-gallery-image', ['id' => $liveShow->id]) }}';
 
     const ATTACHED_MEDIA_URL =
         '{{ route('admin.live-shows.stream-management.attached-media', ['id' => $liveShow->id]) }}';
@@ -1413,11 +1418,35 @@
         });
         setTimeout(() => setStatus('Playing: ' + label, '#86efac'), 600);
 
+        //event of show gallery via ajax call
+        fetch(galleryShowOnStreamUrl, {
+            method: 'POST',
+
+            body: JSON.stringify({
+                gallery_media_id: parseInt(selectedMedia.id, 10)
+            }),
+            headers: {
+                'X-CSRF-TOKEN': galleryCsrf,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+
     });
 
     stopBtn.addEventListener('click', () => {
         if (window.BroadcastOverlay) window.BroadcastOverlay.stop();
         setStatus('Overlay stopped.');
+
+        //event of hide gallery via ajax call
+        fetch(galleryHideOnStreamUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': galleryCsrf,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
     });
 
     window.addEventListener('broadcast-overlay-error', (ev) => {
@@ -1428,7 +1457,7 @@
         //     'Playback failed: ' + (err.message || 'unknown error');
         if (err.name === 'NotAllowedError') {
             // Retry muted; show a "tap for sound" overlay
-            
+
         }
         setStatus(msg, '#fca5a5');
     });
@@ -1462,7 +1491,7 @@
                 loop: false,
                 muted: false,
             });
-            
+
         } else {
             console.error("[Pusher] No URL received in ShowGalleryImageEvent");
         }
@@ -1514,31 +1543,33 @@
     • Old tab after someone else claims: superseded overlay + stream teardown.
 --}}
 <script>
-    (function () {
-        const LIVE_SHOW_ID   = {{ $liveShow->id }};
-        const CLAIM_URL      = '{{ route('admin.live-shows.stream-management.broadcaster.claim-tab', ['id' => $liveShow->id]) }}';
-        const ACTIVE_TAB_URL = '{{ route('admin.live-shows.stream-management.broadcaster.active-tab', ['id' => $liveShow->id]) }}';
-        const CSRF_TOKEN     = '{{ csrf_token() }}';
+    (function() {
+        const LIVE_SHOW_ID = {{ $liveShow->id }};
+        const CLAIM_URL =
+            '{{ route('admin.live-shows.stream-management.broadcaster.claim-tab', ['id' => $liveShow->id]) }}';
+        const ACTIVE_TAB_URL =
+            '{{ route('admin.live-shows.stream-management.broadcaster.active-tab', ['id' => $liveShow->id]) }}';
+        const CSRF_TOKEN = '{{ csrf_token() }}';
         const POLL_INTERVAL_MS = 15000;
 
         const myTabId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
         window.__broadcasterTabId = myTabId;
 
         const localChannelKey = 'broadcaster_active_tab_' + LIVE_SHOW_ID;
-        const localChannel = (typeof BroadcastChannel !== 'undefined')
-            ? new BroadcastChannel(localChannelKey)
-            : null;
+        const localChannel = (typeof BroadcastChannel !== 'undefined') ?
+            new BroadcastChannel(localChannelKey) :
+            null;
 
-        const takeoverPrompt   = document.getElementById('broadcasterTakeoverPrompt');
+        const takeoverPrompt = document.getElementById('broadcasterTakeoverPrompt');
         const takeoverContinue = document.getElementById('broadcasterTakeoverContinueBtn');
-        const takeoverCancel   = document.getElementById('broadcasterTakeoverCancelBtn');
-        const inactiveOverlay  = document.getElementById('broadcasterInactiveOverlay');
-        const useHereBtn       = document.getElementById('broadcasterUseHereBtn');
-        const closeBtn         = document.getElementById('broadcasterCloseBtn');
+        const takeoverCancel = document.getElementById('broadcasterTakeoverCancelBtn');
+        const inactiveOverlay = document.getElementById('broadcasterInactiveOverlay');
+        const useHereBtn = document.getElementById('broadcasterUseHereBtn');
+        const closeBtn = document.getElementById('broadcasterCloseBtn');
 
-        let superseded    = false;
+        let superseded = false;
         let isActiveOwner = false;
-        let pollTimerId   = null;
+        let pollTimerId = null;
 
         function showTakeoverPrompt() {
             if (!takeoverPrompt) return;
@@ -1563,14 +1594,16 @@
             inactiveOverlay.style.display = 'none';
             inactiveOverlay.setAttribute('aria-hidden', 'true');
         }
-        
+
 
         function teardownBroadcastingPipeline() {
             try {
                 if (window.BroadcastOverlay && typeof window.BroadcastOverlay.stop === 'function') {
                     window.BroadcastOverlay.stop();
                 }
-            } catch (e) { console.warn('Overlay stop failed:', e); }
+            } catch (e) {
+                console.warn('Overlay stop failed:', e);
+            }
 
             try {
                 const zp = window.__zegoInstance;
@@ -1578,24 +1611,36 @@
                     if (typeof zp.destroy === 'function') zp.destroy();
                     else if (typeof zp.leaveRoom === 'function') zp.leaveRoom();
                 }
-            } catch (e) { console.warn('Zego teardown failed:', e); }
+            } catch (e) {
+                console.warn('Zego teardown failed:', e);
+            }
 
             try {
-                document.querySelectorAll('video, audio').forEach(function (el) {
+                document.querySelectorAll('video, audio').forEach(function(el) {
                     const stream = el.srcObject;
                     if (stream && typeof stream.getTracks === 'function') {
-                        stream.getTracks().forEach(function (t) { try { t.stop(); } catch (_) {} });
+                        stream.getTracks().forEach(function(t) {
+                            try {
+                                t.stop();
+                            } catch (_) {}
+                        });
                     }
-                    try { el.pause(); } catch (_) {}
+                    try {
+                        el.pause();
+                    } catch (_) {}
                     el.srcObject = null;
                 });
-            } catch (e) { console.warn('Media element cleanup failed:', e); }
+            } catch (e) {
+                console.warn('Media element cleanup failed:', e);
+            }
 
             try {
                 if (typeof pusher !== 'undefined' && pusher && pusher.disconnect) {
                     pusher.disconnect();
                 }
-            } catch (e) { console.warn('Pusher disconnect failed:', e); }
+            } catch (e) {
+                console.warn('Pusher disconnect failed:', e);
+            }
         }
 
         function markAsSuperseded(reason) {
@@ -1606,40 +1651,57 @@
             hideTakeoverPrompt();
             teardownBroadcastingPipeline();
             showInactiveOverlay();
-            if (pollTimerId) { clearInterval(pollTimerId); pollTimerId = null; }
+            if (pollTimerId) {
+                clearInterval(pollTimerId);
+                pollTimerId = null;
+            }
         }
 
         function claimBroadcasterTab() {
             return fetch(CLAIM_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': CSRF_TOKEN,
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({ tab_id: myTabId }),
-            })
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-                console.log('[Broadcaster lock] Claimed:', data);
-                if (localChannel) {
-                    localChannel.postMessage({ type: 'TAB_CLAIMED', tabId: myTabId });
-                }
-                return data;
-            })
-            .catch(function (err) {
-                console.error('[Broadcaster lock] Claim failed:', err);
-                throw err;
-            });
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        tab_id: myTabId
+                    }),
+                })
+                .then(function(r) {
+                    return r.json();
+                })
+                .then(function(data) {
+                    console.log('[Broadcaster lock] Claimed:', data);
+                    if (localChannel) {
+                        localChannel.postMessage({
+                            type: 'TAB_CLAIMED',
+                            tabId: myTabId
+                        });
+                    }
+                    return data;
+                })
+                .catch(function(err) {
+                    console.error('[Broadcaster lock] Claim failed:', err);
+                    throw err;
+                });
         }
+
         function closeBroadcasterTab() {
             window.location.href = "about:blank"
         }
 
         function fetchActiveTabId() {
-            return fetch(ACTIVE_TAB_URL, { headers: { 'Accept': 'application/json' } })
-                .then(function (r) { return r.json(); })
-                .then(function (data) {
+            return fetch(ACTIVE_TAB_URL, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(function(r) {
+                    return r.json();
+                })
+                .then(function(data) {
                     return (data && data.active_tab_id) ? data.active_tab_id : null;
                 });
         }
@@ -1660,12 +1722,12 @@
         function checkActiveTab() {
             if (!isActiveOwner || superseded) return;
             fetchActiveTabId()
-                .then(function (activeId) {
+                .then(function(activeId) {
                     if (activeId && activeId !== myTabId) {
                         markAsSuperseded('polling found different active tab: ' + activeId);
                     }
                 })
-                .catch(function (err) {
+                .catch(function(err) {
                     console.warn('[Broadcaster lock] Poll failed:', err);
                 });
         }
@@ -1673,10 +1735,10 @@
         // User confirmed they want this tab to take over from another session.
         function confirmTakeoverHere() {
             claimBroadcasterTab()
-                .then(function () {
+                .then(function() {
                     activateAsOwner();
                 })
-                .catch(function () {
+                .catch(function() {
                     alert('Could not take over the broadcaster. Please try again.');
                 });
         }
@@ -1687,9 +1749,9 @@
             hideTakeoverPrompt();
 
             fetchActiveTabId()
-                .then(function (activeId) {
+                .then(function(activeId) {
                     if (!activeId) {
-                        return claimBroadcasterTab().then(function () {
+                        return claimBroadcasterTab().then(function() {
                             activateAsOwner();
                         });
                     }
@@ -1700,7 +1762,7 @@
                     // Another tab/device already owns this live show — ask first.
                     showTakeoverPrompt();
                 })
-                .catch(function (err) {
+                .catch(function(err) {
                     console.error('[Broadcaster lock] Init failed:', err);
                     if (typeof window.__rejectBroadcasterLock === 'function') {
                         window.__rejectBroadcasterLock(err);
@@ -1709,7 +1771,7 @@
         }
 
         if (typeof channel !== 'undefined' && channel && typeof channel.bind === 'function') {
-            channel.bind('BroadcasterTabClaimedEvent', function (data) {
+            channel.bind('BroadcasterTabClaimedEvent', function(data) {
                 console.log('[Pusher] BroadcasterTabClaimedEvent received:', data, 'myTabId:', myTabId);
                 if (data.tab_id === myTabId) return;
                 if (data.tab_id !== myTabId) {
@@ -1722,7 +1784,7 @@
         }
 
         if (localChannel) {
-            localChannel.onmessage = function (event) {
+            localChannel.onmessage = function(event) {
                 const msg = event && event.data;
                 if (!msg || msg.type !== 'TAB_CLAIMED') return;
                 if (msg.tabId && msg.tabId !== myTabId && isActiveOwner) {
@@ -1736,10 +1798,10 @@
         }
 
         if (takeoverCancel) {
-            takeoverCancel.addEventListener('click', function () {
+            takeoverCancel.addEventListener('click', function() {
                 console.log('[Broadcaster lock] takeoverCancel clicked');
                 window.location.href = "about:blank"
- 
+
                 hideTakeoverPrompt();
                 if (typeof window.__rejectBroadcasterLock === 'function') {
                     window.__rejectBroadcasterLock('user_cancelled');
@@ -1748,8 +1810,8 @@
         }
 
         if (useHereBtn) {
-            useHereBtn.addEventListener('click', function () {
-                claimBroadcasterTab().finally(function () {
+            useHereBtn.addEventListener('click', function() {
+                claimBroadcasterTab().finally(function() {
                     window.location.reload();
                 });
             });

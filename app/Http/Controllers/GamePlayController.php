@@ -749,7 +749,7 @@ class GamePlayController extends Controller
     {
         $liveShow = \DB::table('live_shows')->where('id', $id)->first();
 
-        return view('show-live-broadcast', compact('liveShow'));
+        return view('live-show-broadcast', compact('liveShow'));
     }
 
     /**

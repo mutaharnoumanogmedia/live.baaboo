@@ -350,7 +350,7 @@
                 <div class="video-placeholder" id="videoPlaceholder">
                     {{-- Zego UIKit (embedded; token from server) --}}
                     <div id="zego-live-root">
-                        <iframe src="{{ route('show-live-broadcast', ['id' => $liveShow->id]) }}"
+                        <iframe src="{{ route('live-show-broadcast', ['id' => $liveShow->id]) }}"
                             title="iframe video player" frameborder="0" allow="autoplay; encrypted-media; "
                             style=""></iframe>
                     </div>
@@ -529,7 +529,7 @@
 
     </div>
     <div class="live-show-bottom-fixed" id="liveShowBottomFixed">
-        <div id="liveShowTabContainer">
+        <div id="liveShowTabContainer" class="to-be-hidden-on-mediaplay">
 
             <div class="tab-content" id="liveShowTabsContent">
                 <div class="tab-pane fade show active" id="chatTab" role="tabpanel" aria-labelledby="chatTab-tab">
@@ -560,17 +560,7 @@
 
                     </div>
                 </div>
-                {{-- ZEGOCLOUD ZIM Chat tab (parallel to the existing chat for A/B testing) --}}
-                {{-- <div class="tab-pane fade" id="zegoChatTab" role="tabpanel" aria-labelledby="zegoChatTab-tab">
-                    <div class="zego-chat-wrapper">
-                        <div id="zimkit-container" class="zimkit-container">
-                            <div class="zimkit-status" id="zimkit-status">
-                                <i class="fas fa-spinner fa-spin me-2"></i>
-                                <span>Connecting to ZEGO chat…</span>
-                            </div>
-                        </div>
-                    </div>
-                </div> --}}
+
                 <div class="tab-pane fade " id="playerTab" role="tabpanel" aria-labelledby="playerTab-tab">
                     <!-- Player List -->
                     <div class="container-fluid ">
@@ -590,7 +580,7 @@
                 class="flex-row px-2 text-center nav d-flex flex-nowrap w-100 justify-content-between align-items-center">
 
                 <!-- 1) Logo -->
-                <li class="nav-item flex-fill">
+                <li class="nav-item flex-fill to-be-hidden-on-mediaplay">
                     <a href="#"
                         class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center">
                         <img src="{{ asset('images/badabing-logo.webp') }}" alt="Logo"
@@ -599,7 +589,7 @@
                 </li>
 
                 <!-- 2) Chat -->
-                <li class="nav-item flex-fill" role="presentation">
+                <li class="nav-item flex-fill to-be-hidden-on-mediaplay" role="presentation">
                     <a class="px-0 py-2 nav-link active d-flex flex-column align-items-center justify-content-center"
                         id="chatTab-tab" data-bs-toggle="tab" href="#chatTab" role="tab"
                         aria-controls="chatTab" aria-selected="true">
@@ -607,19 +597,9 @@
                         <small class="mt-1">{{ __('de.main_ui.chat') }}</small>
                     </a>
                 </li>
-
-                {{-- 3) ZEGO Chat (parallel to existing chat for A/B testing) --}}
-                {{-- <li class="nav-item flex-fill" role="presentation">
-                    <a class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
-                        id="zegoChatTab-tab" data-bs-toggle="tab" href="#zegoChatTab" role="tab"
-                        aria-controls="zegoChatTab" aria-selected="false">
-                        <i class="fas fa-bolt fs-5"></i>
-                        <small class="mt-1">ZEGO</small>
-                    </a>
-                </li> --}}
-
                 <!-- 3) Players -->
-                <li class="nav-item flex-fill" role="presentation" id="player-tab-nav-item">
+                <li class="nav-item flex-fill to-be-hidden-on-mediaplay" role="presentation"
+                    id="player-tab-nav-item">
                     <a class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
                         id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
                         aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
@@ -736,6 +716,12 @@
             location.reload();
         });
 
+        function toggleToBeHiddenOnMediaPlay(displayProperty) {
+            document.querySelectorAll('.to-be-hidden-on-mediaplay').forEach(function(element) {
+                element.style.display = displayProperty;
+            });
+        }
+
 
         function emptyTheBodyWithEndShow(messageText = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme!') {
             document.body.innerHTML = '';
@@ -823,7 +809,8 @@
             emptyTheBodyWithEndShow('{{ $updateMessage }}');
         @endif
         @if ($liveShow->media_visible)
-            document.getElementById("liveShowBottomFixed").style.display = "none";
+            // document.getElementById("liveShowBottomFixed").style.display = "none";
+            toggleToBeHiddenOnMediaPlay('none');
         @endif
 
 
@@ -1659,29 +1646,6 @@
         });
 
 
-        const quizDummy = {
-            id: 1,
-            question: "What is the capital of France?",
-            options: [{
-                    id: 1,
-                    option_text: "Berlin"
-                },
-                {
-                    id: 2,
-                    option_text: "Madrid"
-                },
-                {
-                    id: 3,
-                    option_text: "Paris"
-                },
-                {
-                    id: 4,
-                    option_text: "Rome"
-                }
-            ]
-        };
-
-
         function showQuestionAndSetTimer(quiz, timer) {
             isCurrentAnswerCorrect = null; //reset current answer status
             $(".option-result-container").css("display", "none");
@@ -1695,9 +1659,6 @@
                 toggleQuiz("show");
             }, 100);
         }
-
-        // showQuestionAndSetTimer(quizDummy, 100);
-
 
 
         function startTimer(durationSeconds, onComplete) {
@@ -2080,11 +2041,6 @@
             return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
         }
 
-        // document.getElementById("playButton").addEventListener("click", function() {
-        //     // enablePush();
-
-        //     unmuteAndHide();
-        // });
 
         async function enablePush() {
             if (!('serviceWorker' in navigator)) {
@@ -2181,14 +2137,6 @@
         function applyChatStatus(chatEnabled, showMessage = false) {
             isChatEnabled = !!chatEnabled;
             updateChatComposerState();
-
-            // if (showMessage) {
-            //     if (isChatEnabled) {
-            //         alert('Der Chat ist jetzt wieder aktiviert.');
-            //     } else {
-            //         alert('Der Chat wurde vom Moderator deaktiviert.');
-            //     }
-            // }
         }
 
         function updateChatComposerState() {
@@ -2658,8 +2606,6 @@
 
             return text;
         }
-
-     
     </script>
     <script>
         var channelMediaPlayed = pusher.subscribe('live-show-media-played.' + {{ $liveShow->id }});
@@ -2668,9 +2614,10 @@
             console.log('LiveShowMediaPlayed channel subscribed successfully!');
         });
         channelMediaPlayed.bind('LiveShowMediaPlayed', function(data) {
-            document.getElementById('galleryOverlayModal').style.display = 'none';
+            // document.getElementById('galleryOverlayModal').style.display = 'none';
             console.log('LiveShowMediaPlayed event received:', data);
-            document.getElementById('liveShowBottomFixed').style.display = 'none';
+            // document.getElementById('liveShowBottomFixed').style.display = 'none';
+            toggleToBeHiddenOnMediaPlay('none');
         });
 
         var channelMediaHidden = pusher.subscribe('live-show-media-hidden.' + {{ $liveShow->id }});
@@ -2681,12 +2628,14 @@
             console.log('LiveShowMediaHidden event received:', data);
             //hide overlay
             document.getElementById('liveShowBottomFixed').style.display = 'block';
+            toggleToBeHiddenOnMediaPlay('block');
         });
     </script>
 
     @if (request()->boolean('debug_bot') && $liveShow->is_test_show)
         <script src="{{ url('js/live-show-quiz-debug-bot.js?v=' . time()) }}"></script>
     @endif
+
 
 
 
