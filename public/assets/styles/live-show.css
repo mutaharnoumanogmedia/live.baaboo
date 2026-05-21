@@ -65,7 +65,7 @@ body .end-show {
     text-align: center;
 }
 
-/* Bottom fixed navbar styling */
+/* Bottom fixed navbar styling ocpaity */
 .bottom-nav {
     background: #ffffff;
     border-top: 1px solid rgba(0, 0, 0, 0.08);
@@ -75,6 +75,7 @@ body .end-show {
     z-index: 1030;
     /* above most stuff */
     padding: 0;
+
     opacity: 0.9;
 
     /* iPhone home bar safe area */
