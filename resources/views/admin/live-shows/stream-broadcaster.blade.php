@@ -3,6 +3,31 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
+        /* Base reset to center the mobile view on large screens */
+        /* body {
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+        } */
+
+        /* The wrapper that acts as your mobile screen */
+        /* #mobile-frame {
+            width: 100%;
+            max-width: 390px;
+            
+            height: 844px;
+            
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            border-radius: 24px;
+            border: 4px solid #000000;
+        } */
+
         #root,
         #root>div,
         #root video {
@@ -488,7 +513,7 @@
 </head>
 
 
-<body>
+<body id="mobile-frame">
     <div id="page-qr-wrapper">
         <div id="page-qr-code"></div>
         <div id="page-qr-label">Scan to open the same broadcasting panel in your phone</div>
