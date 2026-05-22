@@ -54,7 +54,19 @@ class LiveShowController extends Controller
     public function index()
     {
         //
-        $liveShows = LiveShow::orderBy('id', 'desc')->get();
+        // Get shows with 'scheduled', then 'live', then 'completed'
+        $liveShows = LiveShow::orderByRaw("
+                CASE 
+                    WHEN status = 'live' THEN 0
+                    WHEN status = 'scheduled' THEN 1
+                    WHEN status = 'completed' THEN 2
+                    ELSE 3
+                END
+            ")
+            ->orderBy('scheduled_at', 'asc')
+            ->orderBy('id', 'desc')
+            ->get();
+
 
         return view('admin.live-shows.index', compact('liveShows'));
     }
