@@ -1,6 +1,6 @@
 <x-guest-layout>
     <!-- Live Show Banner -->
-    @if (isset($currentLiveShow) && $currentLiveShow && true)
+    @if (isset($currentLiveShow) && $currentLiveShow && false)
         <style>
             /* Updated banner styles */
             .live-show-banner {
@@ -621,7 +621,7 @@
     <!-- ══════════════════════════════════════════
        HOST
   ══════════════════════════════════════════ -->
-    <section class="host-section gradient-bg-reverse">
+    <section class="host-section gradient-bg-reverse d-none">
         <div class="container">
             <div class="text-center w-100">
                 <div class="host-eyebrow fs-6 text-orange">DEINE GASTGEBERIN</div>
