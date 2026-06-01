@@ -1,9 +1,8 @@
 <html>
 
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        /* Base reset to center the mobile view on large screens */
         /* body {
             margin: 0 auto;
             display: flex;
@@ -11,15 +10,14 @@
             align-items: center;
             min-height: 100vh;
             background-color: #f0f2f5;
-        } */
+        }
 
-        /* The wrapper that acts as your mobile screen */
-        /* #mobile-frame {
+        #mobile-frame {
             width: 100%;
             max-width: 390px;
-            
+
             height: 844px;
-            
+
             position: relative;
             overflow: hidden;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -617,7 +615,7 @@
     });
 </script> --}}
 
-    <div id="broadcasterTakeoverPrompt" role="dialog" aria-live="polite" aria-hidden="true">
+    {{-- <div id="broadcasterTakeoverPrompt" role="dialog" aria-live="polite" aria-hidden="true">
         <div class="card">
             <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
             <h3>Broadcaster already open</h3>
@@ -630,9 +628,9 @@
                 <button id="broadcasterTakeoverCancelBtn" type="button">Cancel</button>
             </div>
         </div>
-    </div>
+    </div> --}}
 
-    <div id="broadcasterInactiveOverlay" role="dialog" aria-live="assertive" aria-hidden="true">
+    {{-- <div id="broadcasterInactiveOverlay" role="dialog" aria-live="assertive" aria-hidden="true">
         <div class="card">
             <div class="icon"><i class="fas fa-tv"></i></div>
             <h3>Broadcaster opened elsewhere</h3>
@@ -645,7 +643,7 @@
             </button>
             <button id="broadcasterCloseBtn" type="button">Close</button>
         </div>
-    </div>
+    </div> --}}
 </body>
 <script>
     // ─────────────────────────────────────────────────────────────
@@ -675,6 +673,7 @@
         let pipeline = null;
         let pipelinePromise = null;
         let overlayVideoEl = null;
+        let overlayImageEl = null;
 
         const liveShowMediaHiddenUrl = '{{ route('admin.live-shows.media-hidden', $liveShow->id) }}';
         const liveShowMediaPlayedUrl = '{{ route('admin.live-shows.media-played', $liveShow->id) }}';
@@ -683,6 +682,7 @@
         // Overlay state, mutable from the UI controls.
         const overlayState = {
             visible: false,
+            mediaType: null, // 'video' | 'image' | null
             position: 'center',
             size: 0.35,
         };
@@ -738,15 +738,71 @@
             overlayVideoEl.style.cssText = 'width:2px;height:2px;';
             hiddenHost.appendChild(overlayVideoEl);
 
+            // Overlay <img> for gallery images (composited like video).
+            overlayImageEl = document.createElement('img');
+            overlayImageEl.crossOrigin = 'anonymous';
+            overlayImageEl.style.cssText = 'width:2px;height:2px;';
+            hiddenHost.appendChild(overlayImageEl);
+
             // Canvas where camera + overlay get composited every frame.
             const canvas = document.createElement('canvas');
             canvas.width = CANVAS_WIDTH;
             canvas.height = CANVAS_HEIGHT;
             const ctx = canvas.getContext('2d');
 
+            function drawCompositedOverlay(naturalWidth, naturalHeight, sourceEl) {
+                const aspect = naturalWidth / naturalHeight;
+                let ow, oh, ox, oy;
+
+                if (overlayState.position === 'fullscreen') {
+                    const sc = Math.min(canvas.width / naturalWidth, canvas.height / naturalHeight);
+                    ow = naturalWidth * sc;
+                    oh = naturalHeight * sc;
+                    ox = (canvas.width - ow) / 2;
+                    oy = (canvas.height - oh) / 2;
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                } else {
+                    ow = canvas.width * (overlayState.size || 0.35);
+                    oh = ow / aspect;
+                    const margin = 24;
+                    switch (overlayState.position) {
+                        case 'top-left':
+                            ox = margin;
+                            oy = margin;
+                            break;
+                        case 'bottom-left':
+                            ox = margin;
+                            oy = canvas.height - oh - margin;
+                            break;
+                        case 'bottom-right':
+                            ox = canvas.width - ow - margin;
+                            oy = canvas.height - oh - margin;
+                            break;
+                        case 'center':
+                            ox = (canvas.width - ow) / 2;
+                            oy = (canvas.height - oh) / 2;
+                            break;
+                        case 'top-right':
+                        default:
+                            ox = canvas.width - ow - margin;
+                            oy = margin;
+                            break;
+                    }
+                    ctx.save();
+                    ctx.shadowColor = 'rgba(0,0,0,0.55)';
+                    ctx.shadowBlur = 18;
+                    ctx.shadowOffsetY = 4;
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(ox - 2, oy - 2, ow + 4, oh + 4);
+                    ctx.restore();
+                }
+
+                ctx.drawImage(sourceEl, ox, oy, ow, oh);
+            }
+
             function drawFrame() {
                 if (cameraVideoEl.readyState >= 2 && cameraVideoEl.videoWidth > 0) {
-                    // Draw camera using "cover" semantics so it always fills.
                     const cw = cameraVideoEl.videoWidth;
                     const ch = cameraVideoEl.videoHeight;
                     const scale = Math.max(canvas.width / cw, canvas.height / ch);
@@ -760,63 +816,23 @@
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                 }
 
-                if (overlayState.visible &&
+                if (overlayState.visible && overlayState.mediaType === 'video' &&
                     !overlayVideoEl.paused &&
                     overlayVideoEl.readyState >= 2 &&
                     overlayVideoEl.videoWidth > 0) {
-
-                    const aspect = overlayVideoEl.videoWidth / overlayVideoEl.videoHeight;
-
-                    let ow, oh, ox, oy;
-                    if (overlayState.position === 'fullscreen') {
-                        // Fit (letterbox) the URL video inside canvas
-                        const sc = Math.min(canvas.width / overlayVideoEl.videoWidth,
-                            canvas.height / overlayVideoEl.videoHeight);
-                        ow = overlayVideoEl.videoWidth * sc;
-                        oh = overlayVideoEl.videoHeight * sc;
-                        ox = (canvas.width - ow) / 2;
-                        oy = (canvas.height - oh) / 2;
-                        // Black bars
-                        ctx.fillStyle = '#000';
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    } else {
-                        ow = canvas.width * (overlayState.size || 0.35);
-                        oh = ow / aspect;
-                        const margin = 24;
-                        switch (overlayState.position) {
-                            case 'top-left':
-                                ox = margin;
-                                oy = margin;
-                                break;
-                            case 'bottom-left':
-                                ox = margin;
-                                oy = canvas.height - oh - margin;
-                                break;
-                            case 'bottom-right':
-                                ox = canvas.width - ow - margin;
-                                oy = canvas.height - oh - margin;
-                                break;
-                            case 'center':
-                                ox = (canvas.width - ow) / 2;
-                                oy = (canvas.height - oh) / 2;
-                                break;
-                            case 'top-right':
-                            default:
-                                ox = canvas.width - ow - margin;
-                                oy = margin;
-                                break;
-                        }
-                        // Soft drop shadow for legibility
-                        ctx.save();
-                        ctx.shadowColor = 'rgba(0,0,0,0.55)';
-                        ctx.shadowBlur = 18;
-                        ctx.shadowOffsetY = 4;
-                        ctx.fillStyle = '#000';
-                        ctx.fillRect(ox - 2, oy - 2, ow + 4, oh + 4);
-                        ctx.restore();
-                    }
-
-                    ctx.drawImage(overlayVideoEl, ox, oy, ow, oh);
+                    drawCompositedOverlay(
+                        overlayVideoEl.videoWidth,
+                        overlayVideoEl.videoHeight,
+                        overlayVideoEl
+                    );
+                } else if (overlayState.visible && overlayState.mediaType === 'image' &&
+                    overlayImageEl.complete &&
+                    overlayImageEl.naturalWidth > 0) {
+                    drawCompositedOverlay(
+                        overlayImageEl.naturalWidth,
+                        overlayImageEl.naturalHeight,
+                        overlayImageEl
+                    );
                 }
             }
 
@@ -869,7 +885,7 @@
                 try {
                     cameraVideoEl.play().catch(() => {});
                 } catch (_) {}
-                if (overlayState.visible) {
+                if (overlayState.visible && overlayState.mediaType === 'video') {
                     try {
                         overlayVideoEl.play().catch(() => {});
                     } catch (_) {}
@@ -950,6 +966,7 @@
             return {
                 cameraVideoEl,
                 overlayVideoEl,
+                overlayImageEl,
                 canvas,
                 audioContext,
                 overlayGain,
@@ -1001,6 +1018,24 @@
                 return !!pipeline;
             },
 
+            _clearImageOverlay() {
+                if (!pipeline || !pipeline.overlayImageEl) return;
+                pipeline.overlayImageEl.onload = null;
+                pipeline.overlayImageEl.onerror = null;
+                try {
+                    pipeline.overlayImageEl.removeAttribute('src');
+                } catch (_) {}
+            },
+
+            _clearVideoOverlay() {
+                if (!pipeline || !pipeline.overlayVideoEl) return;
+                pipeline.overlayVideoEl.pause();
+                try {
+                    pipeline.overlayVideoEl.removeAttribute('src');
+                    pipeline.overlayVideoEl.load();
+                } catch (_) {}
+            },
+
             play(url, options) {
                 if (!pipeline) {
                     console.warn('[Overlay] Pipeline not ready yet, retrying when available.');
@@ -1011,24 +1046,63 @@
                     return;
                 }
                 const opts = options || {};
+                if (opts.type === 'image') {
+                    return this.playImage(url, opts);
+                }
+                return this.playVideo(url, opts);
+            },
+
+            playImage(url, options) {
+                if (!pipeline) return;
+                const opts = options || {};
+                const img = pipeline.overlayImageEl;
+
+                this._clearVideoOverlay();
+                overlayState.mediaType = 'image';
+                overlayState.visible = false;
+                if (opts.position) overlayState.position = opts.position;
+                if (typeof opts.size === 'number') overlayState.size = opts.size;
+
+                img.onload = () => {
+                    overlayState.visible = true;
+                };
+                img.onerror = () => {
+                    overlayState.visible = false;
+                    const err = new Error('Image failed to load (check URL / CORS).');
+                    console.error('[Overlay] image load failed:', url, err);
+                    window.dispatchEvent(new CustomEvent('broadcast-overlay-error', {
+                        detail: err
+                    }));
+                };
+                img.crossOrigin = 'anonymous';
+                img.src = url;
+            },
+
+            playVideo(url, options) {
+                if (!pipeline) return;
+                const opts = options || {};
                 const v = pipeline.overlayVideoEl;
+
+                this._clearImageOverlay();
+                overlayState.mediaType = 'video';
+                overlayState.visible = false;
 
                 v.loop = !!opts.loop;
                 v.muted = !!opts.muted;
 
-                // Resume audio context (browsers require a user gesture).
                 if (pipeline.audioContext.state === 'suspended') {
                     pipeline.audioContext.resume().catch(() => {});
                 }
 
                 if (!v.muted) pipeline.ensureOverlayAudioWired();
 
+                if (opts.position) overlayState.position = opts.position;
+                if (typeof opts.size === 'number') overlayState.size = opts.size;
+
                 v.src = url;
                 v.load();
                 v.play().then(() => {
                     overlayState.visible = true;
-                    if (opts.position) overlayState.position = opts.position;
-                    if (typeof opts.size === 'number') overlayState.size = opts.size;
                 }).catch(err => {
                     console.error('[Overlay] play failed:', err);
                     window.dispatchEvent(new CustomEvent('broadcast-overlay-error', {
@@ -1039,12 +1113,10 @@
 
             stop() {
                 if (!pipeline) return;
-                pipeline.overlayVideoEl.pause();
-                try {
-                    pipeline.overlayVideoEl.removeAttribute('src');
-                    pipeline.overlayVideoEl.load();
-                } catch (_) {}
+                this._clearVideoOverlay();
+                this._clearImageOverlay();
                 overlayState.visible = false;
+                overlayState.mediaType = null;
             },
 
             setPosition(position) {
@@ -1079,23 +1151,23 @@
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 
 {{-- Zego must not start until the broadcaster lock allows this tab. --}}
-<script>
+{{-- <script>
     window.__broadcasterLockReady = new Promise(function(resolve, reject) {
         window.__resolveBroadcasterLock = resolve;
         window.__rejectBroadcasterLock = reject;
     });
-</script>
+</script> --}}
 
 <script>
     window.onload = async function() {
         // Wait until this tab owns the broadcaster (first tab auto-claims;
         // additional tabs must confirm via the takeover prompt).
-        try {
-            await window.__broadcasterLockReady;
-        } catch (e) {
-            console.log('[Broadcaster lock] Streaming not started in this tab.');
-            return;
-        }
+        // try {
+        //     await window.__broadcasterLockReady;
+        // } catch (e) {
+        //     console.log('[Broadcaster lock] Streaming not started in this tab.');
+        //     return;
+        // }
 
         function getUrlParams(url) {
             let urlStr = url.split('?')[1] || "";
@@ -1118,7 +1190,7 @@
         }
 
         // 1) get or create roomID in outer scope
-        const roomID = "{{ time() . rand(1000, 9999) }}";
+        const roomID = "{{"RoomID_".$liveShow->id }}";
 
         try {
             // 2) save it first
@@ -1175,6 +1247,12 @@
                 container: document.querySelector("#root"),
                 videoResolutionList: [ZegoUIKitPrebuilt.VideoResolution_720P],
                 videoResolutionDefault: ZegoUIKitPrebuilt.VideoResolution_720P,
+                captureWidth: 1080,
+                captureHeight: 1920,
+                encodeWidth: 1080,
+                encodeHeight: 1920,
+                fps: 30, // Match your Camo Studio frame rate
+                bitrate: 3000,
 
 
                 scenario: {
@@ -1341,7 +1419,7 @@
     async function loadAttachedMedia() {
         mediaList.innerHTML = '<div id="overlay-media-loading">Loading attached media…</div>';
         try {
-            const res = await fetch(ATTACHED_MEDIA_URL + '?type=video', {
+            const res = await fetch(ATTACHED_MEDIA_URL, {
                 headers: {
                     'Accept': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
@@ -1355,7 +1433,7 @@
 
             if (!data.media || data.media.length === 0) {
                 mediaList.innerHTML =
-                    '<div id="overlay-media-empty">No video media attached to this live show.</div>';
+                    '<div id="overlay-media-empty">No image or video media attached to this live show.</div>';
                 return;
             }
 
@@ -1434,14 +1512,16 @@
         const label = selectedMedia ?
             (selectedMedia.title || selectedMedia.original_name || ('Media #' + selectedMedia.id)) :
             'overlay';
+        const mediaType = selectedMedia && selectedMedia.type === 'image' ? 'image' : 'video';
         setStatus('Loading ' + label + '…');
         window.BroadcastOverlay.play(url, {
+            type: mediaType,
             position: posSel.value,
             size: parseFloat(sizeSel.value),
             loop: loopChk.checked,
-            muted: muteChk.checked,
+            muted: mediaType === 'image' ? true : muteChk.checked,
         });
-        setTimeout(() => setStatus('Playing: ' + label, '#86efac'), 600);
+        setTimeout(() => setStatus((mediaType === 'image' ? 'Showing' : 'Playing') + ': ' + label, '#86efac'), 600);
 
         //event of show gallery via ajax call
         fetch(galleryShowOnStreamUrl, {
@@ -1484,6 +1564,7 @@
             // Retry muted; show a "tap for sound" overlay
 
         }
+        const msg = (err && err.message) ? err.message : 'Overlay playback failed.';
         setStatus(msg, '#fca5a5');
     });
 </script>
@@ -1510,11 +1591,13 @@
     channel.bind('ShowGalleryImageEvent', function(data) {
         console.log("[Pusher] ShowGalleryImageEvent received:", data);
         if (window.BroadcastOverlay && data.url) {
+            const mediaType = data.type === 'image' ? 'image' : 'video';
             window.BroadcastOverlay.play(data.url, {
+                type: mediaType,
                 position: 'fullscreen',
                 size: 1,
                 loop: false,
-                muted: false,
+                muted: mediaType !== 'video',
             });
 
         } else {
@@ -1567,7 +1650,7 @@
       Zego only starts after the user confirms.
     • Old tab after someone else claims: superseded overlay + stream teardown.
 --}}
-<script>
+{{-- <script>
     (function() {
         const LIVE_SHOW_ID = {{ $liveShow->id }};
         const CLAIM_URL =
@@ -1844,7 +1927,9 @@
 
         document.addEventListener('DOMContentLoaded', initBroadcasterLock);
     })();
-</script>
+
+   
+</script> --}}
 
 <script src="https://cdn.jsdelivr.net/npm/nosleep.js@0.12.0/dist/NoSleep.min.js"></script>
 <script>
