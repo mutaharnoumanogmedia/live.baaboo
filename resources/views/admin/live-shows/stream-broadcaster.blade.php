@@ -1190,7 +1190,7 @@
         }
 
         // 1) get or create roomID in outer scope
-        const roomID = "{{"RoomID_".$liveShow->id }}";
+        const roomID = "{{"RoomID_".$liveShow->id . rand(1000, 9999) }}";
 
         try {
             // 2) save it first

@@ -18,18 +18,7 @@ class HomeController extends Controller
     public function index()
     {
 
-        $currentLiveShow = LiveShow::query()
-            ->where(function ($query) {
-                $query->where('status', 'live')
-                    ->orWhere(function ($q) {
-                        $q->where('status', 'scheduled')
-                            ->whereDate('scheduled_at', '>=', now()->toDateString());
-                    });
-            })
-            ->orderBy('scheduled_at', 'asc')
-            ->notTestShow()
-            ->with('users')
-            ->first();
+        $currentLiveShow = LiveShow::currentForHomepage();
 
         $scheduleShows = LiveShow::query()
             ->whereIn('status', ['live', 'scheduled'])
@@ -465,4 +454,7 @@ class HomeController extends Controller
             return false;
         }
     }
+
+
+    
 }

@@ -14,61 +14,30 @@
             }
 
 
-            .live-show-badge {
-                background: #f73fae;
-                color: #000000;
-                padding: 6px 18px;
-                border-radius: 21px 6px 21px 21px;
-                letter-spacing: 1.5px;
-                box-shadow: 0 2px 8px rgba(255, 167, 38, 0.06);
-                font-weight: bold;
-                font-size: 1rem;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
+            @media (max-width: 991.98px) {
+                .live-show-content-container {
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                }
             }
 
-            .live-dot {
-                display: inline-block;
-                width: 12px;
-                height: 12px;
-                border-radius: 50%;
-                background: radial-gradient(ellipse at center, #ff3358 80%, #ff6347 100%);
-                box-shadow: 0 0 8px 2px #ff335888;
-                margin-right: 7px;
-                vertical-align: middle;
-            }
-
-            .live-show-content-container {
-                display: flex;
-                align-items: center;
-                justify-content: left;
-            }
-
-            .schedule-highlight {
-                background: #f73fae;
-                color: #00000;
-                padding: 0.20em 0.7em;
-                border-radius: 8px;
-                font-weight: bold;
-                width: 150px;
-            }
-
-            .live-show-title {
+            .live-show-content-container>* {
+                display: block;
                 width: 100%;
-                text-align: left;
-                font-weight: bold;
-                font-size: 1.2rem;
-                color: #140b63;
-                margin-top: 10px;
-                margin-bottom: 10px;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-                padding: 0 15px;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                margin-left: auto;
+                margin-right: auto;
             }
 
-            .text-gradient {
-                color: #140b63;
+            .live-show-badge {
+                width: auto;
+                border-radius: 24px;
             }
 
 
@@ -144,41 +113,21 @@
                         <div class="live-show-content-container">
                             <div class="live-show-badge ">
                                 <div class="live-dot me-2"></div>
-                                @if (isset($currentLiveShow) && $currentLiveShow->status == 'scheduled')
-                                    @if ($currentLiveShow->scheduled_at)
-                                        <div class="schedule-highlight">
-                                            {{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.F Y \u\m H:i') }}
-                                            Uhr
-                                        </div>
-                                    @endif
-                                @elseif (isset($currentLiveShow) && $currentLiveShow->status == 'live')
-                                    <div class="schedule-highlight">
-                                        LIVE NOW
-                                    </div>
-                                @else
-                                @endif
-
+                                <div id="live-show-schedule-badge" class="schedule-highlight d-none"></div>
                             </div>
                             <div class="live-show-title">
                                 <h5 class="mb-1 fw-bold text-gradient" style="font-size:1.2rem;">
-                                    <span style="color:#140b63;">{{ $currentLiveShow->title ?? 'Live Show' }}</span>
+                                    <span id="live-show-banner-title" style="color:#140b63;">Live Show</span>
                                     <span class="mx-2">·</span>
                                 </h5>
-                                {{-- <p class="mb-0 opacity-75 fs-6"
-                                   style="color:#140b63;">
-                                    <i class="bi bi-people-fill" style="color:#140b63;"></i>
-                                    {{ $currentLiveShow->users->count() ?? 0 }}
-                                    {{ $currentLiveShow->users->count() == 1 ? 'Mitspieler ist' : 'Mitspieler sind' }} gerade
-                                    dabei
-                                </p> --}}
                             </div>
 
                         </div>
                     </div>
                     <div class="col-lg-3 d-inline-flex justify-content-center">
                         <div class="live-show-join-btn">
-                            <a href="{{ route('live-show', $currentLiveShow->id) }}"
-                                class="px-4 shadow-sm btn btn-lg join-live-btn" style="border-radius: 24px;">
+                            <a id="live-show-join-link" href="#" class="px-4 shadow-sm btn btn-lg join-live-btn"
+                                style="border-radius: 24px;">
                                 <i class="fas fa-play me-2 text-orange"></i>Jetzt mitspielen
                             </a>
                         </div>
@@ -188,6 +137,7 @@
             </div>
         </div>
     @endif
+
 
 
 
@@ -896,6 +846,7 @@
 
 
     @push('scripts')
+     
         <script>
             var assetPath = "{{ asset('images/') }}";
             var scheduleData = @json($scheduleData ?? ['carousel_items' => []]);
@@ -979,9 +930,8 @@
             document.addEventListener('DOMContentLoaded', function() {
                 // Get the scheduled time from PHP (format: Y-m-d H:i:s)
                 @if (isset($currentLiveShow) && $currentLiveShow->scheduled_at)
-                    var scheduledTime =
-                        "{{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('Y-m-d H:i:s') }}";
-                    var scheduledDate = new Date(scheduledTime.replace(' ', 'T') + '+02:00'); // force EU timezone
+                    // ISO8601 includes Berlin offset (+01/+02) so countdown is correct in any viewer timezone
+                    var scheduledDate = new Date(@json($currentLiveShow->scheduled_at->toIso8601String()));
                 @else
                     var scheduledDate = null;
                 @endif
@@ -1056,7 +1006,7 @@
 
                 var statusUrl = "{{ route('live-show.banner-status') }}";
                 // Re-check every 30s so the banner appears/disappears without a page reload.
-                var POLL_INTERVAL_MS = 10000;
+                var POLL_INTERVAL_MS = 20000;
 
                 function applyBannerStatus(data) {
                     if (data && data.show) {
