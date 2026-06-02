@@ -1,117 +1,28 @@
 <x-guest-layout>
     <!-- Live Show Banner -->
-    <style>
-        /* Updated banner styles */
-        .live-show-banner {
-            background: #fde901;
-            color: #140b63;
-            border-radius: 32px;
-            box-shadow: 0 4px 20px rgba(160, 130, 255, 0.08);
-            margin-bottom: 36px;
-            margin-top: 36px;
-            padding: 15px;
-        }
-
-
-        .live-show-badge {
-            background: #f73fae;
-            color: #000000;
-            padding: 6px 18px;
-            border-radius: 21px 6px 21px 21px;
-            letter-spacing: 1.5px;
-            box-shadow: 0 2px 8px rgba(255, 167, 38, 0.06);
-            font-weight: bold;
-            font-size: 1rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .live-dot {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: radial-gradient(ellipse at center, #ff3358 80%, #ff6347 100%);
-            box-shadow: 0 0 8px 2px #ff335888;
-            margin-right: 7px;
-            vertical-align: middle;
-        }
-
-        .live-show-content-container {
-            display: flex;
-            align-items: center;
-            justify-content: left;
-        }
-
-        .schedule-highlight {
-            background: #f73fae;
-            color: #00000;
-            padding: 0.20em 0.7em;
-            border-radius: 8px;
-            font-weight: bold;
-            width: 150px;
-        }
-
-        .live-show-title {
-            width: 100%;
-            text-align: left;
-            font-weight: bold;
-            font-size: 1.2rem;
-            color: #140b63;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 0 15px;
-        }
-
-        .text-gradient {
-            color: #140b63;
-        }
-
-
-
-        .banner-announcement {
-            background: #f73fae !important;
-            color: #140b63 !important;
-            border-radius: 30px !important;
-            letter-spacing: 1px;
-
-            width: fit-content;
-            margin: 0 auto;
-        }
-
-        .border-purple {
-            border: 2px solid #bb5ff5 !important;
-        }
-
-        .join-live-btn {
-            background: #f73fae;
-            color: #000000 !important;
-            border-radius: 24px !important;
-            font-weight: bold !important;
-            border: 2px solid #bb5ff5 !important;
-        }
-
-        .text-orange {
-            color: #f73fae !important;
-        }
-
-        @media (min-width: 992px) {
-            .banner-announcement {
-                margin-top: -35px !important;
+    @if (isset($currentLiveShow) && $currentLiveShow)
+        <style>
+            /* Updated banner styles */
+            .live-show-banner {
+                background: #fde901;
+                color: #140b63;
+                border-radius: 32px;
+                box-shadow: 0 4px 20px rgba(160, 130, 255, 0.08);
+                margin-bottom: 36px;
+                margin-top: 36px;
+                padding: 15px;
             }
-        }
 
-        @media (max-width: 991.98px) {
-            .live-show-content-container {
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
+
+            @media (max-width: 991.98px) {
+                .live-show-content-container {
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                }
             }
 
             .live-show-content-container>* {
@@ -128,10 +39,69 @@
                 width: auto;
                 border-radius: 24px;
             }
-        }
-    </style>
-    <div id="live-show-banner-wrapper" class="d-none">
-        <div class="live-show-banner position-relative" style="overflow:visible;">
+
+
+
+            .banner-announcement {
+                background: #f73fae !important;
+                color: #140b63 !important;
+                border-radius: 30px !important;
+                letter-spacing: 1px;
+
+                width: fit-content;
+                margin: 0 auto;
+            }
+
+            .border-purple {
+                border: 2px solid #bb5ff5 !important;
+            }
+
+            .join-live-btn {
+                background: #f73fae;
+                color: #000000 !important;
+                border-radius: 24px !important;
+                font-weight: bold !important;
+                border: 2px solid #bb5ff5 !important;
+            }
+
+            .text-orange {
+                color: #f73fae !important;
+            }
+
+            @media (min-width: 992px) {
+                .banner-announcement {
+                    margin-top: -35px !important;
+                }
+            }
+
+            @media (max-width: 991.98px) {
+                .live-show-content-container {
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                }
+
+                .live-show-content-container>* {
+                    display: block;
+                    width: 100%;
+                    justify-content: center;
+                    align-items: center;
+                    text-align: center;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+
+                .live-show-badge {
+                    width: auto;
+                    border-radius: 24px;
+                }
+            }
+        </style>
+        <div class="live-show-banner position-relative" id="live-show-banner"
+            data-live-show-id="{{ $currentLiveShow->id }}" style="overflow:visible; display:none;">
 
             <div class="px-4 py-2 text-center shadow banner-announcement fs-5">
                 ✨ <span style="color:#fde901;">It's Show Time!</span> Lass dir den Spaß nicht entgehen! ✨
@@ -166,7 +136,8 @@
 
             </div>
         </div>
-    </div>
+    @endif
+
 
 
 
@@ -875,161 +846,7 @@
 
 
     @push('scripts')
-        <script>
-            (function() {
-                const BANNER_API_URL = @json(route('api.current-live-show'));
-                const POLL_INTERVAL_MS = 60 * 1000;
-                const SHOW_BEFORE_MS = 30 * 60 * 1000;
-                const HIDE_AFTER_MS = 60 * 60 * 1000;
-
-                let currentShow = null;
-                let visibilityTimer = null;
-
-                const wrapper = document.getElementById('live-show-banner-wrapper');
-                const scheduleBadge = document.getElementById('live-show-schedule-badge');
-                const titleEl = document.getElementById('live-show-banner-title');
-                const joinLink = document.getElementById('live-show-join-link');
-
-                function parseScheduledAt(show) {
-                    if (!show || !show.scheduled_at_iso) {
-                        return null;
-                    }
-                    const date = new Date(show.scheduled_at_iso);
-                    return Number.isNaN(date.getTime()) ? null : date;
-                }
-
-                function isWithinBannerWindow(show, scheduledAt) {
-                    if (show && show.status === 'live') {
-                        return true;
-                    }
-
-                    if (!scheduledAt) {
-                        return false;
-                    }
-
-                    const now = Date.now();
-                    const start = scheduledAt.getTime() - SHOW_BEFORE_MS;
-                    const end = scheduledAt.getTime() + HIDE_AFTER_MS;
-
-                    // Visible only when we are <=30 minutes before the show,
-                    // until 1 hour after the show.
-                    return now >= start && now <= end;
-                }
-
-                function updateBannerContent(show) {
-                    if (!show) {
-                        return;
-                    }
-
-                    titleEl.textContent = show.title || 'Live Show';
-                    joinLink.href = show.join_url || '#';
-
-                    if (show.schedule_badge) {
-                        scheduleBadge.textContent = show.schedule_badge;
-                        scheduleBadge.classList.remove('d-none');
-                    } else {
-                        scheduleBadge.textContent = '';
-                        scheduleBadge.classList.add('d-none');
-                    }
-                }
-
-                function setBannerVisible(visible) {
-                    if (!wrapper) {
-                        return;
-                    }
-                    wrapper.classList.toggle('d-none', !visible);
-                }
-
-                function scheduleNextVisibilityCheck(show, scheduledAt) {
-                    if (visibilityTimer) {
-                        clearTimeout(visibilityTimer);
-                        visibilityTimer = null;
-                    }
-
-                    if (show && show.status === 'live' && !scheduledAt) {
-                        setBannerVisible(true);
-                        return;
-                    }
-
-                    if (!scheduledAt) {
-                        setBannerVisible(false);
-                        return;
-                    }
-
-                    const now = Date.now();
-                    const start = scheduledAt.getTime() - SHOW_BEFORE_MS;
-                    const end = scheduledAt.getTime() + HIDE_AFTER_MS;
-
-                    let nextCheckAt = null;
-                    if (now < start) {
-                        nextCheckAt = start;
-                    } else if (now <= end) {
-                        nextCheckAt = end + 1;
-                    }
-
-                    updateBannerVisibility();
-
-                    if (nextCheckAt !== null) {
-                        const delay = Math.max(nextCheckAt - now, 1000);
-                        visibilityTimer = setTimeout(function() {
-                            updateBannerVisibility();
-                            scheduleNextVisibilityCheck(scheduledAt);
-                        }, delay);
-                    }
-                }
-
-                function updateBannerVisibility() {
-                    if (!currentShow) {
-                        setBannerVisible(false);
-                        return;
-                    }
-
-                    const scheduledAt = parseScheduledAt(currentShow);
-                    const visible = isWithinBannerWindow(currentShow, scheduledAt);
-                    setBannerVisible(visible);
-                }
-
-                function applyLiveShowData(payload) {
-                    currentShow = payload && payload.show ? payload.show : null;
-
-                    if (!currentShow) {
-                        if (visibilityTimer) {
-                            clearTimeout(visibilityTimer);
-                            visibilityTimer = null;
-                        }
-                        setBannerVisible(false);
-                        return;
-                    }
-
-                    updateBannerContent(currentShow);
-                    scheduleNextVisibilityCheck(currentShow, parseScheduledAt(currentShow));
-                }
-
-                function fetchCurrentLiveShow() {
-                    return fetch(BANNER_API_URL, {
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest',
-                            },
-                        })
-                        .then(function(response) {
-                            if (!response.ok) {
-                                throw new Error('Failed to fetch live show');
-                            }
-                            return response.json();
-                        })
-                        .then(applyLiveShowData)
-                        .catch(function() {
-                            /* keep last known state on transient errors */
-                        });
-                }
-
-                document.addEventListener('DOMContentLoaded', function() {
-                    fetchCurrentLiveShow();
-                    setInterval(fetchCurrentLiveShow, POLL_INTERVAL_MS);
-                });
-            })();
-        </script>
+     
         <script>
             var assetPath = "{{ asset('images/') }}";
             var scheduleData = @json($scheduleData ?? ['carousel_items' => []]);
@@ -1176,6 +993,46 @@
                     delay: 0,
                 });
             });
+        </script>
+
+        {{-- Live show banner visibility: validated server-side (Europe/Berlin) via AJAX.
+             Visible from 30 min before the scheduled time until 1 hour after. --}}
+        <script>
+            (function() {
+                var banner = document.getElementById('live-show-banner');
+                if (!banner) {
+                    return;
+                }
+
+                var statusUrl = "{{ route('live-show.banner-status') }}";
+                // Re-check every 30s so the banner appears/disappears without a page reload.
+                var POLL_INTERVAL_MS = 20000;
+
+                function applyBannerStatus(data) {
+                    if (data && data.show) {
+                        banner.style.display = '';
+                    } else {
+                        banner.style.display = 'none';
+                    }
+                }
+
+                function checkBannerStatus() {
+                    $.ajax({
+                        url: statusUrl,
+                        method: 'GET',
+                        dataType: 'json',
+                        cache: false
+                    }).done(function(data) {
+                        applyBannerStatus(data);
+                    }).fail(function() {
+                        // On failure, keep the banner hidden to avoid showing it outside its window.
+                        banner.style.display = 'none';
+                    });
+                }
+
+                checkBannerStatus();
+                setInterval(checkBannerStatus, POLL_INTERVAL_MS);
+            })();
         </script>
     @endpush
 </x-guest-layout>
