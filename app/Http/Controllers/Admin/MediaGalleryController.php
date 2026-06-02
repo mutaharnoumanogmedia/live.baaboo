@@ -176,7 +176,9 @@ class MediaGalleryController extends Controller
         Storage::disk('s3')->delete($media_gallery->path);
 
         // delete thumbnail from s3
-        Storage::disk('s3')->delete($media_gallery->thumbnail);
+        if ($media_gallery->thumbnail) {
+            Storage::disk('s3')->delete($media_gallery->thumbnail);
+        }
         $media_gallery->liveShows()->detach();
         $media_gallery->delete();
 
