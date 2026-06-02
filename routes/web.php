@@ -32,6 +32,9 @@ Route::get('datenschutz', [HomeController::class, 'privacyPolicy'])->name('daten
 
 Route::get('/live-show-magic-link/{name}', [HomeController::class, 'liveShowMagicLink'])->name('live-show-magic-link');
 
+// AJAX: validate whether the live-show banner should be visible (server-authoritative, Europe/Berlin time)
+Route::get('/live-show-banner-status', [HomeController::class, 'liveShowBannerStatus'])->name('live-show.banner-status');
+
 // Route::middleware(['auth:admin', 'role:admin'])->group(function () {
 //     Route::get("dashboard", [HomeController::class, 'dashboard_redirect'])->name('dashboard');
 // });

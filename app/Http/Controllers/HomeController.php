@@ -61,6 +61,70 @@ class HomeController extends Controller
         return view('index', compact('currentLiveShow', 'scheduleData'));
     }
 
+    /**
+     * AJAX endpoint that decides whether the live-show banner should be visible.
+     *
+     * The decision is made entirely server-side using the application's
+     * Europe/Berlin timezone, so it stays correct regardless of the visitor's
+     * local clock/timezone. The banner is shown from 30 minutes before the
+     * scheduled start until 1 hour after the scheduled start (or while live).
+     */
+    public function liveShowBannerStatus(Request $request)
+    {
+        $show = LiveShow::query()
+            ->where(function ($query) {
+                $query->where('status', 'live')
+                    ->orWhere(function ($q) {
+                        $q->where('status', 'scheduled')
+                            ->whereDate('scheduled_at', '>=', now()->toDateString());
+                    });
+            })
+            ->orderBy('scheduled_at', 'asc')
+            ->notTestShow()
+            ->first();
+
+        $now = now(); // Europe/Berlin (config app.timezone)
+
+        if (! $show) {
+            return response()->json([
+                'show' => false,
+                'server_time' => $now->toIso8601String(),
+            ]);
+        }
+
+        // A show that is explicitly marked live is always shown.
+        if ($show->status === 'live') {
+            return response()->json([
+                'show' => true,
+                'reason' => 'live',
+                'live_show_id' => $show->id,
+                'server_time' => $now->toIso8601String(),
+            ]);
+        }
+
+        if (! $show->scheduled_at) {
+            return response()->json([
+                'show' => false,
+                'live_show_id' => $show->id,
+                'server_time' => $now->toIso8601String(),
+            ]);
+        }
+
+        $windowStart = $show->scheduled_at->copy()->subMinutes(30);
+        $windowEnd = $show->scheduled_at->copy()->addHour();
+
+        $visible = $now->betweenIncluded($windowStart, $windowEnd);
+
+        return response()->json([
+            'show' => $visible,
+            'live_show_id' => $show->id,
+            'scheduled_at' => $show->scheduled_at->toIso8601String(),
+            'window_start' => $windowStart->toIso8601String(),
+            'window_end' => $windowEnd->toIso8601String(),
+            'server_time' => $now->toIso8601String(),
+        ]);
+    }
+
     public function thankYouForYourParticipation($userName)
     {
         $user = User::where('user_name', $userName)->first();

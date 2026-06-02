@@ -1,6 +1,6 @@
 <x-guest-layout>
     <!-- Live Show Banner -->
-    @if (isset($currentLiveShow) && $currentLiveShow && true)
+    @if (isset($currentLiveShow) && $currentLiveShow)
         <style>
             /* Updated banner styles */
             .live-show-banner {
@@ -131,7 +131,8 @@
                 }
             }
         </style>
-        <div class="live-show-banner position-relative" style="overflow:visible;">
+        <div class="live-show-banner position-relative" id="live-show-banner"
+            data-live-show-id="{{ $currentLiveShow->id }}" style="overflow:visible; display:none;">
 
             <div class="px-4 py-2 text-center shadow banner-announcement fs-5">
                 ✨ <span style="color:#fde901;">It's Show Time!</span> Lass dir den Spaß nicht entgehen! ✨
@@ -1042,6 +1043,46 @@
                     delay: 0,
                 });
             });
+        </script>
+
+        {{-- Live show banner visibility: validated server-side (Europe/Berlin) via AJAX.
+             Visible from 30 min before the scheduled time until 1 hour after. --}}
+        <script>
+            (function() {
+                var banner = document.getElementById('live-show-banner');
+                if (!banner) {
+                    return;
+                }
+
+                var statusUrl = "{{ route('live-show.banner-status') }}";
+                // Re-check every 30s so the banner appears/disappears without a page reload.
+                var POLL_INTERVAL_MS = 10000;
+
+                function applyBannerStatus(data) {
+                    if (data && data.show) {
+                        banner.style.display = '';
+                    } else {
+                        banner.style.display = 'none';
+                    }
+                }
+
+                function checkBannerStatus() {
+                    $.ajax({
+                        url: statusUrl,
+                        method: 'GET',
+                        dataType: 'json',
+                        cache: false
+                    }).done(function(data) {
+                        applyBannerStatus(data);
+                    }).fail(function() {
+                        // On failure, keep the banner hidden to avoid showing it outside its window.
+                        banner.style.display = 'none';
+                    });
+                }
+
+                checkBannerStatus();
+                setInterval(checkBannerStatus, POLL_INTERVAL_MS);
+            })();
         </script>
     @endpush
 </x-guest-layout>
