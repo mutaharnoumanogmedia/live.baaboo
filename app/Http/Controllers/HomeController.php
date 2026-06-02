@@ -18,18 +18,7 @@ class HomeController extends Controller
     public function index()
     {
 
-        $currentLiveShow = LiveShow::query()
-            ->where(function ($query) {
-                $query->where('status', 'live')
-                    ->orWhere(function ($q) {
-                        $q->where('status', 'scheduled')
-                            ->whereDate('scheduled_at', '>=', now()->toDateString());
-                    });
-            })
-            ->orderBy('scheduled_at', 'asc')
-            ->notTestShow()
-            ->with('users')
-            ->first();
+        $currentLiveShow = LiveShow::currentForHomepage();
 
         $scheduleShows = LiveShow::query()
             ->whereIn('status', ['live', 'scheduled'])
@@ -59,6 +48,46 @@ class HomeController extends Controller
         ];
 
         return view('index', compact('currentLiveShow', 'scheduleData'));
+    }
+
+    public function apiCurrentLiveShow()
+    {
+        $show = LiveShow::currentForHomepage();
+
+        if (! $show) {
+            return response()->json([
+                'show' => null,
+                'server_time' => now()->toIso8601String(),
+            ]);
+        }
+
+        $scheduledAt = $show->scheduled_at;
+
+        return response()->json([
+            'show' => [
+                'id' => $show->id,
+                'title' => $show->title ?? 'Live Show',
+                'status' => $show->status,
+                'scheduled_at' => $scheduledAt?->format('Y-m-d H:i:s'),
+                'scheduled_at_iso' => $scheduledAt?->toIso8601String(),
+                'schedule_badge' => $this->formatLiveShowScheduleBadge($show),
+                'join_url' => route('live-show', $show->id),
+            ],
+            'server_time' => now()->toIso8601String(),
+        ]);
+    }
+
+    private function formatLiveShowScheduleBadge(LiveShow $show): string
+    {
+        if ($show->status === 'live') {
+            return 'LIVE NOW';
+        }
+
+        if ($show->status === 'scheduled' && $show->scheduled_at) {
+            return $show->scheduled_at->format('d.F Y \u\m H:i').' Uhr';
+        }
+
+        return '';
     }
 
     public function thankYouForYourParticipation($userName)

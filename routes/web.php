@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [HomeController::class, 'index'])->name('index');
+Route::get('/api/current-live-show', [HomeController::class, 'apiCurrentLiveShow'])->name('api.current-live-show');
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');

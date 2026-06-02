@@ -84,6 +84,24 @@ class LiveShow extends Model
         return $query->where('status', 'inactive');
     }
 
+    /**
+     * Next public live or scheduled show for the homepage (excludes test shows).
+     */
+    public static function currentForHomepage(): ?self
+    {
+        return static::query()
+            ->where(function ($query) {
+                $query->where('status', 'live')
+                    ->orWhere(function ($q) {
+                        $q->where('status', 'scheduled')
+                            ->whereDate('scheduled_at', '>=', now()->toDateString());
+                    });
+            })
+            ->orderBy('scheduled_at', 'asc')
+            ->notTestShow()
+            ->first();
+    }
+
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_live_shows')
