@@ -485,7 +485,7 @@
                              </li>
                          </ul>
                      </div>
-                     <div class="card-body p-0">
+                     <div class="card-body p-0" style="overflow: scroll; max-height: 80vh;">
                          <div class="tab-content">
                              <div class="tab-pane fade show active" id="chat-tab">
                                  <div class="p-3">
