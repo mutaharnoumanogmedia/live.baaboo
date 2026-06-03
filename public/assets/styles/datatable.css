@@ -95,3 +95,11 @@ table.data-table tbody td {
     color: #aaaaaa;
     padding-top: 8px;
 }
+
+.dt-length select {
+    background-color: #2a2a2a !important;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: #e0e0e0;
+}
