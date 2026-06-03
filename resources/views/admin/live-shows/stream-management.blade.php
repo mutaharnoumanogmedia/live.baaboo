@@ -6,7 +6,11 @@
 
      <div class="container-fluid  min-vh-100">
          <div class=" d-flex justify-content-between align-items-center py-3 bg-dark rounded mb-1 p-3">
-             <div>
+             <div class="d-flex align-items-center gap-2">
+                 <button type="button" class="btn btn-outline-light btn-sm" id="toggleLeftSidebarBtn"
+                     title="Show/Hide sidebar" data-bs-toggle="tooltip" data-bs-placement="bottom">
+                     <i class="fas fa-bars"></i>
+                 </button>
                  <h4 class="mb-0 fw-bold  ">{{ $liveShow->title }}</h4>
              </div>
              <div class="btn-group shadow-sm">
@@ -28,7 +32,7 @@
              </div>
          </div>
          <div class="row g-4">
-             <div class="col-lg-2">
+             <div class="col-lg-2" id="left-sidebar">
                  <label class="small text-muted d-block mb-2">Join via QR Code</label>
                  <div id="qrcode" class=" p-2 rounded"></div>
                  <div class="mt-1 d-flex   mb-3">
@@ -51,7 +55,7 @@
                              </span>
                          </h6>
                      </div>
-                     <div class="card-body p-0">
+                     <div class="card-body p-0" style="overflow: scroll; max-height: 80vh;">
                          <div class="d-flex justify-content-between align-items-center gap-2 mb-2 p-2 flex-wrap">
                              <div class="input-group input-group-sm" style="max-width: 100%;">
                                  <span class="input-group-text">
@@ -115,111 +119,126 @@
                  </div>
              </div>
 
-             <main class="col-lg-7">
-                 <div class="card border-0 shadow-sm mb-4">
-                     <div class="card-body ">
-                         <div class="row align-items-center">
-                             <div class="col-lg-12 mb-4">
-                                 <div class="row">
-                                     <div class="col-lg-3">
+             <main class="col-lg-7" id="main-content-stream">
+                 <div class="card border-0 shadow-sm mb-4" id="live-show-status-card">
+                     <div class="card-header border-bottom d-flex justify-content-between align-items-center py-2">
+                         <h6 class="mb-0 fw-bold text-uppercase small text-muted">
+                             <i class="fas fa-broadcast-tower me-2 text-primary"></i> Show Controls
+                         </h6>
+                         <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 ms-2"
+                             data-bs-toggle="collapse" data-bs-target="#liveShowStatusCardBody" aria-expanded="true"
+                             aria-controls="liveShowStatusCardBody" id="liveShowStatusToggle"
+                             title="Toggle show controls">
+                             <i class="fa fa-bars"></i>
+                         </button>
+                     </div>
+                     <div class="collapse show" id="liveShowStatusCardBody">
+                         <div class="card-body ">
+                             <div class="row align-items-center">
+                                 <div class="col-lg-12 mb-4">
+                                     <div class="row">
+                                         <div class="col-lg-3">
 
-                                         <h6 class="text-muted small text-uppercase fw-bold mb-3">Live Show Status
-                                         </h6>
-                                         <form action="" method="post" id="live-show-status-form" class=" ">
-                                             <select class="form-select fw-bold" id="liveShowStatusSelect"
-                                                 onchange="updateLiveShowStatus(this.value)">
-                                                 >
-                                                 <option value="scheduled"
-                                                     {{ $liveShow->status == 'scheduled' ? 'selected' : '' }}>⏳
-                                                     Scheduled</option>
-                                                 <option value="live"
-                                                     {{ $liveShow->status == 'live' ? 'selected' : '' }}>🟢
-                                                     Live</option>
-                                                 <option value="completed"
-                                                     {{ $liveShow->status == 'completed' ? 'selected' : '' }}>
-                                                     🔴
-                                                     Completed
-                                                 </option>
-                                             </select>
-                                             {{-- <button type="submit"
+                                             <h6 class="text-muted small text-uppercase fw-bold mb-3">Live Show Status
+                                             </h6>
+                                             <form action="" method="post" id="live-show-status-form"
+                                                 class=" ">
+                                                 <select class="form-select fw-bold" id="liveShowStatusSelect"
+                                                     onchange="updateLiveShowStatus(this.value)">
+                                                     >
+                                                     <option value="scheduled"
+                                                         {{ $liveShow->status == 'scheduled' ? 'selected' : '' }}>⏳
+                                                         Scheduled</option>
+                                                     <option value="live"
+                                                         {{ $liveShow->status == 'live' ? 'selected' : '' }}>🟢
+                                                         Live</option>
+                                                     <option value="completed"
+                                                         {{ $liveShow->status == 'completed' ? 'selected' : '' }}>
+                                                         🔴
+                                                         Completed
+                                                     </option>
+                                                 </select>
+                                                 {{-- <button type="submit"
                                                               class="btn btn-dark text-nowrap px-3">Update</button> --}}
-                                         </form>
+                                             </form>
 
-                                     </div>
-                                     <div class="col-lg ">
-
-                                         <div>
-                                             <h6 class="text-muted small text-uppercase fw-bold mb-3">
-                                                 Winners Ceremony
-                                             </h6>
                                          </div>
+                                         <div class="col-lg ">
 
-                                         <div>
-                                             <button type="button" id="announceWinnersBtn"
-                                                 class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm  "
-                                                 onclick="updateWinners()"
-                                                 @if ($liveShow->winners_announced) disabled aria-disabled="true" @endif>
-                                                 <span id="announceWinnersBtnContent"
-                                                     class="announce-winners-btn-label @if ($liveShow->winners_announced) d-none @endif">
-                                                     <i class="fas fa-trophy me-2"></i> Announce Winners
-                                                 </span>
-                                                 <span id="announceWinnersBtnLoader"
-                                                     class="announce-winners-btn-loader d-none">
-                                                     <i class="fas fa-spinner fa-spin me-2" aria-hidden="true"></i>
-                                                     Announcing…
-                                                 </span>
-                                                 <span id="announceWinnersBtnDone"
-                                                     class="announce-winners-btn-done @if (!$liveShow->winners_announced) d-none @endif">
-                                                     <i class="fas fa-check me-2"></i> Winners announced
-                                                 </span>
-                                             </button>
-                                             <p id="announceWinnersAckMessage"
-                                                 class="small text-success mb-0 mt-2 px-1 @if (!$liveShow->winners_announced) d-none @endif">
-                                                 Winners have been announced. Winner notification emails have been
-                                                 queued for the winners.
-                                             </p>
-                                             <button type="button" id="unannounceWinnersBtn"
-                                                 class="btn btn-outline-secondary w-100 py-2 fw-bold shadow-sm my-2 @if (!$liveShow->winners_announced) d-none @endif"
-                                                 onclick="unannounceWinners()">
-                                                 <span id="unannounceWinnersBtnLabel"
-                                                     class="unannounce-winners-btn-label">
-                                                     <i class="fas fa-undo me-2"></i> Un-announce winners
-                                                 </span>
-                                                 <span id="unannounceWinnersBtnLoader"
-                                                     class="unannounce-winners-btn-loader d-none">
-                                                     <i class="fas fa-spinner fa-spin me-2" aria-hidden="true"></i>
-                                                     Updating…
-                                                 </span>
-                                             </button>
-                                         </div>
+                                             <div>
+                                                 <h6 class="text-muted small text-uppercase fw-bold mb-3">
+                                                     Winners Ceremony
+                                                 </h6>
+                                             </div>
 
-                                     </div>
-                                     <div class="col-lg  ">
-                                         <div>
-                                             <h6 class="text-muted small text-uppercase fw-bold mb-3">
-                                                 Winner Tab Management
-                                             </h6>
+                                             <div>
+                                                 <button type="button" id="announceWinnersBtn"
+                                                     class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm  "
+                                                     onclick="updateWinners()"
+                                                     @if ($liveShow->winners_announced) disabled aria-disabled="true" @endif>
+                                                     <span id="announceWinnersBtnContent"
+                                                         class="announce-winners-btn-label @if ($liveShow->winners_announced) d-none @endif">
+                                                         <i class="fas fa-trophy me-2"></i> Announce Winners
+                                                     </span>
+                                                     <span id="announceWinnersBtnLoader"
+                                                         class="announce-winners-btn-loader d-none">
+                                                         <i class="fas fa-spinner fa-spin me-2"
+                                                             aria-hidden="true"></i>
+                                                         Announcing…
+                                                     </span>
+                                                     <span id="announceWinnersBtnDone"
+                                                         class="announce-winners-btn-done @if (!$liveShow->winners_announced) d-none @endif">
+                                                         <i class="fas fa-check me-2"></i> Winners announced
+                                                     </span>
+                                                 </button>
+                                                 <p id="announceWinnersAckMessage"
+                                                     class="small text-success mb-0 mt-2 px-1 @if (!$liveShow->winners_announced) d-none @endif">
+                                                     Winners have been announced. Winner notification emails have been
+                                                     queued for the winners.
+                                                 </p>
+                                                 <button type="button" id="unannounceWinnersBtn"
+                                                     class="btn btn-outline-secondary w-100 py-2 fw-bold shadow-sm my-2 @if (!$liveShow->winners_announced) d-none @endif"
+                                                     onclick="unannounceWinners()">
+                                                     <span id="unannounceWinnersBtnLabel"
+                                                         class="unannounce-winners-btn-label">
+                                                         <i class="fas fa-undo me-2"></i> Un-announce winners
+                                                     </span>
+                                                     <span id="unannounceWinnersBtnLoader"
+                                                         class="unannounce-winners-btn-loader d-none">
+                                                         <i class="fas fa-spinner fa-spin me-2"
+                                                             aria-hidden="true"></i>
+                                                         Updating…
+                                                     </span>
+                                                 </button>
+                                             </div>
+
                                          </div>
-                                         <div>
-                                             <button type="button"
-                                                 class="btn btn-primary  fw-bold text-white shadow-sm mb-2"
-                                                 onclick="showWinnerTab(this)">
-                                                 <i class="fas fa-eye me-2"></i> Show Winner tab
-                                             </button>
-                                             <button type="button"
-                                                 class="btn btn-danger   fw-bold text-white shadow-sm mb-2"
-                                                 onclick="hideWinnerTab(this)">
-                                                 <i class="fas fa-eye-slash me-2"></i> Hide Winner tab
-                                             </button>
+                                         <div class="col-lg  ">
+                                             <div>
+                                                 <h6 class="text-muted small text-uppercase fw-bold mb-3">
+                                                     Winner Tab Management
+                                                 </h6>
+                                             </div>
+                                             <div>
+                                                 <button type="button"
+                                                     class="btn btn-primary  fw-bold text-white shadow-sm mb-2"
+                                                     onclick="showWinnerTab(this)">
+                                                     <i class="fas fa-eye me-2"></i> Show
+                                                 </button>
+                                                 <button type="button"
+                                                     class="btn btn-danger   fw-bold text-white shadow-sm mb-2"
+                                                     onclick="hideWinnerTab(this)">
+                                                     <i class="fas fa-eye-slash me-2"></i> Hide
+                                                 </button>
+                                             </div>
                                          </div>
                                      </div>
                                  </div>
-                             </div>
 
 
 
 
-                             {{-- <div class="col-md-7 text-center d-flex justify-content-center align-items-center">
+                                 {{-- <div class="col-md-7 text-center d-flex justify-content-center align-items-center">
                                  <div
                                      style="padding: 0px; overflow: hidden; border: 1px solid #ccc;border-radius: 10px;">
                                      <div id="">
@@ -248,7 +267,8 @@
                                      </iframe>
                                  </div>
 
-                             </div> --}}
+                            </div> --}}
+                             </div>
                          </div>
                      </div>
                  </div>
@@ -283,7 +303,8 @@
                                                              <div class="text-center mb-4 fw-bold">
                                                                  <div class="mb-2">Question {{ $index + 1 }} /
                                                                      {{ $liveShow->quizzes->count() }}</div>
-                                                                 <div class=" h3">{{ $quiz->question }}</div>
+                                                                 <div class="question-text">{{ $quiz->question }}
+                                                                 </div>
                                                              </div>
 
                                                              @if ($quiz->options)
@@ -396,17 +417,17 @@
                                              <button type="button" class="btn btn-sm btn-outline-primary mt-2"
                                                  title="Attach media from gallery" data-bs-toggle="modal"
                                                  data-bs-target="#select-media-modal">
-                                                 <i class="fas fa-plus"></i> Add from gallery
+                                                 <i class="fas fa-plus"></i>
                                              </button>
                                              <button type="button"
                                                  class="btn btn-sm btn-outline-secondary gallery-hide-on-stream-btn mt-2"
                                                  id="hideGalleryOnStreamBtn"
                                                  title="Hide image/video overlay on live stream ">
-                                                 <i class="fas fa-eye-slash"></i> Hide on stream
+                                                 <i class="fas fa-eye-slash"></i>
                                              </button>
                                              <button type="button" class="btn btn-sm btn-outline-success  mt-2"
                                                  title="Refresh gallery items" onclick="fetchGalleryMediaItems()">
-                                                 <i class="fas fa-sync-alt"></i> Refresh gallery
+                                                 <i class="fas fa-sync-alt"></i>
                                              </button>
 
 
@@ -2478,49 +2499,51 @@
                                 <i class="fas fa-grip-vertical text-muted"></i>
                                 </div>
                             
-                          <div class="    ">
+                          <div class="row justify-content-between">
+                            <div class="position-relative col-6">
                                 <img src="${data.is_image ? data.path : (data.thumbnail ?? data.path)}"
                                     alt=""
-                                    style="width: 64px; height: 64px; object-fit: cover; border-radius: 6px; border: 1px solid #555;">
+                                    title="${data.title}"
+                                    style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; border: 1px solid #555;">
 
-                                    <span class="badge ${data.type === 'video' ? 'bg-primary' : 'bg-warning text-dark'}">
+                                    <span class="badge ${data.type === 'video' ? 'bg-primary' : 'bg-warning text-dark'} position-absolute top-0 end-0">
                                     ${data.type ?? ''}
                                 </span>
-                                <div class="mb-1   fw-semibold" style="width:100%;">
-                                ${data.title || '—'}
+                             
                             </div>
                             
-                            <div class="d-flex gap-2 flex-wrap   mt-1">
-                                
+                            <div class=" col-6">
+                                <div class="w-100 mb-1">
                                 <button type="button"
-                                    class="btn btn-sm btn-success gallery-show-on-stream-btn"
+                                    class="btn btn-sm btn-success gallery-show-on-stream-btn   "
                                     onclick="galleryShowOnStream('${data.id}', this)"
                                     data-media-id="${data.id}"
                                     id="show-media-btn-${data.id}"
                                     title="Show on live stream">
                                     <i class="fas fa-tv"></i>
-                                    Show
+                                     
                                 </button>
                                 <button type="button"
-                                    class="btn btn-sm btn-warning gallery-hide-on-stream-btn"
+                                    class="btn btn-sm btn-warning gallery-hide-on-stream-btn   "
                                     onclick="galleryHideOnStream(this)"
                                     data-media-id="${data.id}"
                                     id="hide-media-btn-${data.id}"
                                     title="Hide on live stream">
                                     <i class="fas fa-eye-slash"></i>
-                                    Hide
+                                     
                                 </button>
                                 <button type="button"
-                                    class="btn btn-sm btn-outline-danger gallery-detach-btn"
+                                    class="btn btn-sm btn-outline-danger gallery-detach-btn   "
                                     data-media-id="${data.id}"
                                     title="Remove from stream"
                                     id="detach-media-btn-${data.id}"
                                     onclick="galleryDetach('${data.id}', this)">
                                     <i class="fas fa-times"></i>
                                 </button>
+                                </div>
                                 <button type="button"
                                     id="preview-media-btn-${data.id}"
-                                    class="btn btn-sm btn-secondary" title="Preview"
+                                    class="btn btn-sm btn-secondary d-block " title="Preview"
                                     onclick="openMediaPreviewModal('${data.is_image ? data.path : (data.thumbnail ?? data.path)}')">
                                     <i class="fas fa-eye"></i>
                                 </button>
@@ -2538,6 +2561,11 @@
                                     </label>
                                 </div>
                        
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-1   fw-semibold text-truncate" style="width:100%;" title="${data.title}">
+                                        ${data.title.length > 25 ? data.title.substring(0, 25) + '...' : data.title || '—'}
+                                    </div>
                             </div>
                             </div>
                             
@@ -2783,6 +2811,34 @@
                          });
                      });
                  }
+
+                 const liveShowStatusCardBody = document.getElementById('liveShowStatusCardBody');
+                 const liveShowStatusToggle = document.getElementById('liveShowStatusToggle');
+                 if (liveShowStatusCardBody && liveShowStatusToggle) {
+                     const statusToggleIcon = liveShowStatusToggle.querySelector('i');
+                     liveShowStatusCardBody.addEventListener('show.bs.collapse', function() {
+                         statusToggleIcon.classList.remove('fa-chevron-down');
+                         statusToggleIcon.classList.add('fa-chevron-up');
+                     });
+                     liveShowStatusCardBody.addEventListener('hide.bs.collapse', function() {
+                         statusToggleIcon.classList.remove('fa-chevron-up');
+                         statusToggleIcon.classList.add('fa-chevron-down');
+                     });
+                 }
+
+                 const toggleLeftSidebarBtn = document.getElementById('toggleLeftSidebarBtn');
+                 const leftSidebar = document.getElementById('left-sidebar');
+                 const mainContent = document.getElementById('main-content-stream');
+                 if (toggleLeftSidebarBtn && leftSidebar) {
+                     toggleLeftSidebarBtn.addEventListener('click', function() {
+                         const hidden = leftSidebar.classList.toggle('d-none');
+                         toggleLeftSidebarBtn.classList.toggle('active', hidden);
+                         if (mainContent) {
+                             mainContent.classList.toggle('col-lg-7', !hidden);
+                             mainContent.classList.toggle('col-lg-9', hidden);
+                         }
+                     });
+                 }
              });
          </script>
          <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
@@ -2798,6 +2854,15 @@
 
              .drag-handle:active {
                  cursor: grabbing !important;
+             }
+
+             .question-text {
+                 font-size: 1.3rem;
+                 font-weight: 600;
+                 color: #fff;
+                 text-align: left;
+
+                 margin-bottom: 20px;
              }
          </style>
      @endpush
