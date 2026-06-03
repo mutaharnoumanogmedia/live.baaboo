@@ -2505,10 +2505,16 @@
                                     alt=""
                                     title="${data.title}"
                                     style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; border: 1px solid #555;">
-
-                                    <span class="badge ${data.type === 'video' ? 'bg-primary' : 'bg-warning text-dark'} position-absolute top-0 end-0">
-                                    ${data.type ?? ''}
-                                </span>
+                                <button type="button"
+                                    class="btn btn-sm btn-danger   gallery-detach-btn"
+                                    style="opacity: 0.8; transition: opacity 0.3s ease;"
+                                    data-media-id="${data.id}"
+                                    title="Remove from stream"
+                                    id="detach-media-btn-${data.id}"
+                                    onclick="galleryDetach('${data.id}', this)">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                    
                              
                             </div>
                             
@@ -2532,14 +2538,7 @@
                                     <i class="fas fa-eye-slash"></i>
                                      
                                 </button>
-                                <button type="button"
-                                    class="btn btn-sm btn-outline-danger gallery-detach-btn   "
-                                    data-media-id="${data.id}"
-                                    title="Remove from stream"
-                                    id="detach-media-btn-${data.id}"
-                                    onclick="galleryDetach('${data.id}', this)">
-                                    <i class="fas fa-times"></i>
-                                </button>
+                               
                                 </div>
                                 <button type="button"
                                     id="preview-media-btn-${data.id}"
@@ -2547,7 +2546,17 @@
                                     onclick="openMediaPreviewModal('${data.is_image ? data.path : (data.thumbnail ?? data.path)}')">
                                     <i class="fas fa-eye"></i>
                                 </button>
-                                <div class="form-check align-items-center d-flex">
+                                
+                       
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-1   fw-semibold text-truncate" style="width:100%;" title="${data.title}">
+                                    <span class="badge ${data.type === 'video' ? 'bg-primary' : 'bg-warning text-dark'}  top-0 end-0">
+                                    ${data.type ?? ''}
+                                </span>
+                                        ${data.title.length > 15 ? data.title.substring(0, 15) + '...' : data.title || '—'}
+                                    </div>
+                                    <div class="form-check align-items-center d-flex">
                                     <input 
                                         class="form-check-input" 
                                         type="radio" 
@@ -2560,12 +2569,6 @@
                                         Play on live start
                                     </label>
                                 </div>
-                       
-                            </div>
-                            <div class="col-12">
-                                <div class="mb-1   fw-semibold text-truncate" style="width:100%;" title="${data.title}">
-                                        ${data.title.length > 25 ? data.title.substring(0, 25) + '...' : data.title || '—'}
-                                    </div>
                             </div>
                             </div>
                             
@@ -2863,6 +2866,16 @@
                  text-align: left;
 
                  margin-bottom: 20px;
+             }
+             .gallery-detach-btn {
+                 position: absolute;
+                 top: 0px;
+                 left: 10px;
+                 opacity: 0.5;
+                 transition: opacity 0.3s ease;
+             }
+             .gallery-detach-btn:hover {
+                 opacity: 1;
              }
          </style>
      @endpush
