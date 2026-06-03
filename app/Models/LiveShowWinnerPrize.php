@@ -8,11 +8,13 @@ class LiveShowWinnerPrize extends Model
 {
     protected $table = 'live_show_winner_prizes';
 
-    protected $fillable = ['live_show_id', 'rank', 'prize'];
+    protected $fillable = ['live_show_id', 'rank', 'prize', 'is_voucher', 'voucher_amount'];
 
     protected $casts = [
         'prize' => 'string',
         'rank' => 'integer',
+        'is_voucher' => 'boolean',
+        'voucher_amount' => 'decimal:2',
     ];
 
     public function liveShow()

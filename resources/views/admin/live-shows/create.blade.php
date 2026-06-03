@@ -1,6 +1,6 @@
 <x-app-dashboard-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="text-xl font-semibold leading-tight text-gray-800">
             {{ __('Create a New Live Show') }}
         </h2>
     </x-slot>
@@ -16,13 +16,13 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-12 mb-3">
+                        <div class="mb-3 col-md-12">
                             <label class="form-label required-field">Title</label>
                             <input type="text" name="title" class="form-control"
                                 placeholder="Enter live show title" required>
                         </div>
 
-                        <div class="col-md-12 mb-3">
+                        <div class="mb-3 col-md-12">
                             <label class="form-label">Description</label>
                             <textarea name="description" class="form-control" rows="4" placeholder="Provide a description of your live show"></textarea>
                         </div>
@@ -37,12 +37,12 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3 col-md-6">
                             <label class="form-label required-field">Scheduled At</label>
                             <input type="datetime-local" name="scheduled_at" class="form-control" required>
                         </div>
 
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3 col-md-6">
                             <label class="form-label">Status</label>
                             <select name="status" class="form-select">
                                 <option value="scheduled">Scheduled</option>
@@ -50,20 +50,20 @@
                                 <option value="completed">Completed</option>
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3 col-md-6">
                             <label class="form-label">Is Test Show</label>
                             <select name="is_test_show" class="form-select">
                                 <option value="0">No</option>
                                 <option value="1">Yes</option>
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3 col-md-6">
                             <label class="form-label required-field">Max Players</label>
                             <input type="number" name="max_players" class="form-control" min="1" max="100000"
                                 required value="{{ old('max_players', 1000) }}">
                             <div class="form-text">Maximum number of participants allowed to join this show</div>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3 col-md-6">
                             <label class="form-label required-field">Chat Status</label>
                             <select name="chat_enabled" class="form-select" required>
                                 <option value="1" {{ old('chat_enabled', 1) == 1 ? 'selected' : '' }}>Enabled
@@ -74,7 +74,7 @@
                             <div class="form-text">Participants can send messages only when chat is enabled</div>
                         </div>
 
-                        {{-- <div class="col-md-12 mb-3">
+                        {{-- <div class="mb-3 col-md-12">
                             <label class="form-label">Stream Link</label>
                             <input type="text" name="stream_link" class="form-control" placeholder="https://">
                             <div class="form-text">Enter the URL where your live stream will be hosted</div>
@@ -90,18 +90,18 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3 col-md-6">
                             <label class="form-label">Host Name</label>
                             <input type="text" name="host_name" class="form-control" placeholder="Enter host's name">
                         </div>
 
-                        <div class="col-md-3 mb-3">
+                        <div class="mb-3 col-md-3">
                             <label class="form-label required-field">Prize Amount</label>
                             <input type="number" name="prize_amount" class="form-control" placeholder="0.00"
                                 step="0.01" value="0.00" required>
                         </div>
 
-                        <div class="col-md-3 mb-3">
+                        <div class="mb-3 col-md-3">
                             <label class="form-label">Currency</label>
                             <input type="text" name="currency" class="form-control" value="EUR" readonly>
                             <div class="form-text">Currency is fixed to EUR</div>
@@ -117,26 +117,29 @@
                 </div>
                 <div class="card-body">
                     @php $maxWinnerSlots = 50; @endphp
-                    <div class="row mb-3">
+                    <div class="mb-3 row">
                         <div class="col-md-4">
                             <label class="form-label required-field">Max winners per show</label>
-                            <input type="text" name="max_winners" id="maxWinners" class="form-control" min="1"
-                                max="{{ $maxWinnerSlots }}" required value="{{ old('max_winners', 3) }}">
+                            <input type="text" name="max_winners" id="maxWinners" class="form-control"
+                                min="1" max="{{ $maxWinnerSlots }}" required
+                                value="{{ old('max_winners', 3) }}">
                             <div class="form-text">Number of top winners (1–{{ $maxWinnerSlots }}) who share the prize
                             </div>
                         </div>
                     </div>
                     @error('winner_prizes')
-                        <div class="alert alert-danger py-2">{{ $message }}</div>
+                        <div class="py-2 alert alert-danger">{{ $message }}</div>
                     @enderror
-                    <p class="text-muted small mb-2">Prize percentage per rank (must total 100% for the first <span
+                    <p class="mb-2 text-muted small">Prize percentage per rank (must total 100% for the first <span
                             id="maxWinnersLabel">3</span> winner(s):</p>
                     <div class="table-responsive">
-                        <table class="table table-bordered align-middle">
+                        <table class="table align-middle table-bordered">
                             <thead class="table-dark">
                                 <tr>
                                     <th>Rank</th>
                                     <th>Prize</th>
+                                    <th>Voucher</th>
+                                    <th>Voucher Amount</th>
                                 </tr>
                             </thead>
                             <tbody id="winnerPrizesBody">
@@ -151,6 +154,17 @@
                                                 class="form-control winner-pct-input"
                                                 placeholder="Dailixir Starterset, 50€, 10€ baaboo Voucher"
                                                 value="{{ old('winner_prizes.' . $r) }}">
+                                        </td>
+                                        <td style="max-width: 120px;">
+                                            <input type="number" name="winner_voucher[{{ $r }}]"
+                                                class="form-control winner-voucher-input" placeholder="Voucher ID"
+                                                min="0" value="{{ old('winner_voucher.' . $r) }}">
+                                        </td>
+                                        <td style="max-width: 120px;">
+                                            <input type="number" name="winner_voucher_amount[{{ $r }}]"
+                                                class="form-control winner-voucher-amount-input"
+                                                placeholder="Voucher Amount" min="0" step="0.01"
+                                                value="{{ old('winner_voucher_amount.' . $r) }}">
                                         </td>
                                     </tr>
                                 @endfor
@@ -167,6 +181,23 @@
                         var labelEl = document.getElementById('maxWinnersLabel');
                         var rows = document.querySelectorAll('.winner-percent-row');
 
+                        function voucherChecks() {
+                            var voucherInputs = document.querySelectorAll('.winner-voucher-input');
+                            var voucherAmountInputs = document.querySelectorAll('.winner-voucher-amount-input');
+                            voucherInputs.forEach(function(input, index) {
+                                var amountInput = voucherAmountInputs[index];
+                                input.addEventListener('input', function() {
+                                    if (input.value.trim() !== '') {
+                                        amountInput.required = true;
+                                    } else {
+                                        amountInput.required = false;
+                                        amountInput.value = '';
+                                    }
+                                });
+                            });
+                        }
+                        voucherChecks();
+
                         function update() {
                             var maxRank = rows.length;
                             var n = parseInt(maxWinnersEl.value, 10) || 1;
@@ -176,6 +207,7 @@
                                 var rank = parseInt(tr.getAttribute('data-rank'), 10);
                                 tr.style.display = rank <= n ? '' : 'none';
                             });
+                            voucherChecks();
                         }
                         if (maxWinnersEl) {
                             maxWinnersEl.addEventListener('change', update);
@@ -193,7 +225,7 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-6 mb-4">
+                        <div class="mb-4 col-md-6">
                             <label class="form-label">Thumbnail</label>
                             <div class="dropzone" id="thumbnailDropzone">
                                 <i class="fas fa-cloud-upload-alt"></i>
@@ -207,7 +239,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6 mb-4">
+                        <div class="mb-4 col-md-6">
                             <label class="form-label">Banner</label>
                             <div class="dropzone" id="bannerDropzone">
                                 <i class="fas fa-cloud-upload-alt"></i>
@@ -224,7 +256,7 @@
                 </div>
             </div> --}}
 
-            <div class="text-center mt-4">
+            <div class="mt-4 text-center">
                 <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save me-2"></i>Save Live
                     Show</button>
             </div>

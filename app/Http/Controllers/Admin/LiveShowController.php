@@ -56,7 +56,7 @@ class LiveShowController extends Controller
         //
         // Get shows with 'scheduled', then 'live', then 'completed'
         $liveShows = LiveShow::orderByRaw("
-                CASE 
+                CASE
                     WHEN status = 'live' THEN 0
                     WHEN status = 'scheduled' THEN 1
                     WHEN status = 'completed' THEN 2
@@ -102,17 +102,23 @@ class LiveShowController extends Controller
             'max_players' => 'required|integer|min:1|max:100000',
             'chat_enabled' => 'required|boolean',
             'winner_prizes' => 'nullable|array',
+            'winner_voucher' => 'nullable|array',
+            'winner_voucher_amount' => 'nullable|array|min:0',
             'winner_prizes.*' => 'nullable|string|max:255',
+            'winner_voucher.*' => 'nullable|integer|max:255',
+            'winner_voucher_amount.*' => 'nullable|numeric|min:0',
             'is_test_show' => 'required|boolean',
         ]);
 
         $validated['created_by'] = Auth::id();
         $maxWinners = (int) $validated['max_winners'];
         $prizes = $request->input('winner_prizes', []);
+        $vouchers = $request->input('winner_voucher', []);
+        $voucherAmounts = $request->input('winner_voucher_amount', []);
 
         $show = LiveShow::create($validated);
 
-        $this->syncWinnerPrizes($show->id, $maxWinners, $prizes);
+        $this->syncWinnerPrizes($show->id, $maxWinners, $prizes, $vouchers, $voucherAmounts);
 
         return redirect()->route('admin.live-shows.show', $show->id)->with('success', 'Live Show created successfully!');
     }
@@ -167,17 +173,23 @@ class LiveShowController extends Controller
             'max_players' => 'required|integer|min:1|max:100000',
             'chat_enabled' => 'required|boolean',
             'winner_prizes' => 'nullable|array',
+            'winner_voucher' => 'nullable|array',
+            'winner_voucher_amount' => 'nullable|array|min:0',
             'winner_prizes.*' => 'nullable|string|max:255',
+            'winner_voucher.*' => 'nullable|integer|max:255',
+            'winner_voucher_amount.*' => 'nullable|numeric|min:0',
             'is_test_show' => 'required|boolean',
         ]);
 
         $validated['created_by'] = Auth::id();
         $maxWinners = (int) $validated['max_winners'];
         $prizes = $request->input('winner_prizes', []);
+        $vouchers = $request->input('winner_voucher', []);
+        $voucherAmounts = $request->input('winner_voucher_amount', []);
 
         $live_show->update($validated);
 
-        $this->syncWinnerPrizes($live_show->id, $maxWinners, $prizes);
+        $this->syncWinnerPrizes($live_show->id, $maxWinners, $prizes, $vouchers, $voucherAmounts);
 
         return redirect()->route('admin.live-shows.show', $live_show->id)->with('success', 'Live Show updated successfully!');
     }
@@ -193,7 +205,7 @@ class LiveShowController extends Controller
         }
         if (abs($sum - 100) > 0.01) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'winner_prizes' => ['The prize percentages for the first '.$maxWinners.' winner(s) must total 100%. Current total: '.round($sum, 1).'%.'],
+                'winner_prizes' => ['The prize percentages for the first ' . $maxWinners . ' winner(s) must total 100%. Current total: ' . round($sum, 1) . '%.'],
             ]);
         }
     }
@@ -201,16 +213,31 @@ class LiveShowController extends Controller
     /**
      * Sync winner percentage rows for a live show.
      */
-    protected function syncWinnerPrizes(int $liveShowId, int $maxWinners, array $prizes): void
+    protected function syncWinnerPrizes(int $liveShowId, int $maxWinners, array $prizes, array $vouchers, array $voucherAmounts): void
     {
         LiveShowWinnerPrize::where('live_show_id', $liveShowId)->delete();
+        // for ($rank = 1; $rank <= $maxWinners; $rank++) {
+        //     $prize = (string) ($prizes[$rank] ?? 0);
+        //     if ($prize) {
+        //         LiveShowWinnerPrize::create([
+        //             'live_show_id' => $liveShowId,
+        //             'rank' => $rank,
+        //             'prize' => $prize,
+        //         ]);
+        //     }
+        // }
         for ($rank = 1; $rank <= $maxWinners; $rank++) {
+            $voucher = (string) ($vouchers[$rank] ?? 0);
+            $voucherAmount = (string) ($voucherAmounts[$rank] ?? 0);
             $prize = (string) ($prizes[$rank] ?? 0);
+
             if ($prize) {
                 LiveShowWinnerPrize::create([
+                    'prize' => $prize,
                     'live_show_id' => $liveShowId,
                     'rank' => $rank,
-                    'prize' => $prize,
+                    'is_voucher' => $voucher,
+                    'voucher_amount' => $voucherAmount,
                 ]);
             }
         }
@@ -339,46 +366,46 @@ class LiveShowController extends Controller
         $maxWinners = (int) $liveShow->max_winners;
         $topMaxWinnersByScore =
             $topMaxWinnersByScore = $liveShow->users()
-                ->with(['quizResponses' => function ($query) use ($liveShowId) {
-                    $query->whereHas('userQuiz.quiz', function ($q) use ($liveShowId) {
+            ->with(['quizResponses' => function ($query) use ($liveShowId) {
+                $query->whereHas('userQuiz.quiz', function ($q) use ($liveShowId) {
+                    $q->where('live_show_id', $liveShowId);
+                });
+            }])
+            ->wherePivot('status', 'registered')
+            ->get()
+            ->map(function ($user) use ($liveShowId) {
+
+                // Calculate total score
+                $score = $user->pivot->score ?? 0;
+                // Find the user's quiz responses for this live show and calculate total seconds_to_submit
+                $userQuizResponses = $user->quizResponses()
+                    ->whereHas('userQuiz', function ($q) use ($liveShowId) {
                         $q->where('live_show_id', $liveShowId);
-                    });
-                }])
-                ->wherePivot('status', 'registered')
-                ->get()
-                ->map(function ($user) use ($liveShowId) {
+                    })
+                    ->get();
 
-                    // Calculate total score
-                    $score = $user->pivot->score ?? 0;
-                    // Find the user's quiz responses for this live show and calculate total seconds_to_submit
-                    $userQuizResponses = $user->quizResponses()
-                        ->whereHas('userQuiz', function ($q) use ($liveShowId) {
-                            $q->where('live_show_id', $liveShowId);
-                        })
-                        ->get();
+                $totalSecondsToSubmit = $userQuizResponses->sum('seconds_to_submit');
+                $firstResponseTime = $userQuizResponses->min('created_at') ?? now();
 
-                    $totalSecondsToSubmit = $userQuizResponses->sum('seconds_to_submit');
-                    $firstResponseTime = $userQuizResponses->min('created_at') ?? now();
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'score' => $score,
 
-                    return [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'score' => $score,
+                    'total_seconds_to_submit' => $totalSecondsToSubmit,
+                    'first_response_time' => $firstResponseTime,
+                ];
+            })
+            ->sort(function ($a, $b) {
+                // Sort by score descending, then by total_seconds_to_submit ascending
+                if ($a['score'] === $b['score']) {
+                    return $a['total_seconds_to_submit'] <=> $b['total_seconds_to_submit'];
+                }
 
-                        'total_seconds_to_submit' => $totalSecondsToSubmit,
-                        'first_response_time' => $firstResponseTime,
-                    ];
-                })
-                ->sort(function ($a, $b) {
-                    // Sort by score descending, then by total_seconds_to_submit ascending
-                    if ($a['score'] === $b['score']) {
-                        return $a['total_seconds_to_submit'] <=> $b['total_seconds_to_submit'];
-                    }
-
-                    return $b['score'] <=> $a['score'];
-                })
-                ->values()
-                ->take($maxWinners);
+                return $b['score'] <=> $a['score'];
+            })
+            ->values()
+            ->take($maxWinners);
 
         // Update pivot table to set is_winner = true for top three users
         foreach ($topMaxWinnersByScore as $winner) {
@@ -398,7 +425,7 @@ class LiveShowController extends Controller
                 SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now()->addMinutes(30));
             } catch (\Exception $e) {
                 // log the error
-                \Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage());
+                \Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: " . $e->getMessage());
             }
         }
 
@@ -749,7 +776,7 @@ class LiveShowController extends Controller
         $isBlocked = $action === 'block' ? true : false;
         UserBlockFromLiveShowEvent::dispatch($liveShowId, $userId, $isBlocked);
 
-        return response()->json(['success' => true, 'message' => 'Player block status updated to '.($isBlocked ? 'blocked' : 'unblocked').'.', 'user' => $user]);
+        return response()->json(['success' => true, 'message' => 'Player block status updated to ' . ($isBlocked ? 'blocked' : 'unblocked') . '.', 'user' => $user]);
     }
 
     public function resetPlayerScore($liveShowId, $userId): JsonResponse
@@ -791,7 +818,7 @@ class LiveShowController extends Controller
 
         if ($newStatus === 'completed' && $liveShow->status !== 'completed') {
             $liveShow->end_time = now();
-            $updateMessage = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme! Die nächste Show ist am '.Carbon::parse($this->getNextScheduledLiveShowDate())->format('d.m.Y H:i').'Uhr statt.';
+            $updateMessage = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme! Die nächste Show ist am ' . Carbon::parse($this->getNextScheduledLiveShowDate())->format('d.m.Y H:i') . 'Uhr statt.';
         }
 
         $liveShow->status = $newStatus;
@@ -1004,12 +1031,12 @@ class LiveShowController extends Controller
 
         rewind($csv);
         $csvContents = stream_get_contents($csv);
-        $filename = 'chats_'.$liveShow->title.'.csv';
+        $filename = 'chats_' . $liveShow->title . '.csv';
         fclose($csv);
 
         return response($csvContents)
             ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     public function exportAllUsersOfLiveShowAsCSV($id)
@@ -1031,12 +1058,12 @@ class LiveShowController extends Controller
         // download the csv file
         rewind($csv);
         $csvContents = stream_get_contents($csv);
-        $filename = 'users_'.$liveShow->title.'.csv';
+        $filename = 'users_' . $liveShow->title . '.csv';
         fclose($csv);
 
         return response($csvContents)
             ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     public function exportAllQuizzesOfLiveShowAsCSV($id)
@@ -1051,7 +1078,7 @@ class LiveShowController extends Controller
         fclose($csv);
 
         // download the csv file
-        return response()->download($csv, 'quizzes'.$liveShow->title.'.csv');
+        return response()->download($csv, 'quizzes' . $liveShow->title . '.csv');
     }
 
     public function viewDetails($id)
@@ -1063,7 +1090,7 @@ class LiveShowController extends Controller
 
         $totalQuestions = $liveShow->quizzes->count();
 
-        $playedCount = $players->filter(fn ($p) => ($p->pivot->score > 0 || $p->pivot->is_online))->count();
+        $playedCount = $players->filter(fn($p) => ($p->pivot->score > 0 || $p->pivot->is_online))->count();
         $notParticipatedCount = $players->count() - $playedCount;
 
         return view('admin.live-shows.view-details', compact('liveShow', 'players', 'totalQuestions', 'playedCount', 'notParticipatedCount'));
@@ -1116,7 +1143,7 @@ class LiveShowController extends Controller
 
         foreach ($players as $index => $player) {
             $correctAnswers = UserQuizResponse::where('user_id', $player->id)
-                ->whereHas('userQuiz', fn ($q) => $q->where('live_show_id', $id))
+                ->whereHas('userQuiz', fn($q) => $q->where('live_show_id', $id))
                 ->where('is_correct', true)
                 ->count();
 
@@ -1138,11 +1165,11 @@ class LiveShowController extends Controller
         $csvContents = stream_get_contents($csv);
         fclose($csv);
 
-        $filename = 'participants_'.str_replace(' ', '_', $liveShow->title).'.csv';
+        $filename = 'participants_' . str_replace(' ', '_', $liveShow->title) . '.csv';
 
         return response($csvContents)
             ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     public function exportWinnersCSV($id)
@@ -1168,11 +1195,11 @@ class LiveShowController extends Controller
         rewind($csv);
         $csvContents = stream_get_contents($csv);
         fclose($csv);
-        $filename = 'winners_'.str_replace(' ', '_', $liveShow->title).'.csv';
+        $filename = 'winners_' . str_replace(' ', '_', $liveShow->title) . '.csv';
 
         return response($csvContents)
             ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     public function exportPlayerCSV($liveShowId, $userId)
@@ -1181,7 +1208,7 @@ class LiveShowController extends Controller
         $user = \App\Models\User::findOrFail($userId);
 
         $responses = UserQuizResponse::where('user_id', $userId)
-            ->whereHas('userQuiz', fn ($q) => $q->where('live_show_id', $liveShowId))
+            ->whereHas('userQuiz', fn($q) => $q->where('live_show_id', $liveShowId))
             ->with(['quiz', 'quizOption'])
             ->orderBy('created_at', 'asc')
             ->get();
@@ -1205,18 +1232,18 @@ class LiveShowController extends Controller
         $csvContents = stream_get_contents($csv);
         fclose($csv);
 
-        $filename = 'player_'.str_replace(' ', '_', $user->name).'_show_'.str_replace(' ', '_', $liveShow->title).'.csv';
+        $filename = 'player_' . str_replace(' ', '_', $user->name) . '_show_' . str_replace(' ', '_', $liveShow->title) . '.csv';
 
         return response($csvContents)
             ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
     }
 
     public function copyLiveShow($id)
     {
         $liveShow = LiveShow::findOrFail($id);
         // change the title to the new title
-        $newTitle = 'Copy of '.$liveShow->title.' - '.now()->format('Y-m-d H:i:s');
+        $newTitle = 'Copy of ' . $liveShow->title . ' - ' . now()->format('Y-m-d H:i:s');
         $newLiveShow = $liveShow->replicate();
         $newLiveShow->title = $newTitle;
         $newLiveShow->save();
@@ -1241,6 +1268,8 @@ class LiveShowController extends Controller
                 'live_show_id' => $newLiveShow->id,
                 'prize' => $winnerPrize->prize,
                 'rank' => $winnerPrize->rank,
+                'is_voucher' => $winnerPrize->is_voucher,
+                'voucher_amount' => $winnerPrize->voucher_amount,
             ]);
         }
         // media gallery
@@ -1293,31 +1322,31 @@ class LiveShowController extends Controller
         // $galleryMedia = $liveShow->galleryMedia()->findOrFail($galleryMediaId);
         $mediaUrl = $galleryMediaPath; // The media URL from your DB
         $roomId = $liveShowStreamId; // Current live Room ID
-        $streamId = 'media_'.uniqid(); // Unique ID for this media stream
+        $streamId = 'media_' . uniqid(); // Unique ID for this media stream
 
         $appId = env('ZEGO_APP_ID');
         $serverSecret = env('ZEGO_SERVER_SECRET');
         $timestamp = time();
         $signatureNonce = bin2hex(random_bytes(8));
-        $signature = md5($appId.$signatureNonce.$serverSecret.$timestamp);
+        $signature = md5($appId . $signatureNonce . $serverSecret . $timestamp);
 
         // Call the Zego Server API directly
         $response = Http::get('https://rtc-api.zego.im/', [
             'api' => '1',
             'ver' => '1',
-            'UserId' => 'media-bot-'.uniqid(),
+            'UserId' => 'media-bot-' . uniqid(),
             'Action' => 'AddStream',
             'AppId' => $appId,
             'SignatureNonce' => $signatureNonce,
             'Timestamp' => $timestamp,
             'Signature' => $signature,
-            'SignatureVersion' =>'2.0',
+            'SignatureVersion' => '2.0',
             'RoomId' => $roomId,
             'StreamId' => $streamId,
             'StreamUrl' => $mediaUrl, // The URL of the media you want to push
         ]);
 
-            \Log::info('Inject Media Stream Response: ' , ['response' => $response->json(), 'mediaUrl' => $mediaUrl, 'roomId' => $roomId, 'streamId' => $streamId] );
+        \Log::info('Inject Media Stream Response: ', ['response' => $response->json(), 'mediaUrl' => $mediaUrl, 'roomId' => $roomId, 'streamId' => $streamId]);
 
         return response()->json($response->json());
     }

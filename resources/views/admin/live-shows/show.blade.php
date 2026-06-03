@@ -1,6 +1,6 @@
 <x-app-dashboard-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="text-xl font-semibold leading-tight text-gray-800">
             {{ __('View Live Show') }}
         </h2>
     </x-slot>
@@ -8,8 +8,8 @@
     <div class="container py-4">
 
         <!-- Event Details Card -->
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-dark text-white">
+        <div class="mb-4 shadow-sm card">
+            <div class="text-white card-header bg-dark">
                 <h3 class="mb-0"><i class="fas fa-broadcast-tower me-2"></i>{{ $liveShow->title }}</h3>
             </div>
             <div class="card-body">
@@ -60,7 +60,11 @@
                                     @foreach ($liveShow->winnerPrizes as $winnerPrize)
                                         <tr>
                                             <td>{{ $winnerPrize->rank }}</td>
-                                            <td>{{ $winnerPrize->prize }}</td>
+                                            <td>{{ $winnerPrize->prize }}
+                                                @if($winnerPrize->is_voucher)
+                                                    <span class="badge bg-primary ms-2">€{{$winnerPrize->voucher_amount}} voucher</span>
+                                                @endif
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
@@ -70,11 +74,11 @@
 
                 </div>
 
-                <div class="d-flex gap-3 mt-3">
+                <div class="gap-3 mt-3 d-flex">
                     @if ($liveShow->thumbnail)
                         <div>
                             <p class="fw-bold">Thumbnail</p>
-                            <img src="{{ $liveShow->thumbnail }}" class="img-fluid rounded shadow-sm"
+                            <img src="{{ $liveShow->thumbnail }}" class="rounded shadow-sm img-fluid"
                                 style="max-width:200px;">
                         </div>
                     @endif
@@ -84,15 +88,15 @@
         </div>
 
         <!-- Users List -->
-        <div class="card shadow-sm">
-            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+        <div class="shadow-sm card">
+            <div class="text-white card-header bg-secondary d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-users me-2"></i>Participants ({{ $liveShow->users->count() }})
                 </h5>
             </div>
-            <div class="card-body p-0">
+            <div class="p-0 card-body">
                 @if ($liveShow->users->count())
                     <div class="table-responsive">
-                        <table class="table table-hover table-dark table-borderless mb-0 data-table">
+                        <table class="table mb-0 table-hover table-dark table-borderless data-table">
                             <thead class="">
                                 <tr>
                                     <th>#</th>
@@ -100,7 +104,7 @@
                                     <th>Email</th>
                                     <th>Status</th>
                                     <th>Score</th>
-                                  
+
                                     <th>Is Winner</th>
                                     <th>Prize Won</th>
                                     <th>Joined At</th>
@@ -119,7 +123,7 @@
                                             </span>
                                         </td>
                                         <td>{{ $user->pivot->score }}</td>
-                                        
+
                                         <td>{{ $user->pivot->is_winner ? 'Yes' : 'No' }}</td>
                                         <td>{{ $user->pivot->prize_won }}</td>
                                         <td>{{ $user->pivot->created_at->format('d M Y, H:i') }}</td>

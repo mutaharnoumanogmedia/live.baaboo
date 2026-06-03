@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('live_show_winner_prizes', function (Blueprint $table) {
-            $table->boolean('is_voucher_price')->default(false)->after('prize');
-            $table->decimal('voucher_amount', 8, 2)->nullable()->after('is_voucher_price');
+            $table->boolean('is_voucher')->default(false)->after('prize');
+            $table->decimal('voucher_amount', 8, 2)->nullable()->after('is_voucher');
         });
     }
 
@@ -23,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('live_show_winner_prizes', function (Blueprint $table) {
-            $table->dropColumn('is_voucher_price');
+            $table->dropColumn('is_voucher');
             $table->dropColumn('voucher_amount');
         });
     }
