@@ -873,7 +873,13 @@ class LiveShowController extends Controller
     {
         $liveShow = LiveShow::with(['quizzes.options'])->findOrFail($id);
 
-        return view('admin.live-shows.stream-broadcaster', compact('liveShow'));
+        // The main host (full control: go live, BGM, remove co-hosts) is a single
+        // designated account. Every other admin opening this page joins as a co-host
+        // who can still publish camera/mic and play media on the stream.
+        $mainHostEmail = "admin@baaboo.com";
+        $isMainHost = auth()->user()->email === $mainHostEmail;
+
+        return view('admin.live-shows.stream-broadcaster', compact('liveShow', 'isMainHost', 'mainHostEmail'));
     }
 
     /**
@@ -987,7 +993,9 @@ class LiveShowController extends Controller
         $liveShow->save();
 
         // call event set broadcast room id
-        event(new SetBroadcastRoomIdEvent($liveShow->id, $liveShow->stream_id));
+        if(auth()->user()->email === "admin@baaboo.com"){
+            event(new SetBroadcastRoomIdEvent($liveShow->id, $liveShow->stream_id));
+        }
 
         return response()->json(['message' => 'Room ID saved successfully!', 'room_id' => $liveShow->stream_id]);
     }

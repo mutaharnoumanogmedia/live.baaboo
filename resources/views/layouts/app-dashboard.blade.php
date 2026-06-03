@@ -147,7 +147,7 @@
 <body class="app-topnav-fixed">
     @include('partials.gtm', ['part' => 'body'])
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top app-topnav shadow-sm">
+    <nav class="navbar navbar-collapse-lg navbar-dark bg-dark fixed-top app-topnav shadow-sm">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold" href="{{ route('admin.dashboard') }}">
                 {{ env('APP_NAME') }}
