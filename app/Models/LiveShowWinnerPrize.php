@@ -8,7 +8,7 @@ class LiveShowWinnerPrize extends Model
 {
     protected $table = 'live_show_winner_prizes';
 
-    protected $fillable = ['live_show_id', 'rank', 'prize', 'is_voucher', 'voucher_amount'];
+    protected $fillable = ['live_show_id', 'rank', 'prize', 'is_voucher', 'voucher_amount', 'discount_rule_id'];
 
     protected $casts = [
         'prize' => 'string',
@@ -20,5 +20,10 @@ class LiveShowWinnerPrize extends Model
     public function liveShow()
     {
         return $this->belongsTo(LiveShow::class);
+    }
+
+    public function discountRule()
+    {
+        return $this->belongsTo(ShopifyPriceRule::class, 'discount_rule_id');
     }
 }

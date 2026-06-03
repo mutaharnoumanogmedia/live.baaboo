@@ -31,6 +31,7 @@ use App\Models\QuizOption;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use App\Services\LiveShowQuizService;
+use App\Services\ShopifyDiscountService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -38,6 +39,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class LiveShowController extends Controller
 {
@@ -216,20 +218,44 @@ class LiveShowController extends Controller
     protected function syncWinnerPrizes(int $liveShowId, int $maxWinners, array $prizes, array $vouchers, array $voucherAmounts): void
     {
         LiveShowWinnerPrize::where('live_show_id', $liveShowId)->delete();
-        // for ($rank = 1; $rank <= $maxWinners; $rank++) {
-        //     $prize = (string) ($prizes[$rank] ?? 0);
-        //     if ($prize) {
-        //         LiveShowWinnerPrize::create([
-        //             'live_show_id' => $liveShowId,
-        //             'rank' => $rank,
-        //             'prize' => $prize,
-        //         ]);
-        //     }
-        // }
+
+        $liveShow = LiveShow::find($liveShowId);
+
+
         for ($rank = 1; $rank <= $maxWinners; $rank++) {
             $voucher = (string) ($vouchers[$rank] ?? 0);
             $voucherAmount = (string) ($voucherAmounts[$rank] ?? 0);
             $prize = (string) ($prizes[$rank] ?? 0);
+
+            $discount_rule_id = null;
+            if (!$liveShow->is_test_show) {
+                try {
+
+                $prizeRule = [
+                    'title' => 'BADABING - ' . $liveShow->title . ' - Rank ' . $rank,
+                    'target_type' => 'line_item',
+                    'target_selection' => 'all',
+                    'allocation_method' => 'across',
+                    'value_type' => 'fixed_amount',
+                    'value' => "-{$voucherAmount}",
+                    'customer_selection' => 'all',
+                    'starts_at' => Carbon::now()->subMonth(1)->toIso8601String(),
+                    'ends_at' => Carbon::now()->addDays(31)->toIso8601String(),
+                    'usage_limit' => 1,
+                    'allocation_method' => 'across',
+                    'prerequisite_collection_ids' => [
+                        env("VOUCHER_COLLECTION_ID")
+                    ],
+                    'allocation_limit '=> 1,
+                ];
+                $shopifyPriceRule = new ShopifyDiscountService();
+                $prizeRule = $shopifyPriceRule->createPriceRule($prizeRule);
+                $discount_rule_id = $prizeRule->id;
+                }
+                catch (\Exception $e) {
+                    Log::error("Failed to create Shopify price rule for live show ID {$liveShowId}, rank {$rank}: " . $e->getMessage());
+                }
+            }
 
             if ($prize) {
                 LiveShowWinnerPrize::create([
@@ -238,6 +264,7 @@ class LiveShowController extends Controller
                     'rank' => $rank,
                     'is_voucher' => $voucher,
                     'voucher_amount' => $voucherAmount,
+                    'discount_rule_id' => $discount_rule_id,
                 ]);
             }
         }

@@ -57,20 +57,20 @@ class ShopifyDiscountService
         return $priceRule ?? null;
     }
 
-    public function getPriceRule($query = [])
-    {
-        $url = "{$this->shop}/admin/api/2026-01/price_rules.json";
-        if (!empty($query)) {
-            $url .= '?' . http_build_query($query);
-        }
-        // dd($url);
-        $response = Http::withHeaders([
-            'X-Shopify-Access-Token' => $this->token,
-        ])->get($url);
+    // public function getPriceRule($query = [])
+    // {
+    //     $url = "{$this->shop}/admin/api/2026-01/price_rules.json";
+    //     if (!empty($query)) {
+    //         $url .= '?' . http_build_query($query);
+    //     }
+    //     // dd($url);
+    //     $response = Http::withHeaders([
+    //         'X-Shopify-Access-Token' => $this->token,
+    //     ])->get($url);
 
-        $result = $response->json();
-        return $result ?? null;
-    }
+    //     $result = $response->json();
+    //     return $result ?? null;
+    // }
 
     /**
      * Generate structured discount codes
@@ -150,42 +150,42 @@ class ShopifyDiscountService
     /**
      * Toggle a Price Rule (affects all codes)
      */
-    public function togglePriceRule(int $priceRuleId, bool $enable)
-    {
-        $endsAt = $enable
-            ? now()->addYears(1)->toIso8601String()
-            : now()->subMinute()->toIso8601String();
+    // public function togglePriceRule(int $priceRuleId, bool $enable)
+    // {
+    //     $endsAt = $enable
+    //         ? now()->addYears(1)->toIso8601String()
+    //         : now()->subMinute()->toIso8601String();
 
-        $query = '
-            mutation priceRuleUpdate($id: ID!, $endsAt: DateTime!) {
-                priceRuleUpdate(id: $id, priceRule: { endsAt: $endsAt }) {
-                    userErrors { message }
-                }
-            }
-        ';
+    //     $query = '
+    //         mutation priceRuleUpdate($id: ID!, $endsAt: DateTime!) {
+    //             priceRuleUpdate(id: $id, priceRule: { endsAt: $endsAt }) {
+    //                 userErrors { message }
+    //             }
+    //         }
+    //     ';
 
-        $variables = [
-            'id' => "gid://shopify/PriceRule/{$priceRuleId}",
-            'endsAt' => $endsAt
-        ];
+    //     $variables = [
+    //         'id' => "gid://shopify/PriceRule/{$priceRuleId}",
+    //         'endsAt' => $endsAt
+    //     ];
 
-        $response = Http::withHeaders([
-            'X-Shopify-Access-Token' => $this->token,
-        ])->post("{$this->shop}/admin/api/2026-01/graphql.json", [
-            'query' => $query,
-            'variables' => $variables
-        ]);
+    //     $response = Http::withHeaders([
+    //         'X-Shopify-Access-Token' => $this->token,
+    //     ])->post("{$this->shop}/admin/api/2026-01/graphql.json", [
+    //         'query' => $query,
+    //         'variables' => $variables
+    //     ]);
 
-        return $response->json();
-    }
+    //     return $response->json();
+    // }
 
-    public function updatePriceRule(int $priceRuleId, $startsAt, $endsAt): bool
+    public function updatePriceRule(int $priceRuleId, $startsAt, $endsAt, $others): bool
     {
         $payload = [
-            'price_rule' => [
+            'price_rule' => array_merge($others, [
                 'starts_at' => \Carbon\Carbon::parse($startsAt)->format('Y-m-d\TH:i:s\Z'),
                 'ends_at'   => \Carbon\Carbon::parse($endsAt)->format('Y-m-d\TH:i:s\Z'),
-            ],
+            ]),
         ];
 
         // dd( $payload);
@@ -201,19 +201,20 @@ class ShopifyDiscountService
         if ($response->failed()) {
             Log::error('Error updating price rule', [
                 'price_rule_id' => $priceRuleId,
-                'response' => $response->json(),
+                'others' => $others,
+                'response' => $response->json()
             ]);
             return false;
         }
 
         // Sync locally
-        ShopifyPriceRule::where('shopify_id', $priceRuleId)->update([
+        ShopifyPriceRule::where('shopify_id', $priceRuleId)->update(array_merge($others, [
             'starts_at' => $startsAt,
             'ends_at'   => $endsAt,
-        ]);
+        ]));
 
         Log::info('Price rule updated successfully', [
-            'price_rule_id' => $priceRuleId,
+            'price_rule_id' => $priceRuleId
         ]);
 
         return true;
