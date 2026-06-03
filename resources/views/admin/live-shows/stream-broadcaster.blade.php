@@ -202,6 +202,43 @@
             display: none;
         }
 
+        #bgm-toggle {
+            position: fixed;
+            bottom: 28%;
+            right: 20px;
+            z-index: 99998;
+            background: rgba(20, 20, 20, 0.95);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: system-ui, sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 108px;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        #bgm-toggle:hover {
+            filter: brightness(1.08);
+        }
+
+        #bgm-toggle:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        #bgm-toggle[aria-pressed="true"] {
+            background: rgba(22, 163, 74, 0.92);
+            border-color: rgba(134, 239, 172, 0.35);
+        }
+
+        #bgm-toggle[aria-pressed="false"] {
+            background: rgba(20, 20, 20, 0.95);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
         @media (max-width: 768px) {
             #overlay-controls {
                 width: calc(100vw - 40px);
@@ -361,6 +398,11 @@
                 right: 10px;
             }
 
+            #bgm-toggle {
+                bottom: 130px;
+                right: 10px;
+            }
+
             #overlay-controls {
                 bottom: 10px;
                 max-height: 70vh;
@@ -517,6 +559,11 @@
         <div id="page-qr-label">Scan to open the same broadcasting panel in your phone</div>
     </div>
 
+    <button id="bgm-toggle" type="button" title="Pause background music" aria-pressed="false"
+        data-playing="false" disabled>
+        &#9835; Music Off
+    </button>
+
     <button id="overlay-toggle" class="btn btn-primary btn-lg" type="button" title="Show video overlay controls">Media
         Management</button>
 
@@ -550,6 +597,11 @@
                 <option value="0.5">50%</option>
                 <option value="0.7">70%</option>
             </select>
+        </div>
+        <div class="row">
+            <label style="flex:0 0 auto;font-size:12px;color:rgba(255,255,255,0.75);">Music volume</label>
+            <input id="bgm-volume" type="range" min="0" max="100" value="20" title="Background music volume"
+                style="flex:1;" />
         </div>
         <div class="row">
             <label style="flex:1;display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
@@ -678,6 +730,16 @@
         const liveShowMediaHiddenUrl = '{{ route('admin.live-shows.media-hidden', $liveShow->id) }}';
         const liveShowMediaPlayedUrl = '{{ route('admin.live-shows.media-played', $liveShow->id) }}';
         const csrfToken = '{{ csrf_token() }}';
+        const BGM_URL = '{{ asset('badabing-audio/bg-think-fast.mp3') }}';
+
+        const BG_VOLUME = 0.1;
+
+        const hostAudio = new Audio(BGM_URL);
+        hostAudio.loop = true;
+        hostAudio.preload = 'auto';
+
+        hostAudio.crossOrigin = 'anonymous';
+        hostAudio.volume = BG_VOLUME;
 
         // Overlay state, mutable from the UI controls.
         const overlayState = {
@@ -890,6 +952,9 @@
                         overlayVideoEl.play().catch(() => {});
                     } catch (_) {}
                 }
+                if (!bgmEl.paused) {
+                    bgmEl.play().catch(() => {});
+                }
                 for (let i = 0; i < 3; i++) drawFrame();
             });
 
@@ -932,6 +997,25 @@
                 }
             }
 
+            // Background music → mixed stream (audience hears this)
+            const bgmEl = document.createElement('audio');
+            bgmEl.src = BGM_URL;
+            bgmEl.loop = true;
+            bgmEl.preload = 'auto';
+            bgmEl.crossOrigin = 'anonymous';
+            hiddenHost.appendChild(bgmEl);
+
+            const bgmGain = audioContext.createGain();
+            bgmGain.gain.value = BG_VOLUME;
+            try {
+                const bgmSource = audioContext.createMediaElementSource(bgmEl);
+                bgmSource.connect(bgmGain).connect(audioDestination);
+                // Host local monitoring (same mix the audience receives).
+                bgmGain.connect(audioContext.destination);
+            } catch (e) {
+                console.warn('BGM audio wiring failed:', e);
+            }
+
             const mixedAudioTrack = audioDestination.stream.getAudioTracks()[0];
 
             // overlayVideoEl.addEventListener('playing', () => {
@@ -971,6 +1055,8 @@
                 audioContext,
                 overlayGain,
                 micGain,
+                bgmEl,
+                bgmGain,
                 mixedVideoTrack,
                 mixedAudioTrack,
                 sourceStream,
@@ -1132,6 +1218,66 @@
                     v));
             },
 
+            _emitBgmState(playing) {
+                window.dispatchEvent(new CustomEvent('broadcast-bgm-state-changed', {
+                    detail: {
+                        playing: !!playing
+                    }
+                }));
+            },
+
+            async startBgm() {
+                if (!pipeline || !pipeline.bgmEl) return false;
+                try {
+                    if (pipeline.audioContext.state === 'suspended') {
+                        await pipeline.audioContext.resume();
+                    }
+                    await pipeline.bgmEl.play();
+                    this._emitBgmState(true);
+
+                    console.log('Playing host audio');
+                    await hostAudio.play();
+                    return true;
+                } catch (e) {
+                    console.warn('[BGM] play failed:', e);
+                    this._emitBgmState(false);
+                    return false;
+                }
+            },
+
+            pauseBgm() {
+                if (!pipeline || !pipeline.bgmEl) return;
+                pipeline.bgmEl.pause();
+                this._emitBgmState(false);
+                console.log('Pausing host audio');
+                hostAudio.pause();
+            },
+
+            stopBgm() {
+                if (!pipeline || !pipeline.bgmEl) return;
+                pipeline.bgmEl.pause();
+                pipeline.bgmEl.currentTime = 0;
+                this._emitBgmState(false);
+            },
+
+            async toggleBgm() {
+                if (this.isBgmPlaying()) {
+                    this.pauseBgm();
+                    return false;
+                }
+                return this.startBgm();
+            },
+
+            setBgmVolume(v) {
+                if (pipeline && pipeline.bgmGain) {
+                    pipeline.bgmGain.gain.value = Math.max(0, Math.min(1, v));
+                }
+            },
+
+            isBgmPlaying() {
+                return !!(pipeline && pipeline.bgmEl && !pipeline.bgmEl.paused);
+            },
+
             getState() {
                 return Object.assign({}, overlayState, {
                     ready: !!pipeline
@@ -1190,7 +1336,7 @@
         }
 
         // 1) get or create roomID in outer scope
-        const roomID = "{{"RoomID_".$liveShow->id . rand(1000, 9999) }}";
+        const roomID = "{{ 'RoomID_' . $liveShow->id . rand(1000, 9999) }}";
 
         try {
             // 2) save it first
@@ -1205,6 +1351,7 @@
             const serverSecret = "{{ env('ZEGO_SERVER_SECRET', 'ac4b30ceb3e43b0280c7fa40be34d2ef') }}";
             const TOKEN = generatePrebuiltToken(appID, serverSecret, roomID, userID, userName);
 
+            
             let roleParam = 'Host';
             let role = roleParam === 'Host' ?
                 ZegoUIKitPrebuilt.Host :
@@ -1223,6 +1370,10 @@
                     showUserJoinAndLeave: false,
                     showMirror: false,
                     fillMode: "cover",
+
+                    onLeaveRoom: () => {
+                        if (window.BroadcastOverlay) window.BroadcastOverlay.stopBgm();
+                    },
                 };
             } else {
                 config = {
@@ -1238,6 +1389,8 @@
                     fillMode: "cover",
                 };
             }
+
+
 
             const zp = ZegoUIKitPrebuilt.create(TOKEN);
             // Expose the Zego instance globally so the single-broadcaster
@@ -1265,7 +1418,11 @@
                 onLiveStart: (user) => {
                     console.log("Success! The stream has officially started.");
                     console.log("Broadcasting user details:", user);
-                    // alert('cx`ontinue');
+                    const bgmBtn = document.getElementById('bgm-toggle');
+                    const shouldPlay = !bgmBtn || bgmBtn.getAttribute('data-playing') !== 'false';
+                    if (window.BroadcastOverlay && shouldPlay) {
+                        window.BroadcastOverlay.startBgm();
+                    }
                 },
                 // --- Connection state handling ---------------------------------
                 // Background-tab throttling can cause brief DISCONNECTED blips.
@@ -1345,6 +1502,8 @@
     const sizeSel = $('overlay-size');
     const loopChk = $('overlay-loop');
     const muteChk = $('overlay-muted');
+    const bgmToggleBtn = $('bgm-toggle');
+    const bgmVolumeSlider = $('bgm-volume');
     const playBtn = $('overlay-play');
     const stopBtn = $('overlay-stop');
     const status = $('overlay-status');
@@ -1480,10 +1639,35 @@
     if (collapse) collapse.addEventListener('click', hidePanel);
     if (toggle) toggle.addEventListener('click', showPanel);
 
+    function updateBgmToggleUI(playing) {
+        if (!bgmToggleBtn) return;
+        bgmToggleBtn.setAttribute('aria-pressed', playing ? 'true' : 'false');
+        bgmToggleBtn.setAttribute('data-playing', playing ? 'true' : 'false');
+        bgmToggleBtn.title = playing ? 'Pause background music' : 'Play background music';
+        bgmToggleBtn.innerHTML = playing ? '&#9835; Music On' : '&#9654; Music Off';
+    }
+
+    if (bgmToggleBtn) {
+        bgmToggleBtn.addEventListener('click', async () => {
+            if (!window.BroadcastOverlay || !window.BroadcastOverlay.isReady()) return;
+            await window.BroadcastOverlay.toggleBgm();
+        });
+        window.addEventListener('broadcast-bgm-state-changed', (ev) => {
+            updateBgmToggleUI(!!(ev.detail && ev.detail.playing));
+        });
+        window.addEventListener('broadcast-pipeline-ready', () => {
+            if (bgmToggleBtn) bgmToggleBtn.disabled = false;
+            if (bgmVolumeSlider && window.BroadcastOverlay) {
+                window.BroadcastOverlay.setBgmVolume(parseInt(bgmVolumeSlider.value, 10) / 100);
+            }
+        });
+    }
+
     function refreshReadyState() {
         const ready = window.BroadcastOverlay && window.BroadcastOverlay.isReady();
         playBtn.disabled = !ready;
         stopBtn.disabled = !ready;
+        if (bgmToggleBtn) bgmToggleBtn.disabled = !ready;
         setStatus(ready ? 'Pipeline: ready' : 'Pipeline: initializing…',
             ready ? '#86efac' : 'rgba(255,255,255,0.65)');
     }
@@ -1498,6 +1682,13 @@
     sizeSel.addEventListener('change', () => {
         if (window.BroadcastOverlay) window.BroadcastOverlay.setSize(parseFloat(sizeSel.value));
     });
+
+    if (bgmVolumeSlider) {
+        bgmVolumeSlider.addEventListener('input', () => {
+            const v = parseInt(bgmVolumeSlider.value, 10) / 100;
+            if (window.BroadcastOverlay) window.BroadcastOverlay.setBgmVolume(v);
+        });
+    }
 
     playBtn.addEventListener('click', () => {
         const url = (urlInput.value || '').trim();
@@ -1521,7 +1712,8 @@
             loop: loopChk.checked,
             muted: mediaType === 'image' ? true : muteChk.checked,
         });
-        setTimeout(() => setStatus((mediaType === 'image' ? 'Showing' : 'Playing') + ': ' + label, '#86efac'), 600);
+        setTimeout(() => setStatus((mediaType === 'image' ? 'Showing' : 'Playing') + ': ' + label, '#86efac'),
+            600);
 
         //event of show gallery via ajax call
         fetch(galleryShowOnStreamUrl, {
