@@ -600,7 +600,7 @@
         </div>
         <div class="row">
             <label style="flex:0 0 auto;font-size:12px;color:rgba(255,255,255,0.75);">Music volume</label>
-            <input id="bgm-volume" type="range" min="0" max="100" value="20" title="Background music volume"
+            <input id="bgm-volume" type="range" min="0" max="100" value="7" title="Background music volume"
                 style="flex:1;" />
         </div>
         <div class="row">
@@ -732,7 +732,7 @@
         const csrfToken = '{{ csrf_token() }}';
         const BGM_URL = '{{ asset('badabing-audio/bg-think-fast.mp3') }}';
 
-        const BG_VOLUME = 0.1;
+        const BG_VOLUME = 0.0;
 
         const hostAudio = new Audio(BGM_URL);
         hostAudio.loop = true;
@@ -1685,7 +1685,7 @@
 
     if (bgmVolumeSlider) {
         bgmVolumeSlider.addEventListener('input', () => {
-            const v = parseInt(bgmVolumeSlider.value, 10) / 100;
+            const v = parseInt(bgmVolumeSlider.value, 5) / 100;
             if (window.BroadcastOverlay) window.BroadcastOverlay.setBgmVolume(v);
         });
     }
