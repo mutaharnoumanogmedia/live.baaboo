@@ -600,7 +600,7 @@
         </div>
         <div class="row">
             <label style="flex:0 0 auto;font-size:12px;color:rgba(255,255,255,0.75);">Music volume</label>
-            <input id="bgm-volume" type="range" min="0" max="100" value="7" title="Background music volume"
+            <input id="bgm-volume" type="range" min="0" max="100" value="5" title="Background music volume"
                 style="flex:1;" />
         </div>
         <div class="row">
