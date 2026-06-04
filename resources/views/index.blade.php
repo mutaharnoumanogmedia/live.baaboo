@@ -133,7 +133,7 @@
                     <div class="col-lg-3 d-inline-flex justify-content-center">
                         <div class="live-show-join-btn">
                             <a id="live-show-join-link"
-                                href="{{ route('live-show-play', ['id' => $currentLiveShow->id]) }}"
+                                href="{{ route('live-show', ['id' => $currentLiveShow->id]) }}"
                                 class="px-4 shadow-sm btn btn-lg join-live-btn" style="border-radius: 24px;">
                                 <i class="fas fa-play me-2 text-orange"></i>Jetzt mitspielen
                             </a>
