@@ -49,12 +49,12 @@ class GamePlayController extends Controller
         if ($liveShow->status == 'completed') {
             $nextScheduledLiveShow = LiveShow::where('status', 'scheduled')->orderBy('scheduled_at', 'asc')->notTestShow()->first();
             if ($nextScheduledLiveShow) {
-                $updateMessage = 'Die Live-Übertragung ist beendet. Vielen Dank für deine Teilnahme! Die nächste Show findet am  '.(Carbon::parse($nextScheduledLiveShow->scheduled_at)->locale('de')->format('d.F Y \u\m H:i')).'Uhr statt.';
+                $updateMessage = 'Die Live-Übertragung ist beendet. Vielen Dank für deine Teilnahme! Die nächste Show findet am  '.(Carbon::parse($nextScheduledLiveShow->scheduled_at)->locale('de')->translatedFormat('d.F Y \u\m H:i')).'Uhr statt.';
             }
         }
         // if shceduled
         if ($liveShow->status == 'scheduled') {
-            $updateMessage = 'Die Live-Sendung ist geplant. Die Show startet am '.(Carbon::parse($liveShow->scheduled_at)->locale('de')->format('d.F Y \u\m H:i')).'Uhr.';
+            $updateMessage = 'Die Live-Sendung ist geplant. Die Show startet am '.(Carbon::parse($liveShow->scheduled_at)->locale('de')->translatedFormat('d.F Y \u\m H:i')).'Uhr.';
         }
 
         return view('live-show', compact('liveShow', 'isEliminated', 'galleryStreamInitial', 'updateMessage'));
