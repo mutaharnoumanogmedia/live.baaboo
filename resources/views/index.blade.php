@@ -149,7 +149,7 @@
                     <div>
                         @for ($i = 0; $i < 10; $i++)
                             Nächste Show:
-                            {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H:i') . ' Uhr' : 'Nicht festgelegt' }}
+                            {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? (\Carbon\Carbon::parse($currentLiveShow->scheduled_at)->locale('de')->translatedFormat('d.m.Y \- H:i') ). ' Uhr' : 'Nicht festgelegt' }}
                             <span> | </span>
                             <span class="me-5"> Jetzt kostenlos mitspielen </span>
                         @endfor
@@ -164,7 +164,7 @@
                 <div class="text-center">
                     Nächste Show:
                     <span class="d-block d-lg-inline">
-                        {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->format('d.m.Y \- H') . ' Uhr' : 'Nicht festgelegt' }}</span>
+                        {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? (\Carbon\Carbon::parse($currentLiveShow->scheduled_at)->locale('de')->translatedFormat('d.m.Y \- H') ). ' Uhr' : 'Nicht festgelegt' }}</span>
                 </div>
             </div>
 
