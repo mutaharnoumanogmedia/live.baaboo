@@ -560,8 +560,8 @@
     </div>
 
     @if ($isMainHost)
-        <button id="bgm-toggle" type="button" title="Pause background music" aria-pressed="false"
-            data-playing="false" disabled>
+        <button id="bgm-toggle" type="button" title="Pause background music" aria-pressed="false" data-playing="false"
+            disabled>
             &#9835; Music Off
         </button>
     @endif
@@ -603,8 +603,8 @@
         @if ($isMainHost)
             <div class="row">
                 <label style="flex:0 0 auto;font-size:12px;color:rgba(255,255,255,0.75);">Music volume</label>
-                <input id="bgm-volume" type="range" min="0" max="100" value="5" title="Background music volume"
-                    style="flex:1;" />
+                <input id="bgm-volume" type="range" min="0" max="100" value="5"
+                    title="Background music volume" style="flex:1;" />
             </div>
         @endif
         <div class="row">
@@ -1342,7 +1342,7 @@
         }
 
         // 1) get or create roomID in outer scope
-        const roomID = "{{ 'RoomID_' . $liveShow->id  }}";
+        const roomID = "{{ 'RoomID_' . $liveShow->id }}";
 
         try {
             // 2) save it first
@@ -1406,7 +1406,9 @@
             // The remove-co-host UI relies on the ZIM plugin being registered.
             try {
                 if (typeof ZIM !== 'undefined') {
-                    zp.addPlugins({ ZIM });
+                    zp.addPlugins({
+                        ZIM
+                    });
                 }
             } catch (e) {
                 console.warn('[Zego] ZIM plugin registration failed:', e);
@@ -1532,6 +1534,11 @@
     const galleryCsrf = '{{ csrf_token() }}';
     const galleryHideOnStreamUrl =
         '{{ route('admin.live-shows.stream-management.hide-gallery-image', ['id' => $liveShow->id]) }}';
+
+    const showMediaEventUrl =
+        '{{ route('admin.live-shows.stream-management.media-event', ['event' => 'show', 'id' => $liveShow->id]) }}';
+    const hideMediaEventUrl =
+        '{{ route('admin.live-shows.stream-management.media-event', ['event' => 'hide', 'id' => $liveShow->id]) }}';
 
     const ATTACHED_MEDIA_URL =
         '{{ route('admin.live-shows.stream-management.attached-media', ['id' => $liveShow->id]) }}';
@@ -1734,11 +1741,23 @@
             600);
 
         //event of show gallery via ajax call
-        fetch(galleryShowOnStreamUrl, {
-            method: 'POST',
+        // fetch(galleryShowOnStreamUrl, {
+        //     method: 'POST',
 
+        //     body: JSON.stringify({
+        //         gallery_media_id: parseInt(selectedMedia.id, 10)
+        //     }),
+        //     headers: {
+        //         'X-CSRF-TOKEN': galleryCsrf,
+        //         'Accept': 'application/json',
+        //         'Content-Type': 'application/json'
+        //     }
+        // });
+        fetch(showMediaEventUrl, {
+            method: 'POST',
             body: JSON.stringify({
-                gallery_media_id: parseInt(selectedMedia.id, 10)
+                media_id: parseInt(selectedMedia.id, 10),
+                event: 'show'
             }),
             headers: {
                 'X-CSRF-TOKEN': galleryCsrf,
@@ -1754,8 +1773,20 @@
         setStatus('Overlay stopped.');
 
         //event of hide gallery via ajax call
-        fetch(galleryHideOnStreamUrl, {
+        // fetch(galleryHideOnStreamUrl, {
+        //     method: 'POST',
+        //     headers: {
+        //         'X-CSRF-TOKEN': galleryCsrf,
+        //         'Accept': 'application/json',
+        //         'Content-Type': 'application/json'
+        //     }
+        // });
+        fetch(hideMediaEventUrl, {
             method: 'POST',
+            body: JSON.stringify({
+                media_id: parseInt(selectedMedia.id, 10),
+                event: 'hide'
+            }),
             headers: {
                 'X-CSRF-TOKEN': galleryCsrf,
                 'Accept': 'application/json',
