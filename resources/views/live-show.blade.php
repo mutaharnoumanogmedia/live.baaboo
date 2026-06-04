@@ -561,7 +561,8 @@
                     </div>
                 </div>
 
-                <div class="tab-pane fade " id="playerTab" role="tabpanel" aria-labelledby="playerTab-tab position-relative">
+                <div class="tab-pane fade " id="playerTab" role="tabpanel"
+                    aria-labelledby="playerTab-tab position-relative">
                     <!-- Player List -->
                     <div class="container-fluid ">
                         <div class="players-list-group-container">
@@ -572,7 +573,7 @@
                             </ul>
                         </div>
                     </div>
-                    <div id="players-list-loading-spinner" class="position-absolute top-50 start-50 translate-middle">
+                    <div id="players-list-loading-spinner" style="display: none;">
                         <i class="fas fa-spinner fa-spin"></i>
                     </div>
                 </div>
@@ -1100,7 +1101,9 @@
             //show a loading spinner
             document.getElementById('players-list-loading-spinner').style.display = 'block';
 
-            updatePlayersLeaderboard()
+            updatePlayersLeaderboard().then(() => {
+                document.getElementById('players-list-loading-spinner').style.display = 'none';
+            });
 
 
         }
@@ -1564,12 +1567,6 @@
                         userBlockedFromLiveShowEventTrigger();
                         checkIfUserBlockedFromLiveShow();
 
-
-                        //if liveshow id is 1004
-                        if ("{{ $liveShow->id }}" == 1004 && isLoggedIn) {
-                            autoShowQuizQuestions();
-                        }
-
                     } else {
                         let errorMessages = data.messages || ['Registration failed. Please try again.'];
 
@@ -1950,11 +1947,13 @@
             });
             // Your Laravel broadcast event (drop the dot)
             channelShowWinner.bind('ShowPlayerAsWinnerEvent', function(data) {
-                toggleQuiz("remove");
 
 
                 console.log('Winner Event:', data);
+
                 // AJAX request to fetch prize money for this user
+                toggleQuiz("remove");
+
                 if (userId && isLoggedIn) {
                     fetch("{{ url('live-show/' . $liveShow->id . '/user-prize') }}?user_id=" + userId, {
                             headers: {
@@ -1964,6 +1963,7 @@
                         })
                         .then(response => response.json())
                         .then(prizeData => {
+
                             console.log('Prize data:', prizeData);
                             if (prizeData.success && prizeData.prize !== undefined && prizeData.prize !=
                                 'n/a' && prizeData.is_winner == true) {
@@ -1988,9 +1988,10 @@
                                         title: 'swal2-title-custom-winner'
                                     }
                                 });
-                                showWinnersTabForParticipants();
 
                             }
+                            showWinnersTabForParticipants();
+
 
                         })
                         .catch((err) => {
@@ -2646,7 +2647,7 @@
         });
     </script>
 
-    @if (request()->boolean('debug_bot') && $liveShow->is_test_show)
+    @if (request()->boolean('debug_bot'))
         <script src="{{ url('js/live-show-quiz-debug-bot.js?v=' . time()) }}"></script>
     @endif
 

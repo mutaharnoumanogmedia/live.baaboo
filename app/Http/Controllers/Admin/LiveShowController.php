@@ -381,7 +381,11 @@ class LiveShowController extends Controller
 
         // Update pivot table to set is_winner = true for top three users
         foreach ($topMaxWinnersByScore as $winner) {
-            $liveShow->users()->updateExistingPivot($winner['id'], ['is_winner' => true]);
+            \Log::info("Updating winner {$winner['id']} to is_winner = true");
+            //if score is greater than 0, then update is_winner = true
+            if ($winner['score'] > 0) {
+                $liveShow->users()->updateExistingPivot($winner['id'], ['is_winner' => true]);
+            }
         }
 
         // update each winner prize won
@@ -392,12 +396,16 @@ class LiveShowController extends Controller
             $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon]);
             ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string) $liveShowId);
             \Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
-            // Dispatch job to send winner email after 30 minutes
-            try {
-                SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now()->addMinutes(30));
-            } catch (\Exception $e) {
-                // log the error
-                \Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage());
+
+            if (! $liveShow->is_test_show) {
+                // Dispatch job to send winner email after 30 minutes
+                try {
+                    SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now()->addMinutes(30));
+                    \Log::info("SendWinnerEmailJob dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
+                } catch (\Exception $e) {
+                    // log the error
+                    \Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage());
+                }
             }
         }
 

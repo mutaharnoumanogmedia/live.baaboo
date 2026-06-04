@@ -8,7 +8,9 @@
          <div class=" d-flex justify-content-between align-items-center py-3 bg-dark rounded mb-1 p-3">
              <div class="d-flex align-items-center gap-2">
 
-                 <h4 class="mb-0 fw-bold  ">{{ $liveShow->title }}</h4>
+                 <h4 class="mb-0 fw-bold  ">{{ $liveShow->title }} {!! $liveShow->is_test_show
+                     ? '<span class="badge bg-danger">Test Show</span>'
+                     : '<span class="badge bg-success">Live Show</span>' !!}</h4>
              </div>
              <div class="btn-group shadow-sm">
                  <a target="_blank" class="btn btn-outline-primary"
@@ -58,7 +60,7 @@
                              </span>
                          </h6>
                      </div>
-                     <div class="card-body p-0" style="overflow: scroll; max-height: 80vh;">
+                     <div class="card-body p-0" style="overflow: scroll;  min-height: 80vh; height: auto">
                          <div class="d-flex justify-content-between align-items-center gap-2 mb-2 p-2 flex-wrap">
                              <div class="input-group input-group-sm" style="max-width: 100%;">
                                  <span class="input-group-text">
@@ -128,9 +130,9 @@
                          <h6 class="mb-0 fw-bold text-uppercase small text-muted">
                              <i class="fas fa-broadcast-tower me-2 text-primary"></i> Show Controls
                          </h6>
-                         <button type="button" class="btn btn-outline-light  "
-                             data-bs-toggle="collapse" data-toggle-status="opened" data-bs-target="#liveShowStatusCardBody" aria-expanded="true"
-                             aria-controls="liveShowStatusCardBody" id="liveShowStatusToggle"
+                         <button type="button" class="btn btn-outline-light  " data-bs-toggle="collapse"
+                             data-toggle-status="opened" data-bs-target="#liveShowStatusCardBody"
+                             aria-expanded="true" aria-controls="liveShowStatusCardBody" id="liveShowStatusToggle"
                              title="Toggle show controls">
                              <i class="fa fa-angle-up"></i>
                          </button>
@@ -488,7 +490,7 @@
                              </li>
                          </ul>
                      </div>
-                     <div class="card-body p-0" style="overflow: scroll; max-height: 80vh;">
+                     <div class="card-body p-0" style="overflow: scroll;  min-height: 80vh; height: auto">
                          <div class="tab-content">
                              <div class="tab-pane fade show active" id="chat-tab">
                                  <div class="p-3">
@@ -2821,15 +2823,16 @@
                  const liveShowStatusCardBody = document.getElementById('liveShowStatusCardBody');
                  const liveShowStatusToggle = document.getElementById('liveShowStatusToggle');
                  liveShowStatusToggle.addEventListener('click', function() {
-                    console.log('liveShowStatusToggle clicked' , liveShowStatusToggle.getAttribute('data-toggle-status'));
-                    if (liveShowStatusToggle.getAttribute('data-toggle-status') == 'opened') {
-                        liveShowStatusToggle.setAttribute('data-toggle-status', 'closed');
-                        liveShowStatusToggle.innerHTML = '<i class="fa fa-angle-down"></i>';
-                    } else {
-                        liveShowStatusToggle.setAttribute('data-toggle-status', 'opened');
-                        liveShowStatusToggle.innerHTML = '<i class="fa fa-angle-up"></i>';
-                    }
-                     
+                     console.log('liveShowStatusToggle clicked', liveShowStatusToggle.getAttribute(
+                         'data-toggle-status'));
+                     if (liveShowStatusToggle.getAttribute('data-toggle-status') == 'opened') {
+                         liveShowStatusToggle.setAttribute('data-toggle-status', 'closed');
+                         liveShowStatusToggle.innerHTML = '<i class="fa fa-angle-down"></i>';
+                     } else {
+                         liveShowStatusToggle.setAttribute('data-toggle-status', 'opened');
+                         liveShowStatusToggle.innerHTML = '<i class="fa fa-angle-up"></i>';
+                     }
+
                  });
 
                  const toggleLeftSidebarBtn = document.getElementById('toggleLeftSidebarBtn');
