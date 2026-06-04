@@ -256,7 +256,7 @@ class ShopifyDiscountService
     {
         $priceRuleId = $shopify_rule_id;
         if ($priceRuleId == null) {
-            Log::error("No active price rule found while setting discount code for user ID: " . $user->id);
+            Log::error("No active price rule found while setting discount code for ID: " . $user->id);
             throw new Exception("No active price rule found.");
         }
 

@@ -43,14 +43,13 @@ class SendWinnerEmailJob implements ShouldQueue
         if (! $user || ! $user->email) {
             return;
         }
-
-        if ($show_user && $show_user->discount_code) {
+        if ($show_user && $show_user->discount_code != NULL) {
             Mail::to($user->email)
                 ->send(new WinnerVoucherNotificationMail($show_user));
-            return;
-        } else {
+            Log::info("WinnerVoucherNotificationMail sent to user ID {$user->id} with email {$user->email} for live show ID {$this->liveShow->id} and prize won: {$this->prizeWon}");
+            } else {
 
-            Mail::to($user->email)
+                Mail::to($user->email)
                 ->send(new WinnerNotificationMail($user, $this->prizeWon, $this->liveShow));
         }
     }
