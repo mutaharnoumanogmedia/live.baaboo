@@ -113,11 +113,17 @@
                         <div class="live-show-content-container">
                             <div class="live-show-badge ">
                                 <div class="live-dot me-2"></div>
-                                <div id="live-show-schedule-badge" class="schedule-highlight d-none"></div>
+                                <div id="live-show-schedule-badge" class="schedule-highlight d-none">
+
+                                </div>
+                                {{ \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->locale('de')->translatedFormat('d.m.Y \- H:i') . ' Uhr' }}
                             </div>
                             <div class="live-show-title">
                                 <h5 class="mb-1 fw-bold text-gradient" style="font-size:1.2rem;">
-                                    <span id="live-show-banner-title" style="color:#140b63;">Live Show</span>
+
+                                    <span id="live-show-banner-title" style="color:#140b63;">
+                                        {{ $currentLiveShow->title }}
+                                    </span>
                                     <span class="mx-2">·</span>
                                 </h5>
                             </div>
@@ -126,8 +132,9 @@
                     </div>
                     <div class="col-lg-3 d-inline-flex justify-content-center">
                         <div class="live-show-join-btn">
-                            <a id="live-show-join-link" href="#" class="px-4 shadow-sm btn btn-lg join-live-btn"
-                                style="border-radius: 24px;">
+                            <a id="live-show-join-link"
+                                href="{{ route('live-show-play', ['id' => $currentLiveShow->id]) }}"
+                                class="px-4 shadow-sm btn btn-lg join-live-btn" style="border-radius: 24px;">
                                 <i class="fas fa-play me-2 text-orange"></i>Jetzt mitspielen
                             </a>
                         </div>
@@ -149,7 +156,7 @@
                     <div>
                         @for ($i = 0; $i < 10; $i++)
                             Nächste Show:
-                            {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? (\Carbon\Carbon::parse($currentLiveShow->scheduled_at)->locale('de')->translatedFormat('d.m.Y \- H:i') ). ' Uhr' : 'Nicht festgelegt' }}
+                            {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->locale('de')->translatedFormat('d.m.Y \- H:i') . ' Uhr' : 'Nicht festgelegt' }}
                             <span> | </span>
                             <span class="me-5"> Jetzt kostenlos mitspielen </span>
                         @endfor
@@ -164,7 +171,7 @@
                 <div class="text-center">
                     Nächste Show:
                     <span class="d-block d-lg-inline">
-                        {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? (\Carbon\Carbon::parse($currentLiveShow->scheduled_at)->locale('de')->translatedFormat('d.m.Y \- H') ). ' Uhr' : 'Nicht festgelegt' }}</span>
+                        {{ isset($currentLiveShow) && $currentLiveShow->scheduled_at ? \Carbon\Carbon::parse($currentLiveShow->scheduled_at)->locale('de')->translatedFormat('d.m.Y \- H') . ' Uhr' : 'Nicht festgelegt' }}</span>
                 </div>
             </div>
 
@@ -846,7 +853,6 @@
 
 
     @push('scripts')
-     
         <script>
             var assetPath = "{{ asset('images/') }}";
             var scheduleData = @json($scheduleData ?? ['carousel_items' => []]);
