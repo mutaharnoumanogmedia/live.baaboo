@@ -128,11 +128,11 @@
                          <h6 class="mb-0 fw-bold text-uppercase small text-muted">
                              <i class="fas fa-broadcast-tower me-2 text-primary"></i> Show Controls
                          </h6>
-                         <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 ms-2"
-                             data-bs-toggle="collapse" data-bs-target="#liveShowStatusCardBody" aria-expanded="true"
+                         <button type="button" class="btn btn-outline-light  "
+                             data-bs-toggle="collapse" data-toggle-status="opened" data-bs-target="#liveShowStatusCardBody" aria-expanded="true"
                              aria-controls="liveShowStatusCardBody" id="liveShowStatusToggle"
                              title="Toggle show controls">
-                             <i class="fa fa-bars"></i>
+                             <i class="fa fa-angle-up"></i>
                          </button>
                      </div>
                      <div class="collapse show" id="liveShowStatusCardBody">
@@ -2529,7 +2529,7 @@
                                     data-media-id="${data.id}"
                                     id="show-media-btn-${data.id}"
                                     title="Show on live stream">
-                                    <i class="fas fa-tv"></i>
+                                    <i class="fas fa-tv"></i> Show
                                      
                                 </button>
                                 <button type="button"
@@ -2538,7 +2538,7 @@
                                     data-media-id="${data.id}"
                                     id="hide-media-btn-${data.id}"
                                     title="Hide on live stream">
-                                    <i class="fas fa-eye-slash"></i>
+                                    <i class="fas fa-eye-slash"></i> Hide
                                      
                                 </button>
                                
@@ -2547,7 +2547,7 @@
                                     id="preview-media-btn-${data.id}"
                                     class="btn btn-sm btn-secondary d-block w-100 mb-1 " title="Preview"
                                     onclick="openMediaPreviewModal('${data.is_image ? data.path : (data.thumbnail ?? data.path)}')">
-                                    <i class="fas fa-eye"></i>
+                                    <i class="fas fa-eye"></i> Preview
                                 </button>
                                 
                        
@@ -2820,17 +2820,17 @@
 
                  const liveShowStatusCardBody = document.getElementById('liveShowStatusCardBody');
                  const liveShowStatusToggle = document.getElementById('liveShowStatusToggle');
-                 if (liveShowStatusCardBody && liveShowStatusToggle) {
-                     const statusToggleIcon = liveShowStatusToggle.querySelector('i');
-                     liveShowStatusCardBody.addEventListener('show.bs.collapse', function() {
-                         statusToggleIcon.classList.remove('fa-chevron-down');
-                         statusToggleIcon.classList.add('fa-chevron-up');
-                     });
-                     liveShowStatusCardBody.addEventListener('hide.bs.collapse', function() {
-                         statusToggleIcon.classList.remove('fa-chevron-up');
-                         statusToggleIcon.classList.add('fa-chevron-down');
-                     });
-                 }
+                 liveShowStatusToggle.addEventListener('click', function() {
+                    console.log('liveShowStatusToggle clicked' , liveShowStatusToggle.getAttribute('data-toggle-status'));
+                    if (liveShowStatusToggle.getAttribute('data-toggle-status') == 'opened') {
+                        liveShowStatusToggle.setAttribute('data-toggle-status', 'closed');
+                        liveShowStatusToggle.innerHTML = '<i class="fa fa-angle-down"></i>';
+                    } else {
+                        liveShowStatusToggle.setAttribute('data-toggle-status', 'opened');
+                        liveShowStatusToggle.innerHTML = '<i class="fa fa-angle-up"></i>';
+                    }
+                     
+                 });
 
                  const toggleLeftSidebarBtn = document.getElementById('toggleLeftSidebarBtn');
                  const leftSidebar = document.getElementById('left-sidebar');
@@ -2845,7 +2845,7 @@
                          }
 
                          if (hidden) {
-                            console.log('hidden');
+                             console.log('hidden');
                              toggleLeftSidebarBtn.innerHTML = '<i class="fa fa-angle-double-left"></i>';
                          } else {
                              toggleLeftSidebarBtn.innerHTML = '<i class="fa fa-angle-double-right"></i>';
