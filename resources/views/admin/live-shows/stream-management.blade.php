@@ -7,10 +7,7 @@
      <div class="container-fluid  min-vh-100">
          <div class=" d-flex justify-content-between align-items-center py-3 bg-dark rounded mb-1 p-3">
              <div class="d-flex align-items-center gap-2">
-                 <button type="button" class="btn btn-outline-light btn-sm" id="toggleLeftSidebarBtn"
-                     title="Show/Hide sidebar" data-bs-toggle="tooltip" data-bs-placement="bottom">
-                     <i class="fas fa-bars"></i>
-                 </button>
+
                  <h4 class="mb-0 fw-bold  ">{{ $liveShow->title }}</h4>
              </div>
              <div class="btn-group shadow-sm">
@@ -32,6 +29,12 @@
              </div>
          </div>
          <div class="row g-4">
+             <div class="col-12">
+                 <button type="button" class="btn btn-outline-light btn-sm" id="toggleLeftSidebarBtn"
+                     title="Show/Hide sidebar" data-bs-toggle="tooltip" data-bs-placement="bottom">
+                     <i class="fa fa-angle-double-right"></i>
+                 </button>
+             </div>
              <div class="col-lg-2" id="left-sidebar">
                  <label class="small text-muted d-block mb-2">Join via QR Code</label>
                  <div id="qrcode" class=" p-2 rounded"></div>
@@ -2521,7 +2524,7 @@
                             <div class=" col-6">
                                 <div class="w-100 mb-1">
                                 <button type="button"
-                                    class="btn btn-sm btn-success gallery-show-on-stream-btn   "
+                                    class="btn btn-sm btn-success gallery-show-on-stream-btn  d-block w-100 mb-1 "
                                     onclick="galleryShowOnStream('${data.id}', this)"
                                     data-media-id="${data.id}"
                                     id="show-media-btn-${data.id}"
@@ -2530,7 +2533,7 @@
                                      
                                 </button>
                                 <button type="button"
-                                    class="btn btn-sm btn-warning gallery-hide-on-stream-btn   "
+                                    class="btn btn-sm btn-warning gallery-hide-on-stream-btn  d-block w-100 mb-1 "
                                     onclick="galleryHideOnStream(this)"
                                     data-media-id="${data.id}"
                                     id="hide-media-btn-${data.id}"
@@ -2542,7 +2545,7 @@
                                 </div>
                                 <button type="button"
                                     id="preview-media-btn-${data.id}"
-                                    class="btn btn-sm btn-secondary d-block " title="Preview"
+                                    class="btn btn-sm btn-secondary d-block w-100 mb-1 " title="Preview"
                                     onclick="openMediaPreviewModal('${data.is_image ? data.path : (data.thumbnail ?? data.path)}')">
                                     <i class="fas fa-eye"></i>
                                 </button>
@@ -2840,6 +2843,13 @@
                              mainContent.classList.toggle('col-lg-7', !hidden);
                              mainContent.classList.toggle('col-lg-9', hidden);
                          }
+
+                         if (hidden) {
+                            console.log('hidden');
+                             toggleLeftSidebarBtn.innerHTML = '<i class="fa fa-angle-double-left"></i>';
+                         } else {
+                             toggleLeftSidebarBtn.innerHTML = '<i class="fa fa-angle-double-right"></i>';
+                         }
                      });
                  }
              });
@@ -2867,6 +2877,7 @@
 
                  margin-bottom: 20px;
              }
+
              .gallery-detach-btn {
                  position: absolute;
                  top: 0px;
@@ -2874,6 +2885,7 @@
                  opacity: 0.5;
                  transition: opacity 0.3s ease;
              }
+
              .gallery-detach-btn:hover {
                  opacity: 1;
              }
