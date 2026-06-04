@@ -17,7 +17,7 @@
     </style>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 py-3 mb-1">
-            {{ __('Live Shows') }}
+            {{ __('Manage Live Shows') }}
 
             <a href="{{ route('admin.live-shows.create') }}" class="btn btn-success btn-sm mx-4 float-end">
                 New Live Show
@@ -32,7 +32,7 @@
                     {{-- Non-Test Shows Table --}}
                     <div class="card mb-5">
                         <div class="card-header bg-dark text-light">
-                            <h5 class="mb-0">Live Shows</h5>
+                            <h5 class="mb-0">Badabing Shows</h5>
                         </div>
                         <div class="card-body bg-dark text-light ">
 

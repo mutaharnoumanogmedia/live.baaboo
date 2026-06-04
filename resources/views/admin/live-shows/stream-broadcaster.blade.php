@@ -559,10 +559,12 @@
         <div id="page-qr-label">Scan to open the same broadcasting panel in your phone</div>
     </div>
 
-    <button id="bgm-toggle" type="button" title="Pause background music" aria-pressed="false"
-        data-playing="false" disabled>
-        &#9835; Music Off
-    </button>
+    @if ($isMainHost)
+        <button id="bgm-toggle" type="button" title="Pause background music" aria-pressed="false" data-playing="false"
+            disabled>
+            &#9835; Music Off
+        </button>
+    @endif
 
     <button id="overlay-toggle" class="btn btn-primary btn-lg" type="button" title="Show video overlay controls">Media
         Management</button>
@@ -598,11 +600,13 @@
                 <option value="0.7">70%</option>
             </select>
         </div>
-        <div class="row">
-            <label style="flex:0 0 auto;font-size:12px;color:rgba(255,255,255,0.75);">Music volume</label>
-            <input id="bgm-volume" type="range" min="0" max="100" value="5" title="Background music volume"
-                style="flex:1;" />
-        </div>
+        @if ($isMainHost)
+            <div class="row">
+                <label style="flex:0 0 auto;font-size:12px;color:rgba(255,255,255,0.75);">Music volume</label>
+                <input id="bgm-volume" type="range" min="0" max="100" value="5"
+                    title="Background music volume" style="flex:1;" />
+            </div>
+        @endif
         <div class="row">
             <label style="flex:1;display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
                 <input id="overlay-loop" type="checkbox" /> Loop
@@ -1290,6 +1294,8 @@
 <script src="https://resource.ZEGOCLOUD.com/prebuilt/crypto-js.js"></script>
 <script src="https://resource.ZEGOCLOUD.com/prebuilt/prebuiltToken.js"></script>
 <script src="https://unpkg.com/@ZEGOCLOUD/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
+{{-- ZIM plugin powers co-host management (invite / remove co-host) on the host side. --}}
+<script src="https://unpkg.com/zego-zim-web@2.29.0/index.js"></script>
 
 
 
@@ -1336,7 +1342,7 @@
         }
 
         // 1) get or create roomID in outer scope
-        const roomID = "{{ 'RoomID_' . $liveShow->id . rand(1000, 9999) }}";
+        const roomID = "{{ 'RoomID_' . $liveShow->id }}";
 
         try {
             // 2) save it first
@@ -1345,54 +1351,68 @@
             console.log('Room ID saved successfully:', data);
 
             // 3) only after save succeeds, use it
-            const userID = Math.floor(Math.random() * 10000) + "";
-            const userName = "userName" + userID;
+            //
+            // Role model:
+            //   • The designated main-host account joins as Host (go live, BGM,
+            //     remove co-hosts).
+            //   • Every other admin joins as Co-host: they can still publish
+            //     camera/mic and play media, but cannot remove others.
+            // A stable userID (tied to the DB user id) is required so the main
+            // host can reliably identify and remove a specific co-host.
+            const IS_MAIN_HOST = @json($isMainHost);
+            const CURRENT_EMAIL = @json(auth()->user()->email ?? '');
+            const MAIN_HOST_EMAIL = @json($mainHostEmail);
+
+            const userID = "admin-{{ Auth::id() }}";
+            const userName = IS_MAIN_HOST ? MAIN_HOST_EMAIL : ("cohost-" + CURRENT_EMAIL);
             const appID = {{ env('ZEGO_APP_ID', 1251897065) }};
             const serverSecret = "{{ env('ZEGO_SERVER_SECRET', 'ac4b30ceb3e43b0280c7fa40be34d2ef') }}";
             const TOKEN = generatePrebuiltToken(appID, serverSecret, roomID, userID, userName);
 
-            
-            let roleParam = 'Host';
-            let role = roleParam === 'Host' ?
+            const role = IS_MAIN_HOST ?
                 ZegoUIKitPrebuilt.Host :
-                ZegoUIKitPrebuilt.Audience;
+                ZegoUIKitPrebuilt.Cohost;
 
-            let config = {};
-            if (roleParam === 'Host') {
-                config = {
-                    turnOnCameraWhenJoining: true,
-                    showMyCameraToggleButton: true,
-                    showAudioVideoSettingsButton: true,
-                    showScreenSharingButton: true,
-                    showTextChat: false,
-                    showUserList: false,
-                    showPreJoinView: false,
-                    showUserJoinAndLeave: false,
-                    showMirror: false,
-                    fillMode: "cover",
+            // Shared config — both main host and co-hosts publish camera/mic and
+            // can drive the media overlay pipeline.
+            let config = {
+                turnOnCameraWhenJoining: true,
+                showMyCameraToggleButton: true,
+                showMyMicrophoneToggleButton: true,
+                showAudioVideoSettingsButton: true,
+                showScreenSharingButton: IS_MAIN_HOST,
+                showTextChat: false,
+                showUserList: IS_MAIN_HOST,
+                showPreJoinView: false,
+                showUserJoinAndLeave: false,
+                showMirror: false,
+                fillMode: "cover",
 
-                    onLeaveRoom: () => {
-                        if (window.BroadcastOverlay) window.BroadcastOverlay.stopBgm();
-                    },
-                };
-            } else {
-                config = {
-                    turnOnCameraWhenJoining: false,
-                    showMyCameraToggleButton: false,
-                    showAudioVideoSettingsButton: false,
-                    showScreenSharingButton: false,
-                    showTextChat: false,
-                    showUserList: false,
-                    showPreJoinView: false,
-                    showUserJoinAndLeave: false,
-                    showMirror: false,
-                    fillMode: "cover",
-                };
-            }
+                // Only the main host can remove co-hosts (requires the ZIM plugin).
+                showRemoveCohostButton: IS_MAIN_HOST,
+                // Co-hosts here are admins, not audience members requesting to join,
+                // so the invite/request flows stay hidden.
+                showInviteToCohostButton: false,
+                showRequestToCohostButton: false,
+
+                onLeaveRoom: () => {
+                    if (window.BroadcastOverlay) window.BroadcastOverlay.stopBgm();
+                },
+            };
 
 
 
             const zp = ZegoUIKitPrebuilt.create(TOKEN);
+            // The remove-co-host UI relies on the ZIM plugin being registered.
+            try {
+                if (typeof ZIM !== 'undefined') {
+                    zp.addPlugins({
+                        ZIM
+                    });
+                }
+            } catch (e) {
+                console.warn('[Zego] ZIM plugin registration failed:', e);
+            }
             // Expose the Zego instance globally so the single-broadcaster
             // lock script can tear it down when this tab gets superseded.
             window.__zegoInstance = zp;
@@ -1514,6 +1534,11 @@
     const galleryCsrf = '{{ csrf_token() }}';
     const galleryHideOnStreamUrl =
         '{{ route('admin.live-shows.stream-management.hide-gallery-image', ['id' => $liveShow->id]) }}';
+
+    const showMediaEventUrl =
+        '{{ route('admin.live-shows.stream-management.media-event', ['event' => 'show', 'id' => $liveShow->id]) }}';
+    const hideMediaEventUrl =
+        '{{ route('admin.live-shows.stream-management.media-event', ['event' => 'hide', 'id' => $liveShow->id]) }}';
 
     const ATTACHED_MEDIA_URL =
         '{{ route('admin.live-shows.stream-management.attached-media', ['id' => $liveShow->id]) }}';
@@ -1716,11 +1741,23 @@
             600);
 
         //event of show gallery via ajax call
-        fetch(galleryShowOnStreamUrl, {
-            method: 'POST',
+        // fetch(galleryShowOnStreamUrl, {
+        //     method: 'POST',
 
+        //     body: JSON.stringify({
+        //         gallery_media_id: parseInt(selectedMedia.id, 10)
+        //     }),
+        //     headers: {
+        //         'X-CSRF-TOKEN': galleryCsrf,
+        //         'Accept': 'application/json',
+        //         'Content-Type': 'application/json'
+        //     }
+        // });
+        fetch(showMediaEventUrl, {
+            method: 'POST',
             body: JSON.stringify({
-                gallery_media_id: parseInt(selectedMedia.id, 10)
+                media_id: parseInt(selectedMedia.id, 10),
+                event: 'show'
             }),
             headers: {
                 'X-CSRF-TOKEN': galleryCsrf,
@@ -1736,8 +1773,20 @@
         setStatus('Overlay stopped.');
 
         //event of hide gallery via ajax call
-        fetch(galleryHideOnStreamUrl, {
+        // fetch(galleryHideOnStreamUrl, {
+        //     method: 'POST',
+        //     headers: {
+        //         'X-CSRF-TOKEN': galleryCsrf,
+        //         'Accept': 'application/json',
+        //         'Content-Type': 'application/json'
+        //     }
+        // });
+        fetch(hideMediaEventUrl, {
             method: 'POST',
+            body: JSON.stringify({
+                media_id: parseInt(selectedMedia.id, 10),
+                event: 'hide'
+            }),
             headers: {
                 'X-CSRF-TOKEN': galleryCsrf,
                 'Accept': 'application/json',
