@@ -217,42 +217,52 @@ class LiveShowController extends Controller
      */
     protected function syncWinnerPrizes(int $liveShowId, int $maxWinners, array $prizes, array $vouchers, array $voucherAmounts): void
     {
-        LiveShowWinnerPrize::where('live_show_id', $liveShowId)->delete();
-
         $liveShow = LiveShow::find($liveShowId);
-
-
+        $errors = [];
         for ($rank = 1; $rank <= $maxWinners; $rank++) {
             $voucher = (string) ($vouchers[$rank] ?? 0);
             $voucherAmount = (string) ($voucherAmounts[$rank] ?? 0);
             $prize = (string) ($prizes[$rank] ?? 0);
 
+            $winnerPrize = LiveShowWinnerPrize::where('live_show_id', $liveShowId)->where('rank', $rank)->first();
+            $delWinnerPrize = $winnerPrize;
+            if ($winnerPrize) {
+                $winnerPrize->delete();
+                // dd("Is Deleted",$winnerPrize,$winnerPrize->delete());
+            }
+
             $discount_rule_id = null;
             if (!$liveShow->is_test_show) {
                 try {
+                    $starts_at = Carbon::parse($liveShow->start_time, "CET")->toIso8601String();
+                    $ends_at = Carbon::parse($liveShow->start_time, "CET")->addDays(31)->toIso8601String();
+                    $prizeRule = [
+                        'title' => 'BADABING - ' . $liveShow->title . ' - Rank ' . $rank,
+                        'target_type' => 'line_item',
+                        'target_selection' => 'entitled',
+                        'allocation_method' => 'across',
+                        'value_type' => 'fixed_amount',
+                        'value' => "-{$voucherAmount}",
+                        'customer_selection' => 'all',
+                        'starts_at' => $starts_at,
+                        'ends_at' => $ends_at,
+                        'usage_limit' => 1,
+                        'entitled_collection_ids' => [
+                            env("VOUCHER_COLLECTION_ID")
+                        ],
+                        // 'allocation_limit ' => 1,
+                    ];
+                    $shopifyPriceRule = new ShopifyDiscountService();
+                    if ($delWinnerPrize && $delWinnerPrize->is_voucher && $delWinnerPrize->discount_rule_id) {
+                        $prizeRule = $shopifyPriceRule->updatePriceRule($delWinnerPrize->discount_rule_id, $starts_at, $ends_at, $prizeRule);
+                        $discount_rule_id = $prizeRule->id;
+                    } elseif ($voucher) {
+                        $prizeRule = $shopifyPriceRule->createPriceRule($prizeRule);
+                        $discount_rule_id = $prizeRule->id;
+                    }
+                } catch (\Exception $e) {
 
-                $prizeRule = [
-                    'title' => 'BADABING - ' . $liveShow->title . ' - Rank ' . $rank,
-                    'target_type' => 'line_item',
-                    'target_selection' => 'all',
-                    'allocation_method' => 'across',
-                    'value_type' => 'fixed_amount',
-                    'value' => "-{$voucherAmount}",
-                    'customer_selection' => 'all',
-                    'starts_at' => Carbon::now()->subMonth(1)->toIso8601String(),
-                    'ends_at' => Carbon::now()->addDays(31)->toIso8601String(),
-                    'usage_limit' => 1,
-                    'allocation_method' => 'across',
-                    'prerequisite_collection_ids' => [
-                        env("VOUCHER_COLLECTION_ID")
-                    ],
-                    'allocation_limit '=> 1,
-                ];
-                $shopifyPriceRule = new ShopifyDiscountService();
-                $prizeRule = $shopifyPriceRule->createPriceRule($prizeRule);
-                $discount_rule_id = $prizeRule->id;
-                }
-                catch (\Exception $e) {
+                    $errors[] = "Failed to create/update Shopify price rule for live show ID {$liveShowId}, rank {$rank}. Please check the logs for more details.";
                     Log::error("Failed to create Shopify price rule for live show ID {$liveShowId}, rank {$rank}: " . $e->getMessage());
                 }
             }
@@ -267,6 +277,10 @@ class LiveShowController extends Controller
                     'discount_rule_id' => $discount_rule_id,
                 ]);
             }
+        }
+
+        if (!empty($errors)) {
+            session()->flash('error', implode(' ', $errors));
         }
     }
 
@@ -439,11 +453,27 @@ class LiveShowController extends Controller
             $liveShow->users()->updateExistingPivot($winner['id'], ['is_winner' => true]);
         }
 
+        $discountService = new ShopifyDiscountService();
         // update each winner prize won
         foreach ($topMaxWinnersByScore as $index => $winner) {
-            $prizeWon = $liveShow->winnerPrizes()->where('rank', $index + 1)->first()->prize ?? 'n/a';
+            $prize = $liveShow->winnerPrizes()->where('rank', $index + 1)->first();
+            $prizeWon = $prize->prize ?? 'n/a';
             \Log::info("Winner {$winner['id']} prize won: {$prizeWon}");
-
+            $isVoucher = $prize->is_voucher ?? false;
+            if ($isVoucher && $prize->discount_rule_id) {
+                try {
+                    $discountCode = $discountService->setUserDiscountCode($prize->discountRule->shopify_id, $winner);
+                    if ($discountCode) {
+                        $prizeWon = "Voucher Code: {$discountCode}";
+                    } else {
+                        // $prizeWon = "Voucher code generation failed. Please contact support.";
+                        \Log::error("Failed to generate discount code for user ID {$winner['id']} and live show ID {$liveShowId}");
+                    }
+                } catch (\Exception $e) {
+                    $prizeWon = "Voucher code generation failed. Please contact support.";
+                    \Log::error("Failed to assign discount code to user ID {$winner['id']}: " . $e->getMessage());
+                }
+            }
             $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon]);
             ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string) $liveShowId);
             \Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");

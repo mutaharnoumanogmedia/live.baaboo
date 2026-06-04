@@ -155,15 +155,16 @@
                                                 placeholder="Dailixir Starterset, 50€, 10€ baaboo Voucher"
                                                 value="{{ old('winner_prizes.' . $r) }}">
                                         </td>
-                                        <td style="max-width: 120px;">
-                                            <input type="number" name="winner_voucher[{{ $r }}]"
-                                                class="form-control winner-voucher-input" placeholder="Voucher ID"
-                                                min="0" value="{{ old('winner_voucher.' . $r) }}">
+                                        <td style="max-width: 120px;" class="text-center">
+                                            <input type="checkbox" name="winner_voucher[{{ $r }}]"
+                                                class="form-check-input voucher-checkbox" value="1"
+                                                {{ old('winner_voucher.' . $r) == 1 ? 'checked' : '' }}>
                                         </td>
                                         <td style="max-width: 120px;">
-                                            <input type="number" name="winner_voucher_amount[{{ $r }}]"
-                                                class="form-control winner-voucher-amount-input"
-                                                placeholder="Voucher Amount" min="0" step="0.01"
+                                            <input type="number" min="0" step="0.01"
+                                                name="winner_voucher_amount[{{ $r }}]"
+                                                class="form-control winner-pct-input voucher-amount"
+                                                {{ !old('winner_voucher.' . $r) ? 'readonly' : '' }}
                                                 value="{{ old('winner_voucher_amount.' . $r) }}">
                                         </td>
                                     </tr>
@@ -182,19 +183,19 @@
                         var rows = document.querySelectorAll('.winner-percent-row');
 
                         function voucherChecks() {
-                            var voucherInputs = document.querySelectorAll('.winner-voucher-input');
-                            var voucherAmountInputs = document.querySelectorAll('.winner-voucher-amount-input');
-                            voucherInputs.forEach(function(input, index) {
-                                var amountInput = voucherAmountInputs[index];
-                                input.addEventListener('input', function() {
-                                    if (input.value.trim() !== '') {
-                                        amountInput.required = true;
-                                    } else {
-                                        amountInput.required = false;
-                                        amountInput.value = '';
-                                    }
-                                });
-                            });
+                            $("[type='checkbox']").off()
+                            $("[type='checkbox']").on('change', function() {
+                                var row = $(this).closest(".winner-percent-row");
+                                var voucherAmountInput = row.find(".voucher-amount");
+                                if ($(this).is(":checked")) {
+                                    voucherAmountInput.removeAttr("readonly");
+                                    voucherAmountInput.focus();
+                                } else {
+                                    voucherAmountInput.attr("readonly", "readonly");
+                                    voucherAmountInput.val('');
+                                }
+                                console.log("Clicked near: ", row.find(".voucher-amount"));
+                            })
                         }
                         voucherChecks();
 

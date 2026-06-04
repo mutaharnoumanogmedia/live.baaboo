@@ -6,6 +6,7 @@ use App\Models\ShopifyDiscountCode;
 use App\Models\ShopifyJob;
 use App\Models\ShopifyPriceRule;
 use App\Models\User;
+use App\Models\UserLiveShow;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -208,7 +209,7 @@ class ShopifyDiscountService
         }
 
         // Sync locally
-        ShopifyPriceRule::where('shopify_id', $priceRuleId)->update(array_merge($others, [
+        $priceRule = ShopifyPriceRule::where('shopify_id', $priceRuleId)->update(array_merge($others, [
             'starts_at' => $startsAt,
             'ends_at'   => $endsAt,
         ]));
@@ -217,7 +218,7 @@ class ShopifyDiscountService
             'price_rule_id' => $priceRuleId
         ]);
 
-        return true;
+        return $priceRule;
     }
 
 
@@ -230,36 +231,81 @@ class ShopifyDiscountService
         return "{$shop_url}/discount/{$code}?redirect=" . urlencode($redirect);
     }
 
-    public function setUserDiscountCode(User $user)
+    public function checkDiscountCode($code)
     {
-        $priceRule = ShopifyPriceRule::where("active", true)->first();
-        $priceRuleId = $priceRule->id ?? null;
-        $priceRuleSId = $priceRule->shopify_id ?? null;
-        if ($priceRule == null) {
+        $response = Http::withHeaders([
+            'X-Shopify-Access-Token' => $this->token,
+        ])->get("{$this->shop}/admin/api/2026-04/discount_codes/lookup.json", [
+            'code' => $code,
+        ]);
+
+        if ($response->failed()) {
+            Log::error('Error checking discount code', [
+                'code' => $code,
+                'status' => $response->status(),
+                'response' => $response->body(),
+            ]);
+            return false;
+        }
+
+        $result = $response->json();
+        return !empty($result['discount_code']['id']);
+    }
+
+    public function setUserDiscountCode($shopify_rule_id, UserLiveShow $user)
+    {
+        $priceRuleId = $shopify_rule_id;
+        if ($priceRuleId == null) {
             Log::error("No active price rule found while setting discount code for user ID: " . $user->id);
             throw new Exception("No active price rule found.");
         }
-        $discountPostfix = env('SHOPIFY_DISCOUNT_CODE_POSTFIX', 'LIVE10');
-        if($user->username == null || $user->username == ''){
-            throw new Exception("Username is required to create discount code.");
+
+
+        $code = strtoupper(
+            substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 14)
+        );
+
+        while($this->checkDiscountCode($code)){
+            $code = strtoupper(
+                substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 14)
+            );
         }
-        $code = strtoupper($user->username . '' . $discountPostfix);
-        $existingCode = ShopifyDiscountCode::where('code', $code)->first();
-        if ($existingCode) {
-            $this->createDiscountCodes($priceRuleSId, [['code' => $code]]);
-            $existingCode = $existingCode->refresh();
-            return $existingCode;
-        } else {
-            ShopifyDiscountCode::create([
+
+        $response = Http::withHeaders([
+            'X-Shopify-Access-Token' => $this->token,
+            'Content-Type' => 'application/json',
+        ])->post("{$this->shop}/admin/api/2026-04/price_rules/{$priceRuleId}/discount_codes.json", [
+            'discount_code' => [
+                'code' => $code,
+            ],
+        ]);
+
+        if ($response->failed()) {
+            Log::error('Error creating discount code for user', [
+                'user_id' => $user->id,
                 'price_rule_id' => $priceRuleId,
                 'code' => $code,
-                'user_id' => $user->id,
-                'active' => false,
+                'status' => $response->status(),
+                'response' => $response->body(),
             ]);
-            $this->createDiscountCodes($priceRuleSId, [['code' => $code]]);
-            $existingCode = ShopifyDiscountCode::where('code', $code)->first();
+            return null;
         }
-        return $existingCode;
+
+        $discountCode = $response->json('discount_code');
+        if (!$discountCode || empty($discountCode['id'])) {
+            Log::error('Invalid discount code response from Shopify', [
+                'user_id' => $user->id,
+                'price_rule_id' => $priceRuleId,
+                'response' => $response->body(),
+            ]);
+            return null;
+        }
+
+        $user->discount_code = $discountCode['code'] ?? $code;
+        $user->save();
+
+        return $discountCode['code'] ?? $code;
+
     }
 
     public function removeDiscountCode(string $code): bool

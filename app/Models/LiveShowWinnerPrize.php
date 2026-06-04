@@ -15,6 +15,7 @@ class LiveShowWinnerPrize extends Model
         'rank' => 'integer',
         'is_voucher' => 'boolean',
         'voucher_amount' => 'decimal:2',
+        'discount_rule_id' => 'integer',
     ];
 
     public function liveShow()

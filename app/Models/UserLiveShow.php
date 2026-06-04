@@ -65,4 +65,9 @@ class UserLiveShow extends Pivot
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function winnerPrize()
+    {
+        return $this->belongsTo(LiveShowWinnerPrize::class, 'winner_prize_id');
+    }
 }
