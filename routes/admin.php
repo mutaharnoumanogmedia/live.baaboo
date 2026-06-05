@@ -86,6 +86,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // updateWinners
     Route::post('live-shows/stream-management/{liveShowId}/update-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'updateWinners'])->name('live-shows.update-winners');
+    Route::post('live-shows/stream-management/{liveShowId}/reupdate-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'reupdateWinners'])->name('live-shows.reupdate-winners');
+    Route::post('live-shows/stream-management/{liveShowId}/resend-voucher-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'resendVoucherWinners'])->name('live-shows.resend-voucher-winners');
+
     Route::post('live-shows/stream-management/{liveShowId}/unannounce-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'unannounceWinners'])->name('live-shows.unannounce-winners');
 
     Route::post('live-shows/{id}/block-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'blockUser'])->name('live-shows.block-user');

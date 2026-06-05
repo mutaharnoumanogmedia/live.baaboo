@@ -21,6 +21,7 @@ use App\Events\ShowPlayerAsWinnerEvent;
 use App\Events\UserBlockFromLiveShowEvent;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendWinnerEmailJob;
+use App\Jobs\SendWinnerVoucherEmailJob;
 use App\Models\GalleryMedia;
 use App\Models\LiveShow;
 use App\Models\LiveShowGalleryMedia;
@@ -450,7 +451,7 @@ class LiveShowController extends Controller
 
         // Update pivot table to set is_winner = true for top three users
         foreach ($topMaxWinnersByScore as $winner) {
-            \Log::info("Updating winner {$winner['id']} to is_winner = true");
+            Log::info("Updating winner {$winner['id']} to is_winner = true");
             //if score is greater than 0, then update is_winner = true
             if ($winner['score'] > 0) {
                 $liveShow->users()->updateExistingPivot($winner['id'], ['is_winner' => true]);
@@ -462,14 +463,14 @@ class LiveShowController extends Controller
         foreach ($topMaxWinnersByScore as $index => $winner) {
             $prize = $liveShow->winnerPrizes()->where('rank', $index + 1)->first();
             $prizeWon = $prize->prize ?? 'n/a';
-            \Log::info("Winner {$winner['id']} prize won: {$prizeWon}");
+            Log::info("Winner {$winner['id']} prize won: {$prizeWon}");
             $isVoucher = $prize->is_voucher ?? false;
             if ($isVoucher && $prize->discount_rule_id) {
                 try {
                     $winner_user = UserLiveShow::where('user_id', $winner['id'])->where('live_show_id', $liveShowId)->first();
                     if ($winner_user->discount_code) {
                         $prizeWon = "Voucher Code: {$winner_user->discount_code}";
-                        \Log::info("User ID {$winner['id']} already has a discount code: {$winner_user->discount_code}");
+                        Log::info("User ID {$winner['id']} already has a discount code: {$winner_user->discount_code}");
                         // continue; // skip to next winner if code already exists
                     } else {
 
@@ -478,26 +479,26 @@ class LiveShowController extends Controller
                             $prizeWon = "Voucher Code: {$discountCode}";
                         } else {
                             // $prizeWon = "Voucher code generation failed. Please contact support.";
-                            \Log::error("Failed to generate discount code for user ID {$winner['id']} and live show ID {$liveShowId}");
+                            Log::error("Failed to generate discount code for user ID {$winner['id']} and live show ID {$liveShowId}");
                         }
                     }
                 } catch (\Exception $e) {
                     $prizeWon = "Voucher code generation failed. Please contact support.";
-                    \Log::error("Failed to assign discount code to user ID {$winner['id']}: " . $e->getMessage());
+                    Log::error("Failed to assign discount code to user ID {$winner['id']}: " . $e->getMessage());
                 }
             }
             $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon, 'winner_prize_id' => $prize->id ?? null]);
             ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string) $liveShowId);
-            \Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
+            Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
 
             if (! $liveShow->is_test_show) {
                 // Dispatch job to send winner email after 30 minutes
                 try {
                     SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now()->addMinutes(30));
-                    \Log::info("SendWinnerEmailJob dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
+                    Log::info("SendWinnerEmailJob dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
                 } catch (\Exception $e) {
                     // log the error
-                    \Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage());
+                    Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: " . $e->getMessage());
                 }
             }
         }
@@ -510,6 +511,152 @@ class LiveShowController extends Controller
             'message' => 'Winners have been announced. Winner notification emails have been queued for the winners.',
             'winners_announced' => true,
             'winnerUsers' => $topMaxWinnersByScore,
+        ]);
+    }
+
+    public function reupdateWinners(Request $request, $liveShowId)
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::check()], 401);
+        }
+
+        $liveShow = LiveShow::find($liveShowId);
+        if (! $liveShow) {
+            return response()->json(['message' => 'Live show not found.'], 404);
+        }
+
+        // if ($liveShow->winners_announced) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Winners have already been announced for this live show.',
+        //         'winners_announced' => true,
+        //     ], 422);
+        // }
+
+        // make all users is_winner = false
+        $liveShow->users()->update(['is_winner' => false]);
+
+        $maxWinners = (int) $liveShow->max_winners;
+        $topMaxWinnersByScore =
+            $topMaxWinnersByScore = $liveShow->users()
+            ->with(['quizResponses' => function ($query) use ($liveShowId) {
+                $query->whereHas('userQuiz.quiz', function ($q) use ($liveShowId) {
+                    $q->where('live_show_id', $liveShowId);
+                });
+            }])
+            ->wherePivot('status', 'registered')
+            ->get()
+            ->map(function ($user) use ($liveShowId) {
+
+                // Calculate total score
+                $score = $user->pivot->score ?? 0;
+                // Find the user's quiz responses for this live show and calculate total seconds_to_submit
+                $userQuizResponses = $user->quizResponses()
+                    ->whereHas('userQuiz', function ($q) use ($liveShowId) {
+                        $q->where('live_show_id', $liveShowId);
+                    })
+                    ->get();
+
+                $totalSecondsToSubmit = $userQuizResponses->sum('seconds_to_submit');
+                $firstResponseTime = $userQuizResponses->min('created_at') ?? now();
+
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'score' => $score,
+
+                    'total_seconds_to_submit' => $totalSecondsToSubmit,
+                    'first_response_time' => $firstResponseTime,
+                ];
+            })
+            ->sort(function ($a, $b) {
+                // Sort by score descending, then by total_seconds_to_submit ascending
+                if ($a['score'] === $b['score']) {
+                    return $a['total_seconds_to_submit'] <=> $b['total_seconds_to_submit'];
+                }
+
+                return $b['score'] <=> $a['score'];
+            })
+            ->values()
+            ->take($maxWinners);
+
+        // Update pivot table to set is_winner = true for top three users
+        foreach ($topMaxWinnersByScore as $winner) {
+            Log::info("Updating winner {$winner['id']} to is_winner = true");
+            //if score is greater than 0, then update is_winner = true
+            if ($winner['score'] > 0) {
+                $liveShow->users()->updateExistingPivot($winner['id'], ['is_winner' => true]);
+            }
+        }
+
+        $discountService = new ShopifyDiscountService();
+        // update each winner prize won
+        foreach ($topMaxWinnersByScore as $index => $winner) {
+            $prize = $liveShow->winnerPrizes()->where('rank', $index + 1)->first();
+            $prizeWon = $prize->prize ?? 'n/a';
+            Log::info("Winner {$winner['id']} prize won: {$prizeWon}");
+            $isVoucher = $prize->is_voucher ?? false;
+            if ($isVoucher && $prize->discount_rule_id) {
+                try {
+                    $winner_user = UserLiveShow::where('user_id', $winner['id'])->where('live_show_id', $liveShowId)->first();
+                    if ($winner_user->discount_code) {
+                        $prizeWon = "Voucher Code: {$winner_user->discount_code}";
+                        Log::info("User ID {$winner['id']} already has a discount code: {$winner_user->discount_code}");
+                        // continue; // skip to next winner if code already exists
+                    } else {
+
+                        $discountCode = $discountService->setUserDiscountCode($prize->discountRule->shopify_id, $winner_user);
+                        if ($discountCode) {
+                            $prizeWon = "Voucher Code: {$discountCode}";
+                        } else {
+                            // $prizeWon = "Voucher code generation failed. Please contact support.";
+                            Log::error("Failed to generate discount code for user ID {$winner['id']} and live show ID {$liveShowId}");
+                        }
+                    }
+                } catch (\Exception $e) {
+                    $prizeWon = "Voucher code generation failed. Please contact support.";
+                    Log::error("Failed to assign discount code to user ID {$winner['id']}: " . $e->getMessage());
+                }
+            }
+            $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon, 'winner_prize_id' => $prize->id ?? null]);
+            ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string) $liveShowId);
+            Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
+
+        }
+
+        $liveShow->update(['winners_announced' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Winners Regenerated and Able to be Announced Again who have Voucher prizes.',
+            'winners_announced' => true,
+            'winnerUsers' => $topMaxWinnersByScore,
+        ]);
+    }
+
+    public function resendVoucherWinners( $liveShowId){
+        $liveShow = LiveShow::find($liveShowId);
+        if (! $liveShow) {
+            return response()->json(['message' => 'Live show not found.'], 404);
+        }
+        $voucherWinners = $liveShow->users()->wherePivot('is_winner', true)->wherePivot('discount_code', 'IS NOT', NULL)->get();
+
+        foreach ($voucherWinners as $winner) {
+            $prizeWon = $winner->pivot->prize_won;
+            // Dispatch job to send winner email after 30 minutes
+            try {
+                SendWinnerVoucherEmailJob::dispatch($winner, $winner->pivot);
+                Log::info("SendWinnerVoucherEmailJob dispatched for user ID {$winner->id}, live show ID {$liveShowId} and prize won: {$prizeWon}");
+            } catch (\Exception $e) {
+                // log the error
+                Log::error("Failed to dispatch SendWinnerVoucherEmailJob for user ID {$winner->id}: " . $e->getMessage());
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Resent voucher emails to winners with voucher prizes.',
         ]);
     }
 
@@ -728,7 +875,6 @@ class LiveShowController extends Controller
             LiveShowMediaPlayed::dispatch((string) $liveShow->id);
         } elseif ($event == 'hide') {
             LiveShowMediaHidden::dispatch((string) $liveShow->id);
-
         }
 
         return response()->json([
@@ -736,7 +882,6 @@ class LiveShowController extends Controller
             'message' => 'Media event dispatched successfully.',
             'event' => $event,
         ]);
-
     }
 
     public function apiGetLiveShowUsers($id, Request $request)
@@ -892,6 +1037,35 @@ class LiveShowController extends Controller
     }
 
     public function updateLiveShow(Request $request, $id)
+    {
+        $liveShow = LiveShow::findOrFail($id);
+
+        $updateMessage = '';
+
+        $request->validate([
+            'status' => 'required|in:scheduled,live,completed',
+        ]);
+
+        $newStatus = $request->input('status');
+
+        if ($newStatus === 'live' && $liveShow->status !== 'live') {
+            $liveShow->start_time = now();
+        }
+
+        if ($newStatus === 'completed' && $liveShow->status !== 'completed') {
+            $liveShow->end_time = now();
+            $updateMessage = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme! Die nächste Show ist am ' . Carbon::parse($this->getNextScheduledLiveShowDate())->format('d.m.Y H:i') . 'Uhr statt.';
+        }
+
+        $liveShow->status = $newStatus;
+        $liveShow->save();
+
+        \App\Events\UpdateLiveShowEvent::dispatch((string) $liveShow->id, $liveShow->status, $updateMessage);
+
+        return response()->json(['message' => 'Live show has been updated successfully.', 'status' => $newStatus]);
+    }
+
+    public function reupdateLiveShow(Request $request, $id)
     {
         $liveShow = LiveShow::findOrFail($id);
 
@@ -1443,7 +1617,7 @@ class LiveShowController extends Controller
             'StreamUrl' => $mediaUrl, // The URL of the media you want to push
         ]);
 
-        \Log::info('Inject Media Stream Response: ', ['response' => $response->json(), 'mediaUrl' => $mediaUrl, 'roomId' => $roomId, 'streamId' => $streamId]);
+        Log::info('Inject Media Stream Response: ', ['response' => $response->json(), 'mediaUrl' => $mediaUrl, 'roomId' => $roomId, 'streamId' => $streamId]);
 
         return response()->json($response->json());
     }

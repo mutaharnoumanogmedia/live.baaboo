@@ -3,7 +3,6 @@
 namespace App\Jobs;
 
 use App\Mail\WinnerNotificationMail;
-use App\Mail\WinnerVoucherNotificationMail;
 use App\Models\LiveShow;
 use App\Models\User;
 use App\Models\UserLiveShow;
@@ -45,12 +44,14 @@ class SendWinnerEmailJob implements ShouldQueue
             return;
         }
         if ($show_user && $show_user->discount_code != NULL) {
-            Mail::to($user->email)
-                ->send(new WinnerVoucherNotificationMail($show_user));
-            Log::info("WinnerVoucherNotificationMail sent to user ID {$user->id} with email {$user->email} for live show ID {$this->liveShow->id} and prize won: {$this->prizeWon}");
-            } else {
+            SendWinnerVoucherEmailJob::dispatch($user,$show_user)->delay(now()->addMinutes(30));
 
-                Mail::to($user->email)
+            // Mail::to($user->email)
+            //     ->send(new WinnerVoucherNotificationMail($show_user));
+            Log::info("WinnerVoucherNotificationMail dispatched to user ID {$user->id} with email {$user->email} for live show ID {$this->liveShow->id} and prize won: {$this->prizeWon}");
+        } else {
+
+            Mail::to($user->email)
                 ->send(new WinnerNotificationMail($user, $this->prizeWon, $this->liveShow));
         }
     }
