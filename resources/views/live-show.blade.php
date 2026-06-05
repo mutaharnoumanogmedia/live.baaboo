@@ -870,7 +870,7 @@
         });
         channel2.bind('ShowLiveShowWinnersTabEvent', function(data) {
             console.log('Show winners tab event received:', data);
-            winnerAnnounced = 1;
+
             showWinnersTabForParticipants();
         });
 
@@ -1078,31 +1078,34 @@
         function showWinnersTabForParticipants() {
 
 
-            const playerTabLink = document.getElementById('playerTab-tab');
-            const playerTabPane = document.getElementById('playerTab');
-            const chatTabLink = document.getElementById('chatTab-tab');
-            const chatTabPane = document.getElementById('chatTab');
 
-            if (chatTabLink) {
-                chatTabLink.classList.remove('active');
-                chatTabLink.setAttribute('aria-selected', 'false');
-            }
-            if (chatTabPane) {
-                chatTabPane.classList.remove('show', 'active');
-            }
-
-            if (playerTabLink) {
-                playerTabLink.classList.add('active');
-                playerTabLink.setAttribute('aria-selected', 'true');
-            }
-            if (playerTabPane) {
-                playerTabPane.classList.add('show', 'active');
-            }
-            //show a loading spinner
-            document.getElementById('players-list-loading-spinner').style.display = 'block';
 
             updatePlayersLeaderboard().then(() => {
-                document.getElementById('players-list-loading-spinner').style.display = 'none';
+
+
+                const playerTabLink = document.getElementById('playerTab-tab');
+                const playerTabPane = document.getElementById('playerTab');
+                const chatTabLink = document.getElementById('chatTab-tab');
+                const chatTabPane = document.getElementById('chatTab');
+
+                if (chatTabLink) {
+                    chatTabLink.classList.remove('active');
+                    chatTabLink.setAttribute('aria-selected', 'false');
+                }
+                if (chatTabPane) {
+                    chatTabPane.classList.remove('show', 'active');
+                }
+
+                if (playerTabLink) {
+                    playerTabLink.classList.add('active');
+                    playerTabLink.setAttribute('aria-selected', 'true');
+                }
+                if (playerTabPane) {
+                    playerTabPane.classList.add('show', 'active');
+                }
+                // //show a loading spinner
+                // document.getElementById('players-list-loading-spinner').style.display = 'block';
+                // document.getElementById('players-list-loading-spinner').style.display = 'none';
             });
 
 
@@ -1988,9 +1991,11 @@
                                         title: 'swal2-title-custom-winner'
                                     }
                                 });
+                                winnerAnnounced = 1;
+                                showWinnersTabForParticipants();
+
 
                             }
-                            showWinnersTabForParticipants();
 
 
                         })
