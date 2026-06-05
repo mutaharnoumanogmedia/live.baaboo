@@ -620,8 +620,8 @@ class LiveShowController extends Controller
                 }
             }
             $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon, 'winner_prize_id' => $prize->id ?? null]);
-            ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string) $liveShowId);
-            Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
+            // ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string) $liveShowId);
+            // Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
 
         }
 
