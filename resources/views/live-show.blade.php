@@ -2195,13 +2195,15 @@
         const _escapeDiv = document.createElement('div');
 
         function spawnHeartReaction(userName) {
+            let colorsArray = ['#ff2d55', '#ff5f00', '#ff8c00', '#ffa500', '#ffc0cb', '#ffd700', '#ffeb3b', '#ffec8b', '#fff3bf', '#fff9c4'];
             var overlay = document.getElementById('heartReactionsOverlay');
             if (!overlay) return;
             var leftPct = 15 + Math.random() * 70;
             var el = document.createElement('div');
             el.className = 'heart-reaction-float';
             el.style.left = leftPct + '%';
-            el.innerHTML = '<span class="heart-icon"><i class="fas fa-heart"></i></span><span class="heart-username">' +
+            el.innerHTML = '<span class="heart-icon" style="color:' + colorsArray[Math.floor(Math.random() * colorsArray
+                    .length)] + ';"><i class="fas fa-heart"></i></span><span class="heart-username">' +
                 escapeHtml(userName || 'Someone') + '</span>';
             overlay.appendChild(el);
             el.addEventListener('animationend', function() {
