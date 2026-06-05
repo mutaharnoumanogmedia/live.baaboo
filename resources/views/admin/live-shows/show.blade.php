@@ -54,6 +54,8 @@
                                     <tr>
                                         <th>Rank</th>
                                         <th>Prize</th>
+                                        <th>Voucher</th>
+                                        <th>Voucher Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -65,6 +67,8 @@
                                                     <span class="badge bg-primary ms-2">€{{$winnerPrize->voucher_amount}} voucher</span>
                                                 @endif
                                             </td>
+                                            <td>{{ $winnerPrize->is_voucher ? 'Yes' : 'No' }}</td>
+                                            <td>{{ $winnerPrize->is_voucher ? '€' . $winnerPrize->voucher_amount : '' }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>

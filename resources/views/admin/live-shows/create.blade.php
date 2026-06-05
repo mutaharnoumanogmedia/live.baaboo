@@ -120,7 +120,7 @@
                     <div class="mb-3 row">
                         <div class="col-md-4">
                             <label class="form-label required-field">Max winners per show</label>
-                            <input type="text" name="max_winners" id="maxWinners" class="form-control"
+                            <input type="number" name="max_winners" id="maxWinners" class="form-control"
                                 min="1" max="{{ $maxWinnerSlots }}" required
                                 value="{{ old('max_winners', 3) }}">
                             <div class="form-text">Number of top winners (1–{{ $maxWinnerSlots }}) who share the prize

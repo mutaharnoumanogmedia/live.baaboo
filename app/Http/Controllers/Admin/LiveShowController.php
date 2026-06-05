@@ -469,14 +469,14 @@ class LiveShowController extends Controller
                 try {
                     $winner_user = UserLiveShow::where('user_id', $winner['id'])->where('live_show_id', $liveShowId)->first();
                     if ($winner_user->discount_code) {
-                        $prizeWon = "Voucher Code: {$winner_user->discount_code}";
+                        // $prizeWon = "Voucher Code: {$winner_user->discount_code}";
                         Log::info("User ID {$winner['id']} already has a discount code: {$winner_user->discount_code}");
                         // continue; // skip to next winner if code already exists
                     } else {
 
                         $discountCode = $discountService->setUserDiscountCode($prize->discountRule->shopify_id, $winner_user);
                         if ($discountCode) {
-                            $prizeWon = "Voucher Code: {$discountCode}";
+                            // $prizeWon = "Voucher Code: {$discountCode}";
                         } else {
                             // $prizeWon = "Voucher code generation failed. Please contact support.";
                             Log::error("Failed to generate discount code for user ID {$winner['id']} and live show ID {$liveShowId}");
@@ -601,14 +601,14 @@ class LiveShowController extends Controller
                 try {
                     $winner_user = UserLiveShow::where('user_id', $winner['id'])->where('live_show_id', $liveShowId)->first();
                     if ($winner_user->discount_code) {
-                        $prizeWon = "Voucher Code: {$winner_user->discount_code}";
+                        // $prizeWon = "Voucher Code: {$winner_user->discount_code}";
                         Log::info("User ID {$winner['id']} already has a discount code: {$winner_user->discount_code}");
                         // continue; // skip to next winner if code already exists
                     } else {
 
                         $discountCode = $discountService->setUserDiscountCode($prize->discountRule->shopify_id, $winner_user);
                         if ($discountCode) {
-                            $prizeWon = "Voucher Code: {$discountCode}";
+                            // $prizeWon = "Voucher Code: {$discountCode}";
                         } else {
                             // $prizeWon = "Voucher code generation failed. Please contact support.";
                             Log::error("Failed to generate discount code for user ID {$winner['id']} and live show ID {$liveShowId}");
@@ -1452,7 +1452,7 @@ class LiveShowController extends Controller
         $winners = $quizService->getSortedPlayers($liveShow)->where('pivot.is_winner', true);
 
         $csv = fopen('php://temp', 'w');
-        fputcsv($csv, ['#', 'Name', 'Email', 'Score',  'Is Winner', 'Prize Won', 'Status', 'Joined At']);
+        fputcsv($csv, ['#', 'Name', 'Email', 'Score',  'Is Winner', 'Prize Won', 'Voucher Code', 'Status', 'Joined At']);
         foreach ($winners as $index => $winner) {
             fputcsv($csv, [
                 $index + 1,
@@ -1461,6 +1461,7 @@ class LiveShowController extends Controller
                 $winner->pivot->score ?? 0,
                 $winner->pivot->is_winner ? 'Yes' : 'No',
                 $winner->pivot->prize_won ?? 'N/A',
+                $winner->pivot->voucher_code ?? 'N/A',
                 ucfirst($winner->pivot->status ?? ''),
                 $winner->pivot->created_at,
             ]);
