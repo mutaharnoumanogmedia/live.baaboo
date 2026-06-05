@@ -82,6 +82,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('live-shows/stream-management/{id}/show-gallery-image', [\App\Http\Controllers\Admin\LiveShowController::class, 'showGalleryImage'])->name('live-shows.stream-management.show-gallery-image');
     Route::post('live-shows/stream-management/{id}/hide-gallery-image', [\App\Http\Controllers\Admin\LiveShowController::class, 'hideGalleryImage'])->name('live-shows.stream-management.hide-gallery-image');
 
+    Route::post('live-shows/stream-management/media-event/{event}/{id}', [\App\Http\Controllers\Admin\LiveShowController::class, 'LiveShowMediaEvent'])->name('live-shows.stream-management.media-event');
+
     // updateWinners
     Route::post('live-shows/stream-management/{liveShowId}/update-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'updateWinners'])->name('live-shows.update-winners');
     Route::post('live-shows/stream-management/{liveShowId}/unannounce-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'unannounceWinners'])->name('live-shows.unannounce-winners');

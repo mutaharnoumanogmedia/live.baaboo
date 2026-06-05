@@ -561,7 +561,8 @@
                     </div>
                 </div>
 
-                <div class="tab-pane fade " id="playerTab" role="tabpanel" aria-labelledby="playerTab-tab">
+                <div class="tab-pane fade " id="playerTab" role="tabpanel"
+                    aria-labelledby="playerTab-tab position-relative">
                     <!-- Player List -->
                     <div class="container-fluid ">
                         <div class="players-list-group-container">
@@ -571,6 +572,9 @@
                             <ul class="list-group" id="players-leaderbord">
                             </ul>
                         </div>
+                    </div>
+                    <div id="players-list-loading-spinner" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i>
                     </div>
                 </div>
             </div>
@@ -672,7 +676,7 @@
         let isChatEnabled = {{ $liveShow->chat_enabled ? 'true' : 'false' }};
         let isUserBlockedFromChat = false;
 
-        let winnerAnnounced = {{ $liveShow->winners_announced ? 'true' : 'false' }};
+        let winnerAnnounced = {{ $liveShow->winners_announced ? 1 : 0 }};
 
         const zegoLiveRoot = document.getElementById('zego-live-root');
 
@@ -866,6 +870,7 @@
         });
         channel2.bind('ShowLiveShowWinnersTabEvent', function(data) {
             console.log('Show winners tab event received:', data);
+            winnerAnnounced = 1;
             showWinnersTabForParticipants();
         });
 
@@ -1025,7 +1030,7 @@
                             <span class="trophy-icon">${user.is_winner ? '<i class="fas fa-trophy " title="Winner"></i>' : ''}</span>
                         </div>
                         
-                        <div class="score-text">
+                        <div class="score-text ${user.id !== userId && !winnerAnnounced ? 'blur' : ''}">
                             ${user.score ? Math.round(user.score) : 0}
                         </div>
                     `;
@@ -1033,6 +1038,13 @@
                     });
 
                     document.getElementById('user-count').innerHTML = totalUsers;
+
+                    if (winnerAnnounced) {
+                        document.querySelectorAll('.score-text').forEach(scoreText => {
+                            scoreText.classList.remove('blur');
+                        });
+                        document.getElementById('players-list-loading-spinner').style.display = 'none';
+                    }
                 })
                 .catch(error => console.error('Error fetching players with scores:', error));
 
@@ -1086,8 +1098,12 @@
             if (playerTabPane) {
                 playerTabPane.classList.add('show', 'active');
             }
+            //show a loading spinner
+            document.getElementById('players-list-loading-spinner').style.display = 'block';
 
-            updatePlayersLeaderboard()
+            updatePlayersLeaderboard().then(() => {
+                document.getElementById('players-list-loading-spinner').style.display = 'none';
+            });
 
 
         }
@@ -1476,13 +1492,14 @@
 
 
         @if ($liveShow->status == 'live')
+            const randomInterval = Math.floor(Math.random() * 10000) + 15000;
             setInterval(
                 function() {
                     if (!winnerAnnounced) {
-                        // updatePlayersLeaderboard();
+                        updatePlayersLeaderboard();
                     }
 
-                }, 30000);
+                }, randomInterval);
         @endif
 
         // Prevent quiz overlay from closing when clicking inside
@@ -1549,12 +1566,6 @@
                         playerAsWinnerEventTrigger();
                         userBlockedFromLiveShowEventTrigger();
                         checkIfUserBlockedFromLiveShow();
-
-
-                        //if liveshow id is 1004
-                        if ("{{ $liveShow->id }}" == 1004 && isLoggedIn) {
-                            autoShowQuizQuestions();
-                        }
 
                     } else {
                         let errorMessages = data.messages || ['Registration failed. Please try again.'];
@@ -1936,11 +1947,13 @@
             });
             // Your Laravel broadcast event (drop the dot)
             channelShowWinner.bind('ShowPlayerAsWinnerEvent', function(data) {
-                toggleQuiz("remove");
 
 
                 console.log('Winner Event:', data);
+
                 // AJAX request to fetch prize money for this user
+                toggleQuiz("remove");
+
                 if (userId && isLoggedIn) {
                     fetch("{{ url('live-show/' . $liveShow->id . '/user-prize') }}?user_id=" + userId, {
                             headers: {
@@ -1950,6 +1963,7 @@
                         })
                         .then(response => response.json())
                         .then(prizeData => {
+
                             console.log('Prize data:', prizeData);
                             if (prizeData.success && prizeData.prize !== undefined && prizeData.prize !=
                                 'n/a' && prizeData.is_winner == true) {
@@ -1974,9 +1988,10 @@
                                         title: 'swal2-title-custom-winner'
                                     }
                                 });
-                                showWinnersTabForParticipants();
 
                             }
+                            showWinnersTabForParticipants();
+
 
                         })
                         .catch((err) => {
@@ -2632,7 +2647,7 @@
         });
     </script>
 
-    @if (request()->boolean('debug_bot') && $liveShow->is_test_show)
+    @if (request()->boolean('debug_bot'))
         <script src="{{ url('js/live-show-quiz-debug-bot.js?v=' . time()) }}"></script>
     @endif
 
@@ -2641,5 +2656,11 @@
 
 </body>
 
+<a style="display: none;" href="https://www.flaticon.com/free-icons/gold-cup" title="gold cup icons">Gold cup icons
+    created by Md Tanvirul Haque - Flaticon</a>
+<a style="display: none;" href="https://www.flaticon.com/free-icons/silver-cup" title="silver cup icons">Silver cup
+    icons created by Md Tanvirul Haque - Flaticon</a>
+<a style="display: none;" href="https://www.flaticon.com/free-icons/3rd-place" title="3rd place icons">3rd place
+    icons created by Md Tanvirul Haque - Flaticon</a>
 
 </html>

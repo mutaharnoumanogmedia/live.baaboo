@@ -38,9 +38,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class LiveShowController extends Controller
 {
@@ -69,7 +69,6 @@ class LiveShowController extends Controller
             ->orderBy('scheduled_at', 'asc')
             ->orderBy('id', 'desc')
             ->get();
-
 
         return view('admin.live-shows.index', compact('liveShows'));
     }
@@ -451,7 +450,11 @@ class LiveShowController extends Controller
 
         // Update pivot table to set is_winner = true for top three users
         foreach ($topMaxWinnersByScore as $winner) {
-            $liveShow->users()->updateExistingPivot($winner['id'], ['is_winner' => true]);
+            \Log::info("Updating winner {$winner['id']} to is_winner = true");
+            //if score is greater than 0, then update is_winner = true
+            if ($winner['score'] > 0) {
+                $liveShow->users()->updateExistingPivot($winner['id'], ['is_winner' => true]);
+            }
         }
 
         $discountService = new ShopifyDiscountService();
@@ -486,13 +489,16 @@ class LiveShowController extends Controller
             $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon, 'winner_prize_id' => $prize->id ?? null]);
             ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string) $liveShowId);
             \Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
-            // Dispatch job to send winner email after 30 minutes
-            try {
-                // SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now()->addMinutes(30));
-                SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now());
-            } catch (\Exception $e) {
-                // log the error
-                \Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: " . $e->getMessage());
+
+            if (! $liveShow->is_test_show) {
+                // Dispatch job to send winner email after 30 minutes
+                try {
+                    SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now()->addMinutes(30));
+                    \Log::info("SendWinnerEmailJob dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
+                } catch (\Exception $e) {
+                    // log the error
+                    \Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage());
+                }
             }
         }
 
@@ -713,6 +719,24 @@ class LiveShowController extends Controller
             'success' => true,
             'message' => 'Gallery overlay hidden on stream.',
         ]);
+    }
+
+    public function LiveShowMediaEvent($event, $liveShowId)
+    {
+        $liveShow = LiveShow::findOrFail($liveShowId);
+        if ($event == 'show') {
+            LiveShowMediaPlayed::dispatch((string) $liveShow->id);
+        } elseif ($event == 'hide') {
+            LiveShowMediaHidden::dispatch((string) $liveShow->id);
+
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Media event dispatched successfully.',
+            'event' => $event,
+        ]);
+
     }
 
     public function apiGetLiveShowUsers($id, Request $request)
@@ -967,7 +991,13 @@ class LiveShowController extends Controller
     {
         $liveShow = LiveShow::with(['quizzes.options'])->findOrFail($id);
 
-        return view('admin.live-shows.stream-broadcaster', compact('liveShow'));
+        // The main host (full control: go live, BGM, remove co-hosts) is a single
+        // designated account. Every other admin opening this page joins as a co-host
+        // who can still publish camera/mic and play media on the stream.
+        $mainHostEmail = 'admin@baaboo.com';
+        $isMainHost = auth()->user()->email === $mainHostEmail;
+
+        return view('admin.live-shows.stream-broadcaster', compact('liveShow', 'isMainHost', 'mainHostEmail'));
     }
 
     /**
@@ -1081,7 +1111,9 @@ class LiveShowController extends Controller
         $liveShow->save();
 
         // call event set broadcast room id
-        event(new SetBroadcastRoomIdEvent($liveShow->id, $liveShow->stream_id));
+        if (auth()->user()->email === 'admin@baaboo.com') {
+            event(new SetBroadcastRoomIdEvent($liveShow->id, $liveShow->stream_id));
+        }
 
         return response()->json(['message' => 'Room ID saved successfully!', 'room_id' => $liveShow->stream_id]);
     }
@@ -1369,8 +1401,6 @@ class LiveShowController extends Controller
 
         LiveShowMediaHidden::dispatch($liveShow->id);
         HideGalleryImageEvent::dispatch($liveShow->id);
-
-
 
         return response()->json(['message' => 'Media hidden successfully!']);
     }

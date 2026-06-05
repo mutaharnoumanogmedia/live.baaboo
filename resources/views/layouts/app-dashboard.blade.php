@@ -11,12 +11,13 @@
         {{ env('APP_NAME') }} - Dashboard
     </title>
     <link href="{{ asset('/styles/dashboard.css') }}" rel="stylesheet" />
+    {{-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> --}}
+
     <link rel="stylesheet" href="{{ asset('/styles/dashboard-style.css') }}">
 
 
 
-    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
-
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
     <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
     <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css" />
@@ -151,7 +152,7 @@
 <body class="app-topnav-fixed">
     @include('partials.gtm', ['part' => 'body'])
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top app-topnav shadow-sm">
+    <nav class="navbar navbar-collapse-lg navbar-dark bg-dark fixed-top app-topnav shadow-sm">
         <div class="container-fluid">
             <a class="navbar-brand fw-bold" href="{{ route('admin.dashboard') }}">
                 {{ env('APP_NAME') }}
@@ -359,8 +360,7 @@
     <!-- Bootstrap 5 JS Bundle -->
 
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
 
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 
@@ -369,11 +369,12 @@
     <script>
         $(document).ready(function() {
             $('.data-table').DataTable({
+                lengthChange: true,
                 "pageLength": 20,
-                "lengthMenu": [
-                    [10, 20, 50, -1],
-                    [10, 20, 50, "All"]
-                ]
+                // "lengthMenu": [
+                //     [10, 20, 50, -1],
+                //     [10, 20, 50, "All"]
+                // ]
             });
         });
     </script>

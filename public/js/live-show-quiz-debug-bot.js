@@ -8,7 +8,9 @@
  *
  * Do not use in production against real competitions.
  */
+
 (function () {
+    console.warn("[live-show quiz debug bot] loaded successfully");
     "use strict";
 
     var MIN_DELAY_MS = 200;
@@ -226,7 +228,7 @@
     }
 
     initPlayButtonAutoClick();
-    // initRegisterModalAutoFill();
+    initRegisterModalAutoFill();
     initQuizAutoAnswer();
     // initRandomChatMessages();
 })();
