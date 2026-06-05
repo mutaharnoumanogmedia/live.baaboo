@@ -4,15 +4,15 @@
          $broadcasterUrl = route('admin.live-shows.stream-management.broadcaster', [$liveShow->id]);
      @endphp
 
-     <div class="container-fluid  min-vh-100">
-         <div class=" d-flex justify-content-between align-items-center py-3 bg-dark rounded mb-1 p-3">
-             <div class="d-flex align-items-center gap-2">
+     <div class="container-fluid min-vh-100">
+         <div class="p-3 py-3 mb-1 rounded d-flex justify-content-between align-items-center bg-dark">
+             <div class="gap-2 d-flex align-items-center">
 
-                 <h4 class="mb-0 fw-bold  ">{{ $liveShow->title }} {!! $liveShow->is_test_show
+                 <h4 class="mb-0 fw-bold ">{{ $liveShow->title }} {!! $liveShow->is_test_show
                      ? '<span class="badge bg-danger">Test Show</span>'
                      : '<span class="badge bg-success">Live Show</span>' !!}</h4>
              </div>
-             <div class="btn-group shadow-sm">
+             <div class="shadow-sm btn-group">
                  <a target="_blank" class="btn btn-outline-primary"
                      href="{{ route('admin.live-shows.stream-management.broadcaster', [$liveShow->id]) }}">
                      <i class="fas fa-video me-1"></i> Broadcaster
@@ -38,11 +38,11 @@
                  </button>
              </div>
              <div class="col-lg-2" id="left-sidebar">
-                 <label class="small text-muted d-block mb-2">Join via QR Code</label>
-                 <div id="qrcode" class=" p-2 rounded"></div>
-                 <div class="mt-1 d-flex   mb-3">
+                 <label class="mb-2 small text-muted d-block">Join via QR Code</label>
+                 <div id="qrcode" class="p-2 rounded "></div>
+                 <div class="mt-1 mb-3 d-flex">
                      <a href="{{ url('live-show-play/' . $liveShow->id) }}" target="_blank"
-                         class="text-decoration-none small text-truncate d-block  ">
+                         class="text-decoration-none small text-truncate d-block ">
                          {{ url('live-show-play/' . $liveShow->id) }}
                      </a>
                      <button type="button" class="btn btn-sm btn-link" id="copyLiveShowLinkBtn"
@@ -50,8 +50,8 @@
                          <i class="fas fa-copy"></i>
                      </button>
                  </div>
-                 <div class="card border-0 shadow-sm h-100">
-                     <div class="card-header  border-bottom py-3">
+                 <div class="border-0 shadow-sm card h-100">
+                     <div class="py-3 card-header border-bottom">
                          <h6 class="mb-0 fw-bold text-uppercase small text-muted">
                              <i class="fas fa-users me-2 text-primary"></i>
                              Active Players
@@ -60,8 +60,8 @@
                              </span>
                          </h6>
                      </div>
-                     <div class="card-body p-0" style="overflow: scroll;  min-height: 80vh; height: auto">
-                         <div class="d-flex justify-content-between align-items-center gap-2 mb-2 p-2 flex-wrap">
+                     <div class="p-0 card-body" style="overflow: scroll;  min-height: 80vh; height: auto">
+                         <div class="flex-wrap gap-2 p-2 mb-2 d-flex justify-content-between align-items-center">
                              <div class="input-group input-group-sm" style="max-width: 100%;">
                                  <span class="input-group-text">
                                      <i class="fas fa-search"></i>
@@ -69,7 +69,7 @@
                                  <input type="text" class="form-control" id="playerSearchInput"
                                      placeholder="Search players by name, username, or email">
                              </div>
-                             <div class="d-flex gap-2 ms-auto">
+                             <div class="gap-2 d-flex ms-auto">
                                  <a target="_blank" href="{{ route('admin.live-shows.players', $liveShow->id) }}"
                                      class="btn btn-outline-light btn-sm text-nowrap">
                                      <i class="fas fa-external-link-alt me-1"></i> View All
@@ -85,11 +85,11 @@
                                  </a>
                              </div>
                          </div>
-                         <div class="d-flex justify-content-between align-items-center px-2 pb-2 small text-muted">
+                         <div class="px-2 pb-2 d-flex justify-content-between align-items-center small text-muted">
                              <span id="playersSearchSummary">Showing players</span>
 
                          </div>
-                         <table class="table table-sm table-dark table-hover align-middle mb-0"
+                         <table class="table mb-0 align-middle table-sm table-dark table-hover"
                              style=" overflow-y: scroll; max-height: 80vh; padding-bottom: 30px;">
                              <thead>
                                  <tr>
@@ -99,14 +99,14 @@
                                  </tr>
                              </thead>
                              <tbody id="activePlayersList">
-                                 <tr class="bg-dark align-middle">
+                                 <tr class="align-middle bg-dark">
                                      <td>
                                          <span class="position-relative me-3">
                                              <div class="bg-secondary rounded-circle"
                                                  style="width: 32px; height: 32px;">
                                              </div>
                                              <span
-                                                 class="position-absolute bottom-0 end-0 p-1 bg-success border border-light rounded-circle"></span>
+                                                 class="bottom-0 p-1 border position-absolute end-0 bg-success border-light rounded-circle"></span>
                                          </span>
                                          <div class="small fw-medium">Loading...</div>
                                      </td>
@@ -125,12 +125,12 @@
              </div>
 
              <main class="col-lg-7" id="main-content-stream">
-                 <div class="card border-0 shadow-sm mb-4" id="live-show-status-card">
-                     <div class="card-header border-bottom d-flex justify-content-between align-items-center py-2">
+                 <div class="mb-4 border-0 shadow-sm card" id="live-show-status-card">
+                     <div class="py-2 card-header border-bottom d-flex justify-content-between align-items-center">
                          <h6 class="mb-0 fw-bold text-uppercase small text-muted">
                              <i class="fas fa-broadcast-tower me-2 text-primary"></i> Show Controls
                          </h6>
-                         <button type="button" class="btn btn-outline-light  " data-bs-toggle="collapse"
+                         <button type="button" class="btn btn-outline-light " data-bs-toggle="collapse"
                              data-toggle-status="opened" data-bs-target="#liveShowStatusCardBody"
                              aria-expanded="true" aria-controls="liveShowStatusCardBody" id="liveShowStatusToggle"
                              title="Toggle show controls">
@@ -140,14 +140,14 @@
                      <div class="collapse show" id="liveShowStatusCardBody">
                          <div class="card-body ">
                              <div class="row align-items-center">
-                                 <div class="col-lg-12 mb-4">
+                                 <div class="mb-4 col-lg-12">
                                      <div class="row">
                                          <div class="col-lg-3">
 
-                                             <h6 class="text-muted small text-uppercase fw-bold mb-3">Live Show Status
+                                             <h6 class="mb-3 text-muted small text-uppercase fw-bold">Live Show Status
                                              </h6>
                                              <form action="" method="post" id="live-show-status-form"
-                                                 class=" ">
+                                                 class="">
                                                  <select class="form-select fw-bold" id="liveShowStatusSelect"
                                                      onchange="updateLiveShowStatus(this.value)">
                                                      >
@@ -164,38 +164,58 @@
                                                      </option>
                                                  </select>
                                                  {{-- <button type="submit"
-                                                              class="btn btn-dark text-nowrap px-3">Update</button> --}}
+                                                              class="px-3 btn btn-dark text-nowrap">Update</button> --}}
                                              </form>
 
                                          </div>
                                          <div class="col-lg ">
 
                                              <div>
-                                                 <h6 class="text-muted small text-uppercase fw-bold mb-3">
+                                                 <h6 class="mb-3 text-muted small text-uppercase fw-bold">
                                                      Winners Ceremony
                                                  </h6>
                                              </div>
 
                                              <div>
-                                                 <button type="button" id="announceWinnersBtn"
-                                                     class="btn btn-warning w-100 py-2 fw-bold text-white shadow-sm  "
-                                                     onclick="updateWinners()"
-                                                     @if ($liveShow->winners_announced) disabled aria-disabled="true" @endif>
-                                                     <span id="announceWinnersBtnContent"
-                                                         class="announce-winners-btn-label @if ($liveShow->winners_announced) d-none @endif">
-                                                         <i class="fas fa-trophy me-2"></i> Announce Winners
-                                                     </span>
-                                                     <span id="announceWinnersBtnLoader"
-                                                         class="announce-winners-btn-loader d-none">
-                                                         <i class="fas fa-spinner fa-spin me-2"
-                                                             aria-hidden="true"></i>
-                                                         Announcing…
-                                                     </span>
-                                                     <span id="announceWinnersBtnDone"
-                                                         class="announce-winners-btn-done @if (!$liveShow->winners_announced) d-none @endif">
-                                                         <i class="fas fa-check me-2"></i> Winners announced
-                                                     </span>
-                                                 </button>
+                                                 <div class="d-grid">
+                                                     <button type="button" id="announceWinnersBtn"
+                                                         class="py-2 text-white shadow-sm btn btn-warning w-100 fw-bold "
+                                                         onclick="updateWinners()"
+                                                         @if ($liveShow->winners_announced) disabled aria-disabled="true" @endif>
+                                                         <span id="announceWinnersBtnContent"
+                                                             class="announce-winners-btn-label @if ($liveShow->winners_announced) d-none @endif">
+                                                             <i class="fas fa-trophy me-2"></i> Announce Winners
+                                                         </span>
+                                                         <span id="announceWinnersBtnLoader"
+                                                             class="announce-winners-btn-loader d-none">
+                                                             <i class="fas fa-spinner fa-spin me-2"
+                                                                 aria-hidden="true"></i>
+                                                             Announcing…
+                                                         </span>
+                                                         <span id="announceWinnersBtnDone"
+                                                             class="announce-winners-btn-done @if (!$liveShow->winners_announced) d-none @endif">
+                                                             <i class="fas fa-check me-2"></i> Winners announced
+                                                         </span>
+                                                     </button>
+                                                     @if ($liveShow->winners_announced)
+                                                         <div class="gap-2 mt-2 d-flex">
+                                                             <button
+                                                                 class="py-2 mt-2 text-white shadow-sm btn btn-secondary w-100 fw-bold"
+                                                                 id="regenerateWinnersBtn"
+                                                                 onclick="regenerateWinners()">
+                                                                 <i class="fas fa-sync-alt me-2"></i>
+                                                                 ReGenerate Winners
+                                                             </button>
+                                                             <button
+                                                                 class="py-2 mt-2 text-white shadow-sm btn btn-info w-100 fw-bold"
+                                                                 id="resendVoucherWinnersBtn"
+                                                                 onclick="resendVoucherWinners()">
+                                                                 <i class="fas fa-envelope me-2"></i>
+                                                                 Resend Email To Voucher Winners
+                                                             </button>
+                                                         </div>
+                                                     @endif
+                                                 </div>
                                                  <p id="announceWinnersAckMessage"
                                                      class="small text-success mb-0 mt-2 px-1 @if (!$liveShow->winners_announced) d-none @endif">
                                                      Winners have been announced. Winner notification emails have been
@@ -218,20 +238,20 @@
                                              </div>
 
                                          </div>
-                                         <div class="col-lg  ">
+                                         <div class="col-lg ">
                                              <div>
-                                                 <h6 class="text-muted small text-uppercase fw-bold mb-3">
+                                                 <h6 class="mb-3 text-muted small text-uppercase fw-bold">
                                                      Winner Tab Management
                                                  </h6>
                                              </div>
                                              <div>
                                                  <button type="button"
-                                                     class="btn btn-primary  fw-bold text-white shadow-sm mb-2"
+                                                     class="mb-2 text-white shadow-sm btn btn-primary fw-bold"
                                                      onclick="showWinnerTab(this)">
                                                      <i class="fas fa-eye me-2"></i> Show
                                                  </button>
                                                  <button type="button"
-                                                     class="btn btn-danger   fw-bold text-white shadow-sm mb-2"
+                                                     class="mb-2 text-white shadow-sm btn btn-danger fw-bold"
                                                      onclick="hideWinnerTab(this)">
                                                      <i class="fas fa-eye-slash me-2"></i> Hide
                                                  </button>
@@ -243,23 +263,23 @@
 
 
 
-                                 {{-- <div class="col-md-7 text-center d-flex justify-content-center align-items-center">
+                                 {{-- <div class="text-center col-md-7 d-flex justify-content-center align-items-center">
                                  <div
                                      style="padding: 0px; overflow: hidden; border: 1px solid #ccc;border-radius: 10px;">
                                      <div id="">
-                                         <button class="btn btn-outline-primary mb-2" type="button"
+                                         <button class="mb-2 btn btn-outline-primary" type="button"
                                              onclick="document.querySelector('#broadcasterIframe').src = '{{ $broadcasterUrl }}';"
                                              style=" ">
                                              <i class="fas fa-sync-alt me-1"></i> Refresh Broadcast
                                          </button>
-                                         <button class="btn btn-outline-danger mb-2" type="button"
+                                         <button class="mb-2 btn btn-outline-danger" type="button"
                                              id="disableBroadcastBtn"
                                              onclick="document.querySelector('#broadcasterIframe').src = '';">
                                              <i class="fas fa-ban me-1"></i> Disable Broadcast
                                          </button>
 
 
-                                         <a class="btn btn-outline-info mb-2"
+                                         <a class="mb-2 btn btn-outline-info"
                                              href="{{ route('admin.live-shows.stream-management.broadcaster', [$liveShow->id]) }}"
                                              target="_blank" style="margin-left: 10px;">
                                              <i class="fas fa-external-link-alt me-1"></i> Open in New Tab
@@ -282,10 +302,10 @@
                      class="quiz-questions-fullscreen-backdrop" aria-hidden="true" tabindex="-1"
                      title="Close expanded view"></button>
 
-                 <div class="card border-0 shadow-sm mb-4 " id="quiz-questions-container-card">
-                     <div class="card-header p-0">
+                 <div class="mb-4 border-0 shadow-sm card " id="quiz-questions-container-card">
+                     <div class="p-0 card-header">
                          <button type="button" id="quizQuestionsFullscreenToggleBtn"
-                             class="btn btn-outline-secondary py-2 fw-bold shadow-sm mx-1 float-end" title="Maximize"
+                             class="py-2 mx-1 shadow-sm btn btn-outline-secondary fw-bold float-end" title="Maximize"
                              onclick="toggleQuizQuestionsFullscreen(event)" aria-expanded="false">
                              <i class="fas fa-expand" aria-hidden="true"></i>
                              <span class="visually-hidden">Toggle expanded quiz panel</span>
@@ -296,16 +316,16 @@
                      <div class="card-body position-relative">
                          <div class="row">
                              <div class="col-lg-8 ">
-                                 <div class="p-3   rounded bg-dark">
-                                     <h5 class="mb-0 fw-bold text-center mb-3">Quiz Questions</h5>
+                                 <div class="p-3 rounded bg-dark">
+                                     <h5 class="mb-0 mb-3 text-center fw-bold">Quiz Questions</h5>
                                      <div class="position-relative question-slider-wrap">
                                          <div class="question-slider ">
                                              @foreach ($liveShow->quizzes as $index => $quiz)
                                                  <div class="px-2">
-                                                     <div class="card border mb-3">
+                                                     <div class="mb-3 border card">
                                                          <div class="card-body"
                                                              style="height: auto; overflow-y:hidden">
-                                                             <div class="text-center mb-4 fw-bold">
+                                                             <div class="mb-4 text-center fw-bold">
                                                                  <div class="mb-2">Question {{ $index + 1 }} /
                                                                      {{ $liveShow->quizzes->count() }}</div>
                                                                  <div class="question-text">{{ $quiz->question }}
@@ -313,13 +333,13 @@
                                                              </div>
 
                                                              @if ($quiz->options)
-                                                                 <div class="row g-3 mb-4">
+                                                                 <div class="mb-4 row g-3">
                                                                      @foreach ($quiz->options as $option)
                                                                          <div class="col-md-12">
                                                                              <div
                                                                                  class="p-3 border rounded @if ($option->is_correct) border-success @endif">
                                                                                  <div
-                                                                                     class="d-flex justify-content-between mb-2">
+                                                                                     class="mb-2 d-flex justify-content-between">
                                                                                      <span
                                                                                          class="fw-bold @if ($option->is_correct) text-success @endif">
                                                                                          {{ $option->option_text }}
@@ -352,13 +372,13 @@
                                                                      @csrf
                                                                      <div class="col-auto">
                                                                          <div class="input-group">
-                                                                             <span class="input-group-text bg-white"><i
+                                                                             <span class="bg-white input-group-text"><i
                                                                                      class="fas fa-stopwatch text-muted"></i></span>
                                                                              <input type="number" min="1"
                                                                                  name="seconds"
                                                                                  id="timer-{{ $quiz->id }}"
                                                                                  value="10"
-                                                                                 class="form-control text-center fw-bold"
+                                                                                 class="text-center form-control fw-bold"
                                                                                  style="width: 80px;" required>
                                                                          </div>
                                                                      </div>
@@ -367,10 +387,10 @@
                                                                              value="1">
                                                                      @endif
                                                                      <div class="col-auto">
-                                                                         <div class="btn-group shadow-sm">
+                                                                         <div class="shadow-sm btn-group">
                                                                              <button
                                                                                  type="{{ $quiz->has_shown ? 'button' : 'submit' }}"
-                                                                                 class="btn btn-success px-3"
+                                                                                 class="px-3 btn btn-success"
                                                                                  data-quiz-start
                                                                                  @if ($quiz->has_shown) disabled
                                                                                  aria-disabled="true" @endif>
@@ -383,11 +403,11 @@
                                                                              </button>
                                                                              <button type="button"
                                                                                  onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }}, this)"
-                                                                                 class="btn btn-info px-3 text-white">
+                                                                                 class="px-3 text-white btn btn-info">
                                                                                  <i class="fas fa-chart-bar me-2"></i>
                                                                                  Show Responses
                                                                              </button>
-                                                                             <button class="btn btn-danger px-3"
+                                                                             <button class="px-3 btn btn-danger"
                                                                                  type="button"
                                                                                  onclick="removeQuiz({{ $quiz->id }}, this)">
                                                                                  <i class="fas fa-times me-2"></i> Hide
@@ -412,34 +432,34 @@
                                  </div>
                              </div>
                              <div class="col-lg-4">
-                                 <h5 class="mb-0 fw-bold text-center mb-3">Gallery Media</h5>
-                                 <div class="p-3 border border-light rounded bg-dark">
+                                 <h5 class="mb-0 mb-3 text-center fw-bold">Gallery Media</h5>
+                                 <div class="p-3 border rounded border-light bg-dark">
                                      <div class="w-100">
                                          <div class="mb-2">
                                              <h6 class="text-muted small text-uppercase fw-bold mb-">
                                                  Attached to this stream</h6>
 
-                                             <button type="button" class="btn btn-sm btn-outline-primary mt-2"
+                                             <button type="button" class="mt-2 btn btn-sm btn-outline-primary"
                                                  title="Attach media from gallery" data-bs-toggle="modal"
                                                  data-bs-target="#select-media-modal">
                                                  <i class="fas fa-plus"></i>
                                              </button>
                                              <button type="button"
-                                                 class="btn btn-sm btn-outline-secondary gallery-hide-on-stream-btn mt-2"
+                                                 class="mt-2 btn btn-sm btn-outline-secondary gallery-hide-on-stream-btn"
                                                  id="hideGalleryOnStreamBtn"
                                                  title="Hide image/video overlay on live stream ">
                                                  <i class="fas fa-eye-slash"></i>
                                              </button>
-                                             <button type="button" class="btn btn-sm btn-outline-success  mt-2"
+                                             <button type="button" class="mt-2 btn btn-sm btn-outline-success"
                                                  title="Refresh gallery items" onclick="fetchGalleryMediaItems()">
                                                  <i class="fas fa-sync-alt"></i>
                                              </button>
 
 
                                          </div>
-                                         <div id="gallery-attached-list" class="table-responsive mb-3"
+                                         <div id="gallery-attached-list" class="mb-3 table-responsive"
                                              style="max-height: 520px; overflow-y: auto;">
-                                             <table class="table table-sm table-dark table-hover align-middle mb-0">
+                                             <table class="table mb-0 align-middle table-sm table-dark table-hover">
 
                                                  <tbody id="attached-media-list">
 
@@ -458,23 +478,23 @@
              </main>
 
              <div class="col-lg-3">
-                 <div class="card border-0 shadow-sm h-100">
-                     <div class="card-header p-0">
-                         <ul class="nav nav-tabs nav-fill border-0" id="rightPanelTabs">
+                 <div class="border-0 shadow-sm card h-100">
+                     <div class="p-0 card-header">
+                         <ul class="border-0 nav nav-tabs nav-fill" id="rightPanelTabs">
                              <li class="nav-item position-relative d-flex align-items-center">
                                  <a href="#chat-tab"
-                                     class="nav-link active py-3 border-0 border-bottom fw-bold d-flex text-center"
+                                     class="py-3 text-center border-0 nav-link active border-bottom fw-bold d-flex"
                                      data-bs-toggle="tab">Live Chat
 
                                  </a>
 
                              </li>
                              <li class="nav-item">
-                                 <a href="#live-show-details" class="nav-link py-3 border-0 border-bottom fw-bold"
+                                 <a href="#live-show-details" class="py-3 border-0 nav-link border-bottom fw-bold"
                                      data-bs-toggle="tab">Live Show Details</a>
                              </li>
                              <li class="nav-item">
-                                 <a href="#live-show-preview" class="nav-link py-3 border-0 border-bottom fw-bold"
+                                 <a href="#live-show-preview" class="py-3 border-0 nav-link border-bottom fw-bold"
                                      data-bs-toggle="tab">Preview
                                      <button class="btn btn-sm btn-primary ms-2" id="previewRefreshButton"
                                          onclick="refreshPreview()">
@@ -490,23 +510,23 @@
                              </li>
                          </ul>
                      </div>
-                     <div class="card-body p-0" style="overflow: scroll;  min-height: 80vh; height: auto">
+                     <div class="p-0 card-body" style="overflow: scroll;  min-height: 80vh; height: auto">
                          <div class="tab-content">
                              <div class="tab-pane fade show active" id="chat-tab">
                                  <div class="p-3">
-                                     <button class="btn btn-primary mb-1" id="resetChatBtn" title="Reset Chat"
+                                     <button class="mb-1 btn btn-primary" id="resetChatBtn" title="Reset Chat"
                                          data-bs-toggle="tooltip" data-bs-placement="top">
                                          <i class="fas fa-eraser"></i>
                                      </button>
 
 
                                      <a href="{{ route('admin.live-shows.export-all-chats-as-csv', $liveShow->id) }}"
-                                         class="btn btn-primary mb-1 ms-1" id="exportChatsBtn" title="Export Chats"
+                                         class="mb-1 btn btn-primary ms-1" id="exportChatsBtn" title="Export Chats"
                                          data-bs-toggle="tooltip" data-bs-placement="top">
                                          <i class="fas fa-file-export"></i>
                                      </a>
 
-                                     <button class="btn btn-warning mb-1 ms-1" id="toggleChatStatusBtn"
+                                     <button class="mb-1 btn btn-warning ms-1" id="toggleChatStatusBtn"
                                          title="Toggle Chat Access" data-bs-toggle="tooltip" data-bs-placement="top">
                                          <span class="badge bg-success ms-2 d-none" id="chatStatusBadge">Chat
                                              Enabled</span>
@@ -558,7 +578,7 @@
                                                  <td>Live URL</td>
                                                  <td>
                                                      <a href="{{ url('live-show-play/' . $liveShow->id) }}"
-                                                         class="text-decoration-none small text-truncate d-block px-3">
+                                                         class="px-3 text-decoration-none small text-truncate d-block">
                                                          {{ url('live-show-play/' . $liveShow->id) }}
                                                      </a>
                                                  </td>
@@ -608,7 +628,7 @@
                                                  <td>
                                                      @foreach ($liveShow->winnerPrizes as $winner)
                                                          <div
-                                                             class="d-flex justify-content-start align-items-center mb-3">
+                                                             class="mb-3 d-flex justify-content-start align-items-center">
                                                              <span
                                                                  class="badge bg-success">#{{ $winner->rank }}</span>
                                                              <span class="text-muted">-</span>
@@ -624,9 +644,9 @@
                                  </div>
                              </div>
                              <div class="tab-pane fade" id="live-show-preview">
-                                 <div class="p-2 d-flex justify-content-center align-items-center   ">
+                                 <div class="p-2 d-flex justify-content-center align-items-center ">
                                      <iframe src="{{ url('live-show-play/' . $liveShow->id) }}?preview=true"
-                                         id="live-show-preview-iframe" class="live-show-preview-iframe mt-2"
+                                         id="live-show-preview-iframe" class="mt-2 live-show-preview-iframe"
                                          style="height: 956px; width: 500px; pointer-events: none; border-radius: 30px; border: 1px solid #ccc;overflow: hidden;"
                                          allowfullscreen="true" allow="autoplay; encrypted-media; picture-in-picture"
                                          frameborder="0"></iframe>
@@ -651,9 +671,9 @@
                      <h5 class="modal-title" id="media-preview-modal-label">Media Preview</h5>
                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                  </div>
-                 <div class="modal-body p-0 d-flex justify-content-center align-items-center"
+                 <div class="p-0 modal-body d-flex justify-content-center align-items-center"
                      style="min-height:400px;">
-                     <img src="" id="media-preview-modal-img" class="img-fluid rounded shadow"
+                     <img src="" id="media-preview-modal-img" class="rounded shadow img-fluid"
                          style="max-height:75vh; max-width:100%;">
                  </div>
                  <div class="modal-footer">
@@ -676,7 +696,7 @@
                  <div class="modal-body" style="min-height:350px;">
                      <!-- Placeholder: List of available gallery media will be rendered here later -->
                      <div id="select-media-modal-list" class="row g-3">
-                         <div class="col-12 text-muted text-center py-4">
+                         <div class="py-4 text-center col-12 text-muted">
                              Loading available media...
                          </div>
                      </div>
@@ -1132,7 +1152,7 @@
                      const messageDiv =
                          ` <div class="message alert ${bgClass} d-flex justify-content-between border border-1 rounded-3 p-2">
                                 <div><strong>${message.user.name}:</strong> ${message.message}</div>
-                                   
+
                             </div>`;
 
                      chatContainer.insertAdjacentHTML('beforeend', messageDiv);
@@ -1325,7 +1345,7 @@
              function setPlayersLoading() {
                  const activePlayerUlElement = document.getElementById('activePlayersList');
                  activePlayerUlElement.innerHTML =
-                     '<tr class="bg-dark align-middle"><td colspan="3"><i class="fas fa-spinner fa-spin me-2"></i> Loading...</td></tr>';
+                     '<tr class="align-middle bg-dark"><td colspan="3"><i class="fas fa-spinner fa-spin me-2"></i> Loading...</td></tr>';
              }
 
              function updatePlayerListMeta() {
@@ -1351,14 +1371,14 @@
                  const prizeWon = escapeHtml(player.prize_won ?? '');
                  const playerShowUrl = `{{ url('admin/players') }}/${player.id}`;
 
-                 return `<tr class="bg-dark align-middle">
+                 return `<tr class="align-middle bg-dark">
                     <td class='text-white'>
                         ${index}.
                         <strong class='${player.status != 'eliminated' ? 'text-white' : 'text-secondary'}'>${playerName}</strong>
                         <span class="ms-2 ${player.is_online == 1 ? 'text-success' : 'text-secondary'}">
                             <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
                         </span>
-                       
+
                         ${player.is_winner ? '<i class="bi bi-trophy-fill text-warning"></i>' : ''}
                         <div class='text-white small text-secondary'>${playerEmail}</div>
                         <div class='text-white'>
@@ -1415,7 +1435,7 @@
 
                  if (data.users.length === 0 && !append) {
                      activePlayersList.innerHTML =
-                         '<tr class="bg-dark align-middle"><td colspan="3">No players found.</td></tr>';
+                         '<tr class="align-middle bg-dark"><td colspan="3">No players found.</td></tr>';
                      return;
                  }
 
@@ -1657,7 +1677,138 @@
              }
          </script>
 
+         {{-- Regenerate  Winners & Resend Voucher Emails --}}
+         <script>
+             function regenerateWinners() {
 
+                 streamSwalConfirm({
+                     title: 'Regenerate winners?',
+                     text: 'This will clear the currently announced winners and select new winners based on the current player scores. This cannot be undone.',
+                     confirmButtonText: 'Yes, regenerate winners',
+                 }).then(function(result) {
+                     Swal.enableLoading();
+                     if (!result.isConfirmed) {
+                         return;
+                     }
+                    //  setAnnounceWinnersLoading(true);
+                     fetch(`{{ route('admin.live-shows.reupdate-winners', ['liveShowId' => $liveShow->id]) }}`, {
+                             method: 'POST',
+                             headers: {
+                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                 'Accept': 'application/json',
+                             },
+                         })
+                         .then(function(response) {
+                             return response.json().then(function(data) {
+                                 return {
+                                     ok: response.ok,
+                                     status: response.status,
+                                     data: data
+                                 };
+                             });
+                         })
+                         .then(function(result) {
+                             if (result.status === 422) {
+                                //  applyAnnounceWinnersCompleted();
+                                 streamSwalWarning(
+                                     result.data.message ||
+                                     'Winners have already been announced for this live show.',
+                                     'Already announced');
+                                 return;
+                             }
+                             if (!result.ok) {
+                                //  clearAnnounceWinnersLoading();
+                                 streamSwalError(
+                                     (result.data && result.data.message) ? result.data.message :
+                                     'Could not announce winners. Please try again.',
+                                     'Update failed');
+                                 return;
+                             }
+                            //  applyAnnounceWinnersCompleted();
+                             streamSwalSuccess(
+                                 (result.data && result.data.message) ? result.data.message :
+                                 'Winners have been announced for this live show.',
+                                 'Winners announced');
+                             var fetchBtn = document.getElementById('fetchPlayersButton');
+                             if (fetchBtn) {
+                                 fetchBtn.click();
+                             }
+                         })
+                         .catch(function(error) {
+                             Swal.disableLoading();
+
+                             console.error('Error updating winners:', error);
+                             //  clearAnnounceWinnersLoading();
+                             streamSwalError('Could not announce winners. Please try again.', 'Update failed');
+                         });
+                 });
+             }
+
+
+             function resendVoucherWinners() {
+                 streamSwalConfirm({
+                     title: 'Resend voucher winners?',
+                     text: 'This will resend the voucher emails to the currently announced voucher winners. This is useful if you have regenerated winners or if some winners did not receive their voucher email.',
+                     confirmButtonText: 'Yes, resend voucher winners',
+                 }).then(function(result) {
+                     if (!result.isConfirmed) {
+                         return;
+                     }
+                     swal.enableLoading();
+                     setAnnounceWinnersLoading(true);
+                     fetch(`{{ route('admin.live-shows.resend-voucher-winners', ['liveShowId' => $liveShow->id]) }}`, {
+                             method: 'POST',
+                             headers: {
+                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                 'Accept': 'application/json',
+                             },
+                         })
+                         .then(function(response) {
+                             return response.json().then(function(data) {
+                                 return {
+                                     ok: response.ok,
+                                     status: response.status,
+                                     data: data
+                                 };
+                             });
+                         })
+                         .then(function(result) {
+                             if (result.status === 422) {
+                                 applyAnnounceWinnersCompleted();
+                                 streamSwalWarning(
+                                     result.data.message ||
+                                     'Winners have already been announced for this live show.',
+                                     'Already announced');
+                                 return;
+                             }
+                             if (!result.ok) {
+                                 clearAnnounceWinnersLoading();
+                                 streamSwalError(
+                                     (result.data && result.data.message) ? result.data.message :
+                                     'Could not announce winners. Please try again.',
+                                     'Update failed');
+                                 return;
+                             }
+                             applyAnnounceWinnersCompleted();
+                             streamSwalSuccess(
+                                 (result.data && result.data.message) ? result.data.message :
+                                 'Winners have been announced for this live show.',
+                                 'Winners announced');
+                             var fetchBtn = document.getElementById('fetchPlayersButton');
+                             if (fetchBtn) {
+                                 fetchBtn.click();
+                             }
+                         })
+                         .catch(function(error) {
+                             swal.disableLoading();
+
+                             console.error('Error updating winners:', error);
+                             clearAnnounceWinnersLoading();
+                             streamSwalError('Could not announce winners. Please try again.', 'Update failed');
+                         });
+                 });
+             }
+         </script>
          <script>
              var channel2 = pusher.subscribe('live-show.{{ $liveShow->id }}');
 
@@ -2392,7 +2543,7 @@
                      if (!emptyRow) {
                          tbody.insertAdjacentHTML('beforeend',
                              '<tr id="gallery-attached-empty" class="text-muted">' +
-                             '<td colspan="6" class="text-center py-3 small">No media attached. Use &quot;Add from gallery&quot; to attach items.</td>' +
+                             '<td colspan="6" class="py-3 text-center small">No media attached. Use &quot;Add from gallery&quot; to attach items.</td>' +
                              '</tr>'
                          );
                      }
@@ -2498,12 +2649,12 @@
                  return `
                 <tr class="gallery-media-card" data-media-id="${data.id}" data-attached="1">
                     <td colspan="100" style="padding:0; border:none;">
-                        <div class="  d-flex    gap-2 py-3 px-2">
-                             
-                                  <div class="drag-handle mb-2" style="cursor: grab;">
+                        <div class="gap-2 px-2 py-3 d-flex">
+
+                                  <div class="mb-2 drag-handle" style="cursor: grab;">
                                 <i class="fas fa-grip-vertical text-muted"></i>
                                 </div>
-                            
+
                           <div class="row justify-content-between">
                             <div class="position-relative col-6">
                                 <img src="${data.is_image ? data.path : (data.thumbnail ?? data.path)}"
@@ -2511,7 +2662,7 @@
                                     title="${data.title}"
                                     style="width: 100%; height: 120px; object-fit: cover; border-radius: 6px; border: 1px solid #555;">
                                 <button type="button"
-                                    class="btn btn-sm btn-danger   gallery-detach-btn"
+                                    class="btn btn-sm btn-danger gallery-detach-btn"
                                     style="opacity: 0.8; transition: opacity 0.3s ease;"
                                     data-media-id="${data.id}"
                                     title="Remove from stream"
@@ -2519,54 +2670,54 @@
                                     onclick="galleryDetach('${data.id}', this)">
                                     <i class="fas fa-times"></i>
                                 </button>
-                                    
-                             
+
+
                             </div>
-                            
+
                             <div class=" col-6">
-                                <div class="w-100 mb-1">
+                                <div class="mb-1 w-100">
                                 <button type="button"
-                                    class="btn btn-sm btn-success gallery-show-on-stream-btn  d-block w-100 mb-1 "
+                                    class="mb-1 btn btn-sm btn-success gallery-show-on-stream-btn d-block w-100 "
                                     onclick="galleryShowOnStream('${data.id}', this)"
                                     data-media-id="${data.id}"
                                     id="show-media-btn-${data.id}"
                                     title="Show on live stream">
                                     <i class="fas fa-tv"></i> Show
-                                     
+
                                 </button>
                                 <button type="button"
-                                    class="btn btn-sm btn-warning gallery-hide-on-stream-btn  d-block w-100 mb-1 "
+                                    class="mb-1 btn btn-sm btn-warning gallery-hide-on-stream-btn d-block w-100 "
                                     onclick="galleryHideOnStream(this)"
                                     data-media-id="${data.id}"
                                     id="hide-media-btn-${data.id}"
                                     title="Hide on live stream">
                                     <i class="fas fa-eye-slash"></i> Hide
-                                     
+
                                 </button>
-                               
+
                                 </div>
                                 <button type="button"
                                     id="preview-media-btn-${data.id}"
-                                    class="btn btn-sm btn-secondary d-block w-100 mb-1 " title="Preview"
+                                    class="mb-1 btn btn-sm btn-secondary d-block w-100 " title="Preview"
                                     onclick="openMediaPreviewModal('${data.is_image ? data.path : (data.thumbnail ?? data.path)}')">
                                     <i class="fas fa-eye"></i> Preview
                                 </button>
-                                
-                       
+
+
                             </div>
                             <div class="col-12">
-                                <div class="mb-1   fw-semibold text-truncate" style="width:100%;" title="${data.title}">
+                                <div class="mb-1 fw-semibold text-truncate" style="width:100%;" title="${data.title}">
                                     <span class="badge ${data.type === 'video' ? 'bg-primary' : 'bg-warning text-dark'}  top-0 end-0">
                                     ${data.type ?? ''}
                                 </span>
                                         ${data.title.length > 15 ? data.title.substring(0, 15) + '...' : data.title || '—'}
                                     </div>
                                     <div class="form-check align-items-center d-flex">
-                                    <input 
-                                        class="form-check-input" 
-                                        type="radio" 
-                                        name="play_with_live" 
-                                        id="playWithLiveRadio_${data.id}" 
+                                    <input
+                                        class="form-check-input"
+                                        type="radio"
+                                        name="play_with_live"
+                                        id="playWithLiveRadio_${data.id}"
                                         value="${data.id}"
                                         onchange="askConfirmationWhenSelectThisMediaForLive(this)"
                                         ${data.play_with_live ? 'checked' : ''} >
@@ -2576,12 +2727,12 @@
                                 </div>
                             </div>
                             </div>
-                            
-                             
+
+
                         </div>
                     </td>
                 </tr>
-           
+
             `;
              }
 
@@ -2605,7 +2756,7 @@
                  return `
                 <div class="col-6 col-md-3 col-lg-3">
                     <div class="card">
-                        <img src="${data.is_image ? data.path : (data.thumbnail ?? data.path)}" class="card-img-top w-100" alt="" style="height: 200px; object-fit: cover; ">    
+                        <img src="${data.is_image ? data.path : (data.thumbnail ?? data.path)}" class="card-img-top w-100" alt="" style="height: 200px; object-fit: cover; ">
                         <div class="card-body">
                             <p class="card-title">${data.title || '—'}</p>
                             <p class="card-text">${data.type ?? ''}</p>

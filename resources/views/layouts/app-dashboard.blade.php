@@ -141,6 +141,10 @@
         .dropdown-menu {
             z-index: 1055;
         }
+
+        input[readonly] {
+            border: 1px solid red !important;
+        }
     </style>
 
 </head>
