@@ -9,24 +9,26 @@ class FormularController extends Controller
 {
     public function show(Request $request)
     {
-        $token = $request->query('t', '');
+        // $token = $request->query('t', '');
 
-        if (! preg_match('/^[a-f0-9]{40,}$/i', $token)) {
-            return view('formular');
-        }
+        // if (! preg_match('/^[a-f0-9]{40,}$/i', $token)) {
+        //     return view('formular');
+        // }
 
-        $scriptUrl = config('services.signature_form.script_url');
-        $response = Http::timeout(30)
-            ->withHeaders(['Accept' => 'text/html'])
-            ->get($scriptUrl, ['t' => $token]);
+        // $scriptUrl = "https://script.google.com/macros/s/AKfycbxjD7WfIAb0l92JVE148D-8HYmjSv1CQG9tWQogHDQG8AtyJkV5umevsoz7_H2-iVCm/exec";
+        // $response = Http::timeout(30)
+        //     ->withHeaders(['Accept' => 'text/html'])
+        //     ->get($scriptUrl, ['t' => $token]);
 
-        if (! $response->successful()) {
-            abort(502, 'Formular konnte nicht geladen werden.');
-        }
+        // if (! $response->successful()) {
+        //     abort(502, 'Formular konnte nicht geladen werden.');
+        // }
 
-        $html = $this->rewriteSubmitHandler($response->body());
+        // $html = $this->rewriteSubmitHandler($response->body());
 
-        return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+        // return response($html, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
+
+        return view('formular');
     }
 
     public function submit(Request $request)
