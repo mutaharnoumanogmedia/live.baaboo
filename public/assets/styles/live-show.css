@@ -70,7 +70,7 @@ body .end-show {
     background: #ffffff;
     border-top: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
-    height: 70px;
+    height: 60px;
     background: white;
     z-index: 1030;
     /* above most stuff */
@@ -462,7 +462,7 @@ body .end-show {
     right: 0;
     background: rgba(0, 0, 0, 0.8) !important;
     backdrop-filter: blur(20px);
-    padding: 6px;
+    padding: 0px 6px;
 
     z-index: 10;
     /* height: 120px; */
@@ -892,7 +892,9 @@ body .main-container.quiz-mode {
     font-size: 0.8rem;
     color: #333;
     transition: all 0.3s ease;
-    border-radius: 20px;
+    border-radius: 15px;
+    padding: 6px;
+    min-width: 50px;
 }
 
 .mobile-nav .nav-link.active {
@@ -931,7 +933,7 @@ body .main-container.quiz-mode {
 }
 
 .heart-reaction-float .heart-icon {
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: #ff2d55;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
@@ -944,6 +946,31 @@ body .main-container.quiz-mode {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+
+
+/* Just define the colors here */
+.heart-icon.heart-color-red {
+    color: #ff0000;
+}
+.heart-icon.heart-color-orange {
+    color: #ffb347;
+}
+.heart-icon.heart-color-yellow {
+    color: #fff85b;
+}
+.heart-icon.heart-color-green {
+    color: #78ffb1;
+}
+.heart-icon.heart-color-blue {
+    color: #53c6ff;
+}
+.heart-icon.heart-color-indigo {
+    color: #8a9cff;
+}
+.heart-icon.heart-color-violet {
+    color: #d587ff;
 }
 
 @keyframes heartFloat {

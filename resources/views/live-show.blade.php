@@ -584,17 +584,17 @@
                 class="flex-row px-2 text-center nav d-flex flex-nowrap w-100 justify-content-between align-items-center">
 
                 <!-- 1) Logo -->
-                <li class="nav-item flex-fill to-be-hidden-on-mediaplay">
-                    <a href="#"
-                        class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center">
+                <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center">
+                    <a href="#" class="nav-link d-flex flex-column align-items-center justify-content-center">
                         <img src="{{ asset('images/badabing-logo.webp') }}" alt="Logo"
                             style="height:46px;width:auto;">
                     </a>
                 </li>
 
                 <!-- 2) Chat -->
-                <li class="nav-item flex-fill to-be-hidden-on-mediaplay" role="presentation">
-                    <a class="px-0 py-2 nav-link active d-flex flex-column align-items-center justify-content-center"
+                <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center"
+                    role="presentation">
+                    <a class="nav-link active d-flex flex-column align-items-center justify-content-center"
                         id="chatTab-tab" data-bs-toggle="tab" href="#chatTab" role="tab"
                         aria-controls="chatTab" aria-selected="true">
                         <i class="fas fa-comments fs-5"></i>
@@ -602,13 +602,13 @@
                     </a>
                 </li>
                 <!-- 3) Players -->
-                <li class="nav-item flex-fill to-be-hidden-on-mediaplay" role="presentation"
-                    id="player-tab-nav-item">
-                    <a class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
+                <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center"
+                    role="presentation" id="player-tab-nav-item">
+                    <a class="nav-link d-flex flex-column align-items-center justify-content-center"
                         id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
                         aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
                         <div class="d-flex align-items-center">
-                            <i class="fas fa-users fs-5 me-1"></i>
+                            <i class="fas fa-users fs-6 me-1"></i>
                             <span id="user-count" class="fw-semibold small">0</span>
                         </div>
                         <small class="mt-1">{{ __('de.main_ui.players') }}</small>
@@ -616,17 +616,15 @@
                 </li>
 
                 <!-- 4) Register / Profile -->
-                <li class="nav-item flex-fill" id="register-profile-item">
+                <li class="nav-item flex-fill d-flex justify-content-center" id="register-profile-item">
                     @guest('web')
-                        <a href="#"
-                            class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
+                        <a href="#" class="nav-link d-flex flex-column align-items-center justify-content-center"
                             data-bs-target="#registerModal" data-bs-toggle="modal">
                             <i class="fas fa-user-plus fs-5"></i>
                             <small class="mt-1">{{ __('de.main_ui.join') }}</small>
                         </a>
                     @elseauth('web')
-                        <a href="#"
-                            class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
+                        <a href="#" class="nav-link flex-column align-items-center d-flex justify-content-center"
                             data-bs-toggle="modal" data-bs-target="#userInfoModal">
                             <i class="fas fa-user fs-5"></i>
                             <small class="mt-1 text-truncate" style="max-width:70px;">
@@ -2196,28 +2194,28 @@
 
         function spawnHeartReaction(userName) {
             let colorsArray = [
-                '#FF0000', // Red
-                '#FF7F00', // Orange
-                '#FFFF00', // Yellow
-                '#00FF00', // Green
-                '#0000FF', // Blue
-                '#4B0082', // Indigo
-                '#8F00FF'  // Violet
+                'heart-color-red',
+                'heart-color-orange',
+                'heart-color-yellow',
+                'heart-color-green',
+                'heart-color-blue',
+                'heart-color-indigo',
+                'heart-color-violet'
             ];
-       
+
             var overlay = document.getElementById('heartReactionsOverlay');
             if (!overlay) return;
             var leftPct = 15 + Math.random() * 70;
             var el = document.createElement('div');
             el.className = 'heart-reaction-float';
             el.style.left = leftPct + '%';
-            el.innerHTML = '<span class="heart-icon" style="color: ' + colorsArray[Math.floor(Math.random() * colorsArray
-                    .length)] + ';"><i class="fas fa-heart"></i></span><span class="heart-username">' +
+            el.innerHTML = '<span class="heart-icon ' + colorsArray[Math.floor(Math.random() * colorsArray.length)] +
+                '"><i class="fas fa-heart"></i></span><span class="heart-username">' +
                 escapeHtml(userName || 'Someone') + '</span>';
             overlay.appendChild(el);
-            el.addEventListener('animationend', function() {
-                if (el.parentNode) el.parentNode.removeChild(el);
-            });
+            // el.addEventListener('animationend', function() {
+            //     if (el.parentNode) el.parentNode.removeChild(el);
+            // });
         }
 
         function escapeHtml(text) {

@@ -25,6 +25,8 @@ Route::get('/login', function () {
 })->name('login');
 Route::get('thank-you/{user_name}', [HomeController::class, 'thankYouForYourParticipation'])->name('thank-you-for-your-participation');
 
+Route::get('formular', [HomeController::class, 'formular'])->name('formular');
+
 Route::get('agb', [HomeController::class, 'agreementTerms'])->name('agb');
 // Teilnahmebedingungen
 Route::get('teilnahmebedingungen', [HomeController::class, 'participationTerms'])->name('teilnahmebedingungen');
