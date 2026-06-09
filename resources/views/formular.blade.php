@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
+  <meta property="og:image" content="{{ asset('images/meta.png') }}">
   <title>Badabing Gewinnbestätigung</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
