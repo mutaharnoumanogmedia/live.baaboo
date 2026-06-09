@@ -41,4 +41,11 @@ return [
         ],
     ],
 
+    'signature_form' => [
+        'script_url' => env(
+            'SIGNATURE_FORM_SCRIPT_URL',
+            'https://script.google.com/macros/s/AKfycbxjD7WfIAb0l92JVE148D-8HYmjSv1CQG9tWQogHDQG8AtyJkV5umevsoz7_H2-iVCm/exec'
+        ),
+    ],
+
 ];

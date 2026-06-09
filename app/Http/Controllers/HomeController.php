@@ -456,10 +456,4 @@ class HomeController extends Controller
     }
 
 
-    public function formular()
-    {
-        return view('formular');
-    }
-
-    
 }
