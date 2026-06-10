@@ -60,7 +60,7 @@
                              </span>
                          </h6>
                      </div>
-                     <div class="p-0 card-body" style="overflow: scroll;  min-height: 80vh; height: auto">
+                     <div class="p-0 card-body" style="overflow: scroll;  max-height: 80vh;">
                          <div class="flex-wrap gap-2 p-2 mb-2 d-flex justify-content-between align-items-center">
                              <div class="input-group input-group-sm" style="max-width: 100%;">
                                  <span class="input-group-text">
@@ -90,7 +90,7 @@
 
                          </div>
                          <table class="table mb-0 align-middle table-sm table-dark table-hover"
-                             style=" overflow-y: scroll; max-height: 80vh; padding-bottom: 30px;">
+                             style=" overflow-y: scroll; height: 80vh; padding-bottom: 30px;">
                              <thead>
                                  <tr>
                                      <th>Player</th>
@@ -197,24 +197,22 @@
                                                              <i class="fas fa-check me-2"></i> Winners announced
                                                          </span>
                                                      </button>
-                                                     @if ($liveShow->winners_announced)
-                                                         <div class="gap-2 mt-2 d-flex">
-                                                             <button
-                                                                 class="py-2 mt-2 text-white shadow-sm btn btn-secondary w-100 fw-bold"
-                                                                 id="regenerateWinnersBtn"
-                                                                 onclick="regenerateWinners()">
-                                                                 <i class="fas fa-sync-alt me-2"></i>
-                                                                 ReGenerate Winners
-                                                             </button>
-                                                             <button
-                                                                 class="py-2 mt-2 text-white shadow-sm btn btn-info w-100 fw-bold"
-                                                                 id="resendVoucherWinnersBtn"
-                                                                 onclick="resendVoucherWinners()">
-                                                                 <i class="fas fa-envelope me-2"></i>
-                                                                 Resend Email To Voucher Winners
-                                                             </button>
-                                                         </div>
-                                                     @endif
+                                                     <div class="gap-2 mt-2 d-flex @if (!$liveShow->winners_announced) d-none @endif"
+                                                         id="winnersAnnouncedActions">
+                                                         <button
+                                                             class="py-2 mt-2 text-white shadow-sm btn btn-secondary w-100 fw-bold"
+                                                             id="regenerateWinnersBtn" onclick="regenerateWinners()">
+                                                             <i class="fas fa-sync-alt me-2"></i>
+                                                             ReGenerate Winners
+                                                         </button>
+                                                         <button
+                                                             class="py-2 mt-2 text-white shadow-sm btn btn-info w-100 fw-bold"
+                                                             id="resendVoucherWinnersBtn"
+                                                             onclick="resendVoucherWinners()">
+                                                             <i class="fas fa-envelope me-2"></i>
+                                                             Resend Email To Voucher Winners
+                                                         </button>
+                                                     </div>
                                                  </div>
                                                  <p id="announceWinnersAckMessage"
                                                      class="small text-success mb-0 mt-2 px-1 @if (!$liveShow->winners_announced) d-none @endif">
@@ -317,20 +315,29 @@
                          <div class="row">
                              <div class="col-lg-8 ">
                                  <div class="p-3 rounded bg-dark">
-                                     <h5 class="mb-0 mb-3 text-center fw-bold">Quiz Questions</h5>
+                                     <div>
+                                         <h5 class="mb-0 mb-3 text-center fw-bold">Quiz Questions</h5>
+                                     </div>
                                      <div class="position-relative question-slider-wrap">
                                          <div class="question-slider ">
                                              @foreach ($liveShow->quizzes as $index => $quiz)
                                                  <div class="px-2">
                                                      <div class="mb-3 border card">
-                                                         <div class="card-body"
-                                                             style="height: auto; overflow-y:hidden">
-                                                             <div class="mb-4 text-center fw-bold">
-                                                                 <div class="mb-2">Question {{ $index + 1 }} /
-                                                                     {{ $liveShow->quizzes->count() }}</div>
-                                                                 <div class="question-text">{{ $quiz->question }}
-                                                                 </div>
-                                                             </div>
+                                                        <div class="position-relative card-body"
+                                                            style="height: auto; overflow-y:hidden">
+                                                            <button type="button"
+                                                                class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 m-2 reset-shown-status-btn @if (!$quiz->has_shown) d-none @endif"
+                                                                onclick="resetShownStatus({{ $quiz->id }}, this)"
+                                                                id="resetShownStatusBtn-{{ $quiz->id }}"
+                                                                title="Reset shown status">
+                                                                <i class="fas fa-undo me-1"></i> Reset shown status
+                                                            </button>
+                                                            <div class="mb-4 text-center fw-bold">
+                                                                <div class="mb-2">Question {{ $index + 1 }} /
+                                                                    {{ $liveShow->quizzes->count() }}</div>
+                                                                <div class="question-text">{{ $quiz->question }}
+                                                                </div>
+                                                            </div>
 
                                                              @if ($quiz->options)
                                                                  <div class="mb-4 row g-3">
@@ -472,9 +479,6 @@
                          </div>
                      </div>
                  </div>
-
-
-
              </main>
 
              <div class="col-lg-3">
@@ -1604,16 +1608,87 @@
                  }, 500);
              }
 
-             function markQuizQuestionAsShown(form) {
-                 const btn = form.querySelector('[data-quiz-start]');
-                 if (!btn) {
-                     return;
-                 }
-                 btn.type = 'button';
-                 btn.disabled = true;
-                 btn.setAttribute('aria-disabled', 'true');
-                 btn.innerHTML = 'Question shown';
-             }
+            function markQuizQuestionAsShown(form) {
+                const btn = form.querySelector('[data-quiz-start]');
+                if (!btn) {
+                    return;
+                }
+                btn.type = 'button';
+                btn.disabled = true;
+                btn.setAttribute('aria-disabled', 'true');
+                btn.innerHTML = 'Question shown';
+
+                const quizId = form.id.replace('quiz-timer-form-', '');
+                const resetBtn = document.getElementById(`resetShownStatusBtn-${quizId}`);
+                if (resetBtn) {
+                    resetBtn.classList.remove('d-none');
+                }
+            }
+
+            function revertQuizQuestionToShowable(quizId) {
+                const form = document.getElementById(`quiz-timer-form-${quizId}`);
+                if (form) {
+                    form.dataset.hasShown = '0';
+                    const btn = form.querySelector('[data-quiz-start]');
+                    if (btn) {
+                        btn.type = 'submit';
+                        btn.disabled = false;
+                        btn.removeAttribute('aria-disabled');
+                        btn.innerHTML = '<i class="fas fa-play me-2"></i> Show';
+                    }
+                }
+                const resetBtn = document.getElementById(`resetShownStatusBtn-${quizId}`);
+                if (resetBtn) {
+                    resetBtn.classList.add('d-none');
+                }
+            }
+
+            function resetShownStatus(quizId, btn) {
+                streamSwalConfirm({
+                    title: 'Reset shown status?',
+                    text: 'This will mark the question as not shown so you can show it again.',
+                    confirmButtonText: 'Yes, reset',
+                }).then(function(result) {
+                    if (!result.isConfirmed) {
+                        return;
+                    }
+                    if (btn) {
+                        setBtnBusy(btn, true, 'Resetting\u2026');
+                    }
+                    fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/quizzes/${quizId}/reset-shown-status`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                            },
+                        })
+                        .then(async response => {
+                            const data = await response.json();
+                            if (!response.ok) {
+                                const error = new Error(data.message || 'Could not reset shown status');
+                                error.status = response.status;
+                                throw error;
+                            }
+                            return data;
+                        })
+                        .then(data => {
+                            hideQuizTimer();
+                            revertQuizQuestionToShowable(quizId);
+                            streamSwalSuccess(data.message || 'Question shown status has been reset.',
+                                'Status reset');
+                        })
+                        .catch(error => {
+                            console.error('Error resetting shown status:', error);
+                            streamSwalError(error?.message ||
+                                'Could not reset the shown status. Please try again.', 'Reset failed');
+                        })
+                        .finally(() => {
+                            if (btn) {
+                                setBtnBusy(btn, false);
+                            }
+                        });
+                });
+            }
 
              function submitQuizTimerForm(event, quizId) {
                  event.preventDefault();
@@ -1690,7 +1765,7 @@
                      if (!result.isConfirmed) {
                          return;
                      }
-                    //  setAnnounceWinnersLoading(true);
+                     //  setAnnounceWinnersLoading(true);
                      fetch(`{{ route('admin.live-shows.reupdate-winners', ['liveShowId' => $liveShow->id]) }}`, {
                              method: 'POST',
                              headers: {
@@ -1709,7 +1784,7 @@
                          })
                          .then(function(result) {
                              if (result.status === 422) {
-                                //  applyAnnounceWinnersCompleted();
+                                 //  applyAnnounceWinnersCompleted();
                                  streamSwalWarning(
                                      result.data.message ||
                                      'Winners have already been announced for this live show.',
@@ -1717,14 +1792,14 @@
                                  return;
                              }
                              if (!result.ok) {
-                                //  clearAnnounceWinnersLoading();
+                                 //  clearAnnounceWinnersLoading();
                                  streamSwalError(
                                      (result.data && result.data.message) ? result.data.message :
                                      'Could not announce winners. Please try again.',
                                      'Update failed');
                                  return;
                              }
-                            //  applyAnnounceWinnersCompleted();
+                             //  applyAnnounceWinnersCompleted();
                              streamSwalSuccess(
                                  (result.data && result.data.message) ? result.data.message :
                                  'Winners have been announced for this live show.',
@@ -1843,6 +1918,69 @@
                  updateAdminChatUi(!!data.chatEnabled);
              });
 
+             // Keep every open stream-management screen in sync with admin state
+             // changes (status / winners / quiz) triggered from any other screen.
+             function syncLiveShowStatusUi(status) {
+                 if (!status) {
+                     return;
+                 }
+                 liveShowStatus = status;
+                 const select = document.getElementById('liveShowStatusSelect');
+                 if (select && select.value !== status) {
+                     select.value = status;
+                 }
+             }
+
+             function syncWinnersAnnouncedUi(announced) {
+                 if (announced) {
+                     if (!liveShowWinnersAnnounced) {
+                         applyAnnounceWinnersCompleted();
+                     }
+                 } else if (liveShowWinnersAnnounced) {
+                     applyUnannounceWinnersCompleted();
+                 }
+             }
+
+             function syncQuizUi(payload) {
+                 if (!payload || !payload.quizId) {
+                     return;
+                 }
+                 const form = document.getElementById(`quiz-timer-form-${payload.quizId}`);
+                 if (payload.action === 'shown') {
+                     if (form) {
+                         form.dataset.hasShown = '1';
+                         markQuizQuestionAsShown(form);
+                     }
+                     if (payload.seconds) {
+                         showQuizTimer(payload.seconds, payload.quizId);
+                     }
+                } else if (payload.action === 'hidden') {
+                    hideQuizTimer();
+                } else if (payload.action === 'reset') {
+                    hideQuizTimer();
+                    revertQuizQuestionToShowable(payload.quizId);
+                }
+            }
+
+             var channelAdminState = pusher.subscribe('live-show-admin.{{ $liveShow->id }}');
+             channelAdminState.bind('pusher:subscription_succeeded', function() {
+                 console.log('Admin state channel subscribed successfully!');
+             });
+             channelAdminState.bind('LiveShowAdminStateEvent', function(data) {
+                 const payload = (data && data.payload) ? data.payload : {};
+                 switch (data && data.type) {
+                     case 'status':
+                         syncLiveShowStatusUi(payload.status);
+                         break;
+                     case 'winners':
+                         syncWinnersAnnouncedUi(!!payload.winners_announced);
+                         break;
+                     case 'quiz':
+                         syncQuizUi(payload);
+                         break;
+                 }
+             });
+
 
 
              function removeQuiz(quizId, btn) {
@@ -1928,6 +2066,10 @@
                      unBtn.classList.remove('d-none');
                      unBtn.disabled = false;
                  }
+                 const announcedActions = document.getElementById('winnersAnnouncedActions');
+                 if (announcedActions) {
+                     announcedActions.classList.remove('d-none');
+                 }
              }
 
              function setUnannounceWinnersLoading(isLoading) {
@@ -1974,6 +2116,10 @@
                  if (unBtn) {
                      unBtn.classList.add('d-none');
                      unBtn.disabled = false;
+                 }
+                 const announcedActions = document.getElementById('winnersAnnouncedActions');
+                 if (announcedActions) {
+                     announcedActions.classList.add('d-none');
                  }
              }
 
