@@ -6,6 +6,7 @@ use App\Events\BroadcasterTabClaimedEvent;
 use App\Events\GameResetEvent;
 use App\Events\HideGalleryImageEvent;
 use App\Events\HideLiveShowWinnersTabEvent;
+use App\Events\LiveShowAdminStateEvent;
 use App\Events\LiveShowChatStatusUpdatedEvent;
 use App\Events\LiveShowMediaHidden;
 use App\Events\LiveShowMediaPlayed;
@@ -361,6 +362,12 @@ class LiveShowController extends Controller
 
         $quizModel->update(['has_shown' => true]);
 
+        LiveShowAdminStateEvent::dispatch((string) $liveShow->id, 'quiz', [
+            'action' => 'shown',
+            'quizId' => (int) $quizModel->id,
+            'seconds' => (int) ($request->seconds ?? 10),
+        ]);
+
         return response()->json([
             'message' => 'Quiz question sent successfully!',
             'has_shown' => true,
@@ -379,7 +386,34 @@ class LiveShowController extends Controller
         // Broadcast an event to remove the quiz question from users
         RemoveLiveShowQuizQuestionEvent::dispatch($quiz->id, (string) $liveShow->id);
 
+        LiveShowAdminStateEvent::dispatch((string) $liveShow->id, 'quiz', [
+            'action' => 'hidden',
+            'quizId' => (int) $quiz->id,
+        ]);
+
         return response()->json(['message' => 'Quiz question removed successfully!']);
+    }
+
+    public function resetQuizShownStatus(Request $request, $id, $quizId)
+    {
+        $liveShow = LiveShow::findOrFail($id);
+        $quizModel = $liveShow->quizzes()->where('id', $quizId)->first();
+
+        if (! $quizModel) {
+            return response()->json(['message' => 'Quiz not found for this live show.'], 404);
+        }
+
+        $quizModel->update(['has_shown' => false]);
+
+        LiveShowAdminStateEvent::dispatch((string) $liveShow->id, 'quiz', [
+            'action' => 'reset',
+            'quizId' => (int) $quizModel->id,
+        ]);
+
+        return response()->json([
+            'message' => 'Question shown status has been reset.',
+            'has_shown' => false,
+        ]);
     }
 
     public function updateWinners(Request $request, $liveShowId)
@@ -506,6 +540,10 @@ class LiveShowController extends Controller
         $liveShow->update(['winners_announced' => true]);
         ShowLiveShowWinnersTabEvent::dispatch((string) $liveShow->id);
 
+        LiveShowAdminStateEvent::dispatch((string) $liveShow->id, 'winners', [
+            'winners_announced' => true,
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Winners have been announced. Winner notification emails have been queued for the winners.',
@@ -627,6 +665,10 @@ class LiveShowController extends Controller
 
         $liveShow->update(['winners_announced' => true]);
 
+        LiveShowAdminStateEvent::dispatch((string) $liveShow->id, 'winners', [
+            'winners_announced' => true,
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Winners Regenerated and Able to be Announced Again who have Voucher prizes.',
@@ -674,6 +716,10 @@ class LiveShowController extends Controller
 
         $liveShow->update(['winners_announced' => false]);
         $liveShow->users()->update(['is_winner' => false]);
+
+        LiveShowAdminStateEvent::dispatch((string) $liveShow->id, 'winners', [
+            'winners_announced' => false,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -1062,6 +1108,10 @@ class LiveShowController extends Controller
 
         \App\Events\UpdateLiveShowEvent::dispatch((string) $liveShow->id, $liveShow->status, $updateMessage);
 
+        LiveShowAdminStateEvent::dispatch((string) $liveShow->id, 'status', [
+            'status' => $liveShow->status,
+        ]);
+
         return response()->json(['message' => 'Live show has been updated successfully.', 'status' => $newStatus]);
     }
 
@@ -1090,6 +1140,10 @@ class LiveShowController extends Controller
         $liveShow->save();
 
         \App\Events\UpdateLiveShowEvent::dispatch((string) $liveShow->id, $liveShow->status, $updateMessage);
+
+        LiveShowAdminStateEvent::dispatch((string) $liveShow->id, 'status', [
+            'status' => $liveShow->status,
+        ]);
 
         return response()->json(['message' => 'Live show has been updated successfully.', 'status' => $newStatus]);
     }
