@@ -261,36 +261,7 @@
 
 
 
-                                 {{-- <div class="text-center col-md-7 d-flex justify-content-center align-items-center">
-                                 <div
-                                     style="padding: 0px; overflow: hidden; border: 1px solid #ccc;border-radius: 10px;">
-                                     <div id="">
-                                         <button class="mb-2 btn btn-outline-primary" type="button"
-                                             onclick="document.querySelector('#broadcasterIframe').src = '{{ $broadcasterUrl }}';"
-                                             style=" ">
-                                             <i class="fas fa-sync-alt me-1"></i> Refresh Broadcast
-                                         </button>
-                                         <button class="mb-2 btn btn-outline-danger" type="button"
-                                             id="disableBroadcastBtn"
-                                             onclick="document.querySelector('#broadcasterIframe').src = '';">
-                                             <i class="fas fa-ban me-1"></i> Disable Broadcast
-                                         </button>
-
-
-                                         <a class="mb-2 btn btn-outline-info"
-                                             href="{{ route('admin.live-shows.stream-management.broadcaster', [$liveShow->id]) }}"
-                                             target="_blank" style="margin-left: 10px;">
-                                             <i class="fas fa-external-link-alt me-1"></i> Open in New Tab
-                                         </a>
-
-                                     </div>
-
-                                     <iframe id="broadcasterIframe" src="{{ $broadcasterUrl }}"
-                                         style="width: 720px; height: 1040px; transform: scale(0.9); transform-origin: 0 0; border: none;">
-                                     </iframe>
-                                 </div>
-
-                            </div> --}}
+                                
                              </div>
                          </div>
                      </div>
@@ -651,7 +622,7 @@
                                  <div class="p-2 d-flex justify-content-center align-items-center ">
                                      <iframe src="{{ url('live-show-play/' . $liveShow->id) }}?preview=true"
                                          id="live-show-preview-iframe" class="mt-2 live-show-preview-iframe"
-                                         style="height: 956px; width: 500px; pointer-events: none; border-radius: 30px; border: 1px solid #ccc;overflow: hidden;"
+                                         style="height: 874px; width: 402px; pointer-events: none; border-radius: 30px; border: 1px solid #ccc;overflow: hidden;"
                                          allowfullscreen="true" allow="autoplay; encrypted-media; picture-in-picture"
                                          frameborder="0"></iframe>
                                  </div>
