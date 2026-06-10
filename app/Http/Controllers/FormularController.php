@@ -68,6 +68,7 @@ class FormularController extends Controller
         // The form submits via google.script.run.submitSignature(payload), which
         // only works inside Google's runtime. Rewrite it to POST to our own proxy.
         $formHtml = $this->rewriteSubmitHandler($formHtml);
+        $formHtml = $this->injectFavicon($formHtml);
 
         return response($formHtml, 200, ['Content-Type' => 'text/html; charset=UTF-8']);
     }
@@ -142,7 +143,7 @@ class FormularController extends Controller
         // literal, then to parse the JSON object it represents.
         $jsString = preg_replace('/\\\\x([0-9a-fA-F]{2})/', '\\u00$1', $jsString);
 
-        $innerJson = json_decode('"' . $jsString . '"');
+        $innerJson = json_decode('"'.$jsString.'"');
         if (! is_string($innerJson)) {
             return null;
         }
@@ -153,6 +154,13 @@ class FormularController extends Controller
         }
 
         return $data['userHtml'];
+    }
+
+    private function injectFavicon(string $html): string
+    {
+        $faviconTag = '<link rel="shortcut icon" href="'.asset('images/favicon.ico').'" type="image/x-icon">';
+
+        return preg_replace('/<head[^>]*>/i', '$0'."\n    ".$faviconTag, $html, 1);
     }
 
     /**
