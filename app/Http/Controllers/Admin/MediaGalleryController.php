@@ -27,17 +27,39 @@ class MediaGalleryController extends Controller
 
     private const IMAGE_MAX_BYTES = 2 * 1024 * 1024;  // 2 MB
 
-    private const VIDEO_MAX_BYTES = 250 * 1024 * 1024;  // 100 MB
+    private const VIDEO_MAX_BYTES = 250 * 1024 * 1024;  // 250 MB
 
     private const IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
     private const VIDEO_MIMES = ['video/mp4', 'video/webm', 'video/quicktime'];
 
-    public function index()
+    public function index(Request $request)
     {
-        $media = GalleryMedia::orderBy('created_at', 'desc')->paginate(24);
+        $search = trim((string) $request->input('search'));
+        $type = $request->input('type');
 
-        return view('admin.media-gallery.index', compact('media'));
+        $query = GalleryMedia::query();
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('original_name', 'like', "%{$search}%");
+            });
+        }
+
+        if (in_array($type, ['image', 'video'], true)) {
+            $query->where('type', $type);
+        }
+
+        $media = $query->orderByDesc('created_at')->paginate(24)->withQueryString();
+
+        $counts = [
+            'all' => GalleryMedia::count(),
+            'image' => GalleryMedia::where('type', 'image')->count(),
+            'video' => GalleryMedia::where('type', 'video')->count(),
+        ];
+
+        return view('admin.media-gallery.index', compact('media', 'counts'));
     }
 
     public function create()
@@ -46,15 +68,14 @@ class MediaGalleryController extends Controller
     }
 
     /**
-     * Store single file from DropZone (AJAX). Validates size: images 2MB, videos 5MB.
+     * Store single file from DropZone (AJAX). Validates size: images 2MB, videos 250MB.
      */
     public function upload(Request $request): JsonResponse
     {
-        // 1. Validation for both Images and Videos
         $request->validate([
-            'file' => 'required|file|mimetypes:video/mp4,video/mpeg,video/quicktime,image/jpeg,image/png,image/webp|max:204800', // 200 MB limit
+            'file' => 'required|file|mimetypes:'.implode(',', array_merge(self::IMAGE_MIMES, self::VIDEO_MIMES)).'|max:'.(self::VIDEO_MAX_BYTES / 1024),
             'custom_name' => 'nullable|string|max:255',
-            'thumbnail' => 'nullable|file|mimes:jpeg,jpg,png|max:1024',
+            'thumbnail' => 'nullable|file|mimes:jpeg,jpg,png|max:2048',
             'total_seconds' => 'nullable|integer|min:0',
         ]);
 
@@ -62,83 +83,39 @@ class MediaGalleryController extends Controller
         $mimeType = $file->getMimeType();
         $isVideo = Str::startsWith($mimeType, 'video/');
 
+        $this->assertFileSizeAllowed($file, $isVideo);
+
         $originalName = $file->getClientOriginalName();
-        $title = $request->input('custom_name') ?? pathinfo($originalName, PATHINFO_FILENAME);
-        $fileSize = $file->getSize();
+        $title = $request->filled('custom_name')
+            ? $request->input('custom_name')
+            : pathinfo($originalName, PATHINFO_FILENAME);
 
-        $thumbnailFullUrl = null;
-        $tempThumbPath = null;
+        // Video thumbnail: prefer client-captured JPEG/PNG, else FFmpeg
+        $thumbnailFullUrl = $isVideo
+            ? $this->storeVideoThumbnail($file, $request->file('thumbnail'))
+            : null;
 
-
-        // 2. Video thumbnail: prefer client-captured JPEG/PNG, else FFmpeg
-        if ($isVideo) {
-            $clientThumb = $request->file('thumbnail');
-            if ($clientThumb && $clientThumb->isValid()) {
-                try {
-                    $thumbnailName = 'thumb_'.time().'_'.Str::random(5).'.jpg';
-                    $thumbS3Path = 'thumbnails/'.$thumbnailName;
-                    Storage::disk('s3')->put($thumbS3Path, file_get_contents($clientThumb->getRealPath()), 'public');
-                    $thumbnailFullUrl = Storage::disk('s3')->url($thumbS3Path);
-                } catch (\Exception $e) {
-                    \Log::error('Error uploading client video thumbnail: '.$e->getMessage());
-                }
-            }
-
-            if (! $thumbnailFullUrl) {
-                try {
-                    $ffmpeg = FFMpeg::create([
-                        'ffmpeg.binaries' => '/usr/bin/ffmpeg',
-                        'ffprobe.binaries' => '/usr/bin/ffprobe',
-                    ]);
-
-                    $video = $ffmpeg->open($file->getRealPath());
-                    $thumbnailName = 'thumb_'.time().'_'.Str::random(5).'.jpg';
-                    $tempThumbPath = storage_path('app/public/'.$thumbnailName);
-
-                    // Extract frame at 1 second
-                    $video->frame(TimeCode::fromSeconds(1))->save($tempThumbPath);
-
-                    // Upload Thumbnail to S3
-                    $thumbS3Path = 'thumbnails/'.$thumbnailName;
-                    Storage::disk('s3')->put($thumbS3Path, file_get_contents($tempThumbPath), 'public');
-                    $thumbnailFullUrl = Storage::disk('s3')->url($thumbS3Path);
-                } catch (\Exception $e) {
-                    \Log::error('Error extracting thumbnail: '.$e->getMessage());
-                }
-            }
-        }
-
-        // 3. Upload Main File (Image or Video) to S3
+        // Upload main file (image or video) to S3
         $folder = $isVideo ? 'videos' : 'images';
         $filePathS3 = Storage::disk('s3')->putFile($folder, $file, 'public');
 
-        // 3. Check if the upload actually worked before getting the URL
         if (! $filePathS3) {
             return response()->json([
                 'success' => false,
-                'message' => 'S3 Upload failed. Check your AWS credentials and Bucket permissions. '.$filePathS3,
-                'error' => $filePathS3,
+                'message' => 'S3 upload failed. Check your AWS credentials and bucket permissions.',
             ], 500);
         }
 
-        $fullFileUrl = Storage::disk('s3')->url($filePathS3);
-
-        // 4. Save to Database
         $media = GalleryMedia::create([
-            'path' => $fullFileUrl,
+            'path' => Storage::disk('s3')->url($filePathS3),
             'type' => $isVideo ? 'video' : 'image',
             'original_name' => $originalName,
-            'file_size' => $fileSize,
+            'file_size' => $file->getSize(),
             'mime_type' => $mimeType,
             'title' => $title,
-            'thumbnail' => $thumbnailFullUrl, // Will be null for images
+            'thumbnail' => $thumbnailFullUrl, // Null for images
             'total_seconds' => $isVideo ? $request->input('total_seconds') : null,
         ]);
-
-        // 5. Cleanup temp thumbnail if it exists
-        if ($tempThumbPath && file_exists($tempThumbPath)) {
-            unlink($tempThumbPath);
-        }
 
         return response()->json([
             'success' => true,
@@ -161,9 +138,47 @@ class MediaGalleryController extends Controller
     {
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
+            'file' => 'nullable|file|mimetypes:'.implode(',', array_merge(self::IMAGE_MIMES, self::VIDEO_MIMES)).'|max:'.(self::VIDEO_MAX_BYTES / 1024),
+            'thumbnail' => 'nullable|file|mimes:jpeg,jpg,png|max:2048',
+            'total_seconds' => 'nullable|integer|min:0',
         ]);
 
-        $media_gallery->update($validated);
+        $file = $request->file('file');
+
+        if ($file) {
+            $mimeType = $file->getMimeType();
+            $isVideo = Str::startsWith($mimeType, 'video/');
+
+            $this->assertFileSizeAllowed($file, $isVideo);
+
+            $newThumbnailUrl = $isVideo
+                ? $this->storeVideoThumbnail($file, $request->file('thumbnail'))
+                : null;
+
+            $folder = $isVideo ? 'videos' : 'images';
+            $filePathS3 = Storage::disk('s3')->putFile($folder, $file, 'public');
+
+            if (! $filePathS3) {
+                return back()->withErrors(['file' => 'S3 upload failed. The previous file was kept.']);
+            }
+
+            // Remove the old objects only after the new upload succeeded
+            $this->deleteFromS3ByUrl($media_gallery->path);
+            $this->deleteFromS3ByUrl($media_gallery->thumbnail);
+
+            $media_gallery->fill([
+                'path' => Storage::disk('s3')->url($filePathS3),
+                'type' => $isVideo ? 'video' : 'image',
+                'original_name' => $file->getClientOriginalName(),
+                'file_size' => $file->getSize(),
+                'mime_type' => $mimeType,
+                'thumbnail' => $newThumbnailUrl,
+                'total_seconds' => $isVideo ? ($validated['total_seconds'] ?? null) : null,
+            ]);
+        }
+
+        $media_gallery->title = $validated['title'] ?? $media_gallery->title;
+        $media_gallery->save();
 
         return redirect()
             ->route('admin.media-gallery.index')
@@ -172,13 +187,9 @@ class MediaGalleryController extends Controller
 
     public function destroy(GalleryMedia $media_gallery)
     {
-        // delete file from s3
-        Storage::disk('s3')->delete($media_gallery->path);
+        $this->deleteFromS3ByUrl($media_gallery->path);
+        $this->deleteFromS3ByUrl($media_gallery->thumbnail);
 
-        // delete thumbnail from s3
-        if ($media_gallery->thumbnail) {
-            Storage::disk('s3')->delete($media_gallery->thumbnail);
-        }
         $media_gallery->liveShows()->detach();
         $media_gallery->delete();
 
@@ -189,6 +200,90 @@ class MediaGalleryController extends Controller
         return redirect()
             ->route('admin.media-gallery.index')
             ->with('success', 'Media deleted.');
+    }
+
+    /**
+     * Enforce per-type size limits (images 2MB, videos 250MB).
+     *
+     * @throws ValidationException
+     */
+    private function assertFileSizeAllowed(\Illuminate\Http\UploadedFile $file, bool $isVideo): void
+    {
+        $maxBytes = $isVideo ? self::VIDEO_MAX_BYTES : self::IMAGE_MAX_BYTES;
+
+        if ($file->getSize() > $maxBytes) {
+            $limitMb = (int) ($maxBytes / (1024 * 1024));
+            throw ValidationException::withMessages([
+                'file' => [($isVideo ? 'Videos' : 'Images')." may not be larger than {$limitMb} MB."],
+            ]);
+        }
+    }
+
+    /**
+     * Store a thumbnail for a video on S3: prefer the client-captured frame, fall back to FFmpeg.
+     * Returns the public URL, or null if no thumbnail could be produced.
+     */
+    private function storeVideoThumbnail(\Illuminate\Http\UploadedFile $video, ?\Illuminate\Http\UploadedFile $clientThumb): ?string
+    {
+        $thumbS3Path = 'thumbnails/thumb_'.time().'_'.Str::random(5).'.jpg';
+
+        if ($clientThumb && $clientThumb->isValid()) {
+            try {
+                Storage::disk('s3')->put($thumbS3Path, file_get_contents($clientThumb->getRealPath()), 'public');
+
+                return Storage::disk('s3')->url($thumbS3Path);
+            } catch (\Exception $e) {
+                \Log::error('Error uploading client video thumbnail: '.$e->getMessage());
+            }
+        }
+
+        $tempThumbPath = null;
+
+        try {
+            $ffmpeg = FFMpeg::create([
+                'ffmpeg.binaries' => '/usr/bin/ffmpeg',
+                'ffprobe.binaries' => '/usr/bin/ffprobe',
+            ]);
+
+            $tempThumbPath = storage_path('app/'.basename($thumbS3Path));
+            $ffmpeg->open($video->getRealPath())
+                ->frame(TimeCode::fromSeconds(1))
+                ->save($tempThumbPath);
+
+            Storage::disk('s3')->put($thumbS3Path, file_get_contents($tempThumbPath), 'public');
+
+            return Storage::disk('s3')->url($thumbS3Path);
+        } catch (\Exception $e) {
+            \Log::error('Error extracting video thumbnail: '.$e->getMessage());
+
+            return null;
+        } finally {
+            if ($tempThumbPath && file_exists($tempThumbPath)) {
+                unlink($tempThumbPath);
+            }
+        }
+    }
+
+    /**
+     * Delete an S3 object given the public URL stored in the DB.
+     */
+    private function deleteFromS3ByUrl(?string $url): void
+    {
+        if (! $url) {
+            return;
+        }
+
+        $key = ltrim((string) parse_url($url, PHP_URL_PATH), '/');
+
+        if ($key === '') {
+            return;
+        }
+
+        try {
+            Storage::disk('s3')->delete($key);
+        } catch (\Exception $e) {
+            \Log::error('Error deleting S3 object: '.$e->getMessage());
+        }
     }
 
     public function attachToLiveShow(Request $request): JsonResponse
