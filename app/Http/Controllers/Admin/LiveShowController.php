@@ -1453,7 +1453,7 @@ class LiveShowController extends Controller
                 ];
             });
 
-        return response()->json(['responses' => $responses]);
+        return view('admin.live-shows.player-responses', compact('liveShow', 'userId', 'responses'));
     }
 
     public function exportAllParticipantsCSV($id)
