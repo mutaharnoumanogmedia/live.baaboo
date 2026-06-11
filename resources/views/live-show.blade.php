@@ -1028,7 +1028,7 @@
                             <span class="trophy-icon">${user.is_winner ? '<i class="fas fa-trophy " title="Winner"></i>' : ''}</span>
                         </div>
                         
-                        <div class="score-text ${user.id !== userId && !winnerAnnounced ? 'blur' : ''}">
+                        <div class="score-text }">
                             ${user.score ? Math.round(user.score) : 0}
                         </div>
                     `;
@@ -1038,9 +1038,9 @@
                     document.getElementById('user-count').innerHTML = totalUsers;
 
                     if (winnerAnnounced) {
-                        document.querySelectorAll('.score-text').forEach(scoreText => {
-                            scoreText.classList.remove('blur');
-                        });
+                        // document.querySelectorAll('.score-text').forEach(scoreText => {
+                        //     scoreText.classList.remove('blur');
+                        // });
                         document.getElementById('players-list-loading-spinner').style.display = 'none';
                     }
                 })
