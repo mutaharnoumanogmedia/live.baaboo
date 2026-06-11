@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\LiveShowWinnerPrize;
 use App\Models\User;
+use App\Models\UserQuizResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -23,6 +25,7 @@ class PlayerController extends Controller
      *  - referred_by_username       (string)  per-column search on referrer
      *  - sort                       (string)  one of the orderable columns
      *  - direction                  (asc|desc)
+     *  - per_page                   (25|50|100)
      *  - filter_registered_from / filter_registered_to  (Y-m-d)
      *  - filter_last_show_from  / filter_last_show_to   (Y-m-d)
      *  - filter_has_referrer        ('1' | '0' | '')
@@ -32,62 +35,108 @@ class PlayerController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::role('user')->where('is_active', 1)
+        $perPage = (int) $request->input('per_page', 50);
+        if (! in_array($perPage, [25, 50, 100], true)) {
+            $perPage = 50;
+        }
+
+        $liveShowStats = DB::table('user_live_shows')
+            ->select('user_id')
+            ->selectRaw('COUNT(*) as live_games_played')
+            ->selectRaw('MAX(created_at) as last_game_played_at')
+            ->groupBy('user_id');
+
+        $referralStats = DB::table('users')
+            ->select('referred_by')
+            ->selectRaw('COUNT(*) as referred_users_count')
+            ->whereNotNull('referred_by')
+            ->groupBy('referred_by');
+
+        $query = User::role('user')
+            ->where('users.is_active', 1)
+            ->leftJoinSub($liveShowStats, 'live_show_stats', 'users.id', '=', 'live_show_stats.user_id')
+            ->leftJoinSub($referralStats, 'referral_stats', 'users.id', '=', 'referral_stats.referred_by')
             ->select('users.*')
-            ->withCount([
-                'liveShows as live_games_played',
-                'referredUsers as referred_users_count',
-            ])
-            ->with(['referredBy:id,name,user_name'])
-            ->addSelect([
-                'last_game_played_at' => DB::table('user_live_shows')
-                    ->select('created_at')
-                    ->whereColumn('user_id', 'users.id')
-                    ->orderByDesc('created_at')
-                    ->limit(1),
-            ]);
+            ->selectRaw('COALESCE(live_show_stats.live_games_played, 0) as live_games_played')
+            ->selectRaw('live_show_stats.last_game_played_at')
+            ->selectRaw('COALESCE(referral_stats.referred_users_count, 0) as referred_users_count')
+            ->with(['referredBy:id,name,user_name']);
 
         $this->applyGlobalSearch($query, (string) $request->input('q', ''));
         $this->applyColumnSearch($query, $request);
         $this->applyCustomFilters($query, $request);
         $this->applyOrdering($query, $request);
 
-        // 100 records per page, links keep all current filters/sort.
-        $players = $query->paginate(50)->withQueryString();
+        $players = $query->paginate($perPage)->withQueryString();
 
-        return view('admin.players.index', compact('players'));
+        return view('admin.players.index', compact('players', 'perPage'));
     }
 
     public function show($id)
     {
         $player = User::with([
-            'referredBy:id,name,user_name,email,created_at',
+            'referredBy:id,name,user_name,email,created_at,is_affiliate',
             'referredUsers' => function ($q) {
                 $q->orderByDesc('created_at');
             },
         ])->findOrFail($id);
 
-        // Order participation by most-recently joined first
+        // Load participation with all pivot fields we want to display.
         $player->setRelation(
             'liveShows',
             $player->liveShows()
+                ->withPivot([
+                    'score', 'status', 'created_at', 'prize_won',
+                    'is_winner', 'is_online', 'winner_prize_id', 'discount_code',
+                ])
                 ->orderByPivot('created_at', 'desc')
                 ->get()
         );
 
-        // Aggregate stats. Score is computed via UserLiveShow accessor (live SUM
-        // from user_quiz_responses), so we iterate to honour that single source
-        // of truth instead of reading a possibly-stale pivot column.
+        // Per-show quiz performance for this player.
+        $quizStats = UserQuizResponse::where('user_quiz_responses.user_id', $player->id)
+            ->join('live_show_quizzes', 'user_quiz_responses.quiz_id', '=', 'live_show_quizzes.id')
+            ->select('live_show_quizzes.live_show_id')
+            ->selectRaw('COUNT(*) as total_answers')
+            ->selectRaw('SUM(user_quiz_responses.is_correct) as correct_answers')
+            ->selectRaw('ROUND(AVG(user_quiz_responses.seconds_to_submit), 2) as avg_response_time')
+            ->selectRaw('ROUND(SUM(user_quiz_responses.response_score), 2) as total_score')
+            ->groupBy('live_show_quizzes.live_show_id')
+            ->get()
+            ->keyBy('live_show_id');
+
+        // Load LiveShowWinnerPrize records for every prize this player claimed.
+        $winnerPrizeIds = $player->liveShows
+            ->filter(fn ($s) => $s->pivot->is_winner && $s->pivot->winner_prize_id)
+            ->pluck('pivot.winner_prize_id')
+            ->filter()
+            ->unique();
+
+        $winnerPrizes = LiveShowWinnerPrize::whereIn('id', $winnerPrizeIds)->get()->keyBy('id');
+
+        // Aggregate stats. Score comes from the UserLiveShow accessor (SUM of
+        // response_score), which is the single source of truth.
         $totalGames = $player->liveShows->count();
         $gamesWon = 0;
         $maxScore = 0.0;
+        $totalScoreSum = 0.0;
         $totalPrizeMoney = 0.0;
+        $totalAnswers = 0;
+        $totalCorrect = 0;
 
         foreach ($player->liveShows as $show) {
             $pivot = $show->pivot;
             $score = (float) ($pivot->score ?? 0);
+            $totalScoreSum += $score;
+
             if ($score > $maxScore) {
                 $maxScore = $score;
+            }
+
+            $qs = $quizStats->get($show->id);
+            if ($qs) {
+                $totalAnswers += (int) $qs->total_answers;
+                $totalCorrect += (int) $qs->correct_answers;
             }
 
             if ($pivot->is_winner) {
@@ -103,14 +152,19 @@ class PlayerController extends Controller
         }
 
         $stats = [
-            'total_games' => $totalGames,
-            'games_won' => $gamesWon,
-            'max_score' => $maxScore,
-            'total_prize_money' => $totalPrizeMoney,
-            'referred_count' => $player->referredUsers->count(),
+            'total_games'      => $totalGames,
+            'games_won'        => $gamesWon,
+            'max_score'        => $maxScore,
+            'avg_score'        => $totalGames > 0 ? $totalScoreSum / $totalGames : 0,
+            'total_prize_money'=> $totalPrizeMoney,
+            'referred_count'   => $player->referredUsers->count(),
+            'total_answers'    => $totalAnswers,
+            'total_correct'    => $totalCorrect,
+            'accuracy'         => $totalAnswers > 0 ? ($totalCorrect / $totalAnswers) * 100 : 0,
+            'win_rate'         => $totalGames > 0 ? ($gamesWon / $totalGames) * 100 : 0,
         ];
 
-        return view('admin.players.show', compact('player', 'stats'));
+        return view('admin.players.show', compact('player', 'stats', 'quizStats', 'winnerPrizes'));
     }
 
     public function winners()
@@ -180,22 +234,22 @@ class PlayerController extends Controller
         }
 
         if (is_numeric($request->input('filter_min_referred'))) {
-            $query->has('referredUsers', '>=', (int) $request->input('filter_min_referred'));
+            $query->whereRaw('COALESCE(referral_stats.referred_users_count, 0) >= ?', [
+                (int) $request->input('filter_min_referred'),
+            ]);
         }
 
         if (is_numeric($request->input('filter_min_games'))) {
-            $query->has('liveShows', '>=', (int) $request->input('filter_min_games'));
+            $query->whereRaw('COALESCE(live_show_stats.live_games_played, 0) >= ?', [
+                (int) $request->input('filter_min_games'),
+            ]);
         }
 
         if ($v = $request->input('filter_last_show_from')) {
-            $query->whereHas('liveShows', function ($q) use ($v) {
-                $q->whereDate('user_live_shows.created_at', '>=', $v);
-            });
+            $query->whereDate('live_show_stats.last_game_played_at', '>=', $v);
         }
         if ($v = $request->input('filter_last_show_to')) {
-            $query->whereHas('liveShows', function ($q) use ($v) {
-                $q->whereDate('user_live_shows.created_at', '<=', $v);
-            });
+            $query->whereDate('live_show_stats.last_game_played_at', '<=', $v);
         }
     }
 
