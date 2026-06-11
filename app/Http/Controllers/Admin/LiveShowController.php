@@ -296,10 +296,10 @@ class LiveShowController extends Controller
     {
         $live_show->quizzes()->delete();
         $live_show->winnerPrizes()->delete();
-        $live_show->galleryMedia()->delete();
+        // $live_show->galleryMedia()->delete();
         $live_show->users()->detach();
         $live_show->messages()->delete();
-        $live_show->galleryState()->delete();
+        // $live_show->galleryState()->delete();
         $live_show->delete();
 
         if ($live_show->thumbnail) {
