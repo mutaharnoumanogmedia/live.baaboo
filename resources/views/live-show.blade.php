@@ -1182,7 +1182,7 @@
                 <input type="hidden" id="quizId" value="${quiz.id}">
                     <div class="quiz-question">
                        <div class="text-center quiz-question-index me-1" style="font-size: 14px; font-weight: bold;">${quiz.index  } von ${quiz.totalQuizQuestions}.</div>
-                       <div class="quiz-question-text">${quiz.question}</div>
+                       <div class="quiz-question-text" translate="no">${quiz.question}</div>
                     </div>
                     <div class="quiz-options row">
                         ${quiz.options.map((option, index) =>
