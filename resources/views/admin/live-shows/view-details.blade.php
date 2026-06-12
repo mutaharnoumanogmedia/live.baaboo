@@ -474,8 +474,9 @@
                                         '</td>' +
                                         '<td class="text-success">' + escapeHtml(
                                             correctText) + '</td>' +
-                                        '<td>' +
                                         '<td>' + escapeHtml(resp.answered_at) + '</td>' +
+
+                                        '<td>' +
 
                                         (resp.is_correct ?
                                             '<span class="badge bg-success"><i class="fas fa-check"></i> Correct</span>' :
