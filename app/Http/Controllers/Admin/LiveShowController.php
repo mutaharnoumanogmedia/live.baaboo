@@ -1440,6 +1440,7 @@ class LiveShowController extends Controller
                     'id' => $response->id,
                     'question' => $response->quiz->question ?? 'N/A',
                     'selected_option' => $response->quizOption->option_text ?? 'N/A',
+                    'answered_at' => $response->created_at->format('d M Y, H:i:s'),
                     'is_correct' => (bool) $response->is_correct,
                     'seconds_to_submit' => $response->seconds_to_submit,
                     'response_score' => $response->response_score,

@@ -332,6 +332,7 @@
                                                 <th>#</th>
                                                 <th>Question</th>
                                                 <th>Selected Answer</th>
+                                                <th>Answered At</th>
                                                 <th>Correct Answer</th>
                                                 <th>Result</th>
                                                 <th>Time</th>
@@ -470,6 +471,7 @@
                                         escapeHtml(resp.selected_option) +
                                         '</span>' +
                                         '</td>' +
+                                        '<td>' + escapeHtml(resp.answered_at) + '</td>' +
                                         '<td class="text-success">' + escapeHtml(
                                             correctText) + '</td>' +
                                         '<td>' +
