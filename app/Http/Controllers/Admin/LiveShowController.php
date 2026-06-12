@@ -1452,8 +1452,7 @@ class LiveShowController extends Controller
                     'created_at' => $response->created_at->format('d M Y, H:i:s'),
                 ];
             });
-
-        return view('admin.live-shows.player-responses', compact('liveShow', 'userId', 'responses'));
+        return response()->json($responses);
     }
 
     public function exportAllParticipantsCSV($id)
