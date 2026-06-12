@@ -92,7 +92,7 @@
                                 <div class="col-md-6 mb-3">
                                     <div class="border border-secondary rounded p-3 h-100">
                                         <small class="text-secondary d-block mb-1">Winners announced</small>
-                                        @if (! empty($liveShow->winners_announced))
+                                        @if (!empty($liveShow->winners_announced))
                                             <strong class="text-success">Yes</strong>
                                             <span class="d-block small text-muted mt-1">Winner emails are queued per
                                                 your schedule.</span>
@@ -194,7 +194,7 @@
                             </a>
                         </div>
                     </div>
-                   
+
 
                     <div class="card shadow-sm border-0 h-100">
                         <div
@@ -332,8 +332,9 @@
                                                 <th>#</th>
                                                 <th>Question</th>
                                                 <th>Selected Answer</th>
-                                                <th>Answered At</th>
                                                 <th>Correct Answer</th>
+                                                <th>Answered At</th>
+
                                                 <th>Result</th>
                                                 <th>Time</th>
                                                 <th>Score</th>
@@ -471,10 +472,11 @@
                                         escapeHtml(resp.selected_option) +
                                         '</span>' +
                                         '</td>' +
-                                        '<td>' + escapeHtml(resp.answered_at) + '</td>' +
                                         '<td class="text-success">' + escapeHtml(
                                             correctText) + '</td>' +
                                         '<td>' +
+                                        '<td>' + escapeHtml(resp.answered_at) + '</td>' +
+
                                         (resp.is_correct ?
                                             '<span class="badge bg-success"><i class="fas fa-check"></i> Correct</span>' :
                                             '<span class="badge bg-danger"><i class="fas fa-times"></i> Wrong</span>'
