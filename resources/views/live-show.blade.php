@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    <meta name="google" content="notranslate">
+    <meta name="translation" content="notranslate">
+
+
 
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="preconnect" href="https://js.pusher.com" crossorigin>
@@ -1182,7 +1186,7 @@
                     </div>
                     <div class="quiz-options row">
                         ${quiz.options.map((option, index) =>
-                        `<div class="mb-3 quiz-option col-md-12 position-relative" id="quiz-option-${option.id}">  <div class="option-result-container " id="option-result-container-${option.id}" style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}" class="quiz-option-label">${numberToLetter(index)}. ${option.option_text}</label>  </div> `).join('')}
+                        `<div class="mb-3 quiz-option col-md-12 position-relative" id="quiz-option-${option.id}">  <div class="option-result-container " id="option-result-container-${option.id}" style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}" class="quiz-option-label" translate="no">${numberToLetter(index)}. ${option.option_text}</label>  </div> `).join('')}
                     </div>
              </div>
             `;
