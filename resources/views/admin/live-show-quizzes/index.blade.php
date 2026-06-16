@@ -16,6 +16,28 @@
         @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
+
+        <form method="GET" action="{{ route('admin.live-show-quizzes.index') }}" class="row g-2 align-items-end mb-3">
+            <div class="col-md-5">
+                <label for="live_show_id" class="form-label mb-1">Filter by Live Show</label>
+                <select name="live_show_id" id="live_show_id" class="form-select">
+                    <option value="">All Live Shows</option>
+                    @foreach ($liveShows as $liveShow)
+                        <option value="{{ $liveShow->id }}"
+                            {{ (string) request('live_show_id') === (string) $liveShow->id ? 'selected' : '' }}>
+                            {{ $liveShow->title }} (ID: {{ $liveShow->id }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-auto d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Apply</button>
+                @if (request('live_show_id'))
+                    <a href="{{ route('admin.live-show-quizzes.index') }}" class="btn btn-outline-secondary">Clear</a>
+                @endif
+            </div>
+        </form>
+
         <table class="table table-borderless table-dark data-table">
             <thead>
                 <tr>

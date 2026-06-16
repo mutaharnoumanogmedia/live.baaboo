@@ -39,6 +39,9 @@ class GameshowAttendeeTagService
         $failed = 0;
         $errors = [];
 
+        \Log::info('Players to tag', ['players' => $players]);
+      
+
         foreach ($players as $player) {
             try {
                 $contact = $this->client->findContactByEmail($player->email);
