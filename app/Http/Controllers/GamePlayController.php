@@ -13,6 +13,7 @@ use App\Models\UserLiveShow;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use App\Models\Viewer;
+use App\Services\ActiveCampaign\ActiveCampaignClient;
 use App\Services\AffiliateAPIService;
 use App\Services\LeadGenerationService;
 use App\Services\LiveShowQuizService;
@@ -210,6 +211,11 @@ class GamePlayController extends Controller
             $leadGenerationResponse = (new LeadGenerationService)->leadGeneration($leadGenerationPayload);
             \Log::info('Lead generation request sent successfully', $leadGenerationPayload);
             \Log::info('Lead generation response', $leadGenerationResponse);
+
+            // ensureTagByEmail
+            $activeCampaign = new ActiveCampaignClient;
+            $tagResult = $activeCampaign->ensureTagByEmail($user->email, 'gameshow_attended_general');
+            \Log::info('User tagged with gameshow_attended_general', ['tagResult' => $tagResult]);
 
             return response()->json(['success' => true, 'message' => 'User registered successfully.', 'user' => $user, 'authStatus' => Auth::guard('web')->check()]);
         } catch (\Exception $e) {
