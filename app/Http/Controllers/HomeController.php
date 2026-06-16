@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\RegistrationWelcomeMail;
 use App\Models\LiveShow;
 use App\Models\User;
+use App\Services\ActiveCampaign\ActiveCampaignClient;
 use App\Services\LeadGenerationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -299,6 +300,10 @@ class HomeController extends Controller
         $leadGenerationResponse = (new LeadGenerationService())->leadGeneration($leadGenerationPayload);
         \Log::info('Lead generation request sent successfully', $leadGenerationPayload);
         \Log::info('Lead generation response', $leadGenerationResponse);
+
+        $activeCampaign = new ActiveCampaignClient();
+        $tagResult = $activeCampaign->ensureTagByEmail($user->email, 'gameshow_attended_general');
+        \Log::info('User tagged with gameshow_attended_general', ['tagResult' => $tagResult]);
 
         $liveShow->users()->syncWithoutDetaching([
             $user->id => [
