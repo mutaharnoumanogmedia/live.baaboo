@@ -85,6 +85,7 @@ class ActiveCampaignClient
      */
     public function addTag(int $contactId, int $tagId): array
     {
+        \Log::info('Adding tag to contact', ['contactId' => $contactId, 'tagId' => $tagId]);
         return $this->http->post('contactTags', [
             'contactTag' => ['contact' => $contactId, 'tag' => $tagId],
         ])->throw()->json('contactTag', []);
@@ -123,6 +124,7 @@ class ActiveCampaignClient
      */
     public function ensureTagByEmail(string $email, string $tagSlug): bool
     {
+        \Log::info('Ensuring tag by email', ['email' => $email, 'tagSlug' => $tagSlug]);
         $contact = $this->findContactByEmail($email);
 
         if ($contact === null) {
@@ -141,5 +143,5 @@ class ActiveCampaignClient
         return true;
     }
 
-    
+
 }
