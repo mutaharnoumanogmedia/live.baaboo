@@ -259,7 +259,7 @@
                                  </div>
 
                                 {{-- Push notification trigger: alert every player of this show on their devices --}}
-                                {{-- <div class="col-12 pt-3 mt-2 border-top">
+                                <div class="col-12 pt-3 mt-2 border-top">
                                     <h6 class="mb-3 text-muted small text-uppercase fw-bold">
                                         <i class="fas fa-bell me-2 text-warning"></i> Push Notification To Players
                                     </h6>
@@ -293,7 +293,7 @@
                                     <p class="mt-2 mb-0 small text-muted">
                                         Only players who enabled browser notifications will receive this alert.
                                     </p>
-                                </div> --}}
+                                </div>
 
                              </div>
                          </div>

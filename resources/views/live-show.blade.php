@@ -2621,7 +2621,7 @@
     @endif
 
     {{-- German web-push opt-in banner + subscription logic. --}}
-    {{-- @include('partials.push-notification') --}}
+    @include('partials.push-notification')
 
 
 </body>
