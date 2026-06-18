@@ -50,7 +50,7 @@ class PushNotificationService
             $message,
             $data,
             $subscriptionId,
-        )->onQueue('push');
+        )->onQueue('high');
     }
 
     /**
