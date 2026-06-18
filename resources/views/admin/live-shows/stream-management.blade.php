@@ -258,10 +258,43 @@
                                      </div>
                                  </div>
 
+                                {{-- Push notification trigger: alert every player of this show on their devices --}}
+                                {{-- <div class="col-12 pt-3 mt-2 border-top">
+                                    <h6 class="mb-3 text-muted small text-uppercase fw-bold">
+                                        <i class="fas fa-bell me-2 text-warning"></i> Push Notification To Players
+                                    </h6>
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col-lg-4">
+                                            <label class="mb-1 form-label small text-muted" for="pushNotifyTitle">Title</label>
+                                            <input type="text" id="pushNotifyTitle" class="form-control form-control-sm"
+                                                value="Badabing Live-Show" maxlength="255">
+                                        </div>
+                                        <div class="col-lg-5">
+                                            <label class="mb-1 form-label small text-muted" for="pushNotifyMessage">Message
+                                                (German)</label>
+                                            <input type="text" id="pushNotifyMessage" class="form-control form-control-sm"
+                                                value="Die Live-Show läuft jetzt – steig ein und sichere dir deine Gewinnchance!"
+                                                maxlength="500">
+                                        </div>
+                                        <div class="col-lg-3 d-grid">
+                                            <button type="button" id="notifyPlayersBtn"
+                                                class="py-2 text-white shadow-sm btn btn-warning fw-bold"
+                                                onclick="notifyPlayers()">
+                                                <span class="notify-players-label">
+                                                    <i class="fas fa-paper-plane me-2"></i> Send Push
+                                                </span>
+                                                <span class="notify-players-loader d-none">
+                                                    <i class="fas fa-spinner fa-spin me-2" aria-hidden="true"></i>
+                                                    Sending…
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p class="mt-2 mb-0 small text-muted">
+                                        Only players who enabled browser notifications will receive this alert.
+                                    </p>
+                                </div> --}}
 
-
-
-                                
                              </div>
                          </div>
                      </div>
@@ -2211,9 +2244,89 @@
                  });
              }
 
-             function hideWinnerTab(btn) {
-                 streamSwalConfirm({
-                     title: 'Hide winner tab?',
+            // Send a web-push notification to every player of this live show.
+            function notifyPlayers() {
+                var btn = document.getElementById('notifyPlayersBtn');
+                var titleInput = document.getElementById('pushNotifyTitle');
+                var messageInput = document.getElementById('pushNotifyMessage');
+
+                var title = titleInput ? titleInput.value.trim() : '';
+                var message = messageInput ? messageInput.value.trim() : '';
+
+                if (!message) {
+                    streamSwalWarning('Please enter a notification message.', 'Message required');
+                    return;
+                }
+
+                streamSwalConfirm({
+                    title: 'Send push notification?',
+                    text: 'All players of this show who enabled notifications will receive this alert on their devices.',
+                    confirmButtonText: 'Yes, send notification',
+                }).then(function(result) {
+                    if (!result.isConfirmed) {
+                        return;
+                    }
+
+                    // Swap the button into its loading state while we queue the push.
+                    setNotifyPlayersLoading(btn, true);
+
+                    fetch(`{{ route('admin.live-shows.notify-players', ['liveShowId' => $liveShow->id]) }}`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                title: title,
+                                message: message,
+                            }),
+                        })
+                        .then(function(response) {
+                            return response.json().then(function(data) {
+                                return {
+                                    ok: response.ok,
+                                    status: response.status,
+                                    data: data
+                                };
+                            });
+                        })
+                        .then(function(result) {
+                            setNotifyPlayersLoading(btn, false);
+                            if (!result.ok) {
+                                streamSwalWarning(
+                                    (result.data && result.data.message) ? result.data.message :
+                                    'Could not send the push notification.',
+                                    'Notification not sent');
+                                return;
+                            }
+                            streamSwalSuccess(
+                                (result.data && result.data.message) ? result.data.message :
+                                'Push notification has been queued.',
+                                'Notification queued');
+                        })
+                        .catch(function(error) {
+                            console.error('Error sending push notification:', error);
+                            setNotifyPlayersLoading(btn, false);
+                            streamSwalError('Could not send the push notification. Please try again.',
+                                'Notification failed');
+                        });
+                });
+            }
+
+            // Toggle the spinner/label on the "Send Push" button.
+            function setNotifyPlayersLoading(btn, loading) {
+                if (!btn) return;
+                var label = btn.querySelector('.notify-players-label');
+                var loader = btn.querySelector('.notify-players-loader');
+                btn.disabled = loading;
+                if (label) label.classList.toggle('d-none', loading);
+                if (loader) loader.classList.toggle('d-none', !loading);
+            }
+
+            function hideWinnerTab(btn) {
+                streamSwalConfirm({
+                    title: 'Hide winner tab?',
                      text: 'Participants will no longer see the winners tab in the live show.',
                      confirmButtonText: 'Yes, hide tab',
                  }).then(function(result) {

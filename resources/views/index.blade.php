@@ -1040,5 +1040,8 @@
                 setInterval(checkBannerStatus, POLL_INTERVAL_MS);
             })();
         </script>
+
+        {{-- German web-push opt-in banner + subscription logic. --}}
+        @include('partials.push-notification')
     @endpush
 </x-guest-layout>

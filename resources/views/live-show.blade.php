@@ -644,12 +644,8 @@
 
 
 
-    {{-- <button id="enable-push">
-        Enable Notifications
-    </button> --}}
-
-
-
+    {{-- Push-notification opt-in is handled by the shared partial included at the
+         bottom of this page (resources/views/partials/push-notification.blade.php). --}}
 
     <script>
         let quizMode = false;
@@ -682,7 +678,6 @@
 
         const zegoLiveRoot = document.getElementById('zego-live-root');
 
-        const VAPID_PUBLIC_KEY = "{{ env('VAPID_PUBLIC_KEY') }}";
         const csrfToken = "{{ csrf_token() }}";
 
 
@@ -2052,49 +2047,6 @@
 
 
     <script>
-        /* REQUIRED conversion */
-        function urlBase64ToUint8Array(base64String) {
-            const padding = '='.repeat((4 - base64String.length % 4) % 4);
-            const base64 = (base64String + padding)
-                .replace(/-/g, '+')
-                .replace(/_/g, '/');
-
-            const rawData = atob(base64);
-            return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
-        }
-
-
-        async function enablePush() {
-            if (!('serviceWorker' in navigator)) {
-                console.log('Service workers not supported');
-                return;
-            }
-
-            const permission = await Notification.requestPermission();
-            if (permission !== 'granted') {
-                console.log('Permission denied');
-                return;
-            }
-
-            const registration = await navigator.serviceWorker.register('/sw.js');
-
-            const subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-            });
-
-            await fetch('{{ url('/') }}/api/push/subscribe', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify(subscription)
-            });
-
-            console.log('Push notifications enabled');
-        }
-
         document.getElementById("playButton").addEventListener("click", () => {
             console.log('Tap to play clicked');
             document.getElementById('playButtonOverlay').style.display = 'none';
@@ -2105,7 +2057,6 @@
         });
 
         function onLoadGameShow() {
-            // enablePush();
             if (isLoggedIn == false && window.location.search.indexOf('preview=true') === -1) {
                 showRegisterModal();
             }
@@ -2669,7 +2620,8 @@
         <script src="{{ url('js/live-show-quiz-debug-bot.js?v=' . time()) }}"></script>
     @endif
 
-
+    {{-- German web-push opt-in banner + subscription logic. --}}
+    {{-- @include('partials.push-notification') --}}
 
 
 </body>
