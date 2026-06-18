@@ -67,6 +67,11 @@
         div:has(> .unmuteVideo) {
             display: none !important;
         }
+
+        /* audience-single-host: co-host tiles hidden via data attribute + JS */
+        #root [data-audience-hidden-cohost="1"] {
+            display: none !important;
+        }
     </style>
 </head>
 
@@ -109,6 +114,83 @@
         const serverSecret = "{{ env('ZEGO_SERVER_SECRET', 'ac4b30ceb3e43b0280c7fa40be34d2ef') }}";
         const TOKEN = generatePrebuiltToken(appID, serverSecret, roomID, userID, userName);
 
+        // Main host is the only broadcaster shown to the audience; co-hosts are hidden.
+        const MAIN_HOST_ZEGO_USER_ID = @json($mainHostZegoUserId);
+        const MAIN_HOST_EMAIL = @json($mainHostEmail);
+        const hiddenBroadcasterIds = [];
+
+        function shouldHideBroadcaster(user) {
+            if (!user || !user.userID) {
+                return false;
+            }
+            if (MAIN_HOST_ZEGO_USER_ID && user.userID === MAIN_HOST_ZEGO_USER_ID) {
+                return false;
+            }
+            if (user.userName && user.userName.indexOf('cohost-') === 0) {
+                return true;
+            }
+            // Any other admin publisher (not the designated main host).
+            if (MAIN_HOST_ZEGO_USER_ID && user.userID.indexOf('admin-') === 0) {
+                return true;
+            }
+            return false;
+        }
+
+        function registerHiddenBroadcaster(user) {
+            if (!shouldHideBroadcaster(user) || hiddenBroadcasterIds.includes(user.userID)) {
+                return;
+            }
+            hiddenBroadcasterIds.push(user.userID);
+            syncHiddenBroadcasters();
+        }
+
+        function syncHiddenBroadcasters() {
+            if (window.__zegoAudienceInstance && ZegoUIKitPrebuilt.core && ZegoUIKitPrebuilt.core._config) {
+                ZegoUIKitPrebuilt.core._config.hideUsersById = hiddenBroadcasterIds.slice();
+            }
+            applyAudienceSingleHostLayout();
+        }
+
+        function applyAudienceSingleHostLayout() {
+            const root = document.getElementById('root');
+            if (!root) {
+                return;
+            }
+
+            root.querySelectorAll('#ZegoVideoPlayerName').forEach(function(nameEl) {
+                const label = (nameEl.textContent || '').trim();
+                if (MAIN_HOST_EMAIL && label === MAIN_HOST_EMAIL) {
+                    return;
+                }
+                if (label.indexOf('cohost-') !== 0) {
+                    return;
+                }
+
+                let node = nameEl;
+                for (let depth = 0; depth < 10 && node && node !== root; depth++) {
+                    if (node.querySelector && node.querySelector('video')) {
+                        node.setAttribute('data-audience-hidden-cohost', '1');
+                        break;
+                    }
+                    node = node.parentElement;
+                }
+            });
+        }
+
+        let audienceLayoutObserver = null;
+        function watchAudienceVideoLayout() {
+            const root = document.getElementById('root');
+            if (!root || audienceLayoutObserver) {
+                return;
+            }
+            audienceLayoutObserver = new MutationObserver(function() {
+                syncHiddenBroadcasters();
+            });
+            audienceLayoutObserver.observe(root, {
+                childList: true,
+                subtree: true,
+            });
+        }
 
         // You can assign different roles based on url parameters.
         let role = ZegoUIKitPrebuilt.Audience;
@@ -137,15 +219,34 @@
         }
 
         const zp = ZegoUIKitPrebuilt.create(TOKEN);
+        window.__zegoAudienceInstance = zp;
         zp.joinRoom({
             container: document.querySelector("#root"),
             videoResolutionList: [ZegoUIKitPrebuilt.VideoResolution_360P],
             videoResolutionDefault: ZegoUIKitPrebuilt.VideoResolution_360P,
+            hideUsersById: hiddenBroadcasterIds,
+            showNonVideoUser: false,
             scenario: {
                 mode: ZegoUIKitPrebuilt.LiveStreaming,
                 config: {
                     role: ZegoUIKitPrebuilt.Audience,
                 },
+            },
+            onJoinRoom: function() {
+                watchAudienceVideoLayout();
+                syncHiddenBroadcasters();
+            },
+            onUserJoin: function(users) {
+                (users || []).forEach(registerHiddenBroadcaster);
+            },
+            onLiveStart: function(user) {
+                if (user) {
+                    registerHiddenBroadcaster(user);
+                }
+                syncHiddenBroadcasters();
+            },
+            onStreamUpdate: function() {
+                syncHiddenBroadcasters();
             },
             sharedLinks: [{
                 name: 'Join as an audience',
