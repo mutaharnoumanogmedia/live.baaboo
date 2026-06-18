@@ -239,13 +239,13 @@
                                         </a>
                                     </li>
                                 @endcan
-                                @can('can-manage-push-notifications')
+                                {{-- @can('can-manage-push-notifications') --}}
                                     <li>
                                         <a class="dropdown-item" href="{{ route('admin.push-notifications.index') }}">
                                             <i class="bi bi-bell-fill me-2"></i> Push Notifications
                                         </a>
                                     </li>
-                                @endcan
+                                {{-- @endcan --}}
                             </ul>
                         </li>
                     @endcanany
