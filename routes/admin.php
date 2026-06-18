@@ -93,6 +93,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::post('live-shows/stream-management/{liveShowId}/unannounce-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'unannounceWinners'])->name('live-shows.unannounce-winners');
 
+    // Trigger a web-push notification to every player of a specific live show.
+    Route::post('live-shows/stream-management/{liveShowId}/notify-players', [\App\Http\Controllers\Admin\LiveShowController::class, 'notifyPlayers'])->name('live-shows.notify-players');
+
     Route::post('live-shows/{id}/block-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'blockUser'])->name('live-shows.block-user');
     Route::post('live-shows/{id}/unblock-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'unblockUser'])->name('live-shows.unblock-user');
 

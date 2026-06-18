@@ -15,8 +15,15 @@ class SendPushNotificationJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    /**
+     * @param int|array $userId Targeting rule for the notification:
+     *                          - 0           => broadcast to every saved subscription
+     *                          - int (>0)    => only that single user's devices
+     *                          - array<int>  => only the devices of the given users
+     *                                           (used when notifying all players of a show)
+     */
     public function __construct(
-        public int $userId,
+        public int|array $userId,
         public string $title,
         public string $message,
         public array $data = []
@@ -26,9 +33,16 @@ class SendPushNotificationJob implements ShouldQueue
     {
         $query = PushSubscription::query();
 
-        if ($this->userId > 0) {
+        // Resolve which subscriptions should receive this notification based on
+        // the targeting rule passed into the job.
+        if (is_array($this->userId)) {
+            // A list of user IDs (e.g. all players of a live show).
+            $query->whereIn('user_id', $this->userId);
+        } elseif ($this->userId > 0) {
+            // A single user.
             $query->where('user_id', $this->userId);
         }
+        // When $userId === 0 we leave the query unfiltered to broadcast to all.
 
         $subscriptions = $query->get();
 
@@ -44,8 +58,13 @@ class SendPushNotificationJob implements ShouldQueue
             ],
         ]);
 
+        // Map each endpoint to its DB record so we can clean up dead
+        // subscriptions after the push provider reports back.
+        $subscriptionsByEndpoint = $subscriptions->keyBy('endpoint');
+
+        // Queue every notification first, then flush them in one batch.
         foreach ($subscriptions as $sub) {
-            $webPush->sendOneNotification(
+            $webPush->queueNotification(
                 Subscription::create([
                     'endpoint' => $sub->endpoint,
                     'publicKey' => $sub->public_key,
@@ -60,6 +79,14 @@ class SendPushNotificationJob implements ShouldQueue
             );
         }
 
-        $webPush->flush();
+        // flush() returns a report per notification. We use it to drop
+        // subscriptions that are no longer valid (e.g. the user removed the
+        // app or the browser revoked the subscription).
+        foreach ($webPush->flush() as $report) {
+            if ($report->isSubscriptionExpired()) {
+                $endpoint = $report->getEndpoint();
+                optional($subscriptionsByEndpoint->get($endpoint))->delete();
+            }
+        }
     }
 }

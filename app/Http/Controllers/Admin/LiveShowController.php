@@ -34,6 +34,7 @@ use App\Models\UserLiveShow;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use App\Services\LiveShowQuizService;
+use App\Services\PushNotificationService;
 use App\Services\ShopifyDiscountService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -726,6 +727,70 @@ class LiveShowController extends Controller
             'success' => true,
             'message' => 'Winners announcement has been cleared. You can announce winners again when ready.',
             'winners_announced' => false,
+        ]);
+    }
+
+    /**
+     * Send a web-push notification to every player of the given live show.
+     *
+     * Triggered from the stream-management screen so an admin can nudge all
+     * registered players (e.g. "the show is starting") on their devices.
+     */
+    public function notifyPlayers(Request $request, $liveShowId): JsonResponse
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::check()], 401);
+        }
+
+        $liveShow = LiveShow::find($liveShowId);
+        if (! $liveShow) {
+            return response()->json(['success' => false, 'message' => 'Live show not found.'], 404);
+        }
+
+        // Allow the admin to customise the copy, but fall back to sensible
+        // German defaults that work for the typical "show is live" reminder.
+        $validated = $request->validate([
+            'title' => 'nullable|string|max:255',
+            'message' => 'nullable|string|max:500',
+        ]);
+
+        $title = $validated['title'] ?? null;
+        $title = is_string($title) && trim($title) !== ''
+            ? trim($title)
+            : 'Badabing Live-Show';
+
+        $message = $validated['message'] ?? null;
+        $message = is_string($message) && trim($message) !== ''
+            ? trim($message)
+            : 'Die Live-Show läuft jetzt – steig ein und sichere dir deine Gewinnchance!';
+
+        // Collect the IDs of every player attached to this live show.
+        $playerIds = $liveShow->users()->pluck('users.id')->all();
+
+        if (empty($playerIds)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'There are no players attached to this live show yet.',
+            ], 422);
+        }
+
+        // Queue the push. Only players who actually subscribed to notifications
+        // (i.e. have a saved push subscription) will receive it.
+        $targetedCount = PushNotificationService::sendToUsers(
+            userIds: $playerIds,
+            title: $title,
+            message: $message,
+            data: [
+                'url' => url('live-show-play/'.$liveShow->id),
+                'tag' => 'live-show-'.$liveShow->id,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Push notification has been queued for '.$targetedCount.' player(s).',
+            'targeted' => $targetedCount,
         ]);
     }
 
