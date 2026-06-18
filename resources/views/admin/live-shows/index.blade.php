@@ -50,10 +50,10 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @php $mainShowIndex = 1; @endphp
+                                    
                                     @foreach ($liveShows->where('is_test_show', false) as $show)
                                         <tr>
-                                            <td>{{ $mainShowIndex++ }}</td>
+                                            <td>{{ $show->id }}</td>
                                             <td>{{ $show->title }}</td>
                                             <td>{{ $show->scheduled_at }}</td>
                                             <td>{{ $show->users->count() }}</td>
@@ -157,10 +157,10 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @php $testShowIndex = 1; @endphp
+                                    
                                     @foreach ($liveShows->where('is_test_show', true) as $show)
                                         <tr>
-                                            <td>{{ $testShowIndex++ }}</td>
+                                            <td>{{ $show->id }}</td>
                                             <td>{{ $show->title }}</td>
                                             <td>{{ $show->scheduled_at }}</td>
                                             <td>{{ $show->users->count() }}</td>

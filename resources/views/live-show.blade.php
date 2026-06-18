@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    <meta name="google" content="notranslate">
+    <meta name="translation" content="notranslate">
+
+
 
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="preconnect" href="https://js.pusher.com" crossorigin>
@@ -561,7 +565,8 @@
                     </div>
                 </div>
 
-                <div class="tab-pane fade " id="playerTab" role="tabpanel" aria-labelledby="playerTab-tab position-relative">
+                <div class="tab-pane fade " id="playerTab" role="tabpanel"
+                    aria-labelledby="playerTab-tab position-relative">
                     <!-- Player List -->
                     <div class="container-fluid ">
                         <div class="players-list-group-container">
@@ -572,7 +577,7 @@
                             </ul>
                         </div>
                     </div>
-                    <div id="players-list-loading-spinner" class="position-absolute top-50 start-50 translate-middle">
+                    <div id="players-list-loading-spinner" style="display: none;">
                         <i class="fas fa-spinner fa-spin"></i>
                     </div>
                 </div>
@@ -583,17 +588,17 @@
                 class="flex-row px-2 text-center nav d-flex flex-nowrap w-100 justify-content-between align-items-center">
 
                 <!-- 1) Logo -->
-                <li class="nav-item flex-fill to-be-hidden-on-mediaplay">
-                    <a href="#"
-                        class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center">
+                <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center">
+                    <a href="#" class="nav-link d-flex flex-column align-items-center justify-content-center">
                         <img src="{{ asset('images/badabing-logo.webp') }}" alt="Logo"
                             style="height:46px;width:auto;">
                     </a>
                 </li>
 
                 <!-- 2) Chat -->
-                <li class="nav-item flex-fill to-be-hidden-on-mediaplay" role="presentation">
-                    <a class="px-0 py-2 nav-link active d-flex flex-column align-items-center justify-content-center"
+                <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center"
+                    role="presentation">
+                    <a class="nav-link active d-flex flex-column align-items-center justify-content-center"
                         id="chatTab-tab" data-bs-toggle="tab" href="#chatTab" role="tab"
                         aria-controls="chatTab" aria-selected="true">
                         <i class="fas fa-comments fs-5"></i>
@@ -601,13 +606,13 @@
                     </a>
                 </li>
                 <!-- 3) Players -->
-                <li class="nav-item flex-fill to-be-hidden-on-mediaplay" role="presentation"
-                    id="player-tab-nav-item">
-                    <a class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
+                <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center"
+                    role="presentation" id="player-tab-nav-item">
+                    <a class="nav-link d-flex flex-column align-items-center justify-content-center"
                         id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
                         aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
                         <div class="d-flex align-items-center">
-                            <i class="fas fa-users fs-5 me-1"></i>
+                            <i class="fas fa-users fs-6 me-1"></i>
                             <span id="user-count" class="fw-semibold small">0</span>
                         </div>
                         <small class="mt-1">{{ __('de.main_ui.players') }}</small>
@@ -615,17 +620,15 @@
                 </li>
 
                 <!-- 4) Register / Profile -->
-                <li class="nav-item flex-fill" id="register-profile-item">
+                <li class="nav-item flex-fill d-flex justify-content-center" id="register-profile-item">
                     @guest('web')
-                        <a href="#"
-                            class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
+                        <a href="#" class="nav-link d-flex flex-column align-items-center justify-content-center"
                             data-bs-target="#registerModal" data-bs-toggle="modal">
                             <i class="fas fa-user-plus fs-5"></i>
                             <small class="mt-1">{{ __('de.main_ui.join') }}</small>
                         </a>
                     @elseauth('web')
-                        <a href="#"
-                            class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
+                        <a href="#" class="nav-link flex-column align-items-center d-flex justify-content-center"
                             data-bs-toggle="modal" data-bs-target="#userInfoModal">
                             <i class="fas fa-user fs-5"></i>
                             <small class="mt-1 text-truncate" style="max-width:70px;">
@@ -641,12 +644,8 @@
 
 
 
-    {{-- <button id="enable-push">
-        Enable Notifications
-    </button> --}}
-
-
-
+    {{-- Push-notification opt-in is handled by the shared partial included at the
+         bottom of this page (resources/views/partials/push-notification.blade.php). --}}
 
     <script>
         let quizMode = false;
@@ -679,7 +678,6 @@
 
         const zegoLiveRoot = document.getElementById('zego-live-root');
 
-        const VAPID_PUBLIC_KEY = "{{ env('VAPID_PUBLIC_KEY') }}";
         const csrfToken = "{{ csrf_token() }}";
 
 
@@ -869,7 +867,7 @@
         });
         channel2.bind('ShowLiveShowWinnersTabEvent', function(data) {
             console.log('Show winners tab event received:', data);
-            winnerAnnounced = 1;
+
             showWinnersTabForParticipants();
         });
 
@@ -1029,7 +1027,7 @@
                             <span class="trophy-icon">${user.is_winner ? '<i class="fas fa-trophy " title="Winner"></i>' : ''}</span>
                         </div>
                         
-                        <div class="score-text ${user.id !== userId && !winnerAnnounced ? 'blur' : ''}">
+                        <div class="score-text }">
                             ${user.score ? Math.round(user.score) : 0}
                         </div>
                     `;
@@ -1039,9 +1037,9 @@
                     document.getElementById('user-count').innerHTML = totalUsers;
 
                     if (winnerAnnounced) {
-                        document.querySelectorAll('.score-text').forEach(scoreText => {
-                            scoreText.classList.remove('blur');
-                        });
+                        // document.querySelectorAll('.score-text').forEach(scoreText => {
+                        //     scoreText.classList.remove('blur');
+                        // });
                         document.getElementById('players-list-loading-spinner').style.display = 'none';
                     }
                 })
@@ -1077,30 +1075,35 @@
         function showWinnersTabForParticipants() {
 
 
-            const playerTabLink = document.getElementById('playerTab-tab');
-            const playerTabPane = document.getElementById('playerTab');
-            const chatTabLink = document.getElementById('chatTab-tab');
-            const chatTabPane = document.getElementById('chatTab');
 
-            if (chatTabLink) {
-                chatTabLink.classList.remove('active');
-                chatTabLink.setAttribute('aria-selected', 'false');
-            }
-            if (chatTabPane) {
-                chatTabPane.classList.remove('show', 'active');
-            }
 
-            if (playerTabLink) {
-                playerTabLink.classList.add('active');
-                playerTabLink.setAttribute('aria-selected', 'true');
-            }
-            if (playerTabPane) {
-                playerTabPane.classList.add('show', 'active');
-            }
-            //show a loading spinner
-            document.getElementById('players-list-loading-spinner').style.display = 'block';
+            updatePlayersLeaderboard().then(() => {
 
-            updatePlayersLeaderboard()
+
+                const playerTabLink = document.getElementById('playerTab-tab');
+                const playerTabPane = document.getElementById('playerTab');
+                const chatTabLink = document.getElementById('chatTab-tab');
+                const chatTabPane = document.getElementById('chatTab');
+
+                if (chatTabLink) {
+                    chatTabLink.classList.remove('active');
+                    chatTabLink.setAttribute('aria-selected', 'false');
+                }
+                if (chatTabPane) {
+                    chatTabPane.classList.remove('show', 'active');
+                }
+
+                if (playerTabLink) {
+                    playerTabLink.classList.add('active');
+                    playerTabLink.setAttribute('aria-selected', 'true');
+                }
+                if (playerTabPane) {
+                    playerTabPane.classList.add('show', 'active');
+                }
+                // //show a loading spinner
+                // document.getElementById('players-list-loading-spinner').style.display = 'block';
+                // document.getElementById('players-list-loading-spinner').style.display = 'none';
+            });
 
 
         }
@@ -1174,11 +1177,11 @@
                 <input type="hidden" id="quizId" value="${quiz.id}">
                     <div class="quiz-question">
                        <div class="text-center quiz-question-index me-1" style="font-size: 14px; font-weight: bold;">${quiz.index  } von ${quiz.totalQuizQuestions}.</div>
-                       <div class="quiz-question-text">${quiz.question}</div>
+                       <div class="quiz-question-text" translate="no">${quiz.question}</div>
                     </div>
                     <div class="quiz-options row">
                         ${quiz.options.map((option, index) =>
-                        `<div class="mb-3 quiz-option col-md-12 position-relative" id="quiz-option-${option.id}">  <div class="option-result-container " id="option-result-container-${option.id}" style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}" class="quiz-option-label">${numberToLetter(index)}. ${option.option_text}</label>  </div> `).join('')}
+                        `<div class="mb-3 quiz-option col-md-12 position-relative" id="quiz-option-${option.id}">  <div class="option-result-container " id="option-result-container-${option.id}" style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}" class="quiz-option-label" translate="no">${numberToLetter(index)}. ${option.option_text}</label>  </div> `).join('')}
                     </div>
              </div>
             `;
@@ -1564,12 +1567,6 @@
                         userBlockedFromLiveShowEventTrigger();
                         checkIfUserBlockedFromLiveShow();
 
-
-                        //if liveshow id is 1004
-                        if ("{{ $liveShow->id }}" == 1004 && isLoggedIn) {
-                            autoShowQuizQuestions();
-                        }
-
                     } else {
                         let errorMessages = data.messages || ['Registration failed. Please try again.'];
 
@@ -1950,11 +1947,13 @@
             });
             // Your Laravel broadcast event (drop the dot)
             channelShowWinner.bind('ShowPlayerAsWinnerEvent', function(data) {
-                toggleQuiz("remove");
 
 
                 console.log('Winner Event:', data);
+
                 // AJAX request to fetch prize money for this user
+                toggleQuiz("remove");
+
                 if (userId && isLoggedIn) {
                     fetch("{{ url('live-show/' . $liveShow->id . '/user-prize') }}?user_id=" + userId, {
                             headers: {
@@ -1964,6 +1963,7 @@
                         })
                         .then(response => response.json())
                         .then(prizeData => {
+
                             console.log('Prize data:', prizeData);
                             if (prizeData.success && prizeData.prize !== undefined && prizeData.prize !=
                                 'n/a' && prizeData.is_winner == true) {
@@ -1988,9 +1988,12 @@
                                         title: 'swal2-title-custom-winner'
                                     }
                                 });
+                                winnerAnnounced = 1;
                                 showWinnersTabForParticipants();
 
+
                             }
+
 
                         })
                         .catch((err) => {
@@ -2044,49 +2047,6 @@
 
 
     <script>
-        /* REQUIRED conversion */
-        function urlBase64ToUint8Array(base64String) {
-            const padding = '='.repeat((4 - base64String.length % 4) % 4);
-            const base64 = (base64String + padding)
-                .replace(/-/g, '+')
-                .replace(/_/g, '/');
-
-            const rawData = atob(base64);
-            return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
-        }
-
-
-        async function enablePush() {
-            if (!('serviceWorker' in navigator)) {
-                console.log('Service workers not supported');
-                return;
-            }
-
-            const permission = await Notification.requestPermission();
-            if (permission !== 'granted') {
-                console.log('Permission denied');
-                return;
-            }
-
-            const registration = await navigator.serviceWorker.register('/sw.js');
-
-            const subscription = await registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-            });
-
-            await fetch('{{ url('/') }}/api/push/subscribe', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify(subscription)
-            });
-
-            console.log('Push notifications enabled');
-        }
-
         document.getElementById("playButton").addEventListener("click", () => {
             console.log('Tap to play clicked');
             document.getElementById('playButtonOverlay').style.display = 'none';
@@ -2097,7 +2057,6 @@
         });
 
         function onLoadGameShow() {
-            // enablePush();
             if (isLoggedIn == false && window.location.search.indexOf('preview=true') === -1) {
                 showRegisterModal();
             }
@@ -2189,18 +2148,29 @@
         const _escapeDiv = document.createElement('div');
 
         function spawnHeartReaction(userName) {
+            let colorsArray = [
+                'heart-color-red',
+                'heart-color-orange',
+                'heart-color-yellow',
+                'heart-color-green',
+                'heart-color-blue',
+                'heart-color-indigo',
+                'heart-color-violet'
+            ];
+
             var overlay = document.getElementById('heartReactionsOverlay');
             if (!overlay) return;
             var leftPct = 15 + Math.random() * 70;
             var el = document.createElement('div');
             el.className = 'heart-reaction-float';
             el.style.left = leftPct + '%';
-            el.innerHTML = '<span class="heart-icon"><i class="fas fa-heart"></i></span><span class="heart-username">' +
+            el.innerHTML = '<span class="heart-icon ' + colorsArray[Math.floor(Math.random() * colorsArray.length)] +
+                '"><i class="fas fa-heart"></i></span><span class="heart-username">' +
                 escapeHtml(userName || 'Someone') + '</span>';
             overlay.appendChild(el);
-            el.addEventListener('animationend', function() {
-                if (el.parentNode) el.parentNode.removeChild(el);
-            });
+            // el.addEventListener('animationend', function() {
+            //     if (el.parentNode) el.parentNode.removeChild(el);
+            // });
         }
 
         function escapeHtml(text) {
@@ -2646,11 +2616,12 @@
         });
     </script>
 
-    @if (request()->boolean('debug_bot') && $liveShow->is_test_show)
+    @if (request()->boolean('debug_bot'))
         <script src="{{ url('js/live-show-quiz-debug-bot.js?v=' . time()) }}"></script>
     @endif
 
-
+    {{-- German web-push opt-in banner + subscription logic. --}}
+    {{-- @include('partials.push-notification') --}}
 
 
 </body>

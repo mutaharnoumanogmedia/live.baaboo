@@ -73,6 +73,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::post('live-shows/stream-management/{id}/quizzes/{quizId}/remove-quiz-question', [\App\Http\Controllers\Admin\LiveShowController::class, 'removeQuizQuestion'])->name('live-shows.stream-management.remove-quiz-question');
 
+    Route::post('live-shows/stream-management/{id}/quizzes/{quizId}/reset-shown-status', [\App\Http\Controllers\Admin\LiveShowController::class, 'resetQuizShownStatus'])->name('live-shows.stream-management.reset-shown-status');
+
     Route::get('live-shows/stream-management/{id}/fetch-messages', [\App\Http\Controllers\Admin\LiveShowController::class, 'fetchChatMessages'])->name('live-shows.stream-management.fetch-chat-messages');
     Route::post('live-shows/stream-management/{id}/send-message', [\App\Http\Controllers\Admin\LiveShowController::class, 'sendMessage'])->name('live-shows.stream-management.send-message');
     Route::post('live-shows/stream-management/{id}/reset-chat', [\App\Http\Controllers\Admin\LiveShowController::class, 'resetChat'])->name('live-shows.stream-management.reset-chat');
@@ -86,7 +88,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // updateWinners
     Route::post('live-shows/stream-management/{liveShowId}/update-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'updateWinners'])->name('live-shows.update-winners');
+    Route::post('live-shows/stream-management/{liveShowId}/reupdate-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'reupdateWinners'])->name('live-shows.reupdate-winners');
+    Route::post('live-shows/stream-management/{liveShowId}/resend-voucher-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'resendVoucherWinners'])->name('live-shows.resend-voucher-winners');
+
     Route::post('live-shows/stream-management/{liveShowId}/unannounce-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'unannounceWinners'])->name('live-shows.unannounce-winners');
+
+    // Trigger a web-push notification to every player of a specific live show.
+    Route::post('live-shows/stream-management/{liveShowId}/notify-players', [\App\Http\Controllers\Admin\LiveShowController::class, 'notifyPlayers'])->name('live-shows.notify-players');
 
     Route::post('live-shows/{id}/block-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'blockUser'])->name('live-shows.block-user');
     Route::post('live-shows/{id}/unblock-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'unblockUser'])->name('live-shows.unblock-user');

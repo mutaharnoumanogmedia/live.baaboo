@@ -946,25 +946,26 @@
 
             // Belt-and-braces: when the tab becomes visible again, force a few
             // immediate redraws and try to resume any media that paused.
-            document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState !== 'visible') return;
-                try {
-                    cameraVideoEl.play().catch(() => {});
-                } catch (_) {}
-                if (overlayState.visible && overlayState.mediaType === 'video') {
-                    try {
-                        overlayVideoEl.play().catch(() => {});
-                    } catch (_) {}
-                }
-                if (!bgmEl.paused) {
-                    bgmEl.play().catch(() => {});
-                }
-                for (let i = 0; i < 3; i++) drawFrame();
-            });
+            // (visibilityHandler is registered after bgmEl exists; see below.)
 
             // ── Video track ────────────────────────────────────────
             const canvasStream = canvas.captureStream(TARGET_FPS);
             const mixedVideoTrack = canvasStream.getVideoTracks()[0];
+
+            //video-blackout-fix: Zego's camera toggle calls stop() on the published track.
+            // Swallow that so the canvas capture keeps running; camera-off is expressed via enabled=false.
+            const _origMixedVideoStop = mixedVideoTrack.stop.bind(mixedVideoTrack);
+            mixedVideoTrack.stop = function() {
+                try {
+                    mixedVideoTrack.enabled = false;
+                } catch (_) {
+                    _origMixedVideoStop();
+                }
+            };
+            //video-blackout-fix: if the canvas track still ends, drop the cache for the next getUserMedia.
+            mixedVideoTrack.addEventListener('ended', function() {
+                destroyPipeline();
+            });
 
             // ── Audio mixing ───────────────────────────────────────
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -1051,6 +1052,32 @@
                 console.log('LiveShowMediaHidden event dispatched successfully!');
             });
 
+            //video-blackout-fix: if the raw camera track ends, invalidate the cached pipeline
+            // so the next getUserMedia call rebuilds instead of returning dead tracks.
+            const sourceVideoTrack = sourceStream.getVideoTracks()[0];
+            if (sourceVideoTrack) {
+                sourceVideoTrack.addEventListener('ended', () => {
+                    destroyPipeline();
+                });
+            }
+
+            const visibilityHandler = () => {
+                if (document.visibilityState !== 'visible') return;
+                try {
+                    cameraVideoEl.play().catch(() => {});
+                } catch (_) {}
+                if (overlayState.visible && overlayState.mediaType === 'video') {
+                    try {
+                        overlayVideoEl.play().catch(() => {});
+                    } catch (_) {}
+                }
+                if (!bgmEl.paused) {
+                    bgmEl.play().catch(() => {});
+                }
+                for (let i = 0; i < 3; i++) drawFrame();
+            };
+            document.addEventListener('visibilitychange', visibilityHandler);
+
             return {
                 cameraVideoEl,
                 overlayVideoEl,
@@ -1065,6 +1092,8 @@
                 mixedAudioTrack,
                 sourceStream,
                 ensureOverlayAudioWired,
+                frameTicker,
+                visibilityHandler,
             };
 
 
@@ -1073,8 +1102,124 @@
 
 
 
-        function getOrInitPipeline(constraints) {
-            if (pipeline) return Promise.resolve(pipeline);
+        //video-blackout-fix: true when the canvas output track and underlying camera are still usable.
+        function isPipelineVideoAlive(p) {
+            if (!p || !p.mixedVideoTrack) return false;
+            if (p.mixedVideoTrack.readyState === 'ended') return false;
+            const sourceVideo = p.sourceStream && p.sourceStream.getVideoTracks()[0];
+            if (!sourceVideo || sourceVideo.readyState === 'ended') return false;
+            return true;
+        }
+
+        //video-blackout-fix: tear down a stale pipeline so getUserMedia can build a fresh one.
+        function destroyPipeline() {
+            if (!pipeline) return;
+            const p = pipeline;
+            pipeline = null;
+            pipelinePromise = null;
+
+            if (p.frameTicker) {
+                try {
+                    p.frameTicker.postMessage('stop');
+                    p.frameTicker.terminate();
+                } catch (_) {}
+            }
+            if (p.visibilityHandler) {
+                document.removeEventListener('visibilitychange', p.visibilityHandler);
+            }
+            if (p.sourceStream) {
+                p.sourceStream.getTracks().forEach(function(t) {
+                    try {
+                        t.stop();
+                    } catch (_) {}
+                });
+            }
+            if (p.mixedVideoTrack && p.mixedVideoTrack.readyState === 'live') {
+                try {
+                    MediaStreamTrack.prototype.stop.call(p.mixedVideoTrack);
+                } catch (_) {}
+            }
+            if (p.mixedAudioTrack && p.mixedAudioTrack.readyState === 'live') {
+                try {
+                    p.mixedAudioTrack.stop();
+                } catch (_) {}
+            }
+            if (p.audioContext && p.audioContext.state !== 'closed') {
+                p.audioContext.close().catch(function() {});
+            }
+            [p.cameraVideoEl, p.canvas, p.overlayVideoEl, p.overlayImageEl, p.bgmEl].forEach(function(el) {
+                if (el && el.parentNode) {
+                    el.parentNode.removeChild(el);
+                }
+            });
+            overlayVideoEl = null;
+            overlayImageEl = null;
+        }
+
+        //video-blackout-fix: snapshot overlay + BGM so they survive a pipeline rebuild.
+        function capturePipelineMediaState() {
+            const snapshot = {
+                bgmPlaying: !!(pipeline && pipeline.bgmEl && !pipeline.bgmEl.paused),
+                overlay: null,
+            };
+            if (overlayState.visible && pipeline) {
+                if (overlayState.mediaType === 'video' && pipeline.overlayVideoEl && pipeline.overlayVideoEl.src) {
+                    snapshot.overlay = {
+                        type: 'video',
+                        url: pipeline.overlayVideoEl.src,
+                        loop: pipeline.overlayVideoEl.loop,
+                        muted: pipeline.overlayVideoEl.muted,
+                        position: overlayState.position,
+                        size: overlayState.size,
+                    };
+                } else if (overlayState.mediaType === 'image' && pipeline.overlayImageEl && pipeline.overlayImageEl.src) {
+                    snapshot.overlay = {
+                        type: 'image',
+                        url: pipeline.overlayImageEl.src,
+                        position: overlayState.position,
+                        size: overlayState.size,
+                    };
+                }
+            }
+            return snapshot;
+        }
+
+        //video-blackout-fix: re-apply overlay / BGM after a forced pipeline rebuild.
+        function restorePipelineMediaState(snapshot) {
+            if (!snapshot || !pipeline) return;
+            if (snapshot.overlay) {
+                const o = snapshot.overlay;
+                if (o.type === 'image') {
+                    window.BroadcastOverlay.playImage(o.url, {
+                        position: o.position,
+                        size: o.size
+                    });
+                } else if (o.type === 'video') {
+                    window.BroadcastOverlay.playVideo(o.url, {
+                        loop: o.loop,
+                        muted: o.muted,
+                        position: o.position,
+                        size: o.size
+                    });
+                }
+            }
+            if (snapshot.bgmPlaying) {
+                window.BroadcastOverlay.startBgm();
+            }
+        }
+
+        function getOrInitPipeline(constraints, forceRebuild) {
+            //video-blackout-fix: rebuild when Zego camera toggle left us with ended tracks.
+            if (pipeline && !forceRebuild && constraints && constraints.video !== false &&
+                !isPipelineVideoAlive(pipeline)) {
+                const mediaSnapshot = capturePipelineMediaState();
+                destroyPipeline();
+                return getOrInitPipeline(constraints, true).then(function(p) {
+                    restorePipelineMediaState(mediaSnapshot);
+                    return p;
+                });
+            }
+            if (pipeline && !forceRebuild) return Promise.resolve(pipeline);
             if (pipelinePromise) return pipelinePromise;
 
             pipelinePromise = buildPipeline(constraints).then(p => {
@@ -1095,9 +1240,28 @@
             const wantsAudio = !!(constraints && constraints.audio);
             if (!wantsVideo && !wantsAudio) return origGetUserMedia(constraints);
 
+            //video-blackout-fix: camera-on after toggle calls getUserMedia again; never return dead tracks.
+            if (wantsVideo && pipeline && !isPipelineVideoAlive(pipeline)) {
+                const mediaSnapshot = capturePipelineMediaState();
+                destroyPipeline();
+                const p = await getOrInitPipeline(constraints, true);
+                restorePipelineMediaState(mediaSnapshot);
+                const tracks = [];
+                if (wantsVideo) {
+                    p.mixedVideoTrack.enabled = true;
+                    tracks.push(p.mixedVideoTrack);
+                }
+                if (wantsAudio) tracks.push(p.mixedAudioTrack);
+                return new MediaStream(tracks);
+            }
+
             const p = await getOrInitPipeline(constraints);
             const tracks = [];
-            if (wantsVideo) tracks.push(p.mixedVideoTrack);
+            if (wantsVideo) {
+                //video-blackout-fix: re-enable after camera-off used enabled=false / wrapped stop().
+                p.mixedVideoTrack.enabled = true;
+                tracks.push(p.mixedVideoTrack);
+            }
             if (wantsAudio) tracks.push(p.mixedAudioTrack);
             return new MediaStream(tracks);
         };

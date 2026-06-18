@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FormularController;
 use App\Http\Controllers\GamePlayController;
 use App\Http\Controllers\HomeController;
 use App\Models\LiveShow;
@@ -24,6 +25,9 @@ Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 Route::get('thank-you/{user_name}', [HomeController::class, 'thankYouForYourParticipation'])->name('thank-you-for-your-participation');
+
+Route::get('formular', [FormularController::class, 'show'])->name('formular');
+Route::post('formular/submit', [FormularController::class, 'submit'])->name('formular.submit');
 
 Route::get('agb', [HomeController::class, 'agreementTerms'])->name('agb');
 // Teilnahmebedingungen

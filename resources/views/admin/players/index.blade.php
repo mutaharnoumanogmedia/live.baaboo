@@ -121,12 +121,25 @@
 
                 {{-- Players table --}}
                 <div class="card shadow-sm">
-                    <div class="card-header bg-dark text-light d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-dark text-light d-flex flex-wrap justify-content-between align-items-center gap-2">
                         <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>Players</h5>
-                        <span class="small text-muted">
-                            Showing {{ $players->firstItem() ?? 0 }}–{{ $players->lastItem() ?? 0 }}
-                            of {{ $players->total() }}
-                        </span>
+                        <div class="d-flex align-items-center gap-3">
+                            <label class="small text-muted mb-0 d-flex align-items-center gap-2">
+                                Per page
+                                <select name="per_page" class="form-select form-select-sm" style="width: auto;"
+                                    onchange="this.form.submit()">
+                                    @foreach ([25, 50, 100] as $size)
+                                        <option value="{{ $size }}" {{ (int) $perPage === $size ? 'selected' : '' }}>
+                                            {{ $size }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </label>
+                            <span class="small text-muted">
+                                Showing {{ $players->firstItem() ?? 0 }}–{{ $players->lastItem() ?? 0 }}
+                                of {{ number_format($players->total()) }}
+                            </span>
+                        </div>
                     </div>
                     <div class="card-body bg-dark text-light">
                         <div class="table-responsive">
@@ -243,6 +256,27 @@
 
         </div>
     </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const form = document.getElementById('playersFilterForm');
+                if (!form) {
+                    return;
+                }
+
+                form.querySelectorAll('input[type="text"], input[type="number"], input[type="date"]').forEach(
+                    function(input) {
+                        input.addEventListener('keydown', function(event) {
+                            if (event.key === 'Enter') {
+                                event.preventDefault();
+                                form.submit();
+                            }
+                        });
+                    });
+            });
+        </script>
+    @endpush
 
     @push('styles')
         <style>

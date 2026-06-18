@@ -1,6 +1,6 @@
 <x-app-dashboard-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="text-xl font-semibold leading-tight text-gray-800">
             {{ __('Edit Live Show') }}
         </h2>
     </x-slot>
@@ -18,14 +18,14 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-12 mb-3">
+                        <div class="mb-3 col-md-12">
                             <label class="form-label required-field">Title</label>
                             <input type="text" name="title" class="form-control"
                                 placeholder="Enter live show title" value="{{ old('title', $liveShow->title ?? '') }}"
                                 required>
                         </div>
 
-                        <div class="col-md-12 mb-3">
+                        <div class="mb-3 col-md-12">
                             <label class="form-label">Description</label>
                             <textarea name="description" class="form-control" rows="4" placeholder="Provide a description of your live show">{{ old('description', $liveShow->description ?? '') }}</textarea>
                         </div>
@@ -40,14 +40,14 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3 col-md-6">
                             <label class="form-label required-field">Scheduled At</label>
                             <input type="datetime-local" name="scheduled_at" class="form-control"
                                 value="{{ old('scheduled_at', isset($liveShow) ? \Carbon\Carbon::parse($liveShow->scheduled_at)->format('Y-m-d\TH:i') : '') }}"
                                 required>
                         </div>
 
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3 col-md-6">
                             <label class="form-label">Status</label>
                             <select name="status" class="form-select">
                                 <option value="scheduled"
@@ -61,7 +61,7 @@
                                     Completed</option>
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3 col-md-6">
                             <label class="form-label">Is Test Show</label>
                             <select name="is_test_show" class="form-select">
                                 <option value="0"
@@ -72,13 +72,13 @@
                                 </option>
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3 col-md-6">
                             <label class="form-label required-field">Max Players</label>
                             <input type="number" name="max_players" class="form-control" min="1" max="100000"
                                 required value="{{ old('max_players', $liveShow->max_players ?? 1000) }}">
                             <div class="form-text">Maximum number of participants allowed to join this show</div>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3 col-md-6">
                             <label class="form-label required-field">Chat Status</label>
                             <select name="chat_enabled" class="form-select" required>
                                 <option value="1"
@@ -93,7 +93,7 @@
                             <div class="form-text">Participants can send messages only when chat is enabled</div>
                         </div>
 
-                        {{-- <div class="col-md-12 mb-3">
+                        {{-- <div class="mb-3 col-md-12">
                             <label class="form-label">Stream Link</label>
                             <input type="text" name="stream_link" class="form-control" placeholder="https://"
                                 value="{{ old('stream_link', $liveShow->stream_link ?? '') }}">
@@ -110,20 +110,20 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="mb-3 col-md-6">
                             <label class="form-label">Host Name</label>
                             <input type="text" name="host_name" class="form-control" placeholder="Enter host's name"
                                 value="{{ old('host_name', $liveShow->host_name ?? '') }}">
                         </div>
 
-                        <div class="col-md-3 mb-3">
+                        <div class="mb-3 col-md-3">
                             <label class="form-label required-field">Prize Amount</label>
                             <input type="text" name="prize_amount" class="form-control" placeholder="0.00"
                                 step="0.01" required
                                 value="{{ old('prize_amount', $liveShow->prize_amount ?? '') }}">
                         </div>
 
-                        <div class="col-md-3 mb-3">
+                        <div class="mb-3 col-md-3">
                             <label class="form-label">Currency</label>
                             <input type="text" name="currency" class="form-control" value="EUR" readonly>
                             <div class="form-text">Currency is fixed to EUR</div>
@@ -139,27 +139,29 @@
                 </div>
                 <div class="card-body">
                     @php $maxWinnerSlots = 50; @endphp
-                    <div class="row mb-3">
+                    <div class="mb-3 row">
                         <div class="col-md-4">
                             <label class="form-label required-field">Max winners per show</label>
-                            <input type="number" name="max_winners" id="maxWinners" class="form-control" min="1"
-                                max="{{ $maxWinnerSlots }}" required
+                            <input type="number" name="max_winners" id="maxWinners" class="form-control"
+                                min="1" max="{{ $maxWinnerSlots }}" required
                                 value="{{ old('max_winners', $liveShow->max_winners ?? 3) }}">
                             <div class="form-text">Number of winners (1–{{ $maxWinnerSlots }}) who share the prizes
                             </div>
                         </div>
                     </div>
                     @error('winner_prizes')
-                        <div class="alert alert-danger py-2">{{ $message }}</div>
+                        <div class="py-2 alert alert-danger">{{ $message }}</div>
                     @enderror
-                    <p class="text-muted small mb-2">Prize percentage per rank (must total 100% for the first <span
+                    <p class="mb-2 text-muted small">Prize percentage per rank (must total 100% for the first <span
                             id="maxWinnersLabel">3</span> winner(s):</p>
                     <div class="table-responsive">
-                        <table class="table table-bordered align-middle">
+                        <table class="table align-middle table-bordered">
                             <thead class="table-light">
                                 <tr>
                                     <th>Rank</th>
                                     <th>Prize</th>
+                                    <th>Is Voucher</th>
+                                    <th>Voucher Amount</th>
                                 </tr>
                             </thead>
                             <tbody id="winnerPrizesBody">
@@ -168,6 +170,14 @@
                                     $percentagesByRank = $liveShow->winnerPrizes
                                         ->keyBy('rank')
                                         ->map(fn($p) => $p->prize)
+                                        ->toArray();
+                                    $voucherByRank = $liveShow->winnerPrizes
+                                        ->keyBy('rank')
+                                        ->map(fn($p) => (bool) ($p->voucher ?? ($p->is_voucher ?? false)))
+                                        ->toArray();
+                                    $voucherAmountByRank = $liveShow->winnerPrizes
+                                        ->keyBy('rank')
+                                        ->map(fn($p) => $p->voucher_amount ?? ($p->winner_voucher_amount ?? ''))
                                         ->toArray();
                                     $defaultPct = [1 => 50, 2 => 30, 3 => 20];
                                 @endphp
@@ -182,6 +192,18 @@
                                                 class="form-control winner-pct-input"
                                                 placeholder="Dailixir Starterset, 50€, 10€ baaboo Voucher"
                                                 value="{{ old('winner_prizes.' . $r, $percentagesByRank[$r] ?? ($defaultPct[$r] ?? '')) }}">
+                                        </td>
+                                        <td style="max-width: 120px;" class="text-center">
+                                            <input type="checkbox" name="winner_voucher[{{ $r }}]"
+                                                class="form-check-input voucher-checkbox" value="1"
+                                                {{ old('winner_voucher.' . $r, $voucherByRank[$r] ?? false) ? 'checked' : '' }}>
+                                        </td>
+                                        <td style="max-width: 120px;">
+                                            <input type="number" min="0" step="0.01"
+                                                name="winner_voucher_amount[{{ $r }}]"
+                                                class="form-control winner-pct-input voucher-amount"
+                                                {{ !old('winner_voucher.' . $r, $voucherByRank[$r] ?? false) ? 'readonly' : '' }}
+                                                value="{{ old('winner_voucher_amount.' . $r, $voucherAmountByRank[$r] ?? '') }}">
                                         </td>
                                     </tr>
                                 @endfor
@@ -199,7 +221,7 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-6 mb-4">
+                        <div class="mb-4 col-md-6">
                             <label class="form-label">Thumbnail</label>
                             {{-- <div class="dropzone" id="thumbnailDropzone">
                                 <i class="fas fa-cloud-upload-alt"></i>
@@ -216,7 +238,7 @@
                             </div>
                         </div>
 
-                        {{-- <div class="col-md-6 mb-4">
+                        {{-- <div class="mb-4 col-md-6">
                             <label class="form-label">Banner</label>
                             <div class="dropzone" id="bannerDropzone">
                                 <i class="fas fa-cloud-upload-alt"></i>
@@ -238,7 +260,7 @@
             </div>
 
             <!-- Submit Button -->
-            <div class="text-center mt-4">
+            <div class="mt-4 text-center">
                 <button type="submit" class="btn btn-primary btn-lg">
                     <i class="fas fa-save me-2"></i>
                     {{ __('Update Live Show') }}
@@ -308,6 +330,22 @@
                 var labelEl = document.getElementById('maxWinnersLabel');
                 var rows = document.querySelectorAll('.winner-percent-row');
 
+                function voucherChecks() {
+                    $("[type='checkbox']").off()
+                    $("[type='checkbox']").on('change', function() {
+                        var row = $(this).closest(".winner-percent-row");
+                        var voucherAmountInput = row.find(".voucher-amount");
+                        if ($(this).is(":checked")) {
+                            voucherAmountInput.removeAttr("readonly");
+                            voucherAmountInput.focus();
+                        } else {
+                            voucherAmountInput.attr("readonly", "readonly");
+                            voucherAmountInput.val('');
+                        }
+                        console.log("Clicked near: ", row.find(".voucher-amount"));
+                    })
+                }
+
                 function update() {
                     var maxRank = rows.length;
                     var n = parseInt(maxWinnersEl.value, 10) || 1;
@@ -317,6 +355,7 @@
                         var rank = parseInt(tr.getAttribute('data-rank'), 10);
                         tr.style.display = rank <= n ? '' : 'none';
                     });
+                    voucherChecks();
                 }
                 if (maxWinnersEl) {
                     maxWinnersEl.addEventListener('change', update);

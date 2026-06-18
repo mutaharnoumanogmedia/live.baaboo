@@ -18,15 +18,19 @@ class LiveShowQuizController extends Controller
 
     public function index()
     {
-        $quizzes = LiveShowQuiz::with(['liveShow', 'options'])->
-        when(request('live_show_id'), function ($query) {
-            $query->where('live_show_id', request('live_show_id'));
-        })
+        $quizzes = LiveShowQuiz::with(['liveShow', 'options'])
+            ->when(request('live_show_id'), function ($query) {
+                $query->where('live_show_id', request('live_show_id'));
+            })
             ->orderBy('id', 'asc')
             ->orderBy('live_show_id', 'desc')
             ->get();
 
-        return view('admin.live-show-quizzes.index', compact('quizzes'));
+        $liveShows = LiveShow::query()
+            ->orderByDesc('id')
+            ->get(['id', 'title']);
+
+        return view('admin.live-show-quizzes.index', compact('quizzes', 'liveShows'));
     }
 
     public function create()

@@ -19,6 +19,8 @@ class UserLiveShow extends Pivot
         'is_winner',
         'prize_won',
         'is_online',
+        'winner_prize_id', // new column for winner prize id
+        'discount_code', // new column for discount code
         'created_at',
     ];
 
@@ -37,7 +39,7 @@ class UserLiveShow extends Pivot
             ->sum('user_quiz_responses.response_score');
 
         return round($sum, 2);
-   
+
     }
 
     public function userQuizResponses()
@@ -62,5 +64,10 @@ class UserLiveShow extends Pivot
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function winnerPrize()
+    {
+        return $this->belongsTo(LiveShowWinnerPrize::class, 'winner_prize_id');
     }
 }

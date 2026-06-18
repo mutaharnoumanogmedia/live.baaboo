@@ -13,6 +13,7 @@ use App\Models\UserLiveShow;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
 use App\Models\Viewer;
+use App\Services\ActiveCampaign\ActiveCampaignClient;
 use App\Services\AffiliateAPIService;
 use App\Services\LeadGenerationService;
 use App\Services\LiveShowQuizService;
@@ -49,12 +50,12 @@ class GamePlayController extends Controller
         if ($liveShow->status == 'completed') {
             $nextScheduledLiveShow = LiveShow::where('status', 'scheduled')->orderBy('scheduled_at', 'asc')->notTestShow()->first();
             if ($nextScheduledLiveShow) {
-                $updateMessage = 'Die Live-Übertragung ist beendet. Vielen Dank für deine Teilnahme! Die nächste Show findet am  '.Carbon::parse($nextScheduledLiveShow->scheduled_at)->format('d.F Y \u\m H:i').'Uhr statt.';
+                $updateMessage = 'Die Live-Übertragung ist beendet. Vielen Dank für deine Teilnahme! Die nächste Show findet am  '.(Carbon::parse($nextScheduledLiveShow->scheduled_at)->locale('de')->translatedFormat('d.F Y \u\m H:i')).'Uhr statt.';
             }
         }
         // if shceduled
         if ($liveShow->status == 'scheduled') {
-            $updateMessage = 'Die Live-Sendung ist geplant. Die Show startet am '.Carbon::parse($liveShow->scheduled_at)->format('d.F Y \u\m H:i').'Uhr.';
+            $updateMessage = 'Die Live-Sendung ist geplant. Die Show startet am '.(Carbon::parse($liveShow->scheduled_at)->locale('de')->translatedFormat('d.F Y \u\m H:i')).'Uhr.';
         }
 
         return view('live-show', compact('liveShow', 'isEliminated', 'galleryStreamInitial', 'updateMessage'));
@@ -210,6 +211,11 @@ class GamePlayController extends Controller
             $leadGenerationResponse = (new LeadGenerationService)->leadGeneration($leadGenerationPayload);
             \Log::info('Lead generation request sent successfully', $leadGenerationPayload);
             \Log::info('Lead generation response', $leadGenerationResponse);
+
+            // ensureTagByEmail
+            $activeCampaign = new ActiveCampaignClient;
+            $tagResult = $activeCampaign->ensureTagByEmail($user->email, 'gameshow_attended_general');
+            \Log::info('User tagged with gameshow_attended_general', ['tagResult' => $tagResult]);
 
             return response()->json(['success' => true, 'message' => 'User registered successfully.', 'user' => $user, 'authStatus' => Auth::guard('web')->check()]);
         } catch (\Exception $e) {
