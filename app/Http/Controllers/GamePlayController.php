@@ -754,8 +754,11 @@ class GamePlayController extends Controller
     public function showLiveBroadcast($id)
     {
         $liveShow = \DB::table('live_shows')->where('id', $id)->first();
+        $mainHostEmail = 'admin@baaboo.com';
+        $mainHostUser = User::where('email', $mainHostEmail)->first();
+        $mainHostZegoUserId = $mainHostUser ? 'admin-'.$mainHostUser->id : null;
 
-        return view('live-show-broadcast', compact('liveShow'));
+        return view('live-show-broadcast', compact('liveShow', 'mainHostEmail', 'mainHostZegoUserId'));
     }
 
     /**
