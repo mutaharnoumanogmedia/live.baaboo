@@ -323,10 +323,22 @@
                                          <h5 class="mb-0 mb-3 text-center fw-bold">Quiz Questions</h5>
                                      </div>
                                      <div class="position-relative question-slider-wrap">
-                                         <div class="question-slider ">
+                                         <div id="quizQuestionsCarousel" class="carousel slide">
+                                             @if ($liveShow->quizzes->count() > 1)
+                                                 <div class="carousel-indicators">
+                                                     @foreach ($liveShow->quizzes as $index => $quiz)
+                                                         <button type="button"
+                                                             data-bs-target="#quizQuestionsCarousel"
+                                                             data-bs-slide-to="{{ $index }}"
+                                                             @if ($index === 0) class="active" aria-current="true" @endif
+                                                             aria-label="Question {{ $index + 1 }}"></button>
+                                                     @endforeach
+                                                 </div>
+                                             @endif
+                                             <div class="carousel-inner">
                                              @foreach ($liveShow->quizzes as $index => $quiz)
-                                                 <div class="px-2">
-                                                     <div class="mb-3 border card">
+                                                 <div class="carousel-item px-2 @if ($index === 0) active @endif">
+                                                     <div class="mb-5 border card">
                                                         <div class="position-relative card-body"
                                                             style="height: auto; overflow-y:hidden">
                                                             <button type="button"
@@ -432,6 +444,19 @@
                                                      </div>
                                                  </div>
                                              @endforeach
+                                             </div>
+                                             @if ($liveShow->quizzes->count() > 1)
+                                                 <button class="carousel-control-prev" type="button"
+                                                     data-bs-target="#quizQuestionsCarousel" data-bs-slide="prev">
+                                                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                     <span class="visually-hidden">Previous</span>
+                                                 </button>
+                                                 <button class="carousel-control-next" type="button"
+                                                     data-bs-target="#quizQuestionsCarousel" data-bs-slide="next">
+                                                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                                     <span class="visually-hidden">Next</span>
+                                                 </button>
+                                             @endif
                                          </div>
                                          <div id="questionSliderTimerOverlay" class="question-slider-timer-overlay"
                                              style="display: none;" role="status" aria-live="polite"
@@ -749,14 +774,28 @@
                  border-radius: 5px;
              }
 
-             .slick-list {
-                 min-height: 500px !important;
-                 width: 100% !important;
+             #quizQuestionsCarousel .carousel-item {
+                 min-height: 500px;
              }
 
-             .slick-initialized .slick-slide {
-                 min-height: 500px !important;
-                 min-width: 500px !important;
+             #quizQuestionsCarousel .carousel-control-prev,
+             #quizQuestionsCarousel .carousel-control-next {
+                 width: auto;
+                 opacity: 1;
+             }
+
+             #quizQuestionsCarousel .carousel-control-prev-icon,
+             #quizQuestionsCarousel .carousel-control-next-icon {
+                 width: 2.75rem;
+                 height: 2.75rem;
+                 border-radius: 50%;
+                 background-color: rgba(13, 110, 253, 0.9);
+                 background-size: 55% 55%;
+             }
+
+             #quizQuestionsCarousel .carousel-control-prev:hover .carousel-control-prev-icon,
+             #quizQuestionsCarousel .carousel-control-next:hover .carousel-control-next-icon {
+                 background-color: rgba(13, 110, 253, 1);
              }
          </style>
          <style>
@@ -929,12 +968,10 @@
                      }
                  }
 
-                 if (window.jQuery && typeof jQuery.fn.slick === 'function') {
+                 const quizCarouselEl = document.getElementById('quizQuestionsCarousel');
+                 if (quizCarouselEl && typeof bootstrap !== 'undefined') {
                      setTimeout(function() {
-                         var $sl = jQuery('.question-slider');
-                         if ($sl.hasClass('slick-initialized')) {
-                             $sl.slick('setPosition');
-                         }
+                         window.dispatchEvent(new Event('resize'));
                      }, 0);
                  }
              }
@@ -2400,16 +2437,14 @@
          </script>
          <script>
              document.addEventListener('DOMContentLoaded', function() {
-                 console.log('Document loaded');
-
-                 $('.question-slider').slick({
-                     infinite: false,
-                     slidesToShow: 1,
-                     slidesToScroll: 1,
-                     arrows: true,
-                     dots: true,
-                     adaptiveHeight: true
-                 });
+                 const quizCarouselEl = document.getElementById('quizQuestionsCarousel');
+                 if (quizCarouselEl && typeof bootstrap !== 'undefined') {
+                     bootstrap.Carousel.getOrCreateInstance(quizCarouselEl, {
+                         interval: false,
+                         wrap: false,
+                         touch: true
+                     });
+                 }
              });
 
 

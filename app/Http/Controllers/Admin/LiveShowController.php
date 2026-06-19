@@ -1640,9 +1640,11 @@ class LiveShowController extends Controller
     {
         $liveShow = LiveShow::findOrFail($id);
         // change the title to the new title
-        $newTitle = 'Copy of '.$liveShow->title.' - '.now()->format('Y-m-d H:i:s');
+        $newTitle = 'Copy :'.$liveShow->title.' - '.now()->format('Y-m-d') ." - ".uniqid();
         $newLiveShow = $liveShow->replicate();
         $newLiveShow->title = $newTitle;
+        $newLiveShow->is_test_show = true;
+        $newLiveShow->winners_announced = false;
         $newLiveShow->save();
         // copy the quizzes
         $quizzes = $liveShow->quizzes()->get();
