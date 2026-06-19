@@ -219,7 +219,7 @@
 
                     @canany(['can-manage-settings', 'can-manage-gtm', 'can-manage-push-notifications'])
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle {{ request()->routeIs(['admin.settings.*', 'admin.gtm.*', 'admin.push-notifications.*']) ? 'active' : '' }}"
+                            <a class="nav-link dropdown-toggle {{ request()->routeIs(['admin.settings.*', 'admin.gtm.*', 'admin.push-notifications.*', 'admin.push-subscriptions.*']) ? 'active' : '' }}"
                                 href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown"
                                 aria-expanded="false">
                                 <i class="bi bi-sliders me-1"></i> Settings
@@ -241,7 +241,14 @@
                                 @endcan
                                 {{-- @can('can-manage-push-notifications') --}}
                                     <li>
-                                        <a class="dropdown-item" href="{{ route('admin.push-notifications.index') }}">
+                                        <a class="dropdown-item {{ request()->routeIs('admin.push-subscriptions.*') ? 'active' : '' }}"
+                                            href="{{ route('admin.push-subscriptions.index') }}">
+                                            <i class="bi bi-phone-vibrate me-2"></i> Push Subscriptions
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item {{ request()->routeIs('admin.push-notifications.*') ? 'active' : '' }}"
+                                            href="{{ route('admin.push-notifications.index') }}">
                                             <i class="bi bi-bell-fill me-2"></i> Push Notifications
                                         </a>
                                     </li>

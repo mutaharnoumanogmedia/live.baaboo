@@ -2621,7 +2621,9 @@
     @endif
 
     {{-- German web-push opt-in banner + subscription logic. --}}
-    @include('partials.push-notification')
+    @if (!request()->has('preview'))
+        @include('partials.push-notification')
+    @endif
 
 
 </body>
