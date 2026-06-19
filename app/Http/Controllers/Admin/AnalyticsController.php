@@ -99,8 +99,7 @@ class AnalyticsController extends Controller
             $participated = DB::table('user_live_shows')
                 ->where('live_show_id', $show->id)
                 ->where(function ($q) {
-                    $q->where('score', '>', 0)
-                        ->orWhere('is_online', '>', 0);
+                    $q->where('score', '>', 0);
                 })
                 ->count();
 
