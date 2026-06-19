@@ -162,7 +162,7 @@
                                         <tr>
                                             <td>{{ $show->id }}</td>
                                             <td>{{ $show->title }}</td>
-                                            <td>{{ $show->scheduled_at }}</td>
+                                            <td>{{ $show->scheduled_at->format('d M Y, H:i') }}</td>
                                             <td>{{ $show->users->count() }}</td>
                                             <td>
                                                 @if ($show->status === 'completed')
