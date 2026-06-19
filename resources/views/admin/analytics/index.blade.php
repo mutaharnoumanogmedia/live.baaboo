@@ -365,6 +365,7 @@
                     fetch(`${ROUTES.chartData}?${q}`)
                         .then(r => r.json())
                         .then(data => {
+                            console.log(data);
                             const c = chartColors();
                             const ctx = document.getElementById('participationChart').getContext('2d');
                             if (participationChart) participationChart.destroy();
