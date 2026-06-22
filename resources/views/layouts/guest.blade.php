@@ -771,18 +771,7 @@
             border-radius: 12px;
         }
 
-        .show-card-container {
-            margin-bottom: 10px;
-            padding: 10px !important;
-        }
-
-        .show-card-container .show-card-body {
-            background: #fff;
-            border-radius: 12px;
-
-            margin-bottom: 10px;
-            padding: 30px;
-        }
+     
     </style>
 
     @include('partials.gtm', ['part' => 'head'])

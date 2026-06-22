@@ -100,8 +100,30 @@
                 }
             }
 
+            .show-card-container {
+                margin-bottom: 10px;
+                padding: 10px !important;
+            }
+
+            .show-card-container .show-card-body {
+                background: #fff;
+                border-radius: 12px;
+
+                margin-bottom: 10px;
+                padding: 30px;
+                min-height: 330px;
+                position: relative;
+            }
+
             .fusbal-card.show-card-body {
                 border: 5px dashed #66B341;
+            }
+
+            .show-card-container .icons-wrapper {
+                position: absolute;
+                bottom: 20px;
+                left: 30px;
+                right: 30px;
             }
         </style>
         <div class="live-show-banner position-relative" id="live-show-banner"
@@ -886,15 +908,15 @@
                                         <div class="mb-1 show-date text-pink">${show.date || ''}</div>
                                         <div class="my-2 show-title fs-4 fw-bold">${show.title || ''}</div>
                                         <div class="show-desc">${show.description || ''}</div>
-                                        <div class="flex-wrap gap-2 mt-2 show-meta d-flex">
+                                        <div class="flex-wrap gap-2 mt-2 show-meta d-flex icons-wrapper">
                                             ${Array.isArray(show.meta)
                                                 ? show.meta.map(function(meta) {
                                                     return `
-                                                                        <span class="gap-1 d-inline-flex align-items-center">
-                                                                            ${meta.icon ? `<img src="${assetPath}/${meta.icon}" alt="" width="16" height="16">` : ''}
-                                                                            <span>${meta.label}</span>
-                                                                        </span>
-                                                                    `;
+                                                                                <span class="gap-1 d-inline-flex align-items-center">
+                                                                                    ${meta.icon ? `<img src="${assetPath}/${meta.icon}" alt="" width="16" height="16">` : ''}
+                                                                                    <span>${meta.label}</span>
+                                                                                </span>
+                                                                            `;
                                                 }).join('')
                                                 : ''}
                                         </div>
