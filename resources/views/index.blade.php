@@ -99,6 +99,10 @@
                     border-radius: 24px;
                 }
             }
+
+            .fusbal-card.show-card-body {
+                border: 5px dashed #66B341;
+            }
         </style>
         <div class="live-show-banner position-relative" id="live-show-banner"
             data-live-show-id="{{ $currentLiveShow->id }}" style="overflow:visible; display:none;">
@@ -132,8 +136,7 @@
                     </div>
                     <div class="col-lg-3 d-inline-flex justify-content-center">
                         <div class="live-show-join-btn">
-                            <a id="live-show-join-link"
-                                href="{{ route('live-show', ['id' => $currentLiveShow->id]) }}"
+                            <a id="live-show-join-link" href="{{ route('live-show', ['id' => $currentLiveShow->id]) }}"
                                 class="px-4 shadow-sm btn btn-lg join-live-btn" style="border-radius: 24px;">
                                 <i class="fas fa-play me-2 text-orange"></i>Jetzt mitspielen
                             </a>
@@ -867,43 +870,43 @@
                 // Loop through scheduleData
                 if (scheduleData && Array.isArray(scheduleData.carousel_items)) {
                     scheduleData.carousel_items.forEach(function(show) {
-                        var $card = $(
-                            '<div class="show-card-container"> <div class="mb-3 show-card"></div></div>');
-                        // Top: badge and date
-                        var $badge = $('<span class="mb-2 badge badge-orange" style="font-size:0.75rem;">' + (
-                            show.badge || '') + '</span>');
-                        var $date = $('<div class="mb-1 show-date text-pink">' + (show.date || '') + '</div>');
 
-                        // Title + desc
-                        var $title = $('<div class="my-2 show-title fs-4 fw-bold">' + (show.title || '') +
-                            '</div>');
-                        var $desc = $('<div class="show-desc">' + (show.description || '') + '</div>');
+                        let card = ``;
 
-                        // Meta section
-                        var $meta = $('<div class="flex-wrap gap-2 mt-2 show-meta d-flex"></div>');
-                        if (Array.isArray(show.meta)) {
-                            show.meta.forEach(function(meta) {
-                                var $item = $(
-                                    '<span class="gap-1 d-inline-flex align-items-center"></span>');
-                                if (meta.icon) {
-                                    $item.append('<img src="' + assetPath + '/' + meta.icon +
-                                        '" alt="" width="16" height="16">');
-                                }
-                                $item.append('<span>' + meta.label + '</span>');
-                                $meta.append($item);
-                            });
-                        }
+                        console.log(show.date.includes("25.06.2026"));
 
-                        // Compose card body
-                        var $body = $('<div class="show-card-body text-start"></div>');
-                        $body.append($badge);
-                        $body.append($date);
-                        $body.append($title);
-                        $body.append($desc);
-                        $body.append($meta);
-                        $card.append($body);
 
-                        $('#schedule-carousel').append($card);
+
+                        card =
+                            `
+                                <div class="show-card-container">
+                                    <div class="mb-3 show-card"></div>
+                                    <div class="${show.class} show-card-body text-start">
+                                        <span class="mb-2 badge badge-orange" style="font-size:0.75rem;">${show.badge || ''}</span>
+                                        <div class="mb-1 show-date text-pink">${show.date || ''}</div>
+                                        <div class="my-2 show-title fs-4 fw-bold">${show.title || ''}</div>
+                                        <div class="show-desc">${show.description || ''}</div>
+                                        <div class="flex-wrap gap-2 mt-2 show-meta d-flex">
+                                            ${Array.isArray(show.meta)
+                                                ? show.meta.map(function(meta) {
+                                                    return `
+                                                                        <span class="gap-1 d-inline-flex align-items-center">
+                                                                            ${meta.icon ? `<img src="${assetPath}/${meta.icon}" alt="" width="16" height="16">` : ''}
+                                                                            <span>${meta.label}</span>
+                                                                        </span>
+                                                                    `;
+                                                }).join('')
+                                                : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                                `
+
+
+
+                        $('#schedule-carousel').append(card);
+
+
                     });
 
                     if (scheduleData.carousel_items.length) {
