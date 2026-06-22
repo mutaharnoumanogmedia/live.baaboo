@@ -116,15 +116,13 @@
             }
 
             .fusbal-card.show-card-body {
-                border: 5px dashed #66B341;
+                border: 5px dashed #DD0000; /* red */
+                border-left: 5px dashed #000000; /* black */
+                border-right: 5px dashed #FFCC00; /* gold */
+           
             }
 
-            .show-card-container .icons-wrapper {
-                position: absolute;
-                bottom: 20px;
-                left: 30px;
-                right: 30px;
-            }
+            
         </style>
         <div class="live-show-banner position-relative" id="live-show-banner"
             data-live-show-id="{{ $currentLiveShow->id }}" style="overflow:visible; display:none;">
