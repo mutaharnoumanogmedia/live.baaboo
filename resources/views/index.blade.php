@@ -116,9 +116,10 @@
             }
 
             .fusbal-card.show-card-body {
-                border: 5px dashed #DD0000; /* red */
-                border-left: 5px dashed #000000; /* black */
-                border-right: 5px dashed #FFCC00; /* gold */
+                border-right: 5px dashed #DD0000; /* red */
+                border-left: 5px dashed #DD0000; /* black */
+                border-top: 5px dashed #000000; /* black */
+                border-bottom: 5px dashed #FFCC00; /* gold */
            
             }
 
