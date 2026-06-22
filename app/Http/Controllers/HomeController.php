@@ -40,7 +40,7 @@ class HomeController extends Controller
                         'class' => 'fusbal-card',
                         'badge' => $show->status === 'live' ? 'LIVE' : 'BALD',
                         'date' => $dt->format('d.m.Y').' um '.$dt->format('H:i').' Uhr',
-                        'title' => 'WM-Special: Quiz&Speed Garne Show',
+                        'title' => 'WM-Special: Quiz&Speed Game Show',
                         'description' =>'Teste Dein Fußball-Wissen und deine Schnelligkeit! Sichere Dir die Chance auf echte Gewinne und ein originales DFB Trikot. ',
                         'meta' => [
                             ['icon' => 'bulls-eye-icon.png', 'label' => 'Wissen + Speed'],
