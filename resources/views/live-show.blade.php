@@ -41,6 +41,7 @@
 
 
     @include('partials.gtm', ['part' => 'head'])
+    @include('partials.pwa')
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -2628,11 +2629,6 @@
 
 </body>
 
-{{-- <a style="display: none;" href="https://www.flaticon.com/free-icons/gold-cup" title="gold cup icons">Gold cup icons
-    created by Md Tanvirul Haque - Flaticon</a>
-<a style="display: none;" href="https://www.flaticon.com/free-icons/silver-cup" title="silver cup icons">Silver cup
-    icons created by Md Tanvirul Haque - Flaticon</a>
-<a style="display: none;" href="https://www.flaticon.com/free-icons/3rd-place" title="3rd place icons">3rd place
-    icons created by Md Tanvirul Haque - Flaticon</a> --}}
+
 
 </html>

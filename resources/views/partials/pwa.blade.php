@@ -3,13 +3,13 @@
     and an optional install prompt banner (German copy).
 --}}
 
-<link rel="manifest" href="{{ asset('assets/manifest.webmanifest') }}">
+<link rel="manifest" href="{{ asset('/manifest.webmanifest') }}">
 <meta name="theme-color" content="#5A10AC">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Badabing">
-<link rel="apple-touch-icon" href="{{ asset('assets/icons/apple-touch-icon.png') }}">
+<link rel="apple-touch-icon" href="{{ asset('/icons/apple-touch-icon.png') }}">
 
 <script>
     (function () {
