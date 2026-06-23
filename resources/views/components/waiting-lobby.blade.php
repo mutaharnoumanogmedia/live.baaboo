@@ -77,10 +77,7 @@
                     <span class="waiting-lobby__countdown-timer" id="waitingLobbyCountdown">--:--:--</span>
                 </div>
             </div>
-            <div class="waiting-lobby__waiting-badge">
-                <span class="waiting-lobby__waiting-dot" aria-hidden="true"></span>
-                <span id="waitingLobbyCount">{{ $waitingLabel }}</span> WARTEN
-            </div>
+             
         </section>
 
         {{-- Stats cards --}}
@@ -92,8 +89,11 @@
             </div>
             <div class="waiting-lobby__stat-card">
                 <i class="fas fa-user-friends waiting-lobby__stat-icon" aria-hidden="true"></i>
-                <span class="waiting-lobby__stat-label">MITMACHEN</span>
-                <span class="waiting-lobby__stat-value waiting-lobby__stat-value--accent">{{ $eligibleLabel }}</span>
+                <span class="waiting-lobby__stat-label">WARTEN</span>
+                <span class="waiting-lobby__stat-value waiting-lobby__stat-value--accent">
+                <span class="waiting-lobby__waiting-dot" aria-hidden="true"></span>
+                    
+                    {{ $waitingLabel }}</span>
             </div>
         </section>
 
