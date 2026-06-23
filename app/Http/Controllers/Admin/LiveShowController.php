@@ -1034,6 +1034,9 @@ class LiveShowController extends Controller
                         'status' => $user->pivot->status ?? null,
                         'score' => $user->pivot->score ?? null,
                         'prize_won' => $user->pivot->prize_won ?? null,
+                        'joined_at' => $user->pivot->created_at
+                            ? \Carbon\Carbon::parse($user->pivot->created_at)->format('d M Y, H:i')
+                            : 'N/A',
                         'is_blocked' => $user->blockedLiveShows()
                             ->where('live_show_id', $id)
                             ->exists(),
@@ -1041,10 +1044,14 @@ class LiveShowController extends Controller
                 })
                 ->values();
 
+            $playedCount = $players->filter(fn ($p) => ($p->pivot->score > 0 || $p->pivot->is_online))->count();
+
             return response()->json([
                 'users' => $users,
                 'totalUsers' => $totalUsers,
                 'filteredUsers' => $filteredUsers,
+                'playedCount' => $playedCount,
+                'notParticipatedCount' => $totalUsers - $playedCount,
                 'skip' => $skip,
                 'take' => $take,
                 'hasMore' => ($skip + $users->count()) < $filteredUsers,
@@ -1477,16 +1484,9 @@ class LiveShowController extends Controller
     public function viewDetails($id)
     {
         $liveShow = LiveShow::with(['creator', 'winnerPrizes', 'quizzes.options'])->findOrFail($id);
-        $quizService = new LiveShowQuizService;
-
-        $players = $quizService->getSortedByScore($liveShow);
-
         $totalQuestions = $liveShow->quizzes->count();
 
-        $playedCount = $players->filter(fn ($p) => ($p->pivot->score > 0 || $p->pivot->is_online))->count();
-        $notParticipatedCount = $players->count() - $playedCount;
-
-        return view('admin.live-shows.view-details', compact('liveShow', 'players', 'totalQuestions', 'playedCount', 'notParticipatedCount'));
+        return view('admin.live-shows.view-details', compact('liveShow', 'totalQuestions'));
     }
 
     public function getPlayerResponses($liveShowId, $userId)

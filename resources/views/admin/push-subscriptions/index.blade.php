@@ -2,7 +2,7 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h3 class="mb-1">Push Subscriptions</h3>
+                <h3 class="mb-1">Push Subscriptions ({{ $subscriptions->count() }})</h3>
                 <p class="text-muted mb-0">
                     Registered browser devices that can receive push notifications.
                 </p>

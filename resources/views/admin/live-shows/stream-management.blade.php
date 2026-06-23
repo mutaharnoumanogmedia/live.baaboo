@@ -242,18 +242,20 @@
                                                      Winner Tab Management
                                                  </h6>
                                              </div>
-                                             <div>
-                                                 <button type="button"
-                                                     class="mb-2 text-white shadow-sm btn btn-primary fw-bold"
-                                                     onclick="showWinnerTab(this)">
-                                                     <i class="fas fa-eye me-2"></i> Show
-                                                 </button>
-                                                 <button type="button"
-                                                     class="mb-2 text-white shadow-sm btn btn-danger fw-bold"
-                                                     onclick="hideWinnerTab(this)">
-                                                     <i class="fas fa-eye-slash me-2"></i> Hide
-                                                 </button>
-                                             </div>
+                                            <div>
+                                                <button type="button" id="showWinnerTabBtn"
+                                                    class="mb-2 text-white shadow-sm btn btn-primary fw-bold"
+                                                    onclick="showWinnerTab(this)"
+                                                    @if (!$liveShow->winners_announced) disabled aria-disabled="true" @endif>
+                                                    <i class="fas fa-eye me-2"></i> Show
+                                                </button>
+                                                <button type="button" id="hideWinnerTabBtn"
+                                                    class="mb-2 text-white shadow-sm btn btn-danger fw-bold"
+                                                    onclick="hideWinnerTab(this)"
+                                                    @if (!$liveShow->winners_announced) disabled aria-disabled="true" @endif>
+                                                    <i class="fas fa-eye-slash me-2"></i> Hide
+                                                </button>
+                                            </div>
                                          </div>
                                      </div>
                                  </div>
@@ -495,7 +497,9 @@
                                          </div>
                                          <div id="gallery-attached-list" class="mb-3 table-responsive"
                                              style="max-height: 520px; overflow-y: auto;">
-                                             <table class="table mb-0 align-middle table-sm table-dark table-hover">
+                                             <table class="table mb-0 
+                                             
+                                             table-sm table-dark table-hover">
 
                                                  <tbody id="attached-media-list">
 
@@ -2107,13 +2111,23 @@
                      unBtn.classList.remove('d-none');
                      unBtn.disabled = false;
                  }
-                 const announcedActions = document.getElementById('winnersAnnouncedActions');
-                 if (announcedActions) {
-                     announcedActions.classList.remove('d-none');
-                 }
-             }
+                const announcedActions = document.getElementById('winnersAnnouncedActions');
+                if (announcedActions) {
+                    announcedActions.classList.remove('d-none');
+                }
+                const showWinnerTabBtn = document.getElementById('showWinnerTabBtn');
+                const hideWinnerTabBtn = document.getElementById('hideWinnerTabBtn');
+                if (showWinnerTabBtn) {
+                    showWinnerTabBtn.disabled = false;
+                    showWinnerTabBtn.removeAttribute('aria-disabled');
+                }
+                if (hideWinnerTabBtn) {
+                    hideWinnerTabBtn.disabled = false;
+                    hideWinnerTabBtn.removeAttribute('aria-disabled');
+                }
+            }
 
-             function setUnannounceWinnersLoading(isLoading) {
+            function setUnannounceWinnersLoading(isLoading) {
                  const btn = document.getElementById('unannounceWinnersBtn');
                  const label = document.getElementById('unannounceWinnersBtnLabel');
                  const loader = document.getElementById('unannounceWinnersBtnLoader');
@@ -2158,13 +2172,23 @@
                      unBtn.classList.add('d-none');
                      unBtn.disabled = false;
                  }
-                 const announcedActions = document.getElementById('winnersAnnouncedActions');
-                 if (announcedActions) {
-                     announcedActions.classList.add('d-none');
-                 }
-             }
+                const announcedActions = document.getElementById('winnersAnnouncedActions');
+                if (announcedActions) {
+                    announcedActions.classList.add('d-none');
+                }
+                const showWinnerTabBtn = document.getElementById('showWinnerTabBtn');
+                const hideWinnerTabBtn = document.getElementById('hideWinnerTabBtn');
+                if (showWinnerTabBtn) {
+                    showWinnerTabBtn.disabled = true;
+                    showWinnerTabBtn.setAttribute('aria-disabled', 'true');
+                }
+                if (hideWinnerTabBtn) {
+                    hideWinnerTabBtn.disabled = true;
+                    hideWinnerTabBtn.setAttribute('aria-disabled', 'true');
+                }
+            }
 
-             function unannounceWinners() {
+            function unannounceWinners() {
                  if (!liveShowWinnersAnnounced) {
                      return;
                  }
