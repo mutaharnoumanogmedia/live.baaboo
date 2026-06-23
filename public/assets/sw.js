@@ -1,6 +1,13 @@
-// Service worker for Badabing web push notifications.
-// It receives push payloads from the server and renders a system notification,
-// then routes the user to the right page when they tap it.
+// Service worker for Badabing PWA installability and web push notifications.
+// v2 — lifecycle handlers for install; push + notificationclick unchanged.
+
+self.addEventListener("install", function (event) {
+    self.skipWaiting();
+});
+
+self.addEventListener("activate", function (event) {
+    event.waitUntil(clients.claim());
+});
 
 self.addEventListener("push", function (event) {
     if (!event.data) return;
