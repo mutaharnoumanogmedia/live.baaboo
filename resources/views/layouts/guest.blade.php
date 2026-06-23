@@ -9,7 +9,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
 
     <link rel="icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
-    @include('partials.pwa')
+    @if (request()->is('admin') || request()->is('admin/*'))
+        @include('partials.pwa-admin')
+    @else
+        @include('partials.pwa')
+    @endif
     <meta property="og:image" content="{{ asset('images/meta.png') }}">
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="{{ asset('images/meta.png') }}" />

@@ -1,15 +1,15 @@
 {{--
-    Progressive Web App support: manifest, meta tags, service worker registration,
-    and an optional install prompt banner (German copy).
+    Admin PWA: manifest, meta tags, scoped service worker, install prompt.
+    Scoped to /admin/ — separate from the public Badabing PWA.
 --}}
 
-<link rel="manifest" href="{{ asset('assets/manifest.webmanifest') }}">
-<meta name="theme-color" content="#5A10AC">
+<link rel="manifest" href="{{ asset('/admin/manifest.webmanifest') }}">
+<meta name="theme-color" content="#DC2626">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Badabing">
-<link rel="apple-touch-icon" href="{{ asset('assets/icons/apple-touch-icon.png') }}">
+<meta name="apple-mobile-web-app-title" content="Badabing Admin">
+<link rel="apple-touch-icon" href="{{ asset('/admin/icons/apple-touch-icon.png') }}">
 
 <script>
     (function () {
@@ -19,16 +19,18 @@
             return;
         }
 
-        window.baabooServiceWorkerReady = navigator.serviceWorker.register('{{ asset('sw.js') }}')
-            .catch(function (error) {
-                console.warn('Service worker registration failed:', error);
-            });
+        window.baabooAdminServiceWorkerReady = navigator.serviceWorker.register(
+            @json(asset('/admin/sw.js')),
+            { scope: "{{ ('/admin') }}/" }
+        ).catch(function (error) {
+            console.warn('Admin service worker registration failed:', error);
+        });
     })();
 </script>
 
 @push('styles')
 <style>
-    #baabooPwaBanner {
+    #baabooAdminPwaBanner {
         position: fixed;
         left: 50%;
         bottom: 18px;
@@ -37,9 +39,9 @@
         width: calc(100% - 24px);
         max-width: 460px;
         background: #ffffff;
-        color: #140b63;
+        color: #1f2937;
         border-radius: 18px;
-        box-shadow: 0 12px 40px rgba(20, 11, 99, 0.22);
+        box-shadow: 0 12px 40px rgba(220, 38, 38, 0.22);
         padding: 16px 18px;
         display: flex;
         gap: 14px;
@@ -47,19 +49,20 @@
         font-family: 'Nunito', system-ui, sans-serif;
         opacity: 0;
         transition: transform .35s ease, opacity .35s ease;
+        border: 1px solid rgba(220, 38, 38, 0.15);
     }
 
-    #baabooPwaBanner.is-visible {
+    #baabooAdminPwaBanner.is-visible {
         transform: translateX(-50%) translateY(0);
         opacity: 1;
     }
 
-    #baabooPwaBanner .baaboo-pwa-icon {
+    #baabooAdminPwaBanner .baaboo-admin-pwa-icon {
         flex: 0 0 auto;
         width: 44px;
         height: 44px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #5A10AC, #FC6902);
+        background: #DC2626;
         color: #fff;
         display: flex;
         align-items: center;
@@ -67,27 +70,28 @@
         font-size: 1.2rem;
     }
 
-    #baabooPwaBanner .baaboo-pwa-title {
+    #baabooAdminPwaBanner .baaboo-admin-pwa-title {
         font-weight: 800;
         font-size: 1rem;
         margin: 0 0 2px;
         line-height: 1.2;
+        color: #DC2626;
     }
 
-    #baabooPwaBanner .baaboo-pwa-text {
+    #baabooAdminPwaBanner .baaboo-admin-pwa-text {
         font-size: .85rem;
         margin: 0 0 10px;
-        color: #4b4070;
+        color: #4b5563;
     }
 
-    #baabooPwaBanner .baaboo-pwa-actions {
+    #baabooAdminPwaBanner .baaboo-admin-pwa-actions {
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
     }
 
-    #baabooPwaBanner .baaboo-pwa-install {
-        background: #FC6902;
+    #baabooAdminPwaBanner .baaboo-admin-pwa-install {
+        background: #DC2626;
         color: #fff;
         border: none;
         font-weight: 800;
@@ -97,14 +101,14 @@
         cursor: pointer;
     }
 
-    #baabooPwaBanner .baaboo-pwa-install:disabled {
+    #baabooAdminPwaBanner .baaboo-admin-pwa-install:disabled {
         opacity: .7;
         cursor: default;
     }
 
-    #baabooPwaBanner .baaboo-pwa-later {
+    #baabooAdminPwaBanner .baaboo-admin-pwa-later {
         background: transparent;
-        color: #6b6080;
+        color: #6b7280;
         border: none;
         font-weight: 700;
         font-size: .85rem;
@@ -112,7 +116,7 @@
         padding: 8px 12px;
     }
 
-    #baabooPwaBanner .baaboo-pwa-close {
+    #baabooAdminPwaBanner .baaboo-admin-pwa-close {
         position: absolute;
         top: 8px;
         right: 12px;
@@ -120,30 +124,30 @@
         border: none;
         font-size: 1.1rem;
         line-height: 1;
-        color: #b3acc7;
+        color: #9ca3af;
         cursor: pointer;
     }
 </style>
 @endpush
 
 @push('scripts')
-<div id="baabooPwaBanner" role="dialog" aria-live="polite" aria-label="App installieren" hidden>
-    <button type="button" class="baaboo-pwa-close" id="baabooPwaClose" aria-label="Schließen">&times;</button>
-    <div class="baaboo-pwa-icon" aria-hidden="true">
+<div id="baabooAdminPwaBanner" role="dialog" aria-live="polite" aria-label="Admin-App installieren" hidden>
+    <button type="button" class="baaboo-admin-pwa-close" id="baabooAdminPwaClose" aria-label="Schließen">&times;</button>
+    <div class="baaboo-admin-pwa-icon" aria-hidden="true">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 16 16" fill="currentColor">
             <path d="M8.5 1.5A1.5 1.5 0 0 0 7 3v1H3.5A1.5 1.5 0 0 0 2 5.5v7A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 12.5 4H9V3a1.5 1.5 0 0 0-1.5-1.5zM8 4.5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5z"/>
         </svg>
     </div>
     <div>
-        <p class="baaboo-pwa-title">Badabing als App installieren</p>
-        <p class="baaboo-pwa-text">
-            Füge Badabing deinem Startbildschirm hinzu und starte die Game Show mit einem Tipp.
+        <p class="baaboo-admin-pwa-title">Badabing Admin installieren</p>
+        <p class="baaboo-admin-pwa-text">
+            Füge das Admin-Panel deinem Startbildschirm hinzu und öffne das Dashboard mit einem Tipp.
         </p>
-        <div class="baaboo-pwa-actions">
-            <button type="button" class="baaboo-pwa-install" id="baabooPwaInstall">
+        <div class="baaboo-admin-pwa-actions">
+            <button type="button" class="baaboo-admin-pwa-install" id="baabooAdminPwaInstall">
                 Installieren
             </button>
-            <button type="button" class="baaboo-pwa-later" id="baabooPwaLater">
+            <button type="button" class="baaboo-admin-pwa-later" id="baabooAdminPwaLater">
                 Vielleicht später
             </button>
         </div>
@@ -154,14 +158,14 @@
     (function () {
         'use strict';
 
-        var DISMISS_KEY = 'baaboo_pwa_install_dismissed_at';
+        var DISMISS_KEY = 'baaboo_admin_pwa_install_dismissed_at';
         var DISMISS_TTL_MS = 30 * 24 * 60 * 60 * 1000;
         var deferredPrompt = null;
 
-        var banner = document.getElementById('baabooPwaBanner');
-        var installBtn = document.getElementById('baabooPwaInstall');
-        var laterBtn = document.getElementById('baabooPwaLater');
-        var closeBtn = document.getElementById('baabooPwaClose');
+        var banner = document.getElementById('baabooAdminPwaBanner');
+        var installBtn = document.getElementById('baabooAdminPwaInstall');
+        var laterBtn = document.getElementById('baabooAdminPwaLater');
+        var closeBtn = document.getElementById('baabooAdminPwaClose');
 
         function isStandalone() {
             return window.matchMedia('(display-mode: standalone)').matches ||
@@ -198,7 +202,7 @@
             banner.hidden = true;
         }
 
-        window.baabooInstallPwa = function () {
+        window.baabooAdminInstallPwa = function () {
             if (!deferredPrompt) {
                 return Promise.resolve(false);
             }
@@ -232,7 +236,7 @@
             installBtn.addEventListener('click', function () {
                 installBtn.disabled = true;
                 installBtn.textContent = 'Wird installiert…';
-                window.baabooInstallPwa().finally(function () {
+                window.baabooAdminInstallPwa().finally(function () {
                     installBtn.disabled = false;
                     installBtn.textContent = 'Installieren';
                 });
