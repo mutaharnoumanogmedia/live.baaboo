@@ -213,18 +213,16 @@
                 return Promise.resolve(false);
             }
 
-            return Notification.requestPermission().then(function (permission) {
+                return Notification.requestPermission().then(function (permission) {
                 if (permission !== 'granted') {
                     console.log('Push permission was not granted:', permission);
                     return false;
                 }
 
-                return navigator.serviceWorker.register('/sw.js')
-                    .then(function (registration) {
-                        return navigator.serviceWorker.ready.then(function () {
-                            return registration;
-                        });
-                    })
+                var swReady = window.baabooServiceWorkerReady || navigator.serviceWorker.register(@json(asset('sw.js')));
+                return Promise.resolve(swReady).then(function () {
+                    return navigator.serviceWorker.ready;
+                })
                     .then(function (registration) {
                         return registration.pushManager.subscribe({
                             userVisibleOnly: true,
