@@ -316,331 +316,350 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
+
+        #gameShowBody {
+            display: block;
+        }
+
+        #waitingLobbyBody {
+            display: none;
+        }
     </style>
 </head>
 
 <body>
 
     @include('partials.gtm', ['part' => 'body'])
+    <div id="gameShowBody">
 
-    <div class="main-container">
-        <!-- Single-Tab Restriction Overlay -->
-        <div id="inactiveTabOverlay">
-            <div class="inactive-tab-content d-none" id="inactiveTabContent">
-                <div class="inactive-tab-icon">
-                    <i class="fas fa-tv"></i>
+        <div class="main-container">
+            <!-- Single-Tab Restriction Overlay -->
+            <div id="inactiveTabOverlay">
+                <div class="inactive-tab-content d-none" id="inactiveTabContent">
+                    <div class="inactive-tab-icon">
+                        <i class="fas fa-tv"></i>
+                    </div>
+                    <h3>{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}</h3>
+                    <p>Die Live-Show ist in einem anderen Tab geöffnet.<br>Du kannst sie nur in einem Tab gleichzeitig
+                        nutzen.
+                    </p>
+                    <button id="useHereBtn" class="btn btn-use-here">
+                        <i class="fas fa-arrow-right me-2"></i>Hier verwenden
+                    </button>
                 </div>
-                <h3>{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}</h3>
-                <p>Die Live-Show ist in einem anderen Tab geöffnet.<br>Du kannst sie nur in einem Tab gleichzeitig
-                    nutzen.
-                </p>
-                <button id="useHereBtn" class="btn btn-use-here">
-                    <i class="fas fa-arrow-right me-2"></i>Hier verwenden
+            </div>
+
+            <!-- Centered Play Button Overlay -->
+            <div id="playButtonOverlay" style="">
+                <button id="playButton" style="">
+                    <i class="fas fa-play fa-3x" style="color:white;"></i>
                 </button>
-            </div>
-        </div>
-
-        <!-- Centered Play Button Overlay -->
-        <div id="playButtonOverlay" style="">
-            <button id="playButton" style="">
-                <i class="fas fa-play fa-3x" style="color:white;"></i>
-            </button>
-            <div id="tapToPlayLabel" style="">
-                {{ __('de.main_ui.tap_to_play') }}
-            </div>
-        </div>
-        <div class="main-container" id="mainContainer">
-            <!-- Video Container -->
-            <div class="video-container" id="videoContainer">
-                <div class="video-placeholder" id="videoPlaceholder">
-                    {{-- Zego UIKit (embedded; token from server) --}}
-                    <div id="zego-live-root">
-                        <iframe src="{{ route('live-show-broadcast', ['id' => $liveShow->id]) }}"
-                            title="iframe video player" frameborder="0" allow="autoplay; encrypted-media; "
-                            style=""></iframe>
-                    </div>
+                <div id="tapToPlayLabel" style="">
+                    {{ __('de.main_ui.tap_to_play') }}
                 </div>
-
             </div>
-            <!-- Floating heart reactions (TikTok/Instagram style) -->
-            <div id="heartReactionsOverlay"></div>
-            <!-- Quiz Overlay -->
-            <div class="quiz-overlay" id="quizOverlay">
-                <div class="quiz-content">
-
-                    <div style="height: auto">
-                        <div class="quiz-timer" id="quizTimer">
-                            <svg class="timer-svg" viewBox="0 0 180 180" width="120" height="120">
-                                <!-- Background circle -->
-                                <circle class="timer-bg" cx="90" cy="90" r="80" stroke="#ddd"
-                                    stroke-width="10" fill="none" />
-
-                                <!-- Progress circle -->
-                                <circle class="timer-progress" cx="90" cy="90" r="80"
-                                    stroke="rgb(220, 53, 69)" stroke-width="10" fill="none"
-                                    stroke-dasharray="376.991" stroke-dashoffset="376.991"
-                                    transform="rotate(-90 90 90)" />
-                            </svg>
-
-                            <div class="timer-text" id="timerText">10</div>
-                        </div>
-
-                        <div id="evaluationStatus"></div>
-                    </div>
-
-                    <div class="quiz-section" id="quizSection">
-                        <div>
-                            <input type="hidden" id="quizId" value="${quiz.id}">
-                            <div class="quiz-question">
-                                <i class="fas fa-question-circle text-primary me-2"></i>
-                                ${quiz.question}
-                            </div>
-
-                            <div class="quiz-options row">
-                                ${quiz.options.map((option, index) =>
-                                `<div class="quiz-option"> <input type="radio" id="option${option.id}"
-                                        name="option" value="${option.id}"> <label
-                                        for="option${option.id}">${option.option_text}</label>
-                                </div> `).join('')}
-                            </div>
+            <div class="main-container" id="mainContainer">
+                <!-- Video Container -->
+                <div class="video-container" id="videoContainer">
+                    <div class="video-placeholder" id="videoPlaceholder">
+                        {{-- Zego UIKit (embedded; token from server) --}}
+                        <div id="zego-live-root">
+                            <iframe src="{{ route('live-show-broadcast', ['id' => $liveShow->id]) }}"
+                                title="iframe video player" frameborder="0" allow="autoplay; encrypted-media; "
+                                style=""></iframe>
                         </div>
                     </div>
 
                 </div>
-            </div>
+                <!-- Floating heart reactions (TikTok/Instagram style) -->
+                <div id="heartReactionsOverlay"></div>
+                <!-- Quiz Overlay -->
+                <div class="quiz-overlay" id="quizOverlay">
+                    <div class="quiz-content">
 
-        </div>
+                        <div style="height: auto">
+                            <div class="quiz-timer" id="quizTimer">
+                                <svg class="timer-svg" viewBox="0 0 180 180" width="120" height="120">
+                                    <!-- Background circle -->
+                                    <circle class="timer-bg" cx="90" cy="90" r="80" stroke="#ddd"
+                                        stroke-width="10" fill="none" />
 
-        <!-- Full-Screen Overlay Modal (not closable) -->
-        <div id="galleryOverlayModal"
-            style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.9); z-index:2000; align-items:center; justify-content:center; flex-direction:column;">
-            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
-                <img id="galleryOverlayImage" src="" alt=""
-                    style="max-width:100vw; max-height:90vh; object-fit:contain; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;">
-                <video id="galleryOverlayVideo" src="" autoplay muted playsinline preload="metadata"
-                    poster=""
-                    style="max-width:100vw; max-height:90vh; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;"></video>
-            </div>
-        </div>
+                                    <!-- Progress circle -->
+                                    <circle class="timer-progress" cx="90" cy="90" r="80"
+                                        stroke="rgb(220, 53, 69)" stroke-width="10" fill="none"
+                                        stroke-dasharray="376.991" stroke-dashoffset="376.991"
+                                        transform="rotate(-90 90 90)" />
+                                </svg>
 
+                                <div class="timer-text" id="timerText">10</div>
+                            </div>
 
+                            <div id="evaluationStatus"></div>
+                        </div>
 
-
-        <!-- Register Modal -->
-        <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content" style="border-radius: 20px;">
-                    <div class="modal-header" style="border-bottom: none;">
-                        <h5 class="modal-title" id="registerModalLabel">
-                            <i class="fas fa-user-plus me-2 text-warning"></i>{{ __('de.registration.title') }}
+                        <div class="quiz-section" id="quizSection">
                             <div>
-                                <span style="font-size: 12px">{{ __('de.registration.already_account') }}</span>
+                                <input type="hidden" id="quizId" value="${quiz.id}">
+                                <div class="quiz-question">
+                                    <i class="fas fa-question-circle text-primary me-2"></i>
+                                    ${quiz.question}
+                                </div>
+
+                                <div class="quiz-options row">
+                                    ${quiz.options.map((option, index) =>
+                                    `<div class="quiz-option"> <input type="radio" id="option${option.id}"
+                                            name="option" value="${option.id}"> <label
+                                            for="option${option.id}">${option.option_text}</label>
+                                    </div> `).join('')}
+                                </div>
                             </div>
-                        </h5>
+                        </div>
 
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
                     </div>
+                </div>
 
-                    <form id="registerForm" autocomplete="off">
-                        <div class="modal-body">
-                            {{-- <div class="mb-3">
+            </div>
+
+            <!-- Full-Screen Overlay Modal (not closable) -->
+            <div id="galleryOverlayModal"
+                style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.9); z-index:2000; align-items:center; justify-content:center; flex-direction:column;">
+                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+                    <img id="galleryOverlayImage" src="" alt=""
+                        style="max-width:100vw; max-height:90vh; object-fit:contain; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;">
+                    <video id="galleryOverlayVideo" src="" autoplay muted playsinline preload="metadata"
+                        poster=""
+                        style="max-width:100vw; max-height:90vh; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;"></video>
+                </div>
+            </div>
+
+
+
+
+            <!-- Register Modal -->
+            <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="border-radius: 20px;">
+                        <div class="modal-header" style="border-bottom: none;">
+                            <h5 class="modal-title" id="registerModalLabel">
+                                <i class="fas fa-user-plus me-2 text-warning"></i>{{ __('de.registration.title') }}
+                                <div>
+                                    <span style="font-size: 12px">{{ __('de.registration.already_account') }}</span>
+                                </div>
+                            </h5>
+
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+
+                        <form id="registerForm" autocomplete="off">
+                            <div class="modal-body">
+                                {{-- <div class="mb-3">
                             <label for="registerUsername" class="form-label">{{ __('de.registration.username') }}</label>
                             <input type="text" class="form-control" id="registerUsername" name="name" required
                                 maxlength="32" placeholder="{{ __('de.registration.username_placeholder') }}">
                         </div> --}}
-                            <div class="mb-3">
-                                <label for="registerEmail"
-                                    class="form-label">{{ __('de.registration.email') }}</label>
-                                <input type="email" class="form-control" id="registerEmail" name="email"
-                                    required placeholder="{{ __('de.registration.email_placeholder') }}">
+                                <div class="mb-3">
+                                    <label for="registerEmail"
+                                        class="form-label">{{ __('de.registration.email') }}</label>
+                                    <input type="email" class="form-control" id="registerEmail" name="email"
+                                        required placeholder="{{ __('de.registration.email_placeholder') }}">
+                                </div>
+                                <div class="gap-2 d-flex">
+                                    <input type="checkbox" class="form-check-input form-control-color" id="agree"
+                                        required>
+                                    <label class="form-check-label" for="agree">{!! __('de.registration.terms') !!}</label>
+                                </div>
+                                <div id="registerError" class="text-danger small" style="display:none;"></div>
                             </div>
-                            <div class="gap-2 d-flex">
-                                <input type="checkbox" class="form-check-input form-control-color" id="agree"
-                                    required>
-                                <label class="form-check-label" for="agree">{!! __('de.registration.terms') !!}</label>
+                            <div class="modal-footer" style="border-top: none;">
+                                <button type="submit" class="btn btn-warning w-100"
+                                    style="background-color: #ff5f00; border: none;">
+                                    <i class="fas fa-paper-plane me-2"></i>{{ __('de.registration.register') }}
+                                </button>
                             </div>
-                            <div id="registerError" class="text-danger small" style="display:none;"></div>
-                        </div>
-                        <div class="modal-footer" style="border-top: none;">
-                            <button type="submit" class="btn btn-warning w-100"
-                                style="background-color: #ff5f00; border: none;">
-                                <i class="fas fa-paper-plane me-2"></i>{{ __('de.registration.register') }}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- User Info Modal -->
-        <div class="modal fade" id="userInfoModal" tabindex="-1" aria-labelledby="userInfoModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content" style="border-radius: 20px;">
-                    <div class="modal-header" style="border-bottom: none;">
-                        <h5 class="modal-title" id="userInfoModalLabel">
-                            <i class="fas fa-user me-2 text-success"></i>{{ __('de.profile.title') }}
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-                    <div class="text-center modal-body">
-                        <div class="mb-3">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::guard('web')->user()->name ?? 'User') }}&background=ffb380&color=fff&size=96"
-                                alt="{{ __('de.profile.avatar') }}" class="mb-2 rounded-circle" width="80"
-                                height="80">
-                        </div>
-                        <h6 class="mb-1">{{ Auth::guard('web')->user()->name ?? __('de.profile.guest') }}</h6>
-                        <div class="mb-3 text-muted" style="font-size: 0.95rem;">
-                            {{ Auth::guard('web')->user()->email ?? '' }}
-                        </div>
-                        <div class="mb-3">
-                            <span class="badge bg-success" style="font-size: 1rem;">
-                                <i class="fas fa-star me-1"></i>
-                                <span id="user-points"></span> {{ __('de.profile.points') }}
-                            </span>
-                        </div>
-                        <form method="POST" action="{{ route('livestream.logout', [$liveShow->id]) }}">
-                            @csrf
-                            <button type="submit" class="btn btn-danger w-100">
-                                <i class="fas fa-sign-out-alt me-2"></i>{{ __('de.profile.logout') }}
-                            </button>
                         </form>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Winner Dialog -->
-        <div id="winnerDialog"
-            style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;max-height:100vh; overflow-y:auto;">
-            <div
-                style="background:#fff; border-radius:20px; padding:40px 30px; text-align:center; max-width:350px; margin:auto; margin-top: 20%; box-shadow:0 8px 32px rgba(0,0,0,0.2); ">
-                <i class="mb-3 fas fa-trophy fa-3x text-warning"></i>
-                <h3 class="mb-2" style="color:#ff5f00;">{{ __('de.winner.title') }}</h3>
-                <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.selected') }}</p>
-                <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.prize') }}</p>
-                <div class="text-center mb-3" style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)" id="prizeAmount">
-                </div>
-                <button class="btn btn-success"
-                    onclick="document.getElementById('winnerDialog').style.display='none';">
-                    <i class="fas fa-check me-2"></i>{{ __('de.profile.close') }}
-                </button>
-            </div>
-        </div>
-
-
-    </div>
-    <div class="live-show-bottom-fixed" id="liveShowBottomFixed">
-        <div id="liveShowTabContainer" class="to-be-hidden-on-mediaplay">
-
-            <div class="tab-content" id="liveShowTabsContent">
-                <div class="tab-pane fade show active" id="chatTab" role="tabpanel" aria-labelledby="chatTab-tab">
-                    <div class="chat-container" id="chatContainer">
-                        <!-- TikTok-style Overlay Chat -->
-                        <div class="overlay-chat" id="overlayChat"></div>
-
-                        <!-- Bottom Chat Input -->
-                        <div class="bottom-chat-input">
-
-                            <div class="input-group chat-input-group">
-                                <input type="text" maxlength="200"
-                                    placeholder="{{ __('de.main_ui.placeholder_message') }}" id="chatInput">
-                                <button type="button" id="send-btn-overlay" onclick="sendMessage()">
-                                    <i class="fas fa-paper-plane"></i>
-                                </button>
-                                <button type="button" id="heartReactionBtn"
-                                    title="{{ __('de.main_ui.send_heart') }}">
-                                    <i class="fas fa-heart"></i>
-                                </button>
-                            </div>
-                            <div id="chatDisabledMsg"
-                                style="display: none; text-align: center; font-size: 0.75rem; color: #999; padding: 4px 0 2px;">
-                                Unser Chat macht gerade kurz Pause – hier ist heute richtig was los!
-                            </div>
-
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="tab-pane fade " id="playerTab" role="tabpanel"
-                    aria-labelledby="playerTab-tab position-relative">
-                    <!-- Player List -->
-                    <div class="container-fluid ">
-                        <div class="players-list-group-container">
-                            <h5 class="mb-3"><i
-                                    class="fas fa-users me-2 text-primary"></i>{{ __('de.main_ui.players_scores') }}
+            <!-- User Info Modal -->
+            <div class="modal fade" id="userInfoModal" tabindex="-1" aria-labelledby="userInfoModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="border-radius: 20px;">
+                        <div class="modal-header" style="border-bottom: none;">
+                            <h5 class="modal-title" id="userInfoModalLabel">
+                                <i class="fas fa-user me-2 text-success"></i>{{ __('de.profile.title') }}
                             </h5>
-                            <ul class="list-group" id="players-leaderbord">
-                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
                         </div>
-                    </div>
-                    <div id="players-list-loading-spinner" style="display: none;">
-                        <i class="fas fa-spinner fa-spin"></i>
+                        <div class="text-center modal-body">
+                            <div class="mb-3">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::guard('web')->user()->name ?? 'User') }}&background=ffb380&color=fff&size=96"
+                                    alt="{{ __('de.profile.avatar') }}" class="mb-2 rounded-circle" width="80"
+                                    height="80">
+                            </div>
+                            <h6 class="mb-1">{{ Auth::guard('web')->user()->name ?? __('de.profile.guest') }}</h6>
+                            <div class="mb-3 text-muted" style="font-size: 0.95rem;">
+                                {{ Auth::guard('web')->user()->email ?? '' }}
+                            </div>
+                            <div class="mb-3">
+                                <span class="badge bg-success" style="font-size: 1rem;">
+                                    <i class="fas fa-star me-1"></i>
+                                    <span id="user-points"></span> {{ __('de.profile.points') }}
+                                </span>
+                            </div>
+                            <form method="POST" action="{{ route('livestream.logout', [$liveShow->id]) }}">
+                                @csrf
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="fas fa-sign-out-alt me-2"></i>{{ __('de.profile.logout') }}
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Winner Dialog -->
+            <div id="winnerDialog"
+                style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;max-height:100vh; overflow-y:auto;">
+                <div
+                    style="background:#fff; border-radius:20px; padding:40px 30px; text-align:center; max-width:350px; margin:auto; margin-top: 20%; box-shadow:0 8px 32px rgba(0,0,0,0.2); ">
+                    <i class="mb-3 fas fa-trophy fa-3x text-warning"></i>
+                    <h3 class="mb-2" style="color:#ff5f00;">{{ __('de.winner.title') }}</h3>
+                    <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.selected') }}</p>
+                    <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.prize') }}</p>
+                    <div class="text-center mb-3" style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)"
+                        id="prizeAmount">
+                    </div>
+                    <button class="btn btn-success"
+                        onclick="document.getElementById('winnerDialog').style.display='none';">
+                        <i class="fas fa-check me-2"></i>{{ __('de.profile.close') }}
+                    </button>
+                </div>
+            </div>
+
+
         </div>
-        <nav class="navbar mobile-nav bottom-nav bg-nav-radial-top-gradient border-top">
-            <ul
-                class="flex-row px-2 text-center nav d-flex flex-nowrap w-100 justify-content-between align-items-center">
+        <div class="live-show-bottom-fixed" id="liveShowBottomFixed">
+            <div id="liveShowTabContainer" class="to-be-hidden-on-mediaplay">
 
-                <!-- 1) Logo -->
-                <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center">
-                    <a href="#" class="nav-link d-flex flex-column align-items-center justify-content-center">
-                        <img src="{{ asset('images/badabing-logo.webp') }}" alt="Logo"
-                            style="height:46px;width:auto;">
-                    </a>
-                </li>
+                <div class="tab-content" id="liveShowTabsContent">
+                    <div class="tab-pane fade show active" id="chatTab" role="tabpanel"
+                        aria-labelledby="chatTab-tab">
+                        <div class="chat-container" id="chatContainer">
+                            <!-- TikTok-style Overlay Chat -->
+                            <div class="overlay-chat" id="overlayChat"></div>
 
-                <!-- 2) Chat -->
-                <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center"
-                    role="presentation">
-                    <a class="nav-link active d-flex flex-column align-items-center justify-content-center"
-                        id="chatTab-tab" data-bs-toggle="tab" href="#chatTab" role="tab"
-                        aria-controls="chatTab" aria-selected="true">
-                        <i class="fas fa-comments fs-5"></i>
-                        <small class="mt-1">{{ __('de.main_ui.chat') }}</small>
-                    </a>
-                </li>
-                <!-- 3) Players -->
-                <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center"
-                    role="presentation" id="player-tab-nav-item">
-                    <a class="nav-link d-flex flex-column align-items-center justify-content-center"
-                        id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
-                        aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-users fs-6 me-1"></i>
-                            <span id="user-count" class="fw-semibold small">0</span>
+                            <!-- Bottom Chat Input -->
+                            <div class="bottom-chat-input">
+
+                                <div class="input-group chat-input-group">
+                                    <input type="text" maxlength="200"
+                                        placeholder="{{ __('de.main_ui.placeholder_message') }}" id="chatInput">
+                                    <button type="button" id="send-btn-overlay" onclick="sendMessage()">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                    <button type="button" id="heartReactionBtn"
+                                        title="{{ __('de.main_ui.send_heart') }}">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                </div>
+                                <div id="chatDisabledMsg"
+                                    style="display: none; text-align: center; font-size: 0.75rem; color: #999; padding: 4px 0 2px;">
+                                    Unser Chat macht gerade kurz Pause – hier ist heute richtig was los!
+                                </div>
+
+                            </div>
+
                         </div>
-                        <small class="mt-1">{{ __('de.main_ui.players') }}</small>
-                    </a>
-                </li>
+                    </div>
 
-                <!-- 4) Register / Profile -->
-                <li class="nav-item flex-fill d-flex justify-content-center" id="register-profile-item">
-                    @guest('web')
-                        <a href="#" class="nav-link d-flex flex-column align-items-center justify-content-center"
-                            data-bs-target="#registerModal" data-bs-toggle="modal">
-                            <i class="fas fa-user-plus fs-5"></i>
-                            <small class="mt-1">{{ __('de.main_ui.join') }}</small>
-                        </a>
-                    @elseauth('web')
-                        <a href="#" class="nav-link flex-column align-items-center d-flex justify-content-center"
-                            data-bs-toggle="modal" data-bs-target="#userInfoModal">
-                            <i class="fas fa-user fs-5"></i>
-                            <small class="mt-1 text-truncate" style="max-width:70px;">
-                                {{ Auth::guard('web')->user()->name }}
-                            </small>
-                        </a>
-                    @endauth
-                </li>
+                    <div class="tab-pane fade " id="playerTab" role="tabpanel"
+                        aria-labelledby="playerTab-tab position-relative">
+                        <!-- Player List -->
+                        <div class="container-fluid ">
+                            <div class="players-list-group-container">
+                                <h5 class="mb-3"><i
+                                        class="fas fa-users me-2 text-primary"></i>{{ __('de.main_ui.players_scores') }}
+                                </h5>
+                                <ul class="list-group" id="players-leaderbord">
+                                </ul>
+                            </div>
+                        </div>
+                        <div id="players-list-loading-spinner" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <nav class="navbar mobile-nav bottom-nav bg-nav-radial-top-gradient border-top">
+                <ul
+                    class="flex-row px-2 text-center nav d-flex flex-nowrap w-100 justify-content-between align-items-center">
 
-            </ul>
-        </nav>
+                    <!-- 1) Logo -->
+                    <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center">
+                        <a href="#"
+                            class="nav-link d-flex flex-column align-items-center justify-content-center">
+                            <img src="{{ asset('images/badabing-logo.webp') }}" alt="Logo"
+                                style="height:46px;width:auto;">
+                        </a>
+                    </li>
+
+                    <!-- 2) Chat -->
+                    <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center"
+                        role="presentation">
+                        <a class="nav-link active d-flex flex-column align-items-center justify-content-center"
+                            id="chatTab-tab" data-bs-toggle="tab" href="#chatTab" role="tab"
+                            aria-controls="chatTab" aria-selected="true">
+                            <i class="fas fa-comments fs-5"></i>
+                            <small class="mt-1">{{ __('de.main_ui.chat') }}</small>
+                        </a>
+                    </li>
+                    <!-- 3) Players -->
+                    <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center"
+                        role="presentation" id="player-tab-nav-item">
+                        <a class="nav-link d-flex flex-column align-items-center justify-content-center"
+                            id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
+                            aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-users fs-6 me-1"></i>
+                                <span id="user-count" class="fw-semibold small">0</span>
+                            </div>
+                            <small class="mt-1">{{ __('de.main_ui.players') }}</small>
+                        </a>
+                    </li>
+
+                    <!-- 4) Register / Profile -->
+                    <li class="nav-item flex-fill d-flex justify-content-center" id="register-profile-item">
+                        @guest('web')
+                            <a href="#"
+                                class="nav-link d-flex flex-column align-items-center justify-content-center"
+                                data-bs-target="#registerModal" data-bs-toggle="modal">
+                                <i class="fas fa-user-plus fs-5"></i>
+                                <small class="mt-1">{{ __('de.main_ui.join') }}</small>
+                            </a>
+                        @elseauth('web')
+                            <a href="#"
+                                class="nav-link flex-column align-items-center d-flex justify-content-center"
+                                data-bs-toggle="modal" data-bs-target="#userInfoModal">
+                                <i class="fas fa-user fs-5"></i>
+                                <small class="mt-1 text-truncate" style="max-width:70px;">
+                                    {{ Auth::guard('web')->user()->name }}
+                                </small>
+                            </a>
+                        @endauth
+                    </li>
+
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <div id="waitingLobbyBody">
+        <x-waiting-lobby :live-show="$liveShow" />
     </div>
 
 
@@ -725,7 +744,8 @@
         }
 
 
-        function emptyTheBodyWithEndShow(messageText = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme!') {
+        function emptyTheBodyWithEndShow(messageText = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme!',
+            liveShowStatus = 'completed') {
             document.body.innerHTML = '';
             document.body.style.backgroundColor = '#000';
             const endDiv = document.createElement('div');
@@ -807,9 +827,14 @@
         });
 
 
-        @if ($liveShow->status != 'live')
-            emptyTheBodyWithEndShow('{{ $updateMessage }}');
+        @if ($liveShow->status == 'live')
+            document.getElementById('waitingLobbyBody').innerHTML = '';
+            document.getElementById('gameShowBody').style.display = 'block';
+        @else
+            document.getElementById('gameShowBody').innerHTML = '';
+            document.getElementById('waitingLobbyBody').style.display = 'block';
         @endif
+   
         @if ($liveShow->media_visible)
             // document.getElementById("liveShowBottomFixed").style.display = "none";
             toggleToBeHiddenOnMediaPlay('none');

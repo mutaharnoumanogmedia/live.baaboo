@@ -1,20 +1,85 @@
+@php
+    $badabingShows = $liveShows->where('is_test_show', false);
+    $testShows = $liveShows->where('is_test_show', true);
+@endphp
+
 <x-app-dashboard-layout>
     <style>
-        .card-body,
-        .dataTables_wrapper,
-        .table-responsive {
-            overflow: visible !important;
+        .live-shows-page .live-shows-table-scroll {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
-        table tr:has(.dropdown-menu.show) {
+        .live-shows-page .live-shows-table-scroll:has(.dropdown-menu.show) {
+            overflow: visible;
+        }
+
+        .live-shows-page table.live-shows-table {
+            width: 100%;
+            min-width: 42rem;
+            margin-bottom: 0;
+        }
+
+        .live-shows-page .live-shows-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            min-width: 11rem;
+        }
+
+        .live-shows-page .live-shows-title {
+            max-width: 14rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .live-shows-page .live-shows-pills .nav-link {
+            color: rgba(255, 255, 255, 0.75);
+            border-radius: 2rem;
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .live-shows-page .live-shows-pills .nav-link:hover,
+        .live-shows-page .live-shows-pills .nav-link:focus {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .live-shows-page .live-shows-pills .nav-link.active {
+            color: #fff;
+            background-color: #0d6efd;
+        }
+
+        .live-shows-page .live-shows-pills .nav-link.active[data-tab="test"] {
+            background-color: #dc3545;
+        }
+
+        .live-shows-page table.live-shows-table tbody tr:has(.dropdown-menu.show) {
             position: relative;
             z-index: 1055;
         }
 
-        .dropdown-menu {
+        .live-shows-page .dropdown-menu {
             z-index: 1055;
         }
+
+        @media (max-width: 575.98px) {
+            .live-shows-page .live-shows-pills {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .live-shows-page .live-shows-pills .nav-link {
+                text-align: center;
+            }
+        }
     </style>
+
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 py-3 mb-1">
             {{ __('Manage Live Shows') }}
@@ -25,19 +90,36 @@
         </h2>
     </x-slot>
 
-    <div class="py-6">
+    <div class="py-6 live-shows-page">
         <div class="container-fluid">
-            <div class="row">
-                <div class="col-lg-6">
-                    {{-- Non-Test Shows Table --}}
-                    <div class="card mb-5">
-                        <div class="card-header bg-dark text-light">
-                            <h5 class="mb-0">Badabing Shows</h5>
-                        </div>
-                        <div class="card-body bg-dark text-light ">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-light border-0 py-3">
+                    <ul class="nav nav-pills live-shows-pills flex-wrap gap-2" id="liveShowsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="badabing-shows-tab-btn" data-bs-toggle="pill"
+                                data-bs-target="#badabing-shows-tab" type="button" role="tab"
+                                aria-controls="badabing-shows-tab" aria-selected="true" data-tab="badabing">
+                                Badabing Shows
+                                <span class="badge bg-light text-dark ms-1">{{ $badabingShows->count() }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="test-shows-tab-btn" data-bs-toggle="pill"
+                                data-bs-target="#test-shows-tab" type="button" role="tab"
+                                aria-controls="test-shows-tab" aria-selected="false" data-tab="test">
+                                Test Shows
+                                <span class="badge bg-danger ms-1">{{ $testShows->count() }}</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
 
+                <div class="card-body bg-dark text-light tab-content p-3 p-md-4" id="liveShowsTabContent">
+                    <div class="tab-pane fade show active" id="badabing-shows-tab" role="tabpanel"
+                        aria-labelledby="badabing-shows-tab-btn" tabindex="0">
+                        <div class="live-shows-table-scroll table-responsive">
                             <table id="liveShowsTable"
-                                class="table table-striped table-borderless table-dark data-table table-responsive mb-0 h-100">
+                                class="table table-striped table-borderless table-dark live-shows-table mb-0">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
@@ -50,101 +132,22 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    
-                                    @foreach ($liveShows->where('is_test_show', false) as $show)
-                                        <tr>
-                                            <td>{{ $show->id }}</td>
-                                            <td>{{ $show->title }}</td>
-                                            <td>{{ $show->scheduled_at->format('d M Y, H:i') }}</td>
-                                            <td>{{ $show->users->count() }}</td>
-                                            <td>
-                                                @if ($show->status === 'completed')
-                                                    <span class="badge bg-success">Completed</span>
-                                                @elseif ($show->status === 'scheduled')
-                                                    <span class="badge bg-secondary">Scheduled</span>
-                                                @elseif ($show->status === 'live')
-                                                    <span class="badge bg-danger">Live</span>
-                                                @else
-                                                    <span
-                                                        class="badge bg-light text-dark">{{ ucfirst($show->status) }}</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-success">No</span>
-                                            </td>
-                                            <td class="d-flex gap-2">
-                                                <a href="{{ route('admin.live-shows.stream-management', $show->id) }}"
-                                                    class="btn btn-sm btn-primary ">Stream Management</a>
-                                                <div class="dropdown">
-                                                    <button class="btn btn-sm btn-dark dropdown-toggle" type="button"
-                                                        id="dropdownMenuButton{{ $show->id }}"
-                                                        data-bs-toggle="dropdown" aria-expanded="false">
-                                                        Actions
-                                                    </button>
-                                                    <ul class="dropdown-menu"
-                                                        aria-labelledby="dropdownMenuButton{{ $show->id }}">
-                                                        <li>
-                                                            <a class="dropdown-item"
-                                                                href="{{ route('admin.live-shows.edit', $show->id) }}">Edit</a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item"
-                                                                href="{{ route('admin.live-shows.players', $show->id) }}">All
-                                                                Players</a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item"
-                                                                href="{{ route('admin.live-shows.view-details', $show->id) }}">Details</a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item"
-                                                                href="{{ route('admin.live-show-quizzes.index', ['live_show_id' => $show->id]) }}">Quiz
-                                                                Questions</a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item"
-                                                                href="{{ route('admin.live-shows.gallery-attach', $show) }}">Gallery
-                                                                Media</a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item"
-                                                                href="{{ route('admin.live-shows.copy', $show->id) }}">Copy</a>
-                                                        </li>
-                                                        <li>
-                                                            <form
-                                                                action="{{ route('admin.live-shows.destroy', $show->id) }}"
-                                                                method="POST"
-                                                                onsubmit="return confirm('Are you sure you want to delete this show?');"
-                                                                style="display:inline;">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit"
-                                                                    class="dropdown-item text-danger">
-                                                                    Delete
-                                                                </button>
-                                                            </form>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-
-
-                                            </td>
-                                        </tr>
+                                    @foreach ($badabingShows as $show)
+                                        @include('admin.live-shows.partials.show-table-row', [
+                                            'show' => $show,
+                                            'isTestShow' => false,
+                                        ])
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-6">
-                    {{-- Test Shows Table --}}
-                    <div class="card">
-                        <div class="card-header bg-danger text-light">
-                            <h5 class="mb-0">Test Shows</h5>
-                        </div>
-                        <div class="card-body bg-dark text-light table-responsive">
+
+                    <div class="tab-pane fade" id="test-shows-tab" role="tabpanel"
+                        aria-labelledby="test-shows-tab-btn" tabindex="0">
+                        <div class="live-shows-table-scroll table-responsive">
                             <table id="testShowsTable"
-                                class="table table-striped table-borderless table-dark data-table mb-0">
+                                class="table table-striped table-borderless table-dark live-shows-table mb-0">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
@@ -157,85 +160,11 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    
-                                    @foreach ($liveShows->where('is_test_show', true) as $show)
-                                        <tr>
-                                            <td>{{ $show->id }}</td>
-                                            <td>{{ $show->title }}</td>
-                                            <td>{{ $show->scheduled_at->format('d M Y, H:i') }}</td>
-                                            <td>{{ $show->users->count() }}</td>
-                                            <td>
-                                                @if ($show->status === 'completed')
-                                                    <span class="badge bg-success">Completed</span>
-                                                @elseif ($show->status === 'scheduled')
-                                                    <span class="badge bg-secondary">Scheduled</span>
-                                                @elseif ($show->status === 'live')
-                                                    <span class="badge bg-danger">Live</span>
-                                                @else
-                                                    <span
-                                                        class="badge bg-light text-dark">{{ ucfirst($show->status) }}</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-danger">Yes</span>
-                                            </td>
-                                            <td class="d-flex gap-2">
-                                                <a href="{{ route('admin.live-shows.stream-management', $show->id) }}"
-                                                    class="btn btn-sm btn-primary ">Stream Management</a>
-
-                                                <div class="dropdown">
-                                                    <button class="btn btn-sm btn-dark dropdown-toggle" type="button"
-                                                        id="dropdownMenuButton{{ $show->id }}"
-                                                        data-bs-toggle="dropdown" aria-expanded="false">
-                                                        Actions
-                                                    </button>
-                                                    <ul class="dropdown-menu"
-                                                        aria-labelledby="dropdownMenuButton{{ $show->id }}">
-                                                        <li>
-                                                            <a class="dropdown-item"
-                                                                href="{{ route('admin.live-shows.edit', $show->id) }}">Edit</a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item"
-                                                                href="{{ route('admin.live-shows.players', $show->id) }}">All
-                                                                Players</a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item"
-                                                                href="{{ route('admin.live-shows.view-details', $show->id) }}">Details</a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item"
-                                                                href="{{ route('admin.live-show-quizzes.index', ['live_show_id' => $show->id]) }}">Quiz
-                                                                Questions</a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item"
-                                                                href="{{ route('admin.live-shows.gallery-attach', $show) }}">Gallery
-                                                                Media</a>
-                                                        </li>
-                                                        <li>
-                                                            <a class="dropdown-item"
-                                                                href="{{ route('admin.live-shows.copy', $show->id) }}">Copy</a>
-                                                        </li>
-                                                        <li>
-                                                            <form
-                                                                action="{{ route('admin.live-shows.destroy', $show->id) }}"
-                                                                method="POST"
-                                                                onsubmit="return confirm('Are you sure you want to delete this show?');"
-                                                                style="display:inline;">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit"
-                                                                    class="dropdown-item text-danger">
-                                                                    Delete
-                                                                </button>
-                                                            </form>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                    @foreach ($testShows as $show)
+                                        @include('admin.live-shows.partials.show-table-row', [
+                                            'show' => $show,
+                                            'isTestShow' => true,
+                                        ])
                                     @endforeach
                                 </tbody>
                             </table>
@@ -243,19 +172,6 @@
                     </div>
                 </div>
             </div>
-
-
-
-
         </div>
-
-
     </div>
-
-    @push('styles')
-        <link rel="stylesheet" href="{{ asset('/styles/datatable.css') }}">
-    @endpush
-
-    @push('scripts')
-    @endpush
 </x-app-dashboard-layout>
