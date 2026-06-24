@@ -896,6 +896,7 @@
             console.log('Show winners tab event received:', data);
             const winnersData = data.winnersData;
             showWinnersTabForParticipants().then(() => {
+                toggleQuiz("remove");
 
                 console.log('Winner data:', data.winnersData, 'User ID:', userId);
 
