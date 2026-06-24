@@ -29,16 +29,14 @@
 
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}">
-    <meta property="og:description"
-        content="{{ $liveShow->description ?? '' }}">
+    <meta property="og:description" content="{{ $liveShow->description ?? '' }}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:image" content="{{ asset('og-image.webp') }}">
     <meta property="og:site_name" content="{{ __('de.main_ui.game_show') }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}">
-    <meta name="twitter:description"
-        content="{{ $liveShow->description ?? '' }}">
+    <meta name="twitter:description" content="{{ $liveShow->description ?? '' }}">
     <meta name="twitter:image" content="{{ asset('og-image.webp') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -896,8 +894,21 @@
         });
         channel2.bind('ShowLiveShowWinnersTabEvent', function(data) {
             console.log('Show winners tab event received:', data);
+            const winnersData = data.winnersData;
+            showWinnersTabForParticipants().then(() => {
 
-            showWinnersTabForParticipants();
+                console.log('Winner data:', data.winnersData, 'User ID:', userId);
+
+                if (Array.isArray(winnersData)) {
+                    const winner = winnersData.find(winner => winner.user_id == userId);
+                    if (winner) {
+                        showWinnerSwalDialog(winner.prize_won);
+                    }
+                }
+
+                fireWorksConfetti();
+                playSound('winner');
+            });
         });
 
 
@@ -1102,13 +1113,7 @@
         }
 
         function showWinnersTabForParticipants() {
-
-
-
-
-            updatePlayersLeaderboard().then(() => {
-
-
+          return  updatePlayersLeaderboard().then(() => {
                 const playerTabLink = document.getElementById('playerTab-tab');
                 const playerTabPane = document.getElementById('playerTab');
                 const chatTabLink = document.getElementById('chatTab-tab');
@@ -1133,8 +1138,6 @@
                 // document.getElementById('players-list-loading-spinner').style.display = 'block';
                 // document.getElementById('players-list-loading-spinner').style.display = 'none';
             });
-
-
         }
 
 
@@ -1305,16 +1308,7 @@
                         // console.log('Quiz submission response:', data);
                         if (data.success) {
                             console.log('Quiz submitted successfully.');
-                            // Show correct/incorrect feedback
-                            //using some instead of forEach to break the loop when correct answer is found, converting nodelist to array
 
-
-                            // if (data.is_correct) {
-                            //     appendQuestionResponseStatus('success');
-                            //     fireConfetti();
-                            // } else {
-                            //     appendQuestionResponseStatus('fail');
-                            // }
                         } else {
                             //if authStatus
                             if (data.message && data.message == "unauthorized") {
@@ -1592,7 +1586,7 @@
                         isEliminated = data.isEliminated == true ? true : false;
 
 
-                        playerAsWinnerEventTrigger();
+                        // playerAsWinnerEventTrigger();
                         userBlockedFromLiveShowEventTrigger();
                         checkIfUserBlockedFromLiveShow();
 
@@ -1777,34 +1771,6 @@
             }
             showVideoContainer();
         }
-
-
-        // function evaluateElinimation() {
-        //     document.querySelector('#quizTimer').style.display = "none";
-
-        //     // console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
-        //     updateUserPoints();
-
-        //     if (!isEliminated && isLoggedIn) {
-        //         if (isCurrentAnswerCorrect === true) {
-        //             fireConfetti();
-        //             appendQuestionResponseStatus('success');
-        //         } else if (isCurrentAnswerCorrect === false) {
-        //             appendQuestionResponseStatus('fail');
-
-        //             isEliminated = true;
-        //         } else {
-        //             isEliminated = true;
-        //             appendQuestionResponseStatus('warning');
-        //         }
-        //     } else {
-        //         showVideoContainer();
-        //     }
-
-        //     // Reset for next question
-        //     // isCurrentAnswerCorrect = null;
-        //     //uncheckAndEnableOptions();
-        // }
 
         function updateUserPoints() {
             // console.log('Updating user points...');
@@ -1994,32 +1960,13 @@
                         .then(prizeData => {
 
                             console.log('Prize data:', prizeData);
+                            showWinnersTabForParticipants();
+                            fireWorksConfetti();
+                            playSound('winner');
                             if (prizeData.success && prizeData.prize !== undefined && prizeData.prize !=
                                 'n/a' && prizeData.is_winner == true) {
-                                fireWorksConfetti();
-                                playSound('winner');
-                                Swal.fire({
-                                    title: "{{ __('de.winner.title') }}",
-                                    html: `
-                                        <i class="mb-3 fas fa-trophy fa-3x text-warning"></i>
-                                        <h3 class="mb-2" style="color:#ff5f00;">{{ __('de.winner.title') }}</h3>
-                                        <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.selected') }}</p>
-                                        <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.prize') }}</p>
-                                        <div class="text-center mb-3" style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)">
-                                            ${prizeData.prize}
-                                        </div>
-                                    `,
-                                    icon: 'success',
-                                    confirmButtonText: '<i class="fas fa-check me-2"></i>{{ __('de.profile.close') }}',
-                                    width: 350,
-                                    customClass: {
-                                        popup: 'swal2-dialog-custom-winner',
-                                        title: 'swal2-title-custom-winner'
-                                    }
-                                });
-                                winnerAnnounced = 1;
-                                showWinnersTabForParticipants();
 
+                                showWinnerSwalDialog(prizeData.prize);
 
                             }
 
@@ -2039,6 +1986,30 @@
             document.querySelector('#winnerDialog').style.display = 'block';
             //hide question
             toggleQuiz("remove");
+
+        }
+
+        function showWinnerSwalDialog(prizeWon) {
+            Swal.fire({
+                title: "{{ __('de.winner.title') }}",
+                html: `
+                                        <i class="mb-3 fas fa-trophy fa-3x text-warning"></i>
+                                        <h3 class="mb-2" style="color:#ff5f00;">{{ __('de.winner.title') }}</h3>
+                                        <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.selected') }}</p>
+                                        <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.prize') }}</p>
+                                        <div class="text-center mb-3" style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)">
+                                            ${prizeWon}
+                                        </div>
+                                    `,
+                icon: 'success',
+                confirmButtonText: '<i class="fas fa-check me-2"></i>{{ __('de.profile.close') }}',
+                width: 350,
+                customClass: {
+                    popup: 'swal2-dialog-custom-winner',
+                    title: 'swal2-title-custom-winner'
+                }
+            });
+            winnerAnnounced = 1;
 
         }
 
@@ -2065,7 +2036,7 @@
             });
         }
 
-        playerAsWinnerEventTrigger()
+        // playerAsWinnerEventTrigger()
 
         @if (Auth::guard('web')->check())
             userBlockedFromLiveShowEventTrigger()

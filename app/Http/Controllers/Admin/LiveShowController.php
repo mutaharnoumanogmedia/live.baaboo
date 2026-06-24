@@ -523,8 +523,8 @@ class LiveShowController extends Controller
                 }
             }
             $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon, 'winner_prize_id' => $prize->id ?? null]);
-            ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string) $liveShowId);
-            Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
+            // ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string) $liveShowId);
+            // Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
 
             if (! $liveShow->is_test_show) {
                 // Dispatch job to send winner email after 30 minutes
@@ -539,7 +539,19 @@ class LiveShowController extends Controller
         }
 
         $liveShow->update(['winners_announced' => true]);
-        ShowLiveShowWinnersTabEvent::dispatch((string) $liveShow->id);
+
+        $winnersData = $liveShow->users()
+            ->wherePivot('is_winner', true)
+            ->select('users.id as user_id', 'users.name as user_name', 'user_live_shows.prize_won as prize_won')
+            ->get();
+        $winnersDataArray = $winnersData->map(function ($winner) {
+            return [
+                'user_id' => $winner->user_id,
+                'user_name' => $winner->user_name,
+                'prize_won' => $winner->prize_won,
+            ];
+        })->toArray();
+        ShowLiveShowWinnersTabEvent::dispatch((string) $liveShow->id, $winnersDataArray);
 
         LiveShowAdminStateEvent::dispatch((string) $liveShow->id, 'winners', [
             'winners_announced' => true,
@@ -1640,7 +1652,7 @@ class LiveShowController extends Controller
     {
         $liveShow = LiveShow::findOrFail($id);
         // change the title to the new title
-        $newTitle = 'Copy :'.$liveShow->title.' - '.now()->format('Y-m-d') ." - ".uniqid();
+        $newTitle = 'Copy :'.$liveShow->title.' - '.now()->format('Y-m-d').' - '.uniqid();
         $newLiveShow = $liveShow->replicate();
         $newLiveShow->title = $newTitle;
         $newLiveShow->is_test_show = true;
