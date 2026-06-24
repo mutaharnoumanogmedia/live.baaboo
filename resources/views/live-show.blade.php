@@ -136,7 +136,7 @@
             border: none;
         }
 
-       .quiz-mode #zego-live-root video {
+       .quiz-mode #root video {
             object-fit: cover !important;
             position: fixed;
             top: 0;

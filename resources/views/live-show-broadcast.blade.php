@@ -14,7 +14,7 @@
         }
 
         #root video {
-            object-fit: contain !important;
+            object-fit: contain;
             position: fixed;
             top: 0;
             left: 0;
@@ -215,7 +215,7 @@
             showUserList: false, // Hides the viewer count/list
             language: 'German',
             showMirror: false,
-            fillMode: "contain",
+            // fillMode: "contain",
         }
 
         const zp = ZegoUIKitPrebuilt.create(TOKEN);
