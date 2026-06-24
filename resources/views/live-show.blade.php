@@ -18,6 +18,7 @@
 
     <link rel="shortcut icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
     <title>{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}</title>
+    <meta name="description" content="{{ __('de.main_ui.description', ['description' => $liveShow->description ?? '']) }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -28,14 +29,16 @@
 
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}">
-    <meta property="og:description" content="{{ __('de.main_ui.subtitle') }}">
+    <meta property="og:description"
+        content="{{ __('de.main_ui.description', ['description' => $liveShow->description ?? '']) }}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:image" content="{{ asset('og-image.webp') }}">
     <meta property="og:site_name" content="{{ __('de.main_ui.game_show') }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}">
-    <meta name="twitter:description" content="{{ __('de.main_ui.subtitle') }}">
+    <meta name="twitter:description"
+        content="{{ __('de.main_ui.description', ['description' => $liveShow->description ?? '']) }}">
     <meta name="twitter:image" content="{{ asset('og-image.webp') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -834,7 +837,7 @@
             document.getElementById('gameShowBody').innerHTML = '';
             document.getElementById('waitingLobbyBody').style.display = 'block';
         @endif
-   
+
         @if ($liveShow->media_visible)
             // document.getElementById("liveShowBottomFixed").style.display = "none";
             toggleToBeHiddenOnMediaPlay('none');
