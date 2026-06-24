@@ -136,6 +136,16 @@
             border: none;
         }
 
+       .quiz-mode #zego-live-root video {
+            object-fit: cover !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+             
+        }
+
         /* #zego-live-root video {
             object-fit: cover !important;
             width: 100% !important;
