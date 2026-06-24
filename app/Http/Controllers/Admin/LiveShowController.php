@@ -542,12 +542,11 @@ class LiveShowController extends Controller
 
         $winnersData = $liveShow->users()
             ->wherePivot('is_winner', true)
-            ->select('users.id as user_id', 'users.name as user_name', 'user_live_shows.prize_won as prize_won')
+            ->select('users.id as user_id', 'user_live_shows.prize_won as prize_won')
             ->get();
         $winnersDataArray = $winnersData->map(function ($winner) {
             return [
                 'user_id' => $winner->user_id,
-                'user_name' => $winner->user_name,
                 'prize_won' => $winner->prize_won,
             ];
         })->toArray();
