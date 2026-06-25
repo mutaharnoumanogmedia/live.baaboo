@@ -1172,7 +1172,8 @@
                         position: overlayState.position,
                         size: overlayState.size,
                     };
-                } else if (overlayState.mediaType === 'image' && pipeline.overlayImageEl && pipeline.overlayImageEl.src) {
+                } else if (overlayState.mediaType === 'image' && pipeline.overlayImageEl && pipeline.overlayImageEl
+                    .src) {
                     snapshot.overlay = {
                         type: 'image',
                         url: pipeline.overlayImageEl.src,
@@ -1558,7 +1559,7 @@
                 // so the invite/request flows stay hidden.
                 showInviteToCohostButton: false,
                 showRequestToCohostButton: false,
-                
+
 
                 onLeaveRoom: () => {
                     if (window.BroadcastOverlay) window.BroadcastOverlay.stopBgm();
@@ -1591,7 +1592,14 @@
                 encodeHeight: 1920,
                 fps: 30, // Match your Camo Studio frame rate
                 bitrate: 3000,
+                layout: "Sidebar", // Options: "Auto" | "Grid" | "Sidebar"
+                config: {
+                    sidebarConfig: {
+                        showBestSpeakerAsMainView: true // Pins the host/primary speaker to the big window
+                    }
+                },
 
+                showPinButton: true,
 
                 scenario: {
                     mode: ZegoUIKitPrebuilt.LiveStreaming,

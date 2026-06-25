@@ -7,12 +7,10 @@
             padding: 0;
             overflow: hidden;
         }
-
         #root {
             width: 100vw;
             height: 100vh;
         }
-
         #root video {
             object-fit: cover !important;
             position: fixed;
@@ -22,16 +20,11 @@
             height: 100vh !important;
              
         }
-
-
-
-
         .zg_autoplay_mask {
             background: rgba(0, 0, 0, 0.7) !important;
             font-family: -apple-system, system-ui, sans-serif !important;
             font-size: 18px !important;
         }
-
         .dIzgYQV4CBbzZxzJbwbS,
         #ZegoRoomFooter,
         #ZegoRoomHeader {
