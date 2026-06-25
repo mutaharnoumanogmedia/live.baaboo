@@ -85,12 +85,7 @@ body .end-show {
     margin: 0;
     z-index: 1030;
     opacity: 1;
-    background: radial-gradient(
-        circle at top center,
-        rgba(255, 255, 255, 1) 0%,
-        rgba(240, 230, 255, 1) 35%,
-        rgba(210, 185, 245, 1) 100%
-    );
+    background: #a861f550;
     border-top: 1px solid rgba(168, 97, 245, 0.15);
     box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
 }
@@ -189,6 +184,7 @@ body .end-show {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: white;
 }
 
 #bottom-nav .bottom-nav-label--profile {
