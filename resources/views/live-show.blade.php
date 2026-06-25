@@ -408,23 +408,7 @@
                             <div id="evaluationStatus"></div>
                         </div>
 
-                        <div class="quiz-section" id="quizSection">
-                            <div>
-                                <input type="hidden" id="quizId" value="${quiz.id}">
-                                <div class="quiz-question">
-                                    <i class="fas fa-question-circle text-primary me-2"></i>
-                                    ${quiz.question}
-                                </div>
-
-                                <div class="quiz-options row">
-                                    ${quiz.options.map((option, index) =>
-                                    `<div class="quiz-option"> <input type="radio" id="option${option.id}"
-                                            name="option" value="${option.id}"> <label
-                                            for="option${option.id}">${option.option_text}</label>
-                                    </div> `).join('')}
-                                </div>
-                            </div>
-                        </div>
+                        <div class="quiz-section" id="quizSection"></div>
 
                     </div>
                 </div>
@@ -450,12 +434,12 @@
             <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel"
                 aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content" style="border-radius: 20px;">
-                        <div class="modal-header" style="border-bottom: none;">
+                    <div class="modal-content">
+                        <div class="modal-header">
                             <h5 class="modal-title" id="registerModalLabel">
-                                <i class="fas fa-user-plus me-2 text-warning"></i>{{ __('de.registration.title') }}
+                                <i class="fas fa-user-plus me-2"></i>{{ __('de.registration.title') }}
                                 <div>
-                                    <span style="font-size: 12px">{{ __('de.registration.already_account') }}</span>
+                                    <span>{{ __('de.registration.already_account') }}</span>
                                 </div>
                             </h5>
 
@@ -476,16 +460,14 @@
                                     <input type="email" class="form-control" id="registerEmail" name="email"
                                         required placeholder="{{ __('de.registration.email_placeholder') }}">
                                 </div>
-                                <div class="gap-2 d-flex">
-                                    <input type="checkbox" class="form-check-input form-control-color" id="agree"
-                                        required>
+                                <div class="gap-2 d-flex align-items-start">
+                                    <input type="checkbox" class="form-check-input" id="agree" required>
                                     <label class="form-check-label" for="agree">{!! __('de.registration.terms') !!}</label>
                                 </div>
-                                <div id="registerError" class="text-danger small" style="display:none;"></div>
+                                <div id="registerError" class="small" style="display:none;"></div>
                             </div>
-                            <div class="modal-footer" style="border-top: none;">
-                                <button type="submit" class="btn btn-warning w-100"
-                                    style="background-color: #ff5f00; border: none;">
+                            <div class="modal-footer">
+                                <button type="submit" class="btn w-100">
                                     <i class="fas fa-paper-plane me-2"></i>{{ __('de.registration.register') }}
                                 </button>
                             </div>
@@ -566,23 +548,24 @@
 
                             <!-- Bottom Chat Input -->
                             <div class="bottom-chat-input">
-
-                                <div class="input-group chat-input-group">
-                                    <input type="text" maxlength="200"
-                                        placeholder="{{ __('de.main_ui.placeholder_message') }}" id="chatInput">
-                                    <button type="button" id="send-btn-overlay" onclick="sendMessage()">
-                                        <i class="fas fa-paper-plane"></i>
-                                    </button>
+                                <div class="chat-input-group">
+                                    <div class="chat-input-pill">
+                                        <input type="text" maxlength="200"
+                                            placeholder="{{ __('de.main_ui.placeholder_message') }}" id="chatInput"
+                                            autocomplete="off">
+                                        <button type="button" id="send-btn-overlay" onclick="sendMessage()"
+                                            title="{{ __('de.main_ui.placeholder_message') }}">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </div>
                                     <button type="button" id="heartReactionBtn"
                                         title="{{ __('de.main_ui.send_heart') }}">
                                         <i class="fas fa-heart"></i>
                                     </button>
                                 </div>
-                                <div id="chatDisabledMsg"
-                                    style="display: none; text-align: center; font-size: 0.75rem; color: #999; padding: 4px 0 2px;">
+                                <div id="chatDisabledMsg" class="chat-disabled-msg">
                                     Unser Chat macht gerade kurz Pause – hier ist heute richtig was los!
                                 </div>
-
                             </div>
 
                         </div>
@@ -591,13 +574,12 @@
                     <div class="tab-pane fade " id="playerTab" role="tabpanel"
                         aria-labelledby="playerTab-tab position-relative">
                         <!-- Player List -->
-                        <div class="container-fluid ">
+                        <div class="container-fluid px-2 py-2">
                             <div class="players-list-group-container">
-                                <h5 class="mb-3"><i
-                                        class="fas fa-users me-2 text-primary"></i>{{ __('de.main_ui.players_scores') }}
+                                <h5 class="mb-3 text-center">
+                                    <i class="fas fa-users me-2"></i>{{ __('de.main_ui.players_scores') }}
                                 </h5>
-                                <ul class="list-group" id="players-leaderbord">
-                                </ul>
+                                <ul class="list-group" id="players-leaderbord"></ul>
                             </div>
                         </div>
                         <div id="players-list-loading-spinner" style="display: none;">
@@ -606,40 +588,40 @@
                     </div>
                 </div>
             </div>
-            <nav class="navbar mobile-nav bottom-nav bg-nav-radial-top-gradient border-top">
-                <ul
-                    class="flex-row px-2 text-center nav d-flex flex-nowrap w-100 justify-content-between align-items-center">
+            <nav class="navbar" id="bottom-nav">
+                <ul class="bottom-nav-list nav d-flex flex-nowrap w-100 justify-content-between align-items-center">
 
                     <!-- 1) Logo -->
                     <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center">
                         <a href="#"
-                            class="nav-link d-flex flex-column align-items-center justify-content-center">
+                            class="nav-link bottom-nav-link bottom-nav-link--logo d-flex flex-column align-items-center justify-content-center">
                             <img src="{{ asset('images/badabing-logo.webp') }}" alt="Logo"
-                                style="height:46px;width:auto;">
+                                class="bottom-nav-logo">
                         </a>
                     </li>
 
                     <!-- 2) Chat -->
                     <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center"
                         role="presentation">
-                        <a class="nav-link active d-flex flex-column align-items-center justify-content-center"
+                        <a class="nav-link bottom-nav-link bottom-nav-link--chat active d-flex flex-column align-items-center justify-content-center"
                             id="chatTab-tab" data-bs-toggle="tab" href="#chatTab" role="tab"
                             aria-controls="chatTab" aria-selected="true">
-                            <i class="fas fa-comments fs-5"></i>
-                            <small class="mt-1">{{ __('de.main_ui.chat') }}</small>
+                            <span class="bottom-nav-icon"><i class="fas fa-comments"></i></span>
+                            <small class="bottom-nav-label">{{ __('de.main_ui.chat') }}</small>
                         </a>
                     </li>
+
                     <!-- 3) Players -->
                     <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center"
                         role="presentation" id="player-tab-nav-item">
-                        <a class="nav-link d-flex flex-column align-items-center justify-content-center"
+                        <a class="nav-link bottom-nav-link bottom-nav-link--players d-flex flex-column align-items-center justify-content-center"
                             id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
                             aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
-                            <div class="d-flex align-items-center">
-                                <i class="fas fa-users fs-6 me-1"></i>
-                                <span id="user-count" class="fw-semibold small">0</span>
-                            </div>
-                            <small class="mt-1">{{ __('de.main_ui.players') }}</small>
+                            <span class="bottom-nav-icon bottom-nav-icon--players">
+                                <i class="fas fa-users"></i>
+                                <span id="user-count" class="bottom-nav-badge">0</span>
+                            </span>
+                            <small class="bottom-nav-label">{{ __('de.main_ui.players') }}</small>
                         </a>
                     </li>
 
@@ -647,17 +629,17 @@
                     <li class="nav-item flex-fill d-flex justify-content-center" id="register-profile-item">
                         @guest('web')
                             <a href="#"
-                                class="nav-link d-flex flex-column align-items-center justify-content-center"
+                                class="nav-link bottom-nav-link bottom-nav-link--join d-flex flex-column align-items-center justify-content-center"
                                 data-bs-target="#registerModal" data-bs-toggle="modal">
-                                <i class="fas fa-user-plus fs-5"></i>
-                                <small class="mt-1">{{ __('de.main_ui.join') }}</small>
+                                <span class="bottom-nav-icon"><i class="fas fa-user-plus"></i></span>
+                                <small class="bottom-nav-label">{{ __('de.main_ui.join') }}</small>
                             </a>
                         @elseauth('web')
                             <a href="#"
-                                class="nav-link flex-column align-items-center d-flex justify-content-center"
+                                class="nav-link bottom-nav-link bottom-nav-link--profile d-flex flex-column align-items-center justify-content-center"
                                 data-bs-toggle="modal" data-bs-target="#userInfoModal">
-                                <i class="fas fa-user fs-5"></i>
-                                <small class="mt-1 text-truncate" style="max-width:70px;">
+                                <span class="bottom-nav-icon"><i class="fas fa-user"></i></span>
+                                <small class="bottom-nav-label bottom-nav-label--profile text-truncate">
                                     {{ Auth::guard('web')->user()->name }}
                                 </small>
                             </a>
@@ -1055,9 +1037,13 @@
                                 winnerBgColorClass =
                                     'winner-div silver-div'; // Silver
                                 break;
-                            default:
+                                case 2:
                                 winnerBgColorClass =
                                     'winner-div bronze-div'; // Bronze
+                                break;
+                            default:
+                                winnerBgColorClass =
+                                    'winner-div platinum-div'; // Platinum
                                 break;
 
                         }
@@ -1216,17 +1202,28 @@
 
             const quizSection = document.getElementById('quizSection');
             quizSection.innerHTML = `
-            <div>
+            <div class="quiz-section-inner">
                 <input type="hidden" id="quizId" value="${quiz.id}">
-                    <div class="quiz-question">
-                       <div class="text-center quiz-question-index me-1" style="font-size: 14px; font-weight: bold;">${quiz.index  } von ${quiz.totalQuizQuestions}.</div>
-                       <div class="quiz-question-text" translate="no">${quiz.question}</div>
-                    </div>
-                    <div class="quiz-options row">
-                        ${quiz.options.map((option, index) =>
-                        `<div class="mb-3 quiz-option col-md-12 position-relative" id="quiz-option-${option.id}">  <div class="option-result-container " id="option-result-container-${option.id}" style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}" class="quiz-option-label" translate="no">${numberToLetter(index)}. ${option.option_text}</label>  </div> `).join('')}
-                    </div>
-             </div>
+                <div class="quiz-question">
+                    <div class="quiz-question-index">${quiz.index} von ${quiz.totalQuizQuestions}</div>
+                    <div class="quiz-question-text" translate="no">${quiz.question}</div>
+                </div>
+                <div class="quiz-options row g-2">
+                    ${quiz.options.map((option, index) => `
+                        <div class="quiz-option col-12 position-relative" id="quiz-option-${option.id}">
+                            <div class="option-result-container" id="option-result-container-${option.id}">
+                                <div id="option-result-bar-${option.id}" class="option-result-bar"></div>
+                                <span id="option-result-label-${option.id}" class="option-result-label">0%</span>
+                            </div>
+                            <input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">
+                            <label for="option${option.id}" class="quiz-option-label" translate="no">
+                                <span class="quiz-option-letter">${numberToLetter(index)}</span>
+                                <span class="quiz-option-text">${option.option_text}</span>
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
             `;
 
             // Re-attach event listeners for auto-submit on radio change
@@ -1644,10 +1641,10 @@
             const registerButtonDiv = document.querySelector('#register-profile-item');
             registerButtonDiv.innerHTML = `
                   <a href="#"
-                        class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
+                        class="nav-link bottom-nav-link bottom-nav-link--profile d-flex flex-column align-items-center justify-content-center"
                         data-bs-toggle="modal" data-bs-target="#userInfoModal">
-                        <i class="fas fa-user fs-5"></i>
-                        <small class="mt-1 text-truncate" style="max-width:70px;">
+                        <span class="bottom-nav-icon"><i class="fas fa-user"></i></span>
+                        <small class="bottom-nav-label bottom-nav-label--profile text-truncate">
                             ${username}
                         </small>
                     </a>
