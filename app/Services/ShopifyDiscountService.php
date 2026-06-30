@@ -182,6 +182,7 @@ class ShopifyDiscountService
 
     public function updatePriceRule(int $priceRuleId, $startsAt, $endsAt, $others): bool
     {
+        dd($priceRuleId, $startsAt, $endsAt, $others);
         $payload = [
             'price_rule' => array_merge($others, [
                 'starts_at' => \Carbon\Carbon::parse($startsAt)->format('Y-m-d\TH:i:s\Z'),
