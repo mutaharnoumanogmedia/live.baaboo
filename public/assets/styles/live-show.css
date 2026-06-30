@@ -85,7 +85,7 @@ body .end-show {
     margin: 0;
     z-index: 1030;
     opacity: 1;
-    background: #a861f550;
+    background: #5c10ad;
     border-top: 1px solid rgba(168, 97, 245, 0.15);
     box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
 }
@@ -506,7 +506,7 @@ body .end-show {
 .video-container #zego-live-root {
     border-radius: 00px;
     width: 100%;
-    height: 100%;
+    height: calc(100vh - 68px);
     background: #000;
     object-fit: cover;
     pointer-events: all;

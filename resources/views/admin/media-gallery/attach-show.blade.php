@@ -86,8 +86,9 @@
                             </table>
                         </div>
                         <div class="mt-3">
-                            <a href="{{ route('admin.media-gallery.index') }}" class="btn btn-secondary">Back to
-                                Gallery</a>
+                            <a href="{{ route('admin.media-gallery.index') }}" class="btn btn-secondary">
+                                Back to Gallery
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -120,13 +121,7 @@
                     }).then(async response => {
                         const data = await response.json();
                         if (data.success) {
-                            // Optionally, notify user or update UI
-                            form.closest('li').querySelector('button[type=submit]')
-                                .textContent = 'Attached';
-                            form.closest('li').querySelector('button[type=submit]')
-                                .classList.remove('btn-primary');
-                            form.closest('li').querySelector('button[type=submit]')
-                                .classList.add('btn-success');
+                            window.location.reload();
                         } else {
                             alert(data.message || 'Failed to attach media.');
                             if (submitButton) submitButton.disabled = false;

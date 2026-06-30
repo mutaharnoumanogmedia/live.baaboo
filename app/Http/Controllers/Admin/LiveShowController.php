@@ -154,7 +154,8 @@ class LiveShowController extends Controller
      */
     public function edit(LiveShow $liveShow)
     {
-        //
+        $liveShow->load('winnerPrizes');
+
         return view('admin.live-shows.edit', compact('liveShow'));
     }
 
@@ -171,32 +172,38 @@ class LiveShowController extends Controller
             'description' => 'nullable|string',
             'scheduled_at' => 'required|date',
             'status' => 'required|in:scheduled,live,completed',
-            'host_name' => 'nullable|string|max:255',
-            'prize_amount' => 'required|numeric|min:0',
-            'currency' => 'required|string|max:5',
-            'max_winners' => 'required|integer|min:1|max:50',
             'max_players' => 'required|integer|min:1|max:100000',
             'chat_enabled' => 'required|boolean',
+            'is_test_show' => 'required|boolean',
+        ]);
+
+        $live_show->update($validated);
+
+        return redirect()->route('admin.live-shows.edit', $live_show->id)->with('success', 'Live show details updated successfully!');
+    }
+
+    public function updateWinnerPrizes(Request $request, LiveShow $live_show)
+    {
+        $validated = $request->validate([
+            'max_winners' => 'required|integer|min:1|max:50',
             'winner_prizes' => 'nullable|array',
             'winner_voucher' => 'nullable|array',
             'winner_voucher_amount' => 'nullable|array|min:0',
             'winner_prizes.*' => 'nullable|string|max:255',
             'winner_voucher.*' => 'nullable|integer|max:255',
             'winner_voucher_amount.*' => 'nullable|numeric|min:0',
-            'is_test_show' => 'required|boolean',
         ]);
 
-        $validated['created_by'] = Auth::id();
         $maxWinners = (int) $validated['max_winners'];
         $prizes = $request->input('winner_prizes', []);
         $vouchers = $request->input('winner_voucher', []);
         $voucherAmounts = $request->input('winner_voucher_amount', []);
 
-        $live_show->update($validated);
+        $live_show->update(['max_winners' => $maxWinners]);
 
         $this->syncWinnerPrizes($live_show->id, $maxWinners, $prizes, $vouchers, $voucherAmounts);
 
-        return redirect()->route('admin.live-shows.show', $live_show->id)->with('success', 'Live Show updated successfully!');
+        return redirect()->route('admin.live-shows.edit', $live_show->id)->with('success', 'Winner prizes updated successfully!');
     }
 
     /**
@@ -221,6 +228,10 @@ class LiveShowController extends Controller
     protected function syncWinnerPrizes(int $liveShowId, int $maxWinners, array $prizes, array $vouchers, array $voucherAmounts): void
     {
         $liveShow = LiveShow::find($liveShowId);
+        //if test show or env is local then return 
+        if ($liveShow->is_test_show || env('APP_ENV') == 'local') {
+            return;
+        }
         $errors = [];
         for ($rank = 1; $rank <= $maxWinners; $rank++) {
             $voucher = (string) ($vouchers[$rank] ?? 0);

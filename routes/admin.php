@@ -26,6 +26,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('permissions', PermissionController::class)->only(['index', 'create', 'store', 'destroy']);
 
     Route::resource('live-shows', \App\Http\Controllers\Admin\LiveShowController::class);
+    Route::put('live-shows/{live_show}/winner-prizes', [\App\Http\Controllers\Admin\LiveShowController::class, 'updateWinnerPrizes'])->name('live-shows.winner-prizes.update');
     Route::get('live-shows/{live_show}/gallery-attach', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'liveShowsAttachPage'])->name('live-shows.gallery-attach');
     Route::get('live-shows/{live_show}/copy', [\App\Http\Controllers\Admin\LiveShowController::class, 'copyLiveShow'])->name('live-shows.copy');
 
