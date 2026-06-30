@@ -232,6 +232,7 @@ class LiveShowController extends Controller
         if ($liveShow->is_test_show || env('APP_ENV') == 'local') {
             return;
         }
+
         $errors = [];
         for ($rank = 1; $rank <= $maxWinners; $rank++) {
             $voucher = (string) ($vouchers[$rank] ?? 0);
@@ -275,6 +276,7 @@ class LiveShowController extends Controller
                         $discount_rule_id = $prizeRule->id;
                     }
                 } catch (\Exception $e) {
+                    dd($e);
 
                     $errors[] = "Failed to create/update Shopify price rule for live show ID {$liveShowId}, rank {$rank}. Please check the logs for more details.";
                     Log::error("Failed to create Shopify price rule for live show ID {$liveShowId}, rank {$rank}: ".$e->getMessage());
