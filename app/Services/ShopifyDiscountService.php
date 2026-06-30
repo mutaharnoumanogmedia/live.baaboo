@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\ShopifyDiscountCode;
 use App\Models\ShopifyJob;
 use App\Models\ShopifyPriceRule;
-use App\Models\User;
 use App\Models\UserLiveShow;
 use Exception;
 use Illuminate\Support\Facades\Http;
@@ -15,13 +14,14 @@ use Illuminate\Support\Str;
 class ShopifyDiscountService
 {
     public $shop;
+
     public $token;
 
     public function __construct($shop = null, $token = null)
     {
-        $this->shop = $shop ?? env("SHOPIFY_API_DOMAIN");
-        $this->token = $token ?? env("SHOPIFY_API_KEY");
-        Log::info('ShopifyDiscountService initialized for shop: ' . $this->shop);
+        $this->shop = $shop ?? env('SHOPIFY_API_DOMAIN');
+        $this->token = $token ?? env('SHOPIFY_API_KEY');
+        Log::info('ShopifyDiscountService initialized for shop: '.$this->shop);
     }
 
     /**
@@ -32,12 +32,12 @@ class ShopifyDiscountService
         $response = Http::withHeaders([
             'X-Shopify-Access-Token' => $this->token,
         ])->post("{$this->shop}/admin/api/2026-01/price_rules.json", [
-            'price_rule' => $data
+            'price_rule' => $data,
         ]);
 
         $result = $response->json();
         if ($response->failed()) {
-            Log::error('Error creating price rule: ' . $response->body());
+            Log::error('Error creating price rule: '.$response->body());
         }
 
         $result = $result['price_rule'] ?? null;
@@ -55,6 +55,7 @@ class ShopifyDiscountService
                 'conditions' => json_encode($result ?? []),
             ]);
         }
+
         return $priceRule ?? null;
     }
 
@@ -80,8 +81,9 @@ class ShopifyDiscountService
     {
         $codes = [];
         for ($i = 0; $i < $count; $i++) {
-            $codes[] = ['code' => $prefix . '-' . strtoupper(Str::random(6))];
+            $codes[] = ['code' => $prefix.'-'.strtoupper(Str::random(6))];
         }
+
         return $codes;
     }
 
@@ -93,26 +95,28 @@ class ShopifyDiscountService
         try {
             $chunks = array_chunk($codes, 100);
             foreach ($chunks as $chunk) {
-                if ($chunk === []) continue;
+                if ($chunk === []) {
+                    continue;
+                }
                 $bulk_req_url = "{$this->shop}/admin/api/2026-01/price_rules/{$priceRuleId}/batch.json";
-                Log::info('Shopify Discount Code Batch Req: ' . $bulk_req_url. ' with ' . count($chunk) . ' codes.');
+                Log::info('Shopify Discount Code Batch Req: '.$bulk_req_url.' with '.count($chunk).' codes.');
 
                 $resp = Http::withHeaders([
                     'X-Shopify-Access-Token' => $this->token,
                 ])->post($bulk_req_url, [
-                    'discount_codes' => $chunk
+                    'discount_codes' => $chunk,
                 ]);
 
-                Log::info('Shopify Discount Code Batch Response: ' . $resp->body());
+                Log::info('Shopify Discount Code Batch Response: '.$resp->body());
                 // dd($resp->json(),$chunk);
                 if ($resp->failed()) {
                     Log::info('Error creating discount codes batch:'.$resp->body());
+
                     continue;
                 }
                 $job = $resp->json();
                 $job_id = $job[array_key_first($job)]['id'] ?? null;
                 $job_status = $job[array_key_first($job)]['status'] ?? null;
-
 
                 ShopifyJob::create([
                     'job_type' => array_key_first($job),
@@ -139,12 +143,12 @@ class ShopifyDiscountService
                             ]);
                         }
                     } else {
-                        Log::info('Discount code not found in database / Already in active state for code: ' . $dc['code']);
+                        Log::info('Discount code not found in database / Already in active state for code: '.$dc['code']);
                     }
                 }
             }
         } catch (Exception $e) {
-            Log::error('CreateDiscountService Exception in createDiscountCodes: ' . $e->getMessage());
+            Log::error('CreateDiscountService Exception in createDiscountCodes: '.$e->getMessage());
         }
     }
 
@@ -180,13 +184,13 @@ class ShopifyDiscountService
     //     return $response->json();
     // }
 
-    public function updatePriceRule(int $priceRuleId, $startsAt, $endsAt, $others): bool
+    public function updatePriceRule(int $priceRuleId, $startsAt, $endsAt, $others)
     {
         // dd($priceRuleId, $startsAt, $endsAt, $others);
         $payload = [
             'price_rule' => array_merge($others, [
                 'starts_at' => \Carbon\Carbon::parse($startsAt)->format('Y-m-d\TH:i:s\Z'),
-                'ends_at'   => \Carbon\Carbon::parse($endsAt)->format('Y-m-d\TH:i:s\Z'),
+                'ends_at' => \Carbon\Carbon::parse($endsAt)->format('Y-m-d\TH:i:s\Z'),
             ]),
         ];
 
@@ -204,35 +208,44 @@ class ShopifyDiscountService
             Log::error('Error updating price rule', [
                 'price_rule_id' => $priceRuleId,
                 'others' => $others,
-                'response' => $response->json()
+                'response' => $response->json(),
             ]);
+
             return false;
         }
         $others['collection_ids'] = $others['entitled_collection_ids'];
-        //unset entitled_collection_ids from $others
+        // unset entitled_collection_ids from $others
         unset($others['entitled_collection_ids']);
 
         // Sync locally
-        $priceRule = ShopifyPriceRule::where('shopify_id', $priceRuleId)->update(array_merge($others, [
+        $priceRule = ShopifyPriceRule::where('shopify_id', $priceRuleId)->update([
             'starts_at' => $startsAt,
-            'ends_at'   => $endsAt,
-        ]));
+            'ends_at' => $endsAt,
+            'title' => $others['title'],
+            'type' => $others['value_type'],
+            'value' => $others['value'],
+            'usage_limit' => $others['usage_limit'],
+            'active' => true,
+            'conditions' => json_encode($others ?? []),
 
-        Log::info('Price rule updated successfully', [
-            'price_rule_id' => $priceRuleId
         ]);
 
+        $priceRule = ShopifyPriceRule::where('shopify_id', $priceRuleId)->first();
+        Log::info('Price rule updated successfully', [
+            'price_rule_id' => $priceRuleId,
+        ]);
+        // dd($priceRule);
         return $priceRule;
     }
-
 
     /**
      * Generate Shopify discount URL for a code
      */
     public function generateDiscountUrl(string $code, string $redirect = '/cart'): string
     {
-        $shop_url = env("SHOPIFY_DOMAIN","https://baaboo.com");
-        return "{$shop_url}/discount/{$code}?redirect=" . urlencode($redirect);
+        $shop_url = env('SHOPIFY_DOMAIN', 'https://baaboo.com');
+
+        return "{$shop_url}/discount/{$code}?redirect=".urlencode($redirect);
     }
 
     public function checkDiscountCode($code)
@@ -249,27 +262,28 @@ class ShopifyDiscountService
                 'status' => $response->status(),
                 'response' => $response->body(),
             ]);
+
             return false;
         }
 
         $result = $response->json();
-        return !empty($result['discount_code']['id']);
+
+        return ! empty($result['discount_code']['id']);
     }
 
     public function setUserDiscountCode($shopify_rule_id, UserLiveShow $user)
     {
         $priceRuleId = $shopify_rule_id;
         if ($priceRuleId == null) {
-            Log::error("No active price rule found while setting discount code for ID: " . $user->id);
-            throw new Exception("No active price rule found.");
+            Log::error('No active price rule found while setting discount code for ID: '.$user->id);
+            throw new Exception('No active price rule found.');
         }
-
 
         $code = strtoupper(
             substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 14)
         );
 
-        while($this->checkDiscountCode($code)){
+        while ($this->checkDiscountCode($code)) {
             $code = strtoupper(
                 substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 14)
             );
@@ -292,16 +306,18 @@ class ShopifyDiscountService
                 'status' => $response->status(),
                 'response' => $response->body(),
             ]);
+
             return null;
         }
 
         $discountCode = $response->json('discount_code');
-        if (!$discountCode || empty($discountCode['id'])) {
+        if (! $discountCode || empty($discountCode['id'])) {
             Log::error('Invalid discount code response from Shopify', [
                 'user_id' => $user->id,
                 'price_rule_id' => $priceRuleId,
                 'response' => $response->body(),
             ]);
+
             return null;
         }
 
@@ -328,13 +344,15 @@ class ShopifyDiscountService
             if ($response->successful()) {
                 Log::info("Discount code removed successfully. Code: {$code}");
             } else {
-                Log::error("Error removing code: " . $response->body());
+                Log::error('Error removing code: '.$response->body());
             }
 
             $existingCode->active = false;
             $existingCode->save();
+
             return true;
         }
+
         return false;
     }
 
@@ -344,14 +362,15 @@ class ShopifyDiscountService
             'X-Shopify-Access-Token' => $this->token,
         ])->get("{$this->shop}/admin/api/2026-01/price_rules/{$priceRuleId}/batch/{$jobId}.json");
 
-        if($response->failed()){
-            Log::error('Error fetching job status for job '.$jobId. ': ' . $response->body());
+        if ($response->failed()) {
+            Log::error('Error fetching job status for job '.$jobId.': '.$response->body());
+
             return;
         }
         $result = $response->json();
         $status = $result['discount_code_creation']['status'] ?? 'queued';
 
-        if($status !== 'queued'){
+        if ($status !== 'queued') {
             ShopifyJob::where('job_id', $jobId)->update([
                 'status' => $status,
             ]);
@@ -359,13 +378,13 @@ class ShopifyDiscountService
             // return;
         }
 
-
         $response = Http::withHeaders([
             'X-Shopify-Access-Token' => $this->token,
         ])->get("{$this->shop}/admin/api/2026-01/price_rules/{$priceRuleId}/batch/{$jobId}/discount_codes.json");
 
-        if($response->failed()){
-            Log::error('Error fetching discount codes for job '.$jobId. ': ' . $response->body());
+        if ($response->failed()) {
+            Log::error('Error fetching discount codes for job '.$jobId.': '.$response->body());
+
             return;
         }
         $result = $response->json();
@@ -381,14 +400,13 @@ class ShopifyDiscountService
                     ]);
                 }
             } else {
-                Log::info('Discount code not found in database / Already in active state for code: ' . $dc['code']);
+                Log::info('Discount code not found in database / Already in active state for code: '.$dc['code']);
             }
         }
 
         ShopifyJob::where('job_id', $jobId)->update([
             'status' => $status,
         ]);
-
 
     }
 }
