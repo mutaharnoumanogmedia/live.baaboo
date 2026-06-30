@@ -420,14 +420,24 @@ body .end-show {
     box-shadow: 0 0 0 2px rgba(255, 95, 0, 0.1);
 }
 
-.quiz-section .quiz-option input[type="radio"]:checked + .quiz-option-label .quiz-option-letter {
+.quiz-section
+    .quiz-option
+    input[type="radio"]:checked
+    + .quiz-option-label
+    .quiz-option-letter {
     color: #fff;
     background: var(--qs-accent);
     border-color: var(--qs-accent);
 }
 
-.quiz-section .quiz-option.correct input[type="radio"]:checked + .quiz-option-label,
-.quiz-section .quiz-option.correct input[type="radio"]:disabled + .quiz-option-label,
+.quiz-section
+    .quiz-option.correct
+    input[type="radio"]:checked
+    + .quiz-option-label,
+.quiz-section
+    .quiz-option.correct
+    input[type="radio"]:disabled
+    + .quiz-option-label,
 .quiz-section .quiz-option.correct .quiz-option-label {
     color: #14532d;
     background: #dcfce7;
@@ -510,6 +520,11 @@ body .end-show {
     background: #000;
     object-fit: cover;
     pointer-events: all;
+}
+
+.quiz-mode .video-container iframe,
+.quiz-mode .video-container #zego-live-root {
+    height: 100%;
 }
 
 .video-container.question-activated .video-placeholder {
@@ -744,7 +759,11 @@ body .end-show {
 
 .players-list-group-container ul.list-group::-webkit-scrollbar-thumb,
 .players-list-group-container #players-leaderbord::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, var(--plgc-neon-purple), var(--plgc-neon-cyan));
+    background: linear-gradient(
+        180deg,
+        var(--plgc-neon-purple),
+        var(--plgc-neon-cyan)
+    );
     border-radius: 4px;
 }
 
@@ -770,7 +789,10 @@ body .end-show {
     transform: translateX(2px);
 }
 
-.players-list-group-container .player-list-item > div:first-child > span:first-child {
+.players-list-group-container
+    .player-list-item
+    > div:first-child
+    > span:first-child {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -907,7 +929,10 @@ body .end-show {
     box-shadow: none;
 }
 
-.players-list-group-container .platinum-div > div:first-child > span:first-child {
+.players-list-group-container
+    .platinum-div
+    > div:first-child
+    > span:first-child {
     color: #0369a1;
     border-color: rgba(56, 189, 248, 0.35);
     background: rgba(255, 255, 255, 0.65);
@@ -1546,8 +1571,6 @@ body .main-container.quiz-mode {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
-
 
 /* Just define the colors here */
 .heart-icon.heart-color-red {
