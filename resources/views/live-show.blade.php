@@ -887,8 +887,12 @@
         channel2.bind('ShowLiveShowWinnersTabEvent', function(data) {
             console.log('Show winners tab event received:', data);
             const winnersData = data.winnersData;
+
+            // play an audio, drums-roll.mp3
+            const drumsRollAudio = playSound('drums-roll');
             showWinnersTabForParticipants().then(() => {
                 toggleQuiz("remove");
+                stopSound(drumsRollAudio);
 
                 console.log('Winner data:', data.winnersData, 'User ID:', userId);
 
@@ -922,8 +926,10 @@
             'wrong': '{{ asset('/badabing-audio/wrong-sound.mp3') }}',
             'winner': '{{ asset('/badabing-audio/winner.mp3') }}',
             'correct': '{{ asset('/badabing-audio/correct-sound.mp3') }}',
+            'drums-roll': '{{ asset('/badabing-audio/drums-roll.mp3') }}',
         };
         let isTimeTickSoundPlaying = false;
+        let timeTickAudio = null;
 
         // Cache of preloaded HTMLAudioElement templates, keyed by sound name.
         const SOUND_CACHE = new Map();
@@ -981,12 +987,12 @@
          * Stop a sound returned from playSound() and reset its position.
          */
         function stopSound(audioInstance) {
-            if (!audioInstance) return;
+            if (!audioInstance || typeof audioInstance.pause !== 'function') return;
             try {
                 audioInstance.pause();
                 audioInstance.currentTime = 0;
             } catch (e) {
-                /* noop */
+                console.error('Error stopping sound:', e);
             }
         }
 
@@ -996,6 +1002,7 @@
             preloadSounds();
             fetchMessages();
             updatePlayersLeaderboard();
+            
             updateChatComposerState();
 
 
@@ -1737,7 +1744,7 @@
 
                     //if not already playing, play the time-tick sound
                     if (!isTimeTickSoundPlaying) {
-                        playSound('time-tick');
+                        timeTickAudio = playSound('time-tick');
                         isTimeTickSoundPlaying = true;
                     }
 
@@ -1752,7 +1759,8 @@
                 if (remainingMs <= 0) {
                     clearInterval(timerHandle);
                     isTimeTickSoundPlaying = false;
-                    stopSound('time-tick');
+                    stopSound(timeTickAudio);
+                    timeTickAudio = null;
                     setTimeout(() => {
                         if (onComplete) onComplete();
                     }, 1500);
@@ -2633,6 +2641,9 @@
         @include('partials.push-notification')
     @endif
 
+    <div class="d-none">
+        Sound Effect by <a href="https://pixabay.com/users/freesound_community-46691455/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=88344">freesound_community</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=88344">Pixabay</a>
+    </div>
 
 </body>
 

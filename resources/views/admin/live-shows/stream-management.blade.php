@@ -90,7 +90,7 @@
 
                          </div>
                          <table class="table mb-0 align-middle table-sm table-dark table-hover"
-                             style=" overflow-y: scroll; height: 80vh; padding-bottom: 30px;">
+                             style=" overflow-y: scroll; max-height: 80vh; padding-bottom: 30px;">
                              <thead>
                                  <tr>
                                      <th>Player</th>

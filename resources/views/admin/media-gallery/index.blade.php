@@ -235,6 +235,7 @@
 
     <div class="py-6">
         <div class="container">
+            <x-admin.live-show-tabs :live-show-id="request('live_show_id')" active="gallery" />
 
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -246,21 +247,24 @@
             {{-- Toolbar: filters + search --}}
             <div class="mg-toolbar">
                 <div class="mg-filter-pills">
-                    <a href="{{ route('admin.media-gallery.index', array_filter(['search' => request('search')])) }}"
+                    <a href="{{ route('admin.media-gallery.index', array_filter(['live_show_id' => request('live_show_id'), 'search' => request('search')])) }}"
                         class="mg-pill {{ !request('type') ? 'active' : '' }}">
                         All <span class="badge bg-light text-dark">{{ $counts['all'] }}</span>
                     </a>
-                    <a href="{{ route('admin.media-gallery.index', array_filter(['type' => 'image', 'search' => request('search')])) }}"
+                    <a href="{{ route('admin.media-gallery.index', array_filter(['live_show_id' => request('live_show_id'), 'type' => 'image', 'search' => request('search')])) }}"
                         class="mg-pill {{ request('type') === 'image' ? 'active' : '' }}">
                         <i class="bi bi-image"></i> Images <span class="badge bg-light text-dark">{{ $counts['image'] }}</span>
                     </a>
-                    <a href="{{ route('admin.media-gallery.index', array_filter(['type' => 'video', 'search' => request('search')])) }}"
+                    <a href="{{ route('admin.media-gallery.index', array_filter(['live_show_id' => request('live_show_id'), 'type' => 'video', 'search' => request('search')])) }}"
                         class="mg-pill {{ request('type') === 'video' ? 'active' : '' }}">
                         <i class="bi bi-film"></i> Videos <span class="badge bg-light text-dark">{{ $counts['video'] }}</span>
                     </a>
                 </div>
 
                 <form method="GET" action="{{ route('admin.media-gallery.index') }}" class="d-flex">
+                    @if (request('live_show_id'))
+                        <input type="hidden" name="live_show_id" value="{{ request('live_show_id') }}">
+                    @endif
                     @if (request('type'))
                         <input type="hidden" name="type" value="{{ request('type') }}">
                     @endif
@@ -269,7 +273,7 @@
                         <input type="text" class="form-control border-start-0" name="search"
                             value="{{ request('search') }}" placeholder="Search by title or file name...">
                         @if (request('search'))
-                            <a href="{{ route('admin.media-gallery.index', array_filter(['type' => request('type')])) }}"
+                            <a href="{{ route('admin.media-gallery.index', array_filter(['live_show_id' => request('live_show_id'), 'type' => request('type')])) }}"
                                 class="btn btn-outline-secondary">Clear</a>
                         @endif
                     </div>

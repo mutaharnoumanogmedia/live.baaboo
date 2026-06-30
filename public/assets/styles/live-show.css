@@ -199,7 +199,7 @@ body .end-show {
 
 #bottom-nav .bottom-nav-link.active {
     color: var(--bn-text-active);
-    background: rgba(255, 255, 255, 0.45);
+    background: var(--plgc-neon-orange);
 }
 
 #bottom-nav .bottom-nav-link.active .bottom-nav-icon {
