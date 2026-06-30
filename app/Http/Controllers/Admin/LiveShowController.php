@@ -228,7 +228,7 @@ class LiveShowController extends Controller
     protected function syncWinnerPrizes(int $liveShowId, int $maxWinners, array $prizes, array $vouchers, array $voucherAmounts): void
     {
         $liveShow = LiveShow::find($liveShowId);
-        //if test show or env is local then return 
+        // if test show or env is local then return
         if ($liveShow->is_test_show || env('APP_ENV') == 'local') {
             return;
         }
@@ -269,8 +269,8 @@ class LiveShowController extends Controller
                     ];
                     $shopifyPriceRule = new ShopifyDiscountService;
                     if ($delWinnerPrize && $delWinnerPrize->is_voucher && $delWinnerPrize->discount_rule_id) {
-                      dd($delWinnerPrize);
-                        $prizeRule = $shopifyPriceRule->updatePriceRule($delWinnerPrize->discount_rule_id, $starts_at, $ends_at, $prizeRule);
+                        // dd($delWinnerPrize);
+                        $prizeRule = $shopifyPriceRule->updatePriceRule($delWinnerPrize->discountRule->shopify_id, $starts_at, $ends_at, $prizeRule);
                         $discount_rule_id = $prizeRule->id;
                     } elseif ($voucher) {
                         $prizeRule = $shopifyPriceRule->createPriceRule($prizeRule);
