@@ -269,6 +269,7 @@ class LiveShowController extends Controller
                     ];
                     $shopifyPriceRule = new ShopifyDiscountService;
                     if ($delWinnerPrize && $delWinnerPrize->is_voucher && $delWinnerPrize->discount_rule_id) {
+                      dd($delWinnerPrize);
                         $prizeRule = $shopifyPriceRule->updatePriceRule($delWinnerPrize->discount_rule_id, $starts_at, $ends_at, $prizeRule);
                         $discount_rule_id = $prizeRule->id;
                     } elseif ($voucher) {
