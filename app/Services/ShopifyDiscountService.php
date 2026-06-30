@@ -208,6 +208,9 @@ class ShopifyDiscountService
             ]);
             return false;
         }
+        $others['collection_ids'] = $others['entitled_collection_ids'];
+        //unset entitled_collection_ids from $others
+        unset($others['entitled_collection_ids']);
 
         // Sync locally
         $priceRule = ShopifyPriceRule::where('shopify_id', $priceRuleId)->update(array_merge($others, [
