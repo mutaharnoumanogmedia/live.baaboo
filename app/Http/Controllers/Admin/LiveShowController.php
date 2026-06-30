@@ -253,15 +253,12 @@ class LiveShowController extends Controller
                     $ends_at = Carbon::parse($liveShow->start_time, 'CET')->addDays(31)->toIso8601String();
                     $prizeRule = [
                         'title' => 'BADABING - '.$liveShow->title.' - Rank '.$rank,
-                        'target_type' => 'line_item',
-                        'target_selection' => 'entitled',
-                        'allocation_method' => 'across',
-                        'value_type' => 'fixed_amount',
+                        
                         'value' => "-{$voucherAmount}",
-                        'customer_selection' => 'all',
+                       
                         'starts_at' => $starts_at,
                         'ends_at' => $ends_at,
-                        'usage_limit' => 1,
+                        
                         'entitled_collection_ids' => [
                             env('VOUCHER_COLLECTION_ID'),
                         ],
