@@ -40,7 +40,7 @@
                             <span class="badge bg-warning text-dark fs-6">{{ ucfirst($liveShow->status) }}</span>
                         @endif
                         @if ($liveShow->is_test_show)
-                            <span class="badge bg-info fs-6 ms-1">Test Show</span>
+                            <span class="badge bg-danger fs-6 ms-1">Test Show</span>
                         @endif
                     </div>
                 </div>
@@ -104,7 +104,7 @@
                                 <div class="col-md-6 mb-3">
                                     <div class="border border-secondary rounded p-3 h-100">
                                         <small class="text-secondary d-block mb-1">Total Players</small>
-                                        <strong>{{ $players->count() }}</strong>
+                                        <strong id="totalPlayersCount">-</strong>
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -130,15 +130,15 @@
                                 <div class="col-6">
                                     <div class="border border-secondary rounded p-3 h-100 text-center">
                                         <small class="text-secondary d-block mb-1">Played</small>
-                                        <strong class="text-success fs-4">{{ $playedCount }} /
-                                            {{ $players->count() }}</strong>
+                                        <strong class="text-success fs-4"><span id="playedCount">-</span> /
+                                            <span id="playedTotalCount">-</span></strong>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="border border-secondary rounded p-3 h-100 text-center">
                                         <small class="text-secondary d-block mb-1">Did Not Participate</small>
-                                        <strong class="text-danger fs-4">{{ $notParticipatedCount }} /
-                                            {{ $players->count() }}</strong>
+                                        <strong class="text-danger fs-4"><span id="notParticipatedCount">-</span> /
+                                            <span id="notParticipatedTotalCount">-</span></strong>
                                     </div>
                                 </div>
                             </div>
@@ -192,6 +192,12 @@
                                 class="btn btn-primary btn-sm ms-2">
                                 <i class="fas fa-trophy me-1"></i> Export Winners CSV
                             </a>
+                            <button type="button" class="btn btn-secondary btn-sm ms-2" id="refreshPlayersBtn">
+                                <span id="refreshPlayersBtnIcon">
+                                    <i class="fas fa-sync me-1"></i>
+                                </span>
+                                Refresh
+                            </button>
                         </div>
                     </div>
 
@@ -199,56 +205,24 @@
                     <div class="card shadow-sm border-0 h-100">
                         <div
                             class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-                            <span><i class="fas fa-trophy me-1"></i> Players ({{ $players->count() }})</span>
+                            <span><i class="fas fa-trophy me-1"></i> Players (<span
+                                    id="playersListCount">-</span>)</span>
                             <input type="text" id="playerSearch"
                                 class="form-control form-control-sm bg-dark text-light border-secondary"
                                 style="max-width: 200px;" placeholder="Search players...">
                         </div>
                         <div class="card-body p-0 bg-dark" style="max-height: 75vh; overflow-y: auto;">
-                            @if ($players->count())
-                                <div class="list-group list-group-flush" id="playersList">
-                                    @foreach ($players as $index => $player)
-                                        <a href="javascript:void(0)"
-                                            class="list-group-item list-group-item-action bg-dark text-light border-secondary player-item"
-                                            data-user-id="{{ $player->id }}" data-user-name="{{ $player->name }}"
-                                            data-user-email="{{ $player->email }}"
-                                            data-user-score="{{ $player->pivot->score ?? 0 }}"
-                                            data-user-is-winner="{{ $player->pivot->is_winner ? '1' : '0' }}"
-                                            data-user-prize="{{ $player->pivot->prize_won ?? 'N/A' }}"
-                                            data-user-status="{{ $player->pivot->status ?? '' }}"
-                                            data-user-joined="{{ $player->pivot->created_at ? \Carbon\Carbon::parse($player->pivot->created_at)->format('d M Y, H:i') : 'N/A' }}">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="d-flex align-items-center">
-                                                    <span class="badge bg-secondary me-2"
-                                                        style="min-width:30px;">{{ $index + 1 }}</span>
-                                                    <div>
-                                                        <strong>{{ $player->name }}</strong>
-                                                        @if ($player->pivot->is_winner)
-                                                            <i class="fas fa-crown text-warning ms-1"
-                                                                title="Winner"></i>
-                                                        @endif
-                                                        <br>
-                                                        <small class="text-secondary">{{ $player->email }}</small>
-                                                    </div>
-                                                </div>
-                                                <div class="text-end">
-                                                    <span class="badge bg-primary">{{ $player->pivot->score ?? 0 }}
-                                                        pts</span>
-                                                    @if ($player->pivot->is_winner)
-                                                        <br><small
-                                                            class="text-warning">{{ $player->pivot->prize_won ?? '' }}</small>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </a>
-                                    @endforeach
+                            <div id="playersLoading" class="p-4 text-center text-secondary">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
                                 </div>
-                            @else
-                                <div class="p-4 text-center text-secondary">
-                                    <i class="fas fa-user-slash fa-2x mb-2"></i>
-                                    <p>No participants joined this show.</p>
-                                </div>
-                            @endif
+                                <p class="mt-2 mb-0">Loading players...</p>
+                            </div>
+                            <div class="list-group list-group-flush" id="playersList" style="display:none;"></div>
+                            <div id="playersEmpty" class="p-4 text-center text-secondary" style="display:none;">
+                                <i class="fas fa-user-slash fa-2x mb-2"></i>
+                                <p>No participants joined this show.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -362,7 +336,10 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const playerItems = document.querySelectorAll('.player-item');
+                const playersList = document.getElementById('playersList');
+                const playersLoading = document.getElementById('playersLoading');
+                const playersEmpty = document.getElementById('playersEmpty');
+                const playersListCount = document.getElementById('playersListCount');
                 const emptyState = document.getElementById('emptyState');
                 const loadingState = document.getElementById('loadingState');
                 const responsesContent = document.getElementById('responsesContent');
@@ -373,150 +350,256 @@
                 const exportPlayerCsvBtn = document.getElementById('exportPlayerCsvBtn');
                 const playerSummary = document.getElementById('playerSummary');
                 const playerSearch = document.getElementById('playerSearch');
+                const refreshPlayersBtn = document.getElementById('refreshPlayersBtn');
 
                 let activePlayerId = null;
-
-                playerSearch.addEventListener('input', function() {
-                    const query = this.value.toLowerCase();
-                    playerItems.forEach(function(item) {
-                        const name = item.dataset.userName.toLowerCase();
-                        const email = item.dataset.userEmail.toLowerCase();
-                        item.style.display = (name.includes(query) || email.includes(query)) ? '' :
-                            'none';
-                    });
-                });
-
-                playerItems.forEach(function(item) {
-                    item.addEventListener('click', function() {
-                        const userId = this.dataset.userId;
-                        const userName = this.dataset.userName;
-                        const userEmail = this.dataset.userEmail;
-                        const userScore = this.dataset.userScore;
-                        const isWinner = this.dataset.userIsWinner === '1';
-                        const prizWon = this.dataset.userPrize;
-                        const userStatus = this.dataset.userStatus;
-
-                        playerItems.forEach(function(el) {
-                            el.classList.remove('active');
-                        });
-                        this.classList.add('active');
-
-                        activePlayerId = userId;
-
-                        responsesTitle.textContent = userName + "'s Responses";
-                        responsesActions.style.display = 'block';
-                        exportPlayerCsvBtn.href =
-                            "{{ url('admin/live-shows') }}/{{ $liveShow->id }}/export-player-csv/" +
-                            userId;
-
-                        document.getElementById('summaryName').textContent = userName;
-                        document.getElementById('summaryEmail').textContent = userEmail;
-                        document.getElementById('summaryScore').textContent = userScore + ' pts';
-
-                        const winnerBadge = document.getElementById('summaryWinner');
-                        if (isWinner) {
-                            winnerBadge.textContent = 'Winner - ' + prizWon;
-                            winnerBadge.className = 'badge bg-warning text-dark py-2 px-3';
-                        } else {
-                            winnerBadge.textContent = 'Participant';
-                            winnerBadge.className = 'badge bg-info py-2 px-3';
-                        }
-                        document.getElementById('summaryStatus').textContent = userStatus.charAt(0)
-                            .toUpperCase() + userStatus.slice(1);
-
-                        emptyState.style.display = 'none';
-                        noResponsesState.style.display = 'none';
-                        responsesContent.style.display = 'none';
-                        playerSummary.style.display = 'none';
-                        loadingState.style.display = 'block';
-
-                        fetch("{{ url('admin/live-shows') }}/{{ $liveShow->id }}/player-responses/" +
-                                userId)
-                            .then(function(res) {
-                                return res.json();
-                            })
-                            .then(function(data) {
-                                loadingState.style.display = 'none';
-                                playerSummary.style.display = 'block';
-
-                                if (!data.responses || data.responses.length === 0) {
-                                    noResponsesState.style.display = 'block';
-                                    document.getElementById('summaryCorrect').textContent = '0';
-                                    document.getElementById('summaryWrong').textContent = '0';
-                                    document.getElementById('summaryAvgTime').textContent = '-';
-                                    return;
-                                }
-
-                                var correctCount = 0;
-                                var wrongCount = 0;
-                                var totalTime = 0;
-
-                                responsesTableBody.innerHTML = '';
-                                data.responses.forEach(function(resp, idx) {
-                                    if (resp.is_correct) correctCount++;
-                                    else wrongCount++;
-                                    totalTime += parseFloat(resp.seconds_to_submit) || 0;
-
-                                    var correctOpt = resp.options.find(function(o) {
-                                        return o.is_correct;
-                                    });
-                                    var correctText = correctOpt ? correctOpt.option_text :
-                                        'N/A';
-
-                                    var row = '<tr>' +
-                                        '<td>' + (idx + 1) + '</td>' +
-                                        '<td>' + escapeHtml(resp.question) + '</td>' +
-                                        '<td>' +
-                                        '<span class="' + (resp.is_correct ?
-                                            'text-success' : 'text-danger') + '">' +
-                                        escapeHtml(resp.selected_option) +
-                                        '</span>' +
-                                        '</td>' +
-                                        '<td class="text-success">' + escapeHtml(
-                                            correctText) + '</td>' +
-                                        '<td>' + escapeHtml(resp.answered_at) + '</td>' +
-
-                                        '<td>' +
-
-                                        (resp.is_correct ?
-                                            '<span class="badge bg-success"><i class="fas fa-check"></i> Correct</span>' :
-                                            '<span class="badge bg-danger"><i class="fas fa-times"></i> Wrong</span>'
-                                        ) +
-                                        '</td>' +
-                                        '<td>' + (resp.seconds_to_submit !== null ?
-                                            parseFloat(resp.seconds_to_submit).toFixed(1) +
-                                            's' : '-') + '</td>' +
-                                        '<td>' + (resp.response_score !== null ? parseFloat(
-                                            resp.response_score).toFixed(1) : '-') +
-                                        '</td>' +
-                                        '</tr>';
-
-                                    responsesTableBody.insertAdjacentHTML('beforeend', row);
-                                });
-
-                                document.getElementById('summaryCorrect').textContent =
-                                    correctCount + ' / ' + data.responses.length;
-                                document.getElementById('summaryWrong').textContent = wrongCount +
-                                    ' / ' + data.responses.length;
-                                var avgTime = data.responses.length > 0 ? (totalTime / data
-                                    .responses.length).toFixed(1) + 's' : '-';
-                                document.getElementById('summaryAvgTime').textContent = avgTime;
-
-                                responsesContent.style.display = 'block';
-                            })
-                            .catch(function(err) {
-                                loadingState.style.display = 'none';
-                                noResponsesState.style.display = 'block';
-                                console.error('Failed to load responses:', err);
-                            });
-                    });
-                });
+                let searchTimeout = null;
 
                 function escapeHtml(text) {
                     var div = document.createElement('div');
-                    div.appendChild(document.createTextNode(text));
+                    div.appendChild(document.createTextNode(text ?? ''));
                     return div.innerHTML;
                 }
+
+                function updatePlayerStats(data) {
+                    const total = data.totalUsers ?? 0;
+                    const played = data.playedCount ?? 0;
+                    const notParticipated = data.notParticipatedCount ?? 0;
+                    const displayCount = data.filteredUsers ?? total;
+
+                    document.getElementById('totalPlayersCount').textContent = total;
+                    document.getElementById('playedCount').textContent = played;
+                    document.getElementById('playedTotalCount').textContent = total;
+                    document.getElementById('notParticipatedCount').textContent = notParticipated;
+                    document.getElementById('notParticipatedTotalCount').textContent = total;
+                    playersListCount.textContent = displayCount;
+                }
+
+                function buildPlayerItem(player, index) {
+                    const isWinner = !!player.is_winner;
+                    const score = player.score ?? 0;
+                    const prizeWon = escapeHtml(player.prize_won ?? '');
+                    const status = escapeHtml(player.status ?? '');
+                    const joinedAt = escapeHtml(player.joined_at ?? 'N/A');
+
+                    return `<a href="javascript:void(0)"
+                        class="list-group-item list-group-item-action bg-dark text-light border-secondary player-item"
+                        data-user-id="${player.id}"
+                        data-user-name="${escapeHtml(player.name)}"
+                        data-user-email="${escapeHtml(player.email)}"
+                        data-user-score="${score}"
+                        data-user-is-winner="${isWinner ? '1' : '0'}"
+                        data-user-prize="${escapeHtml(player.prize_won ?? 'N/A')}"
+                        data-user-status="${status}"
+                        data-user-joined="${joinedAt}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-secondary me-2" style="min-width:30px;">${index}</span>
+                                <div>
+                                    <strong>${escapeHtml(player.name)}</strong>
+                                    ${isWinner ? '<i class="fas fa-crown text-warning ms-1" title="Winner"></i>' : ''}
+                                    <br>
+                                    <small class="text-secondary">${escapeHtml(player.email)}</small>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-primary">${score} pts</span>
+                                ${isWinner ? `<br><small class="text-warning">${prizeWon}</small>` : ''}
+                            </div>
+                        </div>
+                    </a>`;
+                }
+
+                function renderPlayersList(data) {
+                    playersLoading.style.display = 'none';
+
+                    if (!data.users || data.users.length === 0) {
+                        playersList.style.display = 'none';
+                        playersEmpty.style.display = 'block';
+                        return;
+                    }
+
+                    playersEmpty.style.display = 'none';
+                    playersList.style.display = 'block';
+                    playersList.innerHTML = data.users.map(function(player, index) {
+                        return buildPlayerItem(player, index + 1);
+                    }).join('');
+                }
+
+                function fetchPlayers(search = '') {
+                    const query = new URLSearchParams({
+                        skip: 0,
+                        take: 1000,
+                        search: search,
+                    });
+
+                    playersLoading.style.display = 'block';
+                    playersList.style.display = 'none';
+                    playersEmpty.style.display = 'none';
+
+                    return fetch(
+                            `{{ url('api/live-show') }}/{{ $liveShow->id }}/get-live-show-users?${query.toString()}`)
+                        .then(function(res) {
+                            return res.json();
+                        })
+                        .then(function(data) {
+                            updatePlayerStats(data);
+                            renderPlayersList(data);
+                            return data;
+                        })
+                        .catch(function(err) {
+                            playersLoading.style.display = 'none';
+                            playersEmpty.style.display = 'block';
+                            playersEmpty.querySelector('p').textContent = 'Failed to load players.';
+                            console.error('Failed to load players:', err);
+                        });
+                }
+
+                playerSearch.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    const query = this.value.trim();
+                    searchTimeout = setTimeout(function() {
+                        fetchPlayers(query);
+                    }, 300);
+                });
+
+                refreshPlayersBtn.addEventListener('click', function() {
+                    const icon = this.querySelector('#refreshPlayersBtnIcon');
+                    this.disabled = true;
+                    icon.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                    fetchPlayers(playerSearch.value.trim()).finally(function() {
+                        refreshPlayersBtn.disabled = false;
+                        icon.innerHTML = '<i class="fas fa-sync me-1"></i>';
+                    });
+                });
+
+                playersList.addEventListener('click', function(e) {
+                    const item = e.target.closest('.player-item');
+                    if (!item) return;
+
+                    const userId = item.dataset.userId;
+                    const userName = item.dataset.userName;
+                    const userEmail = item.dataset.userEmail;
+                    const userScore = item.dataset.userScore;
+                    const isWinner = item.dataset.userIsWinner === '1';
+                    const prizWon = item.dataset.userPrize;
+                    const userStatus = item.dataset.userStatus;
+
+                    playersList.querySelectorAll('.player-item').forEach(function(el) {
+                        el.classList.remove('active');
+                    });
+                    item.classList.add('active');
+
+                    activePlayerId = userId;
+
+                    responsesTitle.textContent = userName + "'s Responses";
+                    responsesActions.style.display = 'block';
+                    exportPlayerCsvBtn.href =
+                        "{{ url('admin/live-shows') }}/{{ $liveShow->id }}/export-player-csv/" +
+                        userId;
+
+                    document.getElementById('summaryName').textContent = userName;
+                    document.getElementById('summaryEmail').textContent = userEmail;
+                    document.getElementById('summaryScore').textContent = userScore + ' pts';
+
+                    const winnerBadge = document.getElementById('summaryWinner');
+                    if (isWinner) {
+                        winnerBadge.textContent = 'Winner - ' + prizWon;
+                        winnerBadge.className = 'badge bg-warning text-dark py-2 px-3';
+                    } else {
+                        winnerBadge.textContent = 'Participant';
+                        winnerBadge.className = 'badge bg-info py-2 px-3';
+                    }
+                    document.getElementById('summaryStatus').textContent = userStatus.charAt(0)
+                        .toUpperCase() + userStatus.slice(1);
+
+                    emptyState.style.display = 'none';
+                    noResponsesState.style.display = 'none';
+                    responsesContent.style.display = 'none';
+                    playerSummary.style.display = 'none';
+                    loadingState.style.display = 'block';
+
+                    fetch("{{ url('admin/live-shows') }}/{{ $liveShow->id }}/player-responses/" +
+                            userId)
+                        .then(function(res) {
+                            return res.json();
+                        })
+                        .then(function(data) {
+                            loadingState.style.display = 'none';
+                            playerSummary.style.display = 'block';
+
+                            if (!data.responses || data.responses.length === 0) {
+                                noResponsesState.style.display = 'block';
+                                document.getElementById('summaryCorrect').textContent = '0';
+                                document.getElementById('summaryWrong').textContent = '0';
+                                document.getElementById('summaryAvgTime').textContent = '-';
+                                return;
+                            }
+
+                            var correctCount = 0;
+                            var wrongCount = 0;
+                            var totalTime = 0;
+
+                            responsesTableBody.innerHTML = '';
+                            data.responses.forEach(function(resp, idx) {
+                                if (resp.is_correct) correctCount++;
+                                else wrongCount++;
+                                totalTime += parseFloat(resp.seconds_to_submit) || 0;
+
+                                var correctOpt = resp.options.find(function(o) {
+                                    return o.is_correct;
+                                });
+                                var correctText = correctOpt ? correctOpt.option_text :
+                                    'N/A';
+
+                                var row = '<tr>' +
+                                    '<td>' + (idx + 1) + '</td>' +
+                                    '<td>' + escapeHtml(resp.question) + '</td>' +
+                                    '<td>' +
+                                    '<span class="' + (resp.is_correct ?
+                                        'text-success' : 'text-danger') + '">' +
+                                    escapeHtml(resp.selected_option) +
+                                    '</span>' +
+                                    '</td>' +
+                                    '<td class="text-success">' + escapeHtml(
+                                        correctText) + '</td>' +
+                                    '<td>' + escapeHtml(resp.answered_at) + '</td>' +
+                                    '<td>' +
+                                    (resp.is_correct ?
+                                        '<span class="badge bg-success"><i class="fas fa-check"></i> Correct</span>' :
+                                        '<span class="badge bg-danger"><i class="fas fa-times"></i> Wrong</span>'
+                                    ) +
+                                    '</td>' +
+                                    '<td>' + (resp.seconds_to_submit !== null ?
+                                        parseFloat(resp.seconds_to_submit).toFixed(1) +
+                                        's' : '-') + '</td>' +
+                                    '<td>' + (resp.response_score !== null ? parseFloat(
+                                        resp.response_score).toFixed(1) : '-') +
+                                    '</td>' +
+                                    '</tr>';
+
+                                responsesTableBody.insertAdjacentHTML('beforeend', row);
+                            });
+
+                            document.getElementById('summaryCorrect').textContent =
+                                correctCount + ' / ' + data.responses.length;
+                            document.getElementById('summaryWrong').textContent = wrongCount +
+                                ' / ' + data.responses.length;
+                            var avgTime = data.responses.length > 0 ? (totalTime / data
+                                .responses.length).toFixed(1) + 's' : '-';
+                            document.getElementById('summaryAvgTime').textContent = avgTime;
+
+                            responsesContent.style.display = 'block';
+                        })
+                        .catch(function(err) {
+                            loadingState.style.display = 'none';
+                            noResponsesState.style.display = 'block';
+                            console.error('Failed to load responses:', err);
+                        });
+                });
+
+                fetchPlayers();
             });
         </script>
     @endpush

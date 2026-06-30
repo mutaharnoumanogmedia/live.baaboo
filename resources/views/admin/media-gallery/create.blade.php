@@ -246,13 +246,35 @@
                     dictFileTooBig: 'File is too big. Images max 2MB, videos max 250MB.',
                     dictInvalidFileType: 'Only images and videos allowed.',
                     autoProcessQueue: false, // queue is processed manually via "Upload All"
+                    autoQueue: true,
                     init: function() {
                         const dropzoneInstance = this;
 
+                        function getPendingUploadFiles() {
+                            return dropzoneInstance.files.filter((file) =>
+                                file.accepted !== false &&
+                                (file.status === Dropzone.ADDED || file.status === Dropzone.QUEUED)
+                            );
+                        }
+
+                        function enqueuePendingFiles() {
+                            dropzoneInstance.getAddedFiles().forEach((file) => {
+                                if (file.accepted === false) {
+                                    return;
+                                }
+
+                                try {
+                                    dropzoneInstance.enqueueFile(file);
+                                } catch (error) {
+                                    // File was already queued or processed.
+                                }
+                            });
+                        }
+
                         function refreshButtons() {
-                            const queued = dropzoneInstance.getFilesWithStatus(Dropzone.ADDED).length;
+                            const pending = getPendingUploadFiles().length;
                             const uploading = dropzoneInstance.getUploadingFiles().length;
-                            uploadAllBtn.disabled = queued === 0 || uploading > 0;
+                            uploadAllBtn.disabled = pending === 0 || uploading > 0;
                             clearQueueBtn.disabled = dropzoneInstance.files.length === 0 || uploading > 0;
                         }
 
@@ -308,6 +330,23 @@
                             }
 
                             refreshButtons();
+                            setTimeout(refreshButtons, 0);
+                        });
+
+                        this.on('error', function(file, msg) {
+                            refreshButtons();
+
+                            const el = file.previewElement?.querySelector('[data-dz-errormessage]');
+                            if (!el) return;
+                            if (typeof msg === 'string') {
+                                el.textContent = msg;
+                            } else if (msg.errors) {
+                                el.textContent = Object.values(msg.errors).flat().join(' ');
+                            } else if (msg.file && msg.file.length) {
+                                el.textContent = msg.file[0];
+                            } else if (msg.message) {
+                                el.textContent = msg.message;
+                            }
                         });
 
                         this.on('removedfile', function() {
@@ -337,23 +376,9 @@
                             }
                         });
 
-                        this.on('error', function(file, msg) {
-                            const el = file.previewElement.querySelector('[data-dz-errormessage]');
-                            if (!el) return;
-                            if (typeof msg === 'string') {
-                                el.textContent = msg;
-                            } else if (msg.errors) {
-                                el.textContent = Object.values(msg.errors).flat().join(' ');
-                            } else if (msg.file && msg.file.length) {
-                                el.textContent = msg.file[0];
-                            } else if (msg.message) {
-                                el.textContent = msg.message;
-                            }
-                        });
-
                         // Keep feeding the queue so 5 uploads stay in flight until it's drained
                         this.on('complete', function() {
-                            if (dropzoneInstance.getFilesWithStatus(Dropzone.ADDED).length > 0) {
+                            if (dropzoneInstance.getQueuedFiles().length > 0) {
                                 dropzoneInstance.processQueue();
                             }
                             refreshButtons();
@@ -375,19 +400,36 @@
                         });
 
                         uploadAllBtn.addEventListener('click', async () => {
-                            const pending = dropzoneInstance.getFilesWithStatus(Dropzone.ADDED);
-                            if (pending.length === 0) return;
+                            enqueuePendingFiles();
+
+                            const pending = getPendingUploadFiles();
+                            if (pending.length === 0) {
+                                return;
+                            }
 
                             uploadAllBtn.disabled = true;
                             clearQueueBtn.disabled = true;
                             statusWrap.classList.remove('d-none');
                             statusText.textContent = 'Preparing files (extracting video thumbnails)...';
 
+                            const prepTimeout = (promise) => Promise.race([
+                                promise,
+                                new Promise((resolve) => setTimeout(resolve, 15000)),
+                            ]);
+
                             // Wait for client-side thumbnail/duration extraction before sending
                             await Promise.all(pending.flatMap((f) => [
-                                f._thumbPromise || Promise.resolve(),
-                                f._durationPromise || Promise.resolve(),
+                                prepTimeout(f._thumbPromise || Promise.resolve()),
+                                prepTimeout(f._durationPromise || Promise.resolve()),
                             ]));
+
+                            enqueuePendingFiles();
+
+                            if (dropzoneInstance.getQueuedFiles().length === 0) {
+                                statusText.textContent = 'No files ready to upload.';
+                                refreshButtons();
+                                return;
+                            }
 
                             statusText.textContent = 'Uploading (up to 5 in parallel)...';
                             refreshProgress();

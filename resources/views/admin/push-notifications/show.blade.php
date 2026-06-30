@@ -5,7 +5,17 @@
         <ul class="list-group">
             <li class="list-group-item">
                 <strong>Target:</strong>
-                {{ $notification->user_id ? 'User #' . $notification->user_id : 'All Users' }}
+                @if ($notification->push_subscription_id)
+                    Subscription #{{ $notification->push_subscription_id }}
+                    @if ($notification->pushSubscription?->user)
+                        — {{ $notification->pushSubscription->user->name }}
+                        ({{ $notification->pushSubscription->user->email }})
+                    @else
+                        — Guest device
+                    @endif
+                @else
+                    All devices (every push subscription)
+                @endif
             </li>
             <li class="list-group-item">
                 <strong>Title:</strong> {{ $notification->title }}
@@ -15,8 +25,15 @@
                 {{ $notification->message }}
             </li>
             <li class="list-group-item">
+                <strong>URL:</strong>
+                <a href="{{ $notification->url ?: ($notification->data['url'] ?? '/') }}" target="_blank"
+                    rel="noopener">
+                    {{ $notification->url ?: ($notification->data['url'] ?? '/') }}
+                </a>
+            </li>
+            <li class="list-group-item">
                 <strong>Sent At:</strong>
-                {{ $notification->sent_at }}
+                {{ $notification->sent_at?->format('Y-m-d H:i:s') ?? '—' }}
             </li>
         </ul>
 

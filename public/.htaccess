@@ -1,3 +1,11 @@
+AddType application/manifest+json .webmanifest
+
+<IfModule mod_headers.c>
+    <FilesMatch "assets/admin/sw\.js$">
+        Header set Service-Worker-Allowed "/admin/"
+    </FilesMatch>
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

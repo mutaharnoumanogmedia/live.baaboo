@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\HomeController as AdminHomeController;
 use App\Http\Controllers\Admin\LiveShowController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\Admin\PushNotificationController;
+use App\Http\Controllers\Admin\PushSubscriptionController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('permissions', PermissionController::class)->only(['index', 'create', 'store', 'destroy']);
 
     Route::resource('live-shows', \App\Http\Controllers\Admin\LiveShowController::class);
+    Route::put('live-shows/{live_show}/winner-prizes', [\App\Http\Controllers\Admin\LiveShowController::class, 'updateWinnerPrizes'])->name('live-shows.winner-prizes.update');
     Route::get('live-shows/{live_show}/gallery-attach', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'liveShowsAttachPage'])->name('live-shows.gallery-attach');
     Route::get('live-shows/{live_show}/copy', [\App\Http\Controllers\Admin\LiveShowController::class, 'copyLiveShow'])->name('live-shows.copy');
 
@@ -140,6 +142,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         'push-notifications',
         PushNotificationController::class
     )->only(['index', 'create', 'store', 'show']);
+
+    Route::get('push-subscriptions', [PushSubscriptionController::class, 'index'])
+        ->name('push-subscriptions.index');
 
     Route::get('analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('analytics/chart-data', [AnalyticsController::class, 'chartData'])->name('analytics.chart-data');

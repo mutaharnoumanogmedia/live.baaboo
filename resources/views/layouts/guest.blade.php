@@ -9,6 +9,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
 
     <link rel="icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
+    @if (request()->is('admin') || request()->is('admin/*'))
+        @include('partials.pwa-admin')
+    @else
+        @include('partials.pwa')
+    @endif
     <meta property="og:image" content="{{ asset('images/meta.png') }}">
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="{{ asset('images/meta.png') }}" />
@@ -17,6 +22,7 @@
         rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
     <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css" />
+    @stack('styles')
     <style>
         :root {
             --purple: #5A10AC;
@@ -771,18 +777,7 @@
             border-radius: 12px;
         }
 
-        .show-card-container {
-            margin-bottom: 10px;
-            padding: 10px !important;
-        }
-
-        .show-card-container .show-card-body {
-            background: #fff;
-            border-radius: 12px;
-
-            margin-bottom: 10px;
-            padding: 30px;
-        }
+     
     </style>
 
     @include('partials.gtm', ['part' => 'head'])

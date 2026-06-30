@@ -18,6 +18,7 @@
 
     <link rel="shortcut icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
     <title>{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}</title>
+    <meta name="description" content="{{ $liveShow->description ?? '' }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -28,19 +29,20 @@
 
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}">
-    <meta property="og:description" content="{{ __('de.main_ui.subtitle') }}">
+    <meta property="og:description" content="{{ $liveShow->description ?? '' }}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:image" content="{{ asset('og-image.webp') }}">
     <meta property="og:site_name" content="{{ __('de.main_ui.game_show') }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}">
-    <meta name="twitter:description" content="{{ __('de.main_ui.subtitle') }}">
+    <meta name="twitter:description" content="{{ $liveShow->description ?? '' }}">
     <meta name="twitter:image" content="{{ asset('og-image.webp') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
 
     @include('partials.gtm', ['part' => 'head'])
+    @include('partials.pwa')
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -132,6 +134,16 @@
             width: 100%;
             height: 100%;
             border: none;
+        }
+
+       .quiz-mode #root video {
+            object-fit: cover !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+             
         }
 
         /* #zego-live-root video {
@@ -315,331 +327,332 @@
             opacity: 0.6;
             cursor: not-allowed;
         }
+
+        #gameShowBody {
+            display: block;
+        }
+
+        #waitingLobbyBody {
+            display: none;
+        }
     </style>
 </head>
 
 <body>
 
     @include('partials.gtm', ['part' => 'body'])
+    <div id="gameShowBody">
 
-    <div class="main-container">
-        <!-- Single-Tab Restriction Overlay -->
-        <div id="inactiveTabOverlay">
-            <div class="inactive-tab-content d-none" id="inactiveTabContent">
-                <div class="inactive-tab-icon">
-                    <i class="fas fa-tv"></i>
+        <div class="main-container">
+            <!-- Single-Tab Restriction Overlay -->
+            <div id="inactiveTabOverlay">
+                <div class="inactive-tab-content d-none" id="inactiveTabContent">
+                    <div class="inactive-tab-icon">
+                        <i class="fas fa-tv"></i>
+                    </div>
+                    <h3>{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}</h3>
+                    <p>Die Live-Show ist in einem anderen Tab geöffnet.<br>Du kannst sie nur in einem Tab gleichzeitig
+                        nutzen.
+                    </p>
+                    <button id="useHereBtn" class="btn btn-use-here">
+                        <i class="fas fa-arrow-right me-2"></i>Hier verwenden
+                    </button>
                 </div>
-                <h3>{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}</h3>
-                <p>Die Live-Show ist in einem anderen Tab geöffnet.<br>Du kannst sie nur in einem Tab gleichzeitig
-                    nutzen.
-                </p>
-                <button id="useHereBtn" class="btn btn-use-here">
-                    <i class="fas fa-arrow-right me-2"></i>Hier verwenden
+            </div>
+
+            <!-- Centered Play Button Overlay -->
+            <div id="playButtonOverlay" style="">
+                <button id="playButton" style="">
+                    <i class="fas fa-play fa-3x" style="color:white;"></i>
                 </button>
-            </div>
-        </div>
-
-        <!-- Centered Play Button Overlay -->
-        <div id="playButtonOverlay" style="">
-            <button id="playButton" style="">
-                <i class="fas fa-play fa-3x" style="color:white;"></i>
-            </button>
-            <div id="tapToPlayLabel" style="">
-                {{ __('de.main_ui.tap_to_play') }}
-            </div>
-        </div>
-        <div class="main-container" id="mainContainer">
-            <!-- Video Container -->
-            <div class="video-container" id="videoContainer">
-                <div class="video-placeholder" id="videoPlaceholder">
-                    {{-- Zego UIKit (embedded; token from server) --}}
-                    <div id="zego-live-root">
-                        <iframe src="{{ route('live-show-broadcast', ['id' => $liveShow->id]) }}"
-                            title="iframe video player" frameborder="0" allow="autoplay; encrypted-media; "
-                            style=""></iframe>
-                    </div>
+                <div id="tapToPlayLabel" style="">
+                    {{ __('de.main_ui.tap_to_play') }}
                 </div>
-
             </div>
-            <!-- Floating heart reactions (TikTok/Instagram style) -->
-            <div id="heartReactionsOverlay"></div>
-            <!-- Quiz Overlay -->
-            <div class="quiz-overlay" id="quizOverlay">
-                <div class="quiz-content">
-
-                    <div style="height: auto">
-                        <div class="quiz-timer" id="quizTimer">
-                            <svg class="timer-svg" viewBox="0 0 180 180" width="120" height="120">
-                                <!-- Background circle -->
-                                <circle class="timer-bg" cx="90" cy="90" r="80" stroke="#ddd"
-                                    stroke-width="10" fill="none" />
-
-                                <!-- Progress circle -->
-                                <circle class="timer-progress" cx="90" cy="90" r="80"
-                                    stroke="rgb(220, 53, 69)" stroke-width="10" fill="none"
-                                    stroke-dasharray="376.991" stroke-dashoffset="376.991"
-                                    transform="rotate(-90 90 90)" />
-                            </svg>
-
-                            <div class="timer-text" id="timerText">10</div>
-                        </div>
-
-                        <div id="evaluationStatus"></div>
-                    </div>
-
-                    <div class="quiz-section" id="quizSection">
-                        <div>
-                            <input type="hidden" id="quizId" value="${quiz.id}">
-                            <div class="quiz-question">
-                                <i class="fas fa-question-circle text-primary me-2"></i>
-                                ${quiz.question}
-                            </div>
-
-                            <div class="quiz-options row">
-                                ${quiz.options.map((option, index) =>
-                                `<div class="quiz-option"> <input type="radio" id="option${option.id}"
-                                        name="option" value="${option.id}"> <label
-                                        for="option${option.id}">${option.option_text}</label>
-                                </div> `).join('')}
-                            </div>
+            <div class="main-container" id="mainContainer">
+                <!-- Video Container -->
+                <div class="video-container" id="videoContainer">
+                    <div class="video-placeholder" id="videoPlaceholder">
+                        {{-- Zego UIKit (embedded; token from server) --}}
+                        <div id="zego-live-root">
+                            <iframe src="{{ route('live-show-broadcast', ['id' => $liveShow->id]) }}"
+                                title="iframe video player" frameborder="0" allow="autoplay; encrypted-media; "
+                                style=""></iframe>
                         </div>
                     </div>
 
                 </div>
-            </div>
+                <!-- Floating heart reactions (TikTok/Instagram style) -->
+                <div id="heartReactionsOverlay"></div>
+                <!-- Quiz Overlay -->
+                <div class="quiz-overlay" id="quizOverlay">
+                    <div class="quiz-content">
 
-        </div>
+                        <div style="height: auto">
+                            <div class="quiz-timer" id="quizTimer">
+                                <svg class="timer-svg" viewBox="0 0 180 180" width="120" height="120">
+                                    <!-- Background circle -->
+                                    <circle class="timer-bg" cx="90" cy="90" r="80" stroke="#ddd"
+                                        stroke-width="10" fill="none" />
 
-        <!-- Full-Screen Overlay Modal (not closable) -->
-        <div id="galleryOverlayModal"
-            style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.9); z-index:2000; align-items:center; justify-content:center; flex-direction:column;">
-            <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
-                <img id="galleryOverlayImage" src="" alt=""
-                    style="max-width:100vw; max-height:90vh; object-fit:contain; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;">
-                <video id="galleryOverlayVideo" src="" autoplay muted playsinline preload="metadata"
-                    poster=""
-                    style="max-width:100vw; max-height:90vh; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;"></video>
-            </div>
-        </div>
+                                    <!-- Progress circle -->
+                                    <circle class="timer-progress" cx="90" cy="90" r="80"
+                                        stroke="rgb(220, 53, 69)" stroke-width="10" fill="none"
+                                        stroke-dasharray="376.991" stroke-dashoffset="376.991"
+                                        transform="rotate(-90 90 90)" />
+                                </svg>
 
-
-
-
-        <!-- Register Modal -->
-        <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content" style="border-radius: 20px;">
-                    <div class="modal-header" style="border-bottom: none;">
-                        <h5 class="modal-title" id="registerModalLabel">
-                            <i class="fas fa-user-plus me-2 text-warning"></i>{{ __('de.registration.title') }}
-                            <div>
-                                <span style="font-size: 12px">{{ __('de.registration.already_account') }}</span>
+                                <div class="timer-text" id="timerText">10</div>
                             </div>
-                        </h5>
 
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
+                            <div id="evaluationStatus"></div>
+                        </div>
+
+                        <div class="quiz-section" id="quizSection"></div>
+
                     </div>
+                </div>
 
-                    <form id="registerForm" autocomplete="off">
-                        <div class="modal-body">
-                            {{-- <div class="mb-3">
+            </div>
+
+            <!-- Full-Screen Overlay Modal (not closable) -->
+            <div id="galleryOverlayModal"
+                style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.9); z-index:2000; align-items:center; justify-content:center; flex-direction:column;">
+                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+                    <img id="galleryOverlayImage" src="" alt=""
+                        style="max-width:100vw; max-height:90vh; object-fit:contain; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;">
+                    <video id="galleryOverlayVideo" src="" autoplay muted playsinline preload="metadata"
+                        poster=""
+                        style="max-width:100vw; max-height:90vh; border-radius:16px; box-shadow:0 2px 32px 0 rgba(0,0,0,0.65); display:none;"></video>
+                </div>
+            </div>
+
+
+
+
+            <!-- Register Modal -->
+            <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="registerModalLabel">
+                                <i class="fas fa-user-plus me-2"></i>{{ __('de.registration.title') }}
+                                <div>
+                                    <span>{{ __('de.registration.already_account') }}</span>
+                                </div>
+                            </h5>
+
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+
+                        <form id="registerForm" autocomplete="off">
+                            <div class="modal-body">
+                                {{-- <div class="mb-3">
                             <label for="registerUsername" class="form-label">{{ __('de.registration.username') }}</label>
                             <input type="text" class="form-control" id="registerUsername" name="name" required
                                 maxlength="32" placeholder="{{ __('de.registration.username_placeholder') }}">
                         </div> --}}
-                            <div class="mb-3">
-                                <label for="registerEmail"
-                                    class="form-label">{{ __('de.registration.email') }}</label>
-                                <input type="email" class="form-control" id="registerEmail" name="email"
-                                    required placeholder="{{ __('de.registration.email_placeholder') }}">
+                                <div class="mb-3">
+                                    <label for="registerEmail"
+                                        class="form-label">{{ __('de.registration.email') }}</label>
+                                    <input type="email" class="form-control" id="registerEmail" name="email"
+                                        required placeholder="{{ __('de.registration.email_placeholder') }}">
+                                </div>
+                                <div class="gap-2 d-flex align-items-start">
+                                    <input type="checkbox" class="form-check-input" id="agree" required>
+                                    <label class="form-check-label" for="agree">{!! __('de.registration.terms') !!}</label>
+                                </div>
+                                <div id="registerError" class="small" style="display:none;"></div>
                             </div>
-                            <div class="gap-2 d-flex">
-                                <input type="checkbox" class="form-check-input form-control-color" id="agree"
-                                    required>
-                                <label class="form-check-label" for="agree">{!! __('de.registration.terms') !!}</label>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn w-100">
+                                    <i class="fas fa-paper-plane me-2"></i>{{ __('de.registration.register') }}
+                                </button>
                             </div>
-                            <div id="registerError" class="text-danger small" style="display:none;"></div>
-                        </div>
-                        <div class="modal-footer" style="border-top: none;">
-                            <button type="submit" class="btn btn-warning w-100"
-                                style="background-color: #ff5f00; border: none;">
-                                <i class="fas fa-paper-plane me-2"></i>{{ __('de.registration.register') }}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- User Info Modal -->
-        <div class="modal fade" id="userInfoModal" tabindex="-1" aria-labelledby="userInfoModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content" style="border-radius: 20px;">
-                    <div class="modal-header" style="border-bottom: none;">
-                        <h5 class="modal-title" id="userInfoModalLabel">
-                            <i class="fas fa-user me-2 text-success"></i>{{ __('de.profile.title') }}
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-                    <div class="text-center modal-body">
-                        <div class="mb-3">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::guard('web')->user()->name ?? 'User') }}&background=ffb380&color=fff&size=96"
-                                alt="{{ __('de.profile.avatar') }}" class="mb-2 rounded-circle" width="80"
-                                height="80">
-                        </div>
-                        <h6 class="mb-1">{{ Auth::guard('web')->user()->name ?? __('de.profile.guest') }}</h6>
-                        <div class="mb-3 text-muted" style="font-size: 0.95rem;">
-                            {{ Auth::guard('web')->user()->email ?? '' }}
-                        </div>
-                        <div class="mb-3">
-                            <span class="badge bg-success" style="font-size: 1rem;">
-                                <i class="fas fa-star me-1"></i>
-                                <span id="user-points"></span> {{ __('de.profile.points') }}
-                            </span>
-                        </div>
-                        <form method="POST" action="{{ route('livestream.logout', [$liveShow->id]) }}">
-                            @csrf
-                            <button type="submit" class="btn btn-danger w-100">
-                                <i class="fas fa-sign-out-alt me-2"></i>{{ __('de.profile.logout') }}
-                            </button>
                         </form>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Winner Dialog -->
-        <div id="winnerDialog"
-            style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;max-height:100vh; overflow-y:auto;">
-            <div
-                style="background:#fff; border-radius:20px; padding:40px 30px; text-align:center; max-width:350px; margin:auto; margin-top: 20%; box-shadow:0 8px 32px rgba(0,0,0,0.2); ">
-                <i class="mb-3 fas fa-trophy fa-3x text-warning"></i>
-                <h3 class="mb-2" style="color:#ff5f00;">{{ __('de.winner.title') }}</h3>
-                <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.selected') }}</p>
-                <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.prize') }}</p>
-                <div class="text-center mb-3" style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)" id="prizeAmount">
-                </div>
-                <button class="btn btn-success"
-                    onclick="document.getElementById('winnerDialog').style.display='none';">
-                    <i class="fas fa-check me-2"></i>{{ __('de.profile.close') }}
-                </button>
-            </div>
-        </div>
-
-
-    </div>
-    <div class="live-show-bottom-fixed" id="liveShowBottomFixed">
-        <div id="liveShowTabContainer" class="to-be-hidden-on-mediaplay">
-
-            <div class="tab-content" id="liveShowTabsContent">
-                <div class="tab-pane fade show active" id="chatTab" role="tabpanel" aria-labelledby="chatTab-tab">
-                    <div class="chat-container" id="chatContainer">
-                        <!-- TikTok-style Overlay Chat -->
-                        <div class="overlay-chat" id="overlayChat"></div>
-
-                        <!-- Bottom Chat Input -->
-                        <div class="bottom-chat-input">
-
-                            <div class="input-group chat-input-group">
-                                <input type="text" maxlength="200"
-                                    placeholder="{{ __('de.main_ui.placeholder_message') }}" id="chatInput">
-                                <button type="button" id="send-btn-overlay" onclick="sendMessage()">
-                                    <i class="fas fa-paper-plane"></i>
-                                </button>
-                                <button type="button" id="heartReactionBtn"
-                                    title="{{ __('de.main_ui.send_heart') }}">
-                                    <i class="fas fa-heart"></i>
-                                </button>
-                            </div>
-                            <div id="chatDisabledMsg"
-                                style="display: none; text-align: center; font-size: 0.75rem; color: #999; padding: 4px 0 2px;">
-                                Unser Chat macht gerade kurz Pause – hier ist heute richtig was los!
-                            </div>
-
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="tab-pane fade " id="playerTab" role="tabpanel"
-                    aria-labelledby="playerTab-tab position-relative">
-                    <!-- Player List -->
-                    <div class="container-fluid ">
-                        <div class="players-list-group-container">
-                            <h5 class="mb-3"><i
-                                    class="fas fa-users me-2 text-primary"></i>{{ __('de.main_ui.players_scores') }}
+            <!-- User Info Modal -->
+            <div class="modal fade" id="userInfoModal" tabindex="-1" aria-labelledby="userInfoModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="border-radius: 20px;">
+                        <div class="modal-header" style="border-bottom: none;">
+                            <h5 class="modal-title" id="userInfoModalLabel">
+                                <i class="fas fa-user me-2 text-success"></i>{{ __('de.profile.title') }}
                             </h5>
-                            <ul class="list-group" id="players-leaderbord">
-                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
                         </div>
-                    </div>
-                    <div id="players-list-loading-spinner" style="display: none;">
-                        <i class="fas fa-spinner fa-spin"></i>
+                        <div class="text-center modal-body">
+                            <div class="mb-3">
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::guard('web')->user()->name ?? 'User') }}&background=ffb380&color=fff&size=96"
+                                    alt="{{ __('de.profile.avatar') }}" class="mb-2 rounded-circle" width="80"
+                                    height="80">
+                            </div>
+                            <h6 class="mb-1">{{ Auth::guard('web')->user()->name ?? __('de.profile.guest') }}</h6>
+                            <div class="mb-3 text-muted" style="font-size: 0.95rem;">
+                                {{ Auth::guard('web')->user()->email ?? '' }}
+                            </div>
+                            <div class="mb-3">
+                                <span class="badge bg-success" style="font-size: 1rem;">
+                                    <i class="fas fa-star me-1"></i>
+                                    <span id="user-points"></span> {{ __('de.profile.points') }}
+                                </span>
+                            </div>
+                            <form method="POST" action="{{ route('livestream.logout', [$liveShow->id]) }}">
+                                @csrf
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="fas fa-sign-out-alt me-2"></i>{{ __('de.profile.logout') }}
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Winner Dialog -->
+            <div id="winnerDialog"
+                style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; z-index:9999; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;max-height:100vh; overflow-y:auto;">
+                <div
+                    style="background:#fff; border-radius:20px; padding:40px 30px; text-align:center; max-width:350px; margin:auto; margin-top: 20%; box-shadow:0 8px 32px rgba(0,0,0,0.2); ">
+                    <i class="mb-3 fas fa-trophy fa-3x text-warning"></i>
+                    <h3 class="mb-2" style="color:#ff5f00;">{{ __('de.winner.title') }}</h3>
+                    <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.selected') }}</p>
+                    <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.prize') }}</p>
+                    <div class="text-center mb-3" style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)"
+                        id="prizeAmount">
+                    </div>
+                    <button class="btn btn-success"
+                        onclick="document.getElementById('winnerDialog').style.display='none';">
+                        <i class="fas fa-check me-2"></i>{{ __('de.profile.close') }}
+                    </button>
+                </div>
+            </div>
+
+
         </div>
-        <nav class="navbar mobile-nav bottom-nav bg-nav-radial-top-gradient border-top">
-            <ul
-                class="flex-row px-2 text-center nav d-flex flex-nowrap w-100 justify-content-between align-items-center">
+        <div class="live-show-bottom-fixed" id="liveShowBottomFixed">
+            <div id="liveShowTabContainer" class="to-be-hidden-on-mediaplay">
 
-                <!-- 1) Logo -->
-                <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center">
-                    <a href="#" class="nav-link d-flex flex-column align-items-center justify-content-center">
-                        <img src="{{ asset('images/badabing-logo.webp') }}" alt="Logo"
-                            style="height:46px;width:auto;">
-                    </a>
-                </li>
+                <div class="tab-content" id="liveShowTabsContent">
+                    <div class="tab-pane fade show active" id="chatTab" role="tabpanel"
+                        aria-labelledby="chatTab-tab">
+                        <div class="chat-container" id="chatContainer">
+                            <!-- TikTok-style Overlay Chat -->
+                            <div class="overlay-chat" id="overlayChat"></div>
 
-                <!-- 2) Chat -->
-                <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center"
-                    role="presentation">
-                    <a class="nav-link active d-flex flex-column align-items-center justify-content-center"
-                        id="chatTab-tab" data-bs-toggle="tab" href="#chatTab" role="tab"
-                        aria-controls="chatTab" aria-selected="true">
-                        <i class="fas fa-comments fs-5"></i>
-                        <small class="mt-1">{{ __('de.main_ui.chat') }}</small>
-                    </a>
-                </li>
-                <!-- 3) Players -->
-                <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center"
-                    role="presentation" id="player-tab-nav-item">
-                    <a class="nav-link d-flex flex-column align-items-center justify-content-center"
-                        id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
-                        aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
-                        <div class="d-flex align-items-center">
-                            <i class="fas fa-users fs-6 me-1"></i>
-                            <span id="user-count" class="fw-semibold small">0</span>
+                            <!-- Bottom Chat Input -->
+                            <div class="bottom-chat-input">
+                                <div class="chat-input-group">
+                                    <div class="chat-input-pill">
+                                        <input type="text" maxlength="200"
+                                            placeholder="{{ __('de.main_ui.placeholder_message') }}" id="chatInput"
+                                            autocomplete="off">
+                                        <button type="button" id="send-btn-overlay" onclick="sendMessage()"
+                                            title="{{ __('de.main_ui.placeholder_message') }}">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                    <button type="button" id="heartReactionBtn"
+                                        title="{{ __('de.main_ui.send_heart') }}">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                </div>
+                                <div id="chatDisabledMsg" class="chat-disabled-msg">
+                                    Unser Chat macht gerade kurz Pause – hier ist heute richtig was los!
+                                </div>
+                            </div>
+
                         </div>
-                        <small class="mt-1">{{ __('de.main_ui.players') }}</small>
-                    </a>
-                </li>
+                    </div>
 
-                <!-- 4) Register / Profile -->
-                <li class="nav-item flex-fill d-flex justify-content-center" id="register-profile-item">
-                    @guest('web')
-                        <a href="#" class="nav-link d-flex flex-column align-items-center justify-content-center"
-                            data-bs-target="#registerModal" data-bs-toggle="modal">
-                            <i class="fas fa-user-plus fs-5"></i>
-                            <small class="mt-1">{{ __('de.main_ui.join') }}</small>
-                        </a>
-                    @elseauth('web')
-                        <a href="#" class="nav-link flex-column align-items-center d-flex justify-content-center"
-                            data-bs-toggle="modal" data-bs-target="#userInfoModal">
-                            <i class="fas fa-user fs-5"></i>
-                            <small class="mt-1 text-truncate" style="max-width:70px;">
-                                {{ Auth::guard('web')->user()->name }}
-                            </small>
-                        </a>
-                    @endauth
-                </li>
+                    <div class="tab-pane fade " id="playerTab" role="tabpanel"
+                        aria-labelledby="playerTab-tab position-relative">
+                        <!-- Player List -->
+                        <div class="container-fluid px-2 py-2">
+                            <div class="players-list-group-container">
+                                <h5 class="mb-3 text-center">
+                                    <i class="fas fa-users me-2"></i>{{ __('de.main_ui.players_scores') }}
+                                </h5>
+                                <ul class="list-group" id="players-leaderbord"></ul>
+                            </div>
+                        </div>
+                        <div id="players-list-loading-spinner" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <nav class="navbar" id="bottom-nav">
+                <ul class="bottom-nav-list nav d-flex flex-nowrap w-100 justify-content-between align-items-center">
 
-            </ul>
-        </nav>
+                    <!-- 1) Logo -->
+                    <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center">
+                        <a href="#"
+                            class="nav-link bottom-nav-link bottom-nav-link--logo d-flex flex-column align-items-center justify-content-center">
+                            <img src="{{ asset('images/badabing-logo.webp') }}" alt="Logo"
+                                class="bottom-nav-logo">
+                        </a>
+                    </li>
+
+                    <!-- 2) Chat -->
+                    <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center"
+                        role="presentation">
+                        <a class="nav-link bottom-nav-link bottom-nav-link--chat active d-flex flex-column align-items-center justify-content-center"
+                            id="chatTab-tab" data-bs-toggle="tab" href="#chatTab" role="tab"
+                            aria-controls="chatTab" aria-selected="true">
+                            <span class="bottom-nav-icon"><i class="fas fa-comments"></i></span>
+                            <small class="bottom-nav-label">{{ __('de.main_ui.chat') }}</small>
+                        </a>
+                    </li>
+
+                    <!-- 3) Players -->
+                    <li class="nav-item flex-fill to-be-hidden-on-mediaplay d-flex justify-content-center"
+                        role="presentation" id="player-tab-nav-item">
+                        <a class="nav-link bottom-nav-link bottom-nav-link--players d-flex flex-column align-items-center justify-content-center"
+                            id="playerTab-tab" data-bs-toggle="tab" href="#playerTab" role="tab"
+                            aria-controls="playerTab" aria-selected="false" onclick="updatePlayersLeaderboard()">
+                            <span class="bottom-nav-icon bottom-nav-icon--players">
+                                <i class="fas fa-users"></i>
+                                <span id="user-count" class="bottom-nav-badge">0</span>
+                            </span>
+                            <small class="bottom-nav-label">{{ __('de.main_ui.players') }}</small>
+                        </a>
+                    </li>
+
+                    <!-- 4) Register / Profile -->
+                    <li class="nav-item flex-fill d-flex justify-content-center" id="register-profile-item">
+                        @guest('web')
+                            <a href="#"
+                                class="nav-link bottom-nav-link bottom-nav-link--join d-flex flex-column align-items-center justify-content-center"
+                                data-bs-target="#registerModal" data-bs-toggle="modal">
+                                <span class="bottom-nav-icon"><i class="fas fa-user-plus"></i></span>
+                                <small class="bottom-nav-label">{{ __('de.main_ui.join') }}</small>
+                            </a>
+                        @elseauth('web')
+                            <a href="#"
+                                class="nav-link bottom-nav-link bottom-nav-link--profile d-flex flex-column align-items-center justify-content-center"
+                                data-bs-toggle="modal" data-bs-target="#userInfoModal">
+                                <span class="bottom-nav-icon"><i class="fas fa-user"></i></span>
+                                <small class="bottom-nav-label bottom-nav-label--profile text-truncate">
+                                    {{ Auth::guard('web')->user()->name }}
+                                </small>
+                            </a>
+                        @endauth
+                    </li>
+
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <div id="waitingLobbyBody">
+        <x-waiting-lobby :live-show="$liveShow" />
     </div>
 
 
@@ -724,7 +737,8 @@
         }
 
 
-        function emptyTheBodyWithEndShow(messageText = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme!') {
+        function emptyTheBodyWithEndShow(messageText = 'Die Live-Sendung ist beendet. Vielen Dank für Ihre Teilnahme!',
+            liveShowStatus = 'completed') {
             document.body.innerHTML = '';
             document.body.style.backgroundColor = '#000';
             const endDiv = document.createElement('div');
@@ -806,9 +820,14 @@
         });
 
 
-        @if ($liveShow->status != 'live')
-            emptyTheBodyWithEndShow('{{ $updateMessage }}');
+        @if ($liveShow->status == 'live')
+            document.getElementById('waitingLobbyBody').innerHTML = '';
+            document.getElementById('gameShowBody').style.display = 'block';
+        @else
+            document.getElementById('gameShowBody').innerHTML = '';
+            document.getElementById('waitingLobbyBody').style.display = 'block';
         @endif
+
         @if ($liveShow->media_visible)
             // document.getElementById("liveShowBottomFixed").style.display = "none";
             toggleToBeHiddenOnMediaPlay('none');
@@ -867,8 +886,26 @@
         });
         channel2.bind('ShowLiveShowWinnersTabEvent', function(data) {
             console.log('Show winners tab event received:', data);
+            const winnersData = data.winnersData;
 
-            showWinnersTabForParticipants();
+            // play an audio, drums-roll.mp3
+            const drumsRollAudio = playSound('drums-roll');
+            showWinnersTabForParticipants().then(() => {
+                toggleQuiz("remove");
+                stopSound(drumsRollAudio);
+
+                console.log('Winner data:', data.winnersData, 'User ID:', userId);
+
+                if (Array.isArray(winnersData)) {
+                    const winner = winnersData.find(winner => winner.user_id == userId);
+                    if (winner) {
+                        showWinnerSwalDialog(winner.prize_won);
+                    }
+                }
+
+                fireWorksConfetti();
+                playSound('winner');
+            });
         });
 
 
@@ -889,8 +926,10 @@
             'wrong': '{{ asset('/badabing-audio/wrong-sound.mp3') }}',
             'winner': '{{ asset('/badabing-audio/winner.mp3') }}',
             'correct': '{{ asset('/badabing-audio/correct-sound.mp3') }}',
+            'drums-roll': '{{ asset('/badabing-audio/drums-roll.mp3') }}',
         };
         let isTimeTickSoundPlaying = false;
+        let timeTickAudio = null;
 
         // Cache of preloaded HTMLAudioElement templates, keyed by sound name.
         const SOUND_CACHE = new Map();
@@ -948,12 +987,12 @@
          * Stop a sound returned from playSound() and reset its position.
          */
         function stopSound(audioInstance) {
-            if (!audioInstance) return;
+            if (!audioInstance || typeof audioInstance.pause !== 'function') return;
             try {
                 audioInstance.pause();
                 audioInstance.currentTime = 0;
             } catch (e) {
-                /* noop */
+                console.error('Error stopping sound:', e);
             }
         }
 
@@ -963,6 +1002,7 @@
             preloadSounds();
             fetchMessages();
             updatePlayersLeaderboard();
+            
             updateChatComposerState();
 
 
@@ -1004,9 +1044,13 @@
                                 winnerBgColorClass =
                                     'winner-div silver-div'; // Silver
                                 break;
-                            default:
+                                case 2:
                                 winnerBgColorClass =
                                     'winner-div bronze-div'; // Bronze
+                                break;
+                            default:
+                                winnerBgColorClass =
+                                    'winner-div platinum-div'; // Platinum
                                 break;
 
                         }
@@ -1073,13 +1117,7 @@
         }
 
         function showWinnersTabForParticipants() {
-
-
-
-
-            updatePlayersLeaderboard().then(() => {
-
-
+          return  updatePlayersLeaderboard().then(() => {
                 const playerTabLink = document.getElementById('playerTab-tab');
                 const playerTabPane = document.getElementById('playerTab');
                 const chatTabLink = document.getElementById('chatTab-tab');
@@ -1104,8 +1142,6 @@
                 // document.getElementById('players-list-loading-spinner').style.display = 'block';
                 // document.getElementById('players-list-loading-spinner').style.display = 'none';
             });
-
-
         }
 
 
@@ -1173,17 +1209,28 @@
 
             const quizSection = document.getElementById('quizSection');
             quizSection.innerHTML = `
-            <div>
+            <div class="quiz-section-inner">
                 <input type="hidden" id="quizId" value="${quiz.id}">
-                    <div class="quiz-question">
-                       <div class="text-center quiz-question-index me-1" style="font-size: 14px; font-weight: bold;">${quiz.index  } von ${quiz.totalQuizQuestions}.</div>
-                       <div class="quiz-question-text" translate="no">${quiz.question}</div>
-                    </div>
-                    <div class="quiz-options row">
-                        ${quiz.options.map((option, index) =>
-                        `<div class="mb-3 quiz-option col-md-12 position-relative" id="quiz-option-${option.id}">  <div class="option-result-container " id="option-result-container-${option.id}" style=""> <div id="option-result-bar-${option.id}" class="option-result-bar"></div>  <span id="option-result-label-${option.id}" class="option-result-label"  style=""> 0% </span>  </div><input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">  <label for="option${option.id}" class="quiz-option-label" translate="no">${numberToLetter(index)}. ${option.option_text}</label>  </div> `).join('')}
-                    </div>
-             </div>
+                <div class="quiz-question">
+                    <div class="quiz-question-index">${quiz.index} von ${quiz.totalQuizQuestions}</div>
+                    <div class="quiz-question-text" translate="no">${quiz.question}</div>
+                </div>
+                <div class="quiz-options row g-2">
+                    ${quiz.options.map((option, index) => `
+                        <div class="quiz-option col-12 position-relative" id="quiz-option-${option.id}">
+                            <div class="option-result-container" id="option-result-container-${option.id}">
+                                <div id="option-result-bar-${option.id}" class="option-result-bar"></div>
+                                <span id="option-result-label-${option.id}" class="option-result-label">0%</span>
+                            </div>
+                            <input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">
+                            <label for="option${option.id}" class="quiz-option-label" translate="no">
+                                <span class="quiz-option-letter">${numberToLetter(index)}</span>
+                                <span class="quiz-option-text">${option.option_text}</span>
+                            </label>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
             `;
 
             // Re-attach event listeners for auto-submit on radio change
@@ -1276,16 +1323,7 @@
                         // console.log('Quiz submission response:', data);
                         if (data.success) {
                             console.log('Quiz submitted successfully.');
-                            // Show correct/incorrect feedback
-                            //using some instead of forEach to break the loop when correct answer is found, converting nodelist to array
 
-
-                            // if (data.is_correct) {
-                            //     appendQuestionResponseStatus('success');
-                            //     fireConfetti();
-                            // } else {
-                            //     appendQuestionResponseStatus('fail');
-                            // }
                         } else {
                             //if authStatus
                             if (data.message && data.message == "unauthorized") {
@@ -1563,7 +1601,7 @@
                         isEliminated = data.isEliminated == true ? true : false;
 
 
-                        playerAsWinnerEventTrigger();
+                        // playerAsWinnerEventTrigger();
                         userBlockedFromLiveShowEventTrigger();
                         checkIfUserBlockedFromLiveShow();
 
@@ -1610,10 +1648,10 @@
             const registerButtonDiv = document.querySelector('#register-profile-item');
             registerButtonDiv.innerHTML = `
                   <a href="#"
-                        class="px-0 py-2 nav-link d-flex flex-column align-items-center justify-content-center"
+                        class="nav-link bottom-nav-link bottom-nav-link--profile d-flex flex-column align-items-center justify-content-center"
                         data-bs-toggle="modal" data-bs-target="#userInfoModal">
-                        <i class="fas fa-user fs-5"></i>
-                        <small class="mt-1 text-truncate" style="max-width:70px;">
+                        <span class="bottom-nav-icon"><i class="fas fa-user"></i></span>
+                        <small class="bottom-nav-label bottom-nav-label--profile text-truncate">
                             ${username}
                         </small>
                     </a>
@@ -1706,7 +1744,7 @@
 
                     //if not already playing, play the time-tick sound
                     if (!isTimeTickSoundPlaying) {
-                        playSound('time-tick');
+                        timeTickAudio = playSound('time-tick');
                         isTimeTickSoundPlaying = true;
                     }
 
@@ -1721,7 +1759,8 @@
                 if (remainingMs <= 0) {
                     clearInterval(timerHandle);
                     isTimeTickSoundPlaying = false;
-                    stopSound('time-tick');
+                    stopSound(timeTickAudio);
+                    timeTickAudio = null;
                     setTimeout(() => {
                         if (onComplete) onComplete();
                     }, 1500);
@@ -1748,34 +1787,6 @@
             }
             showVideoContainer();
         }
-
-
-        // function evaluateElinimation() {
-        //     document.querySelector('#quizTimer').style.display = "none";
-
-        //     // console.log('Evaluating elimination. isCurrentAnswerCorrect:', isCurrentAnswerCorrect);
-        //     updateUserPoints();
-
-        //     if (!isEliminated && isLoggedIn) {
-        //         if (isCurrentAnswerCorrect === true) {
-        //             fireConfetti();
-        //             appendQuestionResponseStatus('success');
-        //         } else if (isCurrentAnswerCorrect === false) {
-        //             appendQuestionResponseStatus('fail');
-
-        //             isEliminated = true;
-        //         } else {
-        //             isEliminated = true;
-        //             appendQuestionResponseStatus('warning');
-        //         }
-        //     } else {
-        //         showVideoContainer();
-        //     }
-
-        //     // Reset for next question
-        //     // isCurrentAnswerCorrect = null;
-        //     //uncheckAndEnableOptions();
-        // }
 
         function updateUserPoints() {
             // console.log('Updating user points...');
@@ -1965,32 +1976,13 @@
                         .then(prizeData => {
 
                             console.log('Prize data:', prizeData);
+                            showWinnersTabForParticipants();
+                            fireWorksConfetti();
+                            playSound('winner');
                             if (prizeData.success && prizeData.prize !== undefined && prizeData.prize !=
                                 'n/a' && prizeData.is_winner == true) {
-                                fireWorksConfetti();
-                                playSound('winner');
-                                Swal.fire({
-                                    title: "{{ __('de.winner.title') }}",
-                                    html: `
-                                        <i class="mb-3 fas fa-trophy fa-3x text-warning"></i>
-                                        <h3 class="mb-2" style="color:#ff5f00;">{{ __('de.winner.title') }}</h3>
-                                        <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.selected') }}</p>
-                                        <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.prize') }}</p>
-                                        <div class="text-center mb-3" style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)">
-                                            ${prizeData.prize}
-                                        </div>
-                                    `,
-                                    icon: 'success',
-                                    confirmButtonText: '<i class="fas fa-check me-2"></i>{{ __('de.profile.close') }}',
-                                    width: 350,
-                                    customClass: {
-                                        popup: 'swal2-dialog-custom-winner',
-                                        title: 'swal2-title-custom-winner'
-                                    }
-                                });
-                                winnerAnnounced = 1;
-                                showWinnersTabForParticipants();
 
+                                showWinnerSwalDialog(prizeData.prize);
 
                             }
 
@@ -2010,6 +2002,30 @@
             document.querySelector('#winnerDialog').style.display = 'block';
             //hide question
             toggleQuiz("remove");
+
+        }
+
+        function showWinnerSwalDialog(prizeWon) {
+            Swal.fire({
+                title: "{{ __('de.winner.title') }}",
+                html: `
+                                        <i class="mb-3 fas fa-trophy fa-3x text-warning"></i>
+                                        <h3 class="mb-2" style="color:#ff5f00;">{{ __('de.winner.title') }}</h3>
+                                        <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.selected') }}</p>
+                                        <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.prize') }}</p>
+                                        <div class="text-center mb-3" style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)">
+                                            ${prizeWon}
+                                        </div>
+                                    `,
+                icon: 'success',
+                confirmButtonText: '<i class="fas fa-check me-2"></i>{{ __('de.profile.close') }}',
+                width: 350,
+                customClass: {
+                    popup: 'swal2-dialog-custom-winner',
+                    title: 'swal2-title-custom-winner'
+                }
+            });
+            winnerAnnounced = 1;
 
         }
 
@@ -2036,7 +2052,7 @@
             });
         }
 
-        playerAsWinnerEventTrigger()
+        // playerAsWinnerEventTrigger()
 
         @if (Auth::guard('web')->check())
             userBlockedFromLiveShowEventTrigger()
@@ -2621,16 +2637,16 @@
     @endif
 
     {{-- German web-push opt-in banner + subscription logic. --}}
-    {{-- @include('partials.push-notification') --}}
+    @if (!request()->has('preview'))
+        @include('partials.push-notification')
+    @endif
 
+    <div class="d-none">
+        Sound Effect by <a href="https://pixabay.com/users/freesound_community-46691455/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=88344">freesound_community</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=88344">Pixabay</a>
+    </div>
 
 </body>
 
-{{-- <a style="display: none;" href="https://www.flaticon.com/free-icons/gold-cup" title="gold cup icons">Gold cup icons
-    created by Md Tanvirul Haque - Flaticon</a>
-<a style="display: none;" href="https://www.flaticon.com/free-icons/silver-cup" title="silver cup icons">Silver cup
-    icons created by Md Tanvirul Haque - Flaticon</a>
-<a style="display: none;" href="https://www.flaticon.com/free-icons/3rd-place" title="3rd place icons">3rd place
-    icons created by Md Tanvirul Haque - Flaticon</a> --}}
+
 
 </html>

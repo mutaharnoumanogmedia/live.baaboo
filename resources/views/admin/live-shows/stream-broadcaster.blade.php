@@ -1172,7 +1172,8 @@
                         position: overlayState.position,
                         size: overlayState.size,
                     };
-                } else if (overlayState.mediaType === 'image' && pipeline.overlayImageEl && pipeline.overlayImageEl.src) {
+                } else if (overlayState.mediaType === 'image' && pipeline.overlayImageEl && pipeline.overlayImageEl
+                    .src) {
                     snapshot.overlay = {
                         type: 'image',
                         url: pipeline.overlayImageEl.src,
@@ -1540,17 +1541,17 @@
             // Shared config — both main host and co-hosts publish camera/mic and
             // can drive the media overlay pipeline.
             let config = {
-                turnOnCameraWhenJoining: true,
-                showMyCameraToggleButton: true,
+                turnOnCameraWhenJoining: IS_MAIN_HOST,
+                showMyCameraToggleButton: IS_MAIN_HOST,
                 showMyMicrophoneToggleButton: true,
-                showAudioVideoSettingsButton: true,
+                showAudioVideoSettingsButton: IS_MAIN_HOST,
                 showScreenSharingButton: IS_MAIN_HOST,
                 showTextChat: false,
                 showUserList: IS_MAIN_HOST,
                 showPreJoinView: false,
                 showUserJoinAndLeave: false,
                 showMirror: false,
-                fillMode: "cover",
+                fillMode: "contain",
 
                 // Only the main host can remove co-hosts (requires the ZIM plugin).
                 showRemoveCohostButton: IS_MAIN_HOST,
@@ -1558,6 +1559,7 @@
                 // so the invite/request flows stay hidden.
                 showInviteToCohostButton: false,
                 showRequestToCohostButton: false,
+
 
                 onLeaveRoom: () => {
                     if (window.BroadcastOverlay) window.BroadcastOverlay.stopBgm();
@@ -1590,7 +1592,14 @@
                 encodeHeight: 1920,
                 fps: 30, // Match your Camo Studio frame rate
                 bitrate: 3000,
+                layout: "Sidebar", // Options: "Auto" | "Grid" | "Sidebar"
+                config: {
+                    sidebarConfig: {
+                        showBestSpeakerAsMainView: true // Pins the host/primary speaker to the big window
+                    }
+                },
 
+                showPinButton: true,
 
                 scenario: {
                     mode: ZegoUIKitPrebuilt.LiveStreaming,

@@ -35,16 +35,32 @@ class HomeController extends Controller
             'carousel_items' => $scheduleShows->map(function (LiveShow $show) use ($defaultCarouselDescription) {
                 $dt = $show->scheduled_at->copy()->timezone(config('app.timezone'));
 
-                return [
-                    'badge' => $show->status === 'live' ? 'LIVE' : 'BALD',
-                    'date' => $dt->format('d.m.Y').' um '.$dt->format('H:i').' Uhr',
-                    'title' => $show->title ?: 'Quiz&Speed Game Show',
-                    'description' => $show->description ?: $defaultCarouselDescription,
-                    'meta' => [
-                        ['icon' => 'bulls-eye-icon.png', 'label' => 'Wissen + Speed'],
-                        ['icon' => 'gift-icon.png', 'label' => 'Geldpreise & Gutscheine'],
-                    ],
-                ];
+                if ($dt->format('d.m.Y') == '25.06.2026') {
+                    return [
+                        'class' => 'fusbal-card',
+                        'badge' => $show->status === 'live' ? 'LIVE' : 'BALD',
+                        'date' => $dt->format('d.m.Y').' um '.$dt->format('H:i').' Uhr',
+                        'title' => 'WM-Special: Quiz&Speed Game Show',
+                        'description' =>'Teste Dein Fußball-Wissen und deine Schnelligkeit! Sichere Dir die Chance auf echte Gewinne und ein originales DFB Trikot. ',
+                        'meta' => [
+                            ['icon' => 'bulls-eye-icon.png', 'label' => 'Wissen + Speed'],
+                            ['icon' => 'gift-icon.png', 'label' => 'Geldpreise & Gutscheine'],
+                            ['icon' => 'de-fb-kit.png', 'label' => '1x originales DFB Trikot'],
+                        ],
+                    ];
+                } else {
+                    return [
+                        'class' => 'normal-card',
+                        'badge' => $show->status === 'live' ? 'LIVE' : 'BALD',
+                        'date' => $dt->format('d.m.Y').' um '.$dt->format('H:i').' Uhr',
+                        'title' => $show->title ?: 'Quiz&Speed Game Show',
+                        'description' => $show->description ?: $defaultCarouselDescription,
+                        'meta' => [
+                            ['icon' => 'bulls-eye-icon.png', 'label' => 'Wissen + Speed'],
+                            ['icon' => 'gift-icon.png', 'label' => 'Geldpreise & Gutscheine'],
+                        ],
+                    ];
+                }
             })->values()->all(),
         ];
 
@@ -297,11 +313,11 @@ class HomeController extends Controller
             'referral_link' => $user->referral_link,
             'is_joined' => 1,
         ];
-        $leadGenerationResponse = (new LeadGenerationService())->leadGeneration($leadGenerationPayload);
+        $leadGenerationResponse = (new LeadGenerationService)->leadGeneration($leadGenerationPayload);
         \Log::info('Lead generation request sent successfully', $leadGenerationPayload);
         \Log::info('Lead generation response', $leadGenerationResponse);
 
-        $activeCampaign = new ActiveCampaignClient();
+        $activeCampaign = new ActiveCampaignClient;
         $tagResult = $activeCampaign->ensureTagByEmail($user->email, 'gameshow_attended_general');
         \Log::info('User tagged with gameshow_attended_general', ['tagResult' => $tagResult]);
 
@@ -459,6 +475,4 @@ class HomeController extends Controller
             return false;
         }
     }
-
-
 }

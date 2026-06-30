@@ -20,29 +20,27 @@ class SendPushNotificationJob implements ShouldQueue
      *                          - 0           => broadcast to every saved subscription
      *                          - int (>0)    => only that single user's devices
      *                          - array<int>  => only the devices of the given users
-     *                                           (used when notifying all players of a show)
+     * @param int|null $subscriptionId When set, send only to this push_subscriptions row
      */
     public function __construct(
         public int|array $userId,
         public string $title,
         public string $message,
-        public array $data = []
+        public array $data = [],
+        public ?int $subscriptionId = null,
     ) {}
 
     public function handle(): void
     {
         $query = PushSubscription::query();
 
-        // Resolve which subscriptions should receive this notification based on
-        // the targeting rule passed into the job.
-        if (is_array($this->userId)) {
-            // A list of user IDs (e.g. all players of a live show).
+        if ($this->subscriptionId) {
+            $query->whereKey($this->subscriptionId);
+        } elseif (is_array($this->userId)) {
             $query->whereIn('user_id', $this->userId);
         } elseif ($this->userId > 0) {
-            // A single user.
             $query->where('user_id', $this->userId);
         }
-        // When $userId === 0 we leave the query unfiltered to broadcast to all.
 
         $subscriptions = $query->get();
 
