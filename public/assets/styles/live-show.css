@@ -389,9 +389,11 @@ body .end-show {
     pointer-events: auto;
 }
 
+/* safari fix for label */
 .quiz-overlay.active {
     pointer-events: auto;
 }
+
 
 .quiz-section .quiz-option-label {
     display: flex;
