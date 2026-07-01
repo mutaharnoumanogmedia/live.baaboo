@@ -2610,6 +2610,7 @@
             console.log('LiveShowMediaPlayed event received:', data);
             // document.getElementById('liveShowBottomFixed').style.display = 'none';
             toggleToBeHiddenOnMediaPlay('none');
+            toggleQuiz("remove")
         });
 
         var channelMediaHidden = pusher.subscribe('live-show-media-hidden.' + {{ $liveShow->id }});

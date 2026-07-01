@@ -386,12 +386,10 @@ body .end-show {
     position: relative;
 }
 .quiz-overlay {
-    z-index: 100001 !important; /* higher than .main-container.quiz-mode (99999) */
     pointer-events: auto;
 }
 
 .quiz-overlay.active {
-    z-index: 100001 !important;
     pointer-events: auto;
 }
 

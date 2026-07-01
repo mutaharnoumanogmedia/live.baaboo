@@ -338,9 +338,13 @@
                                                  </div>
                                              @endif
                                              <div class="carousel-inner">
-                                             @foreach ($liveShow->quizzes as $index => $quiz)
-                                                 <div class="carousel-item px-2 @if ($index === 0) active @endif">
-                                                     <div class="mb-5 border card">
+                                            @foreach ($liveShow->quizzes as $index => $quiz)
+                                                {{-- QuizMediaMerge : tag each quiz slide so the JS merge module can identify + reorder it --}}
+                                                <div class="carousel-item px-2 @if ($index === 0) active @endif"
+                                                    data-qmm-type="quiz" data-qmm-id="{{ $quiz->id }}"
+                                                    data-qmm-question="{{ \Illuminate\Support\Str::limit($quiz->question, 60) }}"
+                                                    data-qmm-index="{{ $index + 1 }}">
+                                                    <div class="mb-5 border card">
                                                         <div class="position-relative card-body"
                                                             style="height: auto; overflow-y:hidden">
                                                             <button type="button"
@@ -469,8 +473,25 @@
                                      </div>
                                  </div>
                              </div>
-                             <div class="col-lg-4">
-                                 <h5 class="mb-0 mb-3 text-center fw-bold">Gallery Media</h5>
+                            <div class="col-lg-4">
+                                {{-- QuizMediaMerge : unified sort manager controlling the merged Quiz + Media carousel (front-end only) --}}
+                                <h5 class="mb-0 mb-3 text-center fw-bold">Carousel Order</h5>
+                                <div class="p-3 mb-3 border rounded border-light bg-dark">
+                                    <div class="mb-2 d-flex justify-content-between align-items-center">
+                                        <span class="text-muted small text-uppercase fw-bold">Drag to reorder slides</span>
+                                        <button type="button" class="btn btn-sm btn-outline-warning"
+                                            id="qmmResetOrderBtn" title="Reset to default arrangement (media every 3 questions)">
+                                            <i class="fas fa-undo me-1"></i> Default
+                                        </button>
+                                    </div>
+                                    <div id="quizMediaMergeList" class="qmm-list"
+                                        style="max-height: 340px; overflow-y:auto;"></div>
+                                    <div id="quizMediaMergeEmpty" class="py-3 text-center small text-muted d-none">
+                                        No quiz questions or media yet.
+                                    </div>
+                                </div>
+
+                                <h5 class="mb-0 mb-3 text-center fw-bold">Gallery Media</h5>
                                  <div class="p-3 border rounded border-light bg-dark">
                                      <div class="w-100">
                                          <div class="mb-2">
@@ -2805,11 +2826,13 @@
                              if (tbody) {
                                  tbody.insertAdjacentHTML('beforeend', row);
                              }
-                             const emptyEl = document.getElementById('gallery-attached-empty');
-                             if (emptyEl) emptyEl.remove();
-                             updateRowIndices();
-                             initSortable();
-                             persistOrder();
+                            const emptyEl = document.getElementById('gallery-attached-empty');
+                            if (emptyEl) emptyEl.remove();
+                            updateRowIndices();
+                            initSortable();
+                            persistOrder();
+                            // QuizMediaMerge : resync the merged carousel so the newly attached media appears as a slide
+                            fetchGalleryMediaItems();
                          } else {
                              streamSwalError(data.message || 'Could not attach this item to the stream.',
                                  'Attach failed');
@@ -2884,11 +2907,13 @@
                                      'Remove failed');
                                  return;
                              }
-                             row.remove();
-                             updateRowIndices();
-                             persistOrder();
-                             ensureGalleryAttachedEmptyRow();
-                             streamSwalSuccess(res.data.message || 'Removed from this stream.', 'Removed');
+                            row.remove();
+                            updateRowIndices();
+                            persistOrder();
+                            ensureGalleryAttachedEmptyRow();
+                            // QuizMediaMerge : resync the merged carousel so the detached media slide disappears
+                            fetchGalleryMediaItems();
+                            streamSwalSuccess(res.data.message || 'Removed from this stream.', 'Removed');
                          })
                          .catch(function(err) {
                              console.error('Gallery detach error:', err);
@@ -2920,16 +2945,20 @@
                                      galleryAvailableList.insertAdjacentHTML('beforeend', attachGalleryMediaItemRow(
                                          media, idx));
                                  });
-                                 if (!data.media.length) {
-                                     ensureGalleryAttachedEmptyRow();
-                                 }
-                             }
-                             initSortable();
-                         } else {
-                             streamSwalError(data.message || 'Could not load gallery items for this stream.',
-                                 'Gallery load failed');
-                             return [];
-                         }
+                                if (!data.media.length) {
+                                    ensureGalleryAttachedEmptyRow();
+                                }
+                            }
+                            initSortable();
+                            // QuizMediaMerge : feed the freshly loaded media into the merged carousel + sort manager
+                            if (typeof QuizMediaMerge !== 'undefined') {
+                                QuizMediaMerge.onMediaLoaded(data.media || []);
+                            }
+                        } else {
+                            streamSwalError(data.message || 'Could not load gallery items for this stream.',
+                                'Gallery load failed');
+                            return [];
+                        }
                      })
                      .catch(err => console.error('Gallery media items error:', err))
              }
@@ -3214,7 +3243,406 @@
 
 
 
-             function togglePreviewMute() {
+             /*
+             * QuizMediaMerge : Front-end module that merges the server-rendered Quiz Question
+             * slides and the Gallery Media items into a SINGLE Bootstrap carousel, and exposes a
+             * drag-to-sort manager in the sidebar. Nothing is persisted to the backend — the chosen
+             * order lives in localStorage (per live show) so it survives reloads. The DEFAULT
+             * arrangement interleaves one media slide before every group of 3 questions
+             * (e.g. M1, Q1, Q2, Q3, M2, Q4, Q5, Q6, ... then any leftover media at the end).
+             */
+            const QuizMediaMerge = (function() {
+                // QuizMediaMerge : how many questions to place after each media slide in the default order
+                const GROUP_SIZE = 3;
+                // QuizMediaMerge : localStorage key is scoped per live show so different shows keep their own order
+                const STORAGE_KEY = 'qmm-order-' + (typeof liveShowId !== 'undefined' ? liveShowId : 'default');
+
+                // QuizMediaMerge : runtime state
+                let mediaMap = {}; // id -> media payload from the gallery endpoint
+                let mediaNodes = {}; // id -> built <div.carousel-item> node (cached so drag just moves nodes)
+                let quizNodesMap = {}; // id -> existing server-rendered <div.carousel-item> node
+                let order = []; // [{ type:'quiz'|'media', id:'..' }] the single source of truth for slide order
+
+                // QuizMediaMerge : DOM helpers
+                function carouselEl() {
+                    return document.getElementById('quizQuestionsCarousel');
+                }
+
+                function innerEl() {
+                    return document.querySelector('#quizQuestionsCarousel .carousel-inner');
+                }
+
+                function indicatorsEl() {
+                    return document.querySelector('#quizQuestionsCarousel .carousel-indicators');
+                }
+
+                function listEl() {
+                    return document.getElementById('quizMediaMergeList');
+                }
+
+                function escapeHtml(str) {
+                    return String(str == null ? '' : str)
+                        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                }
+
+                // QuizMediaMerge : read the quiz slides Blade already rendered (tagged with data-qmm-* attrs)
+                function collectQuizItems() {
+                    const nodes = document.querySelectorAll(
+                        '#quizQuestionsCarousel .carousel-item[data-qmm-type="quiz"]');
+                    const list = [];
+                    quizNodesMap = {};
+                    nodes.forEach(function(n) {
+                        const id = String(n.dataset.qmmId);
+                        quizNodesMap[id] = n;
+                        list.push({
+                            id: id,
+                            index: n.dataset.qmmIndex || '',
+                            question: n.dataset.qmmQuestion || ''
+                        });
+                    });
+                    return list;
+                }
+
+                // QuizMediaMerge : build the DEFAULT interleaved order (media, then GROUP_SIZE questions, repeat)
+                function buildDefaultOrder(quizIds, mediaIds) {
+                    const out = [];
+                    let qi = 0;
+                    let mi = 0;
+                    while (qi < quizIds.length) {
+                        if (mi < mediaIds.length) {
+                            out.push({ type: 'media', id: mediaIds[mi++] });
+                        }
+                        for (let k = 0; k < GROUP_SIZE && qi < quizIds.length; k++) {
+                            out.push({ type: 'quiz', id: quizIds[qi++] });
+                        }
+                    }
+                    // QuizMediaMerge : drop any media that did not fit into a group at the end
+                    while (mi < mediaIds.length) {
+                        out.push({ type: 'media', id: mediaIds[mi++] });
+                    }
+                    return out;
+                }
+
+                function loadSavedOrder() {
+                    try {
+                        const raw = localStorage.getItem(STORAGE_KEY);
+                        if (!raw) return null;
+                        const parsed = JSON.parse(raw);
+                        return Array.isArray(parsed) ? parsed : null;
+                    } catch (e) {
+                        return null;
+                    }
+                }
+
+                function saveOrder() {
+                    try {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(order.map(function(i) {
+                            return { type: i.type, id: String(i.id) };
+                        })));
+                    } catch (e) {
+                        /* QuizMediaMerge : ignore storage failures (private mode / quota) */
+                    }
+                }
+
+                // QuizMediaMerge : merge the saved order with what actually exists right now.
+                // Keeps saved positions for still-present items, appends brand-new items using the
+                // default arrangement, and silently drops items that no longer exist.
+                function reconcile(quizIds, mediaIds) {
+                    const def = buildDefaultOrder(quizIds, mediaIds);
+                    const available = {};
+                    def.forEach(function(i) {
+                        available[i.type + ':' + i.id] = true;
+                    });
+                    const saved = loadSavedOrder();
+                    const result = [];
+                    const seen = {};
+                    if (saved) {
+                        saved.forEach(function(i) {
+                            const key = i.type + ':' + String(i.id);
+                            if (available[key] && !seen[key]) {
+                                result.push({ type: i.type, id: String(i.id) });
+                                seen[key] = true;
+                            }
+                        });
+                    }
+                    def.forEach(function(i) {
+                        const key = i.type + ':' + i.id;
+                        if (!seen[key]) {
+                            result.push(i);
+                            seen[key] = true;
+                        }
+                    });
+                    return result;
+                }
+
+                // QuizMediaMerge : build a carousel slide for a media item (mirrors the quiz card shell)
+                function buildMediaNode(m) {
+                    const src = m.is_image ? m.path : (m.thumbnail || m.path);
+                    const typeBadge = m.type === 'video' ? 'bg-primary' : 'bg-warning text-dark';
+                    const div = document.createElement('div');
+                    div.className = 'carousel-item px-2 qmm-media-slide';
+                    div.setAttribute('data-qmm-type', 'media');
+                    div.setAttribute('data-qmm-id', String(m.id));
+                    div.innerHTML =
+                        '<div class="mb-5 border card">' +
+                        '  <div class="position-relative card-body text-center" style="height:auto; overflow-y:hidden">' +
+                        '    <div class="mb-3 fw-bold">' +
+                        '      <span class="badge ' + typeBadge + '">' + escapeHtml(m.type || 'media') + '</span>' +
+                        '      <div class="mt-2 question-text" style="text-align:center;">' + escapeHtml(m.title || 'Untitled media') + '</div>' +
+                        '    </div>' +
+                        '    <div class="qmm-media-frame">' +
+                        '      <img src="' + escapeHtml(src) + '" alt="' + escapeHtml(m.title || '') + '">' +
+                        '    </div>' +
+                        '    <div class="mt-4 d-flex justify-content-center gap-2 flex-wrap">' +
+                        '      <button type="button" class="btn btn-success" onclick="galleryShowOnStream(\'' + m.id + '\', this)"><i class="fas fa-tv me-2"></i>Show on stream</button>' +
+                        '      <button type="button" class="btn btn-warning" onclick="galleryHideOnStream(this)"><i class="fas fa-eye-slash me-2"></i>Hide</button>' +
+                        '      <button type="button" class="btn btn-secondary" onclick="openMediaPreviewModal(\'' + escapeHtml(src) + '\')"><i class="fas fa-eye me-2"></i>Preview</button>' +
+                        '    </div>' +
+                        '  </div>' +
+                        '</div>';
+                    return div;
+                }
+
+                function nodeFor(item) {
+                    if (item.type === 'quiz') {
+                        return quizNodesMap[item.id] || null;
+                    }
+                    if (!mediaNodes[item.id] && mediaMap[item.id]) {
+                        mediaNodes[item.id] = buildMediaNode(mediaMap[item.id]);
+                    }
+                    return mediaNodes[item.id] || null;
+                }
+
+                // QuizMediaMerge : physically re-order the carousel DOM to match `order`
+                function reorderCarousel() {
+                    const inner = innerEl();
+                    const el = carouselEl();
+                    if (!inner || !el) return;
+
+                    // QuizMediaMerge : tear down the live carousel instance before shuffling its children
+                    if (typeof bootstrap !== 'undefined') {
+                        const inst = bootstrap.Carousel.getInstance(el);
+                        if (inst) inst.dispose();
+                    }
+
+                    // QuizMediaMerge : remove media slides that are no longer part of the order (detached media)
+                    const orderedKeys = {};
+                    order.forEach(function(i) {
+                        orderedKeys[i.type + ':' + i.id] = true;
+                    });
+                    inner.querySelectorAll('.carousel-item[data-qmm-type="media"]').forEach(function(n) {
+                        if (!orderedKeys['media:' + n.dataset.qmmId]) n.remove();
+                    });
+
+                    // QuizMediaMerge : append each node in the desired order (appendChild moves existing nodes)
+                    order.forEach(function(item) {
+                        const node = nodeFor(item);
+                        if (!node) return;
+                        node.classList.add('carousel-item');
+                        node.classList.remove('active');
+                        inner.appendChild(node);
+                    });
+
+                    // QuizMediaMerge : exactly one slide must be active
+                    const first = inner.querySelector('.carousel-item');
+                    if (first) first.classList.add('active');
+
+                    rebuildIndicators();
+                    ensureControls();
+
+                    if (typeof bootstrap !== 'undefined') {
+                        bootstrap.Carousel.getOrCreateInstance(el, {
+                            interval: false,
+                            wrap: false,
+                            touch: true
+                        });
+                    }
+                }
+
+                // QuizMediaMerge : rebuild the dot indicators to match the current slide count
+                function rebuildIndicators() {
+                    const inner = innerEl();
+                    const el = carouselEl();
+                    if (!inner || !el) return;
+                    const items = inner.querySelectorAll('.carousel-item');
+                    let ind = indicatorsEl();
+
+                    if (items.length <= 1) {
+                        if (ind) ind.innerHTML = '';
+                        return;
+                    }
+                    if (!ind) {
+                        ind = document.createElement('div');
+                        ind.className = 'carousel-indicators';
+                        el.insertBefore(ind, el.firstChild);
+                    }
+                    let html = '';
+                    items.forEach(function(_, i) {
+                        html += '<button type="button" data-bs-target="#quizQuestionsCarousel" data-bs-slide-to="' +
+                            i + '"' + (i === 0 ? ' class="active" aria-current="true"' : '') +
+                            ' aria-label="Slide ' + (i + 1) + '"></button>';
+                    });
+                    ind.innerHTML = html;
+                }
+
+                // QuizMediaMerge : make sure prev/next controls exist when there is more than one slide
+                function ensureControls() {
+                    const inner = innerEl();
+                    const el = carouselEl();
+                    if (!inner || !el) return;
+                    const multiple = inner.querySelectorAll('.carousel-item').length > 1;
+                    const hasPrev = el.querySelector('.carousel-control-prev');
+                    if (multiple && !hasPrev) {
+                        const prev = document.createElement('button');
+                        prev.className = 'carousel-control-prev';
+                        prev.type = 'button';
+                        prev.setAttribute('data-bs-target', '#quizQuestionsCarousel');
+                        prev.setAttribute('data-bs-slide', 'prev');
+                        prev.innerHTML =
+                            '<span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Previous</span>';
+                        const next = document.createElement('button');
+                        next.className = 'carousel-control-next';
+                        next.type = 'button';
+                        next.setAttribute('data-bs-target', '#quizQuestionsCarousel');
+                        next.setAttribute('data-bs-slide', 'next');
+                        next.innerHTML =
+                            '<span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Next</span>';
+                        el.appendChild(prev);
+                        el.appendChild(next);
+                    }
+                }
+
+                // QuizMediaMerge : render the sidebar sort manager list from `order`
+                function renderManagerList() {
+                    const list = listEl();
+                    const empty = document.getElementById('quizMediaMergeEmpty');
+                    if (!list) return;
+
+                    if (!order.length) {
+                        list.innerHTML = '';
+                        if (empty) empty.classList.remove('d-none');
+                        return;
+                    }
+                    if (empty) empty.classList.add('d-none');
+
+                    let html = '';
+                    order.forEach(function(item) {
+                        if (item.type === 'quiz') {
+                            const q = quizNodesMap[item.id];
+                            const idx = q ? (q.dataset.qmmIndex || '') : '';
+                            const question = q ? (q.dataset.qmmQuestion || '') : '';
+                            html +=
+                                '<div class="qmm-item qmm-type-quiz" data-qmm-type="quiz" data-qmm-id="' + item.id + '">' +
+                                '  <span class="qmm-handle"><i class="fas fa-grip-vertical"></i></span>' +
+                                '  <span class="qmm-icon"><i class="fas fa-question-circle text-primary"></i></span>' +
+                                '  <span class="qmm-label">Q' + escapeHtml(idx) + ' &middot; ' + escapeHtml(question) + '</span>' +
+                                '</div>';
+                        } else {
+                            const m = mediaMap[item.id];
+                            const src = m ? (m.is_image ? m.path : (m.thumbnail || m.path)) : '';
+                            const title = m ? (m.title || 'Untitled media') : ('Media #' + item.id);
+                            html +=
+                                '<div class="qmm-item qmm-type-media" data-qmm-type="media" data-qmm-id="' + item.id + '">' +
+                                '  <span class="qmm-handle"><i class="fas fa-grip-vertical"></i></span>' +
+                                '  <img class="qmm-thumb" src="' + escapeHtml(src) + '" alt="">' +
+                                '  <span class="qmm-label"><i class="fas fa-photo-film text-warning me-1"></i>' + escapeHtml(title) + '</span>' +
+                                '</div>';
+                        }
+                    });
+                    list.innerHTML = html;
+                    initManagerSortable();
+                }
+
+                // QuizMediaMerge : make the manager list drag-sortable (separate handle from gallery table)
+                function initManagerSortable() {
+                    const list = listEl();
+                    if (!list || typeof Sortable === 'undefined') return;
+                    if (list._qmmSortable) {
+                        list._qmmSortable.destroy();
+                    }
+                    list._qmmSortable = new Sortable(list, {
+                        handle: '.qmm-handle',
+                        animation: 150,
+                        ghostClass: 'qmm-ghost',
+                        chosenClass: 'qmm-chosen',
+                        onEnd: function() {
+                            applyOrderFromManager();
+                        }
+                    });
+                }
+
+                // QuizMediaMerge : read the manager list DOM back into `order`, persist, then re-sort the carousel
+                function applyOrderFromManager() {
+                    const list = listEl();
+                    if (!list) return;
+                    const rows = list.querySelectorAll('.qmm-item');
+                    order = Array.from(rows).map(function(r) {
+                        return { type: r.dataset.qmmType, id: String(r.dataset.qmmId) };
+                    });
+                    saveOrder();
+                    reorderCarousel();
+                }
+
+                // QuizMediaMerge : full paint (carousel + manager list)
+                function render() {
+                    reorderCarousel();
+                    renderManagerList();
+                }
+
+                // QuizMediaMerge : called every time gallery media is (re)loaded from the server
+                function onMediaLoaded(media) {
+                    mediaMap = {};
+                    (media || []).forEach(function(m) {
+                        mediaMap[String(m.id)] = m;
+                    });
+                    // QuizMediaMerge : forget cached slide nodes for media that no longer exists
+                    Object.keys(mediaNodes).forEach(function(id) {
+                        if (!mediaMap[id]) delete mediaNodes[id];
+                    });
+
+                    const quizItems = collectQuizItems();
+                    const quizIds = quizItems.map(function(q) {
+                        return q.id;
+                    });
+                    const mediaIds = (media || []).map(function(m) {
+                        return String(m.id);
+                    });
+
+                    order = reconcile(quizIds, mediaIds);
+                    render();
+                }
+
+                // QuizMediaMerge : reset back to the default interleaved arrangement
+                function resetToDefault() {
+                    try {
+                        localStorage.removeItem(STORAGE_KEY);
+                    } catch (e) {}
+                    const quizItems = collectQuizItems(); // refresh in case DOM changed
+                    order = buildDefaultOrder(quizItems.map(function(q) {
+                        return q.id;
+                    }), Object.keys(mediaMap));
+                    saveOrder();
+                    render();
+                }
+
+                // QuizMediaMerge : wire the "Default" reset button
+                (function bindResetButton() {
+                    const btn = document.getElementById('qmmResetOrderBtn');
+                    if (btn) {
+                        btn.addEventListener('click', function() {
+                            resetToDefault();
+                        });
+                    }
+                })();
+
+                return {
+                    onMediaLoaded: onMediaLoaded,
+                    resetToDefault: resetToDefault
+                };
+            })();
+
+            function togglePreviewMute() {
                  // Assuming the iframe for preview has an id="live-show-preview-iframe"
                  var iframe = document.getElementById('live-show-preview-iframe');
                  if (iframe && iframe.contentWindow) {
@@ -3329,10 +3757,97 @@
                  transition: opacity 0.3s ease;
              }
 
-             .gallery-detach-btn:hover {
-                 opacity: 1;
-             }
-         </style>
-     @endpush
+            .gallery-detach-btn:hover {
+                opacity: 1;
+            }
+
+            /* QuizMediaMerge : styling for the unified sort manager list */
+            .qmm-list {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .qmm-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 6px 8px;
+                border: 1px solid #444;
+                border-radius: 6px;
+                background: #2b2b2b;
+                color: #fff;
+            }
+
+            .qmm-item .qmm-handle {
+                cursor: grab;
+                color: #9aa0a6;
+            }
+
+            .qmm-item .qmm-handle:active {
+                cursor: grabbing;
+            }
+
+            .qmm-thumb {
+                width: 40px;
+                height: 40px;
+                object-fit: cover;
+                border-radius: 4px;
+                border: 1px solid #555;
+                flex: 0 0 auto;
+            }
+
+            .qmm-icon {
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 4px;
+                background: #1f1f1f;
+                flex: 0 0 auto;
+            }
+
+            .qmm-label {
+                flex: 1 1 auto;
+                font-size: .82rem;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .qmm-type-quiz {
+                border-left: 3px solid #0d6efd;
+            }
+
+            .qmm-type-media {
+                border-left: 3px solid #ffc107;
+            }
+
+            .qmm-ghost {
+                opacity: .4;
+            }
+
+            .qmm-chosen {
+                background: rgba(90, 16, 172, 0.2) !important;
+            }
+
+            /* QuizMediaMerge : media slide inside the quiz carousel */
+            .qmm-media-slide .qmm-media-frame {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 300px;
+            }
+
+            .qmm-media-slide .qmm-media-frame img {
+                max-height: 340px;
+                max-width: 100%;
+                object-fit: contain;
+                border-radius: 8px;
+                border: 1px solid #555;
+            }
+        </style>
+    @endpush
 
  </x-app-dashboard-layout>
