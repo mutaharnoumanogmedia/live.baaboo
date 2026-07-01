@@ -734,7 +734,7 @@
         const liveShowMediaHiddenUrl = '{{ route('admin.live-shows.media-hidden', $liveShow->id) }}';
         const liveShowMediaPlayedUrl = '{{ route('admin.live-shows.media-played', $liveShow->id) }}';
         const csrfToken = '{{ csrf_token() }}';
-        const BGM_URL = '{{ asset('badabing-audio/bg-think-fast.mp3') }}';
+        const BGM_URL = '{{ asset('badabing-audio/music1.mp3') }}';
 
         const BG_VOLUME = 0.0;
 
