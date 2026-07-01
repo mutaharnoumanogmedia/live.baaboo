@@ -389,11 +389,6 @@ body .end-show {
     pointer-events: auto;
 }
 
-/* safari fix for label */
-.quiz-overlay.active {
-    pointer-events: auto;
-}
-
 
 .quiz-section .quiz-option-label {
     display: flex;
@@ -1203,6 +1198,8 @@ body .end-show {
     transform: translateY(0);
     max-height: 100%;
     overflow: auto;
+    pointer-events: auto;
+
 }
 
 .quiz-content {
