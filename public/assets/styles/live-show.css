@@ -385,9 +385,6 @@ body .end-show {
 .main-container {
     position: relative;
 }
-.quiz-overlay {
-    pointer-events: auto;
-}
 
 
 .quiz-section .quiz-option-label {
@@ -1192,6 +1189,8 @@ body .end-show {
     overflow-y: auto;
 
     padding: 0px 0px;
+    pointer-events: auto;
+
 }
 
 .quiz-overlay.active {
