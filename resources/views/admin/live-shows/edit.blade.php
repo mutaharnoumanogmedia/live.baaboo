@@ -6,6 +6,8 @@
     </x-slot>
 
     <div class="container-fluid form-container px-3">
+        <x-admin.live-show-tabs :live-show-id="$liveShow->id" active="info" />
+
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}

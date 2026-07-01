@@ -1,8 +1,4 @@
-    <?php
-
-/**
- * Created by Reliese Model.
- */
+<?php
 
 namespace App\Models;
 
@@ -18,17 +14,15 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $payload
  * @property Carbon $created_at
  * @property Carbon $updated_at
- *
- * @package App\Models
  */
 class ShopifyJob extends Model
 {
-	protected $table = 'shopify_jobs';
+    protected $table = 'shopify_jobs';
 
-	protected $fillable = [
-		'job_type',
-		'job_id',
-		'payload',
+    protected $fillable = [
+        'job_type',
+        'job_id',
+        'payload',
         'status',
-	];
+    ];
 }
