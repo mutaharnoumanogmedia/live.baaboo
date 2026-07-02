@@ -49,8 +49,6 @@ class SendWinnerEmailJob implements ShouldQueue
         // voucher winner email
         if ($show_user && $show_user->discount_code != null) {
             SendWinnerVoucherEmailJob::dispatch($user, $show_user);
-            // Mail::to($user->email)
-            //     ->send(new WinnerVoucherNotificationMail($show_user));
             Log::info("WinnerVoucherNotificationMail dispatched to user ID {$user->id} with email {$user->email} for live show ID {$this->liveShow->id} and prize won: {$this->prizeWon}");
         }
 

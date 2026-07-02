@@ -7,7 +7,7 @@
         </h1>
         <p style="font-size: 1.25rem; color: #5A10AC; margin: 0 0 20px 0;">
             herzlichen Glückwunsch! 🎉 Du hast bei der Badabing Gameshow
-            {{ $user->liveShow->start_time ? 'am' . $user->liveShow->start_time->format('d.m.Y') : 'N/A' }} einen
+            {{ $user->liveShow->start_time ? ' am ' . $user->liveShow->start_time->format('d.m.Y') : 'N/A' }} einen
             {{ (int) $user->winnerPrize->voucher_amount }}€ baaboo Gutschein gewonnen 🥳
         </p>
     </div>

@@ -77,7 +77,8 @@
                                             </a>
 
                                             <a href="https://www.instagram.com/badabing.show/" target="_blank"
-                                                rel="noopener" title="Instagram" style="display: inline-block; margin-right: 10px;">
+                                                rel="noopener" title="Instagram"
+                                                style="display: inline-block; margin-right: 10px;">
                                                 <img src="{{ asset('images/Instagram.png') }}" alt="Instagram"
                                                     width="32" height="32" style="display: block; border: none;">
                                             </a>
@@ -106,6 +107,11 @@
 
 
                     <tr>
+                        <td align="center">
+                            <img src="https://legal.baaboo.com/badabing-signature.php" width="100" />
+                        </td>
+                    </tr>
+                    <tr>
                         <td
                             style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative;">
                             <table class="footer" align="center" width="570" cellpadding="0" cellspacing="0"
@@ -131,6 +137,7 @@
 
         </tr>
     </table>
+
 </body>
 
 </html>
