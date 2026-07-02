@@ -31,7 +31,6 @@ use App\Models\LiveShowGalleryState;
 use App\Models\LiveShowQuiz;
 use App\Models\LiveShowWinnerPrize;
 use App\Models\QuizOption;
-use App\Models\ShopifyPriceRule;
 use App\Models\UserLiveShow;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
@@ -249,7 +248,7 @@ class LiveShowController extends Controller
             }
 
             $discount_rule_id = null;
-           // if (! $liveShow->is_test_show) {
+            if (! $liveShow->is_test_show) {
                 try {
                     $starts_at = Carbon::parse($liveShow->start_time, 'CET')->toIso8601String();
                     $ends_at = Carbon::parse($liveShow->start_time, 'CET')->addDays(31)->toIso8601String();
@@ -282,7 +281,7 @@ class LiveShowController extends Controller
                     $errors[] = "Failed to create/update Shopify price rule for live show ID {$liveShowId}, rank {$rank}. Please check the logs for more details.";
                     Log::error("Failed to create Shopify price rule for live show ID {$liveShowId}, rank {$rank}: ".$e->getMessage());
                 }
-           // }
+            }
 
             if ($prize) {
                 LiveShowWinnerPrize::create([
@@ -519,28 +518,25 @@ class LiveShowController extends Controller
                 if ($winner_user?->discount_code) {
                     Log::info("User ID {$winner['id']} already has a discount code: {$winner_user->discount_code}");
                 } elseif ($winner_user && $prize->discountRule?->shopify_id) {
-                    //job added to avoid the delay of the Shopify API
+                    // job added to avoid the delay of the Shopify API
                     try {
                         // delay to avoid the delay of the Shopify API
                         GenerateWinnerDiscountCodeJob::dispatch(
                             $winner['id'],
                             (int) $liveShowId,
                             $prize->discountRule->shopify_id
-                        )->delay(now()->addMinutes(2)); 
+                        )->delay(now()->addMinutes(2));
 
                         Log::info("GenerateWinnerDiscountCodeJob dispatched for user ID {$winner['id']}, live show ID {$liveShowId} ".now()->format('d M Y, H:i'));
                     } catch (\Exception $e) {
-                        Log::error("Failed to dispatch GenerateWinnerDiscountCodeJob for user ID {$winner['id']}: ".$e->getMessage()." ".now()->format('d M Y, H:i'));
+                        Log::error("Failed to dispatch GenerateWinnerDiscountCodeJob for user ID {$winner['id']}: ".$e->getMessage().' '.now()->format('d M Y, H:i'));
                     }
                 }
             }
 
             $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon, 'winner_prize_id' => $prize->id ?? null]);
-            // ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string) $liveShowId);
-            // Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
 
-         
-            // if (! $liveShow->is_test_show) {
+            if (! $liveShow->is_test_show) {
                 // Dispatch job to send winner email after 30 minutes
                 try {
                     // SendWinnerEmailJob routes to the correct email 30 minutes later:
@@ -551,9 +547,9 @@ class LiveShowController extends Controller
                     Log::info("SendWinnerEmailJob dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon} ".now()->format('d M Y, H:i'));
                 } catch (\Exception $e) {
                     // log the error
-                    Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage()." ".now()->format('d M Y, H:i'));
+                    Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage().' '.now()->format('d M Y, H:i'));
                 }
-            // }
+            }
 
         }
 
@@ -1095,13 +1091,14 @@ class LiveShowController extends Controller
 
         $players = $liveShow->users()
             ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at', 'winner_cash_email_sent_at', 'winner_voucher_email_sent_at', 'winner_email_sent_at', 'winner_prize_id', 'discount_code'])
-       
+
             ->withExists(['blockedLiveShows as is_blocked_for_live_show' => function ($query) use ($id) {
                 $query->where('live_show_id', $id);
             }])
             ->orderByDesc('user_live_shows.score')
             ->get()->map(function ($player) {
                 $player->pivot->winnerPrize = LiveShowWinnerPrize::find($player->pivot->winner_prize_id);
+
                 return $player;
             });
 
