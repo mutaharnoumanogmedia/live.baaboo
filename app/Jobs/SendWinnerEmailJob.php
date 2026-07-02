@@ -41,22 +41,20 @@ class SendWinnerEmailJob implements ShouldQueue
         if (! $user || ! $user->email) {
             return;
         }
+        // generic winner email
+        Mail::to($user->email)
+            ->send((new WinnerNotificationMail($user, $this->prizeWon, $this->liveShow))->from('winners@badabing.show', 'Badabing Game Show'));
+        $show_user->winner_email_sent_at = now();
+        $show_user->save();
+        // voucher winner email
         if ($show_user && $show_user->discount_code != null) {
-            SendWinnerVoucherEmailJob::dispatch($user, $show_user)->delay(now()->addMinutes(
-                
-               (int) env('WINNER_EMAIL_DELAY', 30)
-            
-            ));
+            SendWinnerVoucherEmailJob::dispatch($user, $show_user);
             // Mail::to($user->email)
             //     ->send(new WinnerVoucherNotificationMail($show_user));
             Log::info("WinnerVoucherNotificationMail dispatched to user ID {$user->id} with email {$user->email} for live show ID {$this->liveShow->id} and prize won: {$this->prizeWon}");
-        } else {
-            Mail::to($user->email)
-                ->send((new WinnerNotificationMail($user, $this->prizeWon, $this->liveShow))->from('winners@badabing.show', 'Badabing Game Show'));
-            $show_user->winner_email_sent_at = now();
-            $show_user->save();
         }
 
+        // cash winner email
         if ($show_user && $show_user->is_winner == 1 && ($show_user->winnerPrize && $show_user->winnerPrize->is_voucher == 0)) {
             // Cash winner: won a prize where is_voucher = 0.
             SendWinnerCashEmailJob::dispatch($user->id, $this->prizeWon, $this->liveShow);
