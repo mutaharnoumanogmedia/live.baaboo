@@ -536,7 +536,7 @@ class LiveShowController extends Controller
 
             $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon, 'winner_prize_id' => $prize->id ?? null]);
 
-            if (! $liveShow->is_test_show) {
+            // if (! $liveShow->is_test_show) {
                 // Dispatch job to send winner email after 30 minutes
                 try {
                     // SendWinnerEmailJob routes to the correct email 30 minutes later:
@@ -549,7 +549,7 @@ class LiveShowController extends Controller
                     // log the error
                     Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage().' '.now()->format('d M Y, H:i'));
                 }
-            }
+            // }
 
         }
 
