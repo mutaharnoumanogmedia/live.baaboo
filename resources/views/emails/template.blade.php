@@ -104,8 +104,6 @@
                         </td>
 
                     </tr>
-
-
                     <tr>
                         <td>
                             <img src="https://legal.baaboo.com/badabing-signature.php" style="display: block; margin: 0 auto; width: 100%; max-width: 100px;" />
