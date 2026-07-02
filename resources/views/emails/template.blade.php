@@ -98,17 +98,18 @@
                                             </a>
 
                                         </div>
+                                        <div>
+                                            <img src="https://legal.baaboo.com/badabing-signature.php"
+                                                style="display: block; margin: 0 auto; width: 100%; max-width: 100vw;" />
+
+                                        </div>
                                     </td>
                                 </tr>
                             </table>
                         </td>
 
                     </tr>
-                    <tr>
-                        <td>
-                            <img src="https://legal.baaboo.com/badabing-signature.php" style="display: block; margin: 0 auto; width: 100%; max-width: 100px;" />
-                        </td>
-                    </tr>
+                    
                     <tr>
                         <td
                             style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; position: relative;">
