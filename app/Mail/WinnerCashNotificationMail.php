@@ -34,7 +34,7 @@ class WinnerCashNotificationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address('winners@badabing.show', 'Badabing Team'),
+            from: new Address('winners@badabing.show', 'Badabing Game Show'),
             subject: 'Herzlichen Glückwunsch 🎉',
         );
     }
