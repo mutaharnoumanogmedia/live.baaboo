@@ -43,7 +43,7 @@ class SendWinnerEmailJob implements ShouldQueue
         }
         // generic winner email
         Mail::to($user->email)
-            ->send((new WinnerNotificationMail($user, $this->prizeWon, $this->liveShow))->from('winners@badabing.show', 'Badabing Game Show'));
+            ->send((new WinnerNotificationMail($user, $this->prizeWon, $this->liveShow))->from('winners@badabing.show', env('APP_NAME')));
         $show_user->winner_email_sent_at = now();
         $show_user->save();
         // voucher winner email
