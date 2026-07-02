@@ -37,6 +37,9 @@ class SendWinnerVoucherEmailJob implements ShouldQueue
         if ($this->show_user && $this->show_user->discount_code != NULL) {
             Mail::to($this->user->email)
                 ->send(new WinnerVoucherNotificationMail($this->show_user));
+            $this->show_user->winner_voucher_email_sent_at = now();
+            $this->show_user->save();
+
             Log::info("WinnerVoucherNotificationMail dispatched to user ID {$this->user->id} with email {$this->user->email} for live show ID {$this->show_user->live_show_id} and prize won: {$this->show_user->prize_won}");
         } else {
             Log::warning("No discount code found for user ID {$this->user->id} in live show ID {$this->show_user->live_show_id}. WinnerVoucherNotificationMail not dispatched.");

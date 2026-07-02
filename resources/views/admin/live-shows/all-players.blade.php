@@ -10,10 +10,12 @@
                 <div class="text-muted small">{{ $liveShow->title }}</div>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('admin.live-shows.stream-management', $liveShow->id) }}" class="btn btn-secondary btn-sm">
+                <a href="{{ route('admin.live-shows.stream-management', $liveShow->id) }}"
+                    class="btn btn-secondary btn-sm">
                     <i class="fas fa-arrow-left me-1"></i> Stream Management
                 </a>
-                <a href="{{ route('admin.live-shows.export-all-users-as-csv', $liveShow->id) }}" class="btn btn-primary btn-sm">
+                <a href="{{ route('admin.live-shows.export-all-users-as-csv', $liveShow->id) }}"
+                    class="btn btn-primary btn-sm">
                     <i class="fas fa-file-export me-1"></i> Export Users
                 </a>
             </div>
@@ -47,6 +49,7 @@
                                     <th>Winner</th>
                                     <th>Prize</th>
                                     <th>Joined</th>
+                                    <th>Emails Sent At</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -60,9 +63,10 @@
                                         </td>
                                         <td>{{ $player->email }}</td>
                                         <td>{{ $player->pivot->score ?? 0 }}</td>
-                                        <td>{{ ucfirst($player->pivot->status ?? 'n/a') }}</td>
+                                        <td>{{ ucfirst($player->pivot->status ?? '--') }}</td>
                                         <td>
-                                            <span class="badge {{ $player->pivot->is_online ? 'bg-success' : 'bg-secondary' }}">
+                                            <span
+                                                class="badge {{ $player->pivot->is_online ? 'bg-success' : 'bg-secondary' }}">
                                                 {{ $player->pivot->is_online ? 'Online' : 'Offline' }}
                                             </span>
                                         </td>
@@ -73,15 +77,41 @@
                                                 <span class="text-muted">No</span>
                                             @endif
                                         </td>
-                                        <td>{{ $player->pivot->prize_won ?? 'N/A' }}</td>
+                                        <td>{{ $player->pivot->prize_won ?? '--' }}
+                                            <div>
+
+                                                {!! $player->pivot->winnerPrize
+                                                    ? ($player->pivot->winnerPrize->is_voucher
+                                                        ? '<span class="badge bg-warning text-dark">Voucher</span> <div>' .
+                                                            ($player->pivot->discount_code ?? '--') .
+                                                            '</div>'
+                                                        : '<span class="badge bg-success text-white">Cash</span>')
+                                                    : '--' !!}
+                                            </div>
+
+                                        </td>
                                         <td>
-                                            {{ $player->pivot->created_at ? \Carbon\Carbon::parse($player->pivot->created_at)->format('d M Y, H:i') : 'N/A' }}
+                                            {{ $player->pivot->created_at ? \Carbon\Carbon::parse($player->pivot->created_at)->format('d M Y, H:i') : '--' }}
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <span> Cash: </span>
+                                                {{ $player->pivot->winner_cash_email_sent_at ? \Carbon\Carbon::parse($player->pivot->winner_cash_email_sent_at)->format('d M Y, H:i') : '--' }}
+                                            </div>
+                                            <div>
+                                                <span> Voucher: </span>
+                                                {{ $player->pivot->winner_voucher_email_sent_at ? \Carbon\Carbon::parse($player->pivot->winner_voucher_email_sent_at)->format('d M Y, H:i') : '--' }}
+                                            </div>
+                                            <div>
+                                                <span> Email: </span>
+                                                {{ $player->pivot->winner_email_sent_at ? \Carbon\Carbon::parse($player->pivot->winner_email_sent_at)->format('d M Y, H:i') : '--' }}
+                                            </div>
                                         </td>
                                         <td class="text-end">
                                             <div class="dropdown">
                                                 <button class="btn btn-sm btn-secondary dropdown-toggle" type="button"
-                                                    id="playerActionsDropdown{{ $player->id }}" data-bs-toggle="dropdown"
-                                                    aria-expanded="false">
+                                                    id="playerActionsDropdown{{ $player->id }}"
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
                                                     <i class="bi bi-three-dots"></i>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end"
