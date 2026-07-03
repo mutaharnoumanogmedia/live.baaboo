@@ -40,7 +40,7 @@ class SendWinnerCashEmailJob implements ShouldQueue
             return;
         }
 
-        Mail::to($user->email)
+        Mail::mailer('smtp_winners')->to($user->email)
             ->send(new WinnerCashNotificationMail($user, $this->prizeWon, $this->liveShow));
 
         Log::info("WinnerCashNotificationMail sent to user ID {$user->id} with email {$user->email} for live show ID {$this->liveShow->id} and prize won: {$this->prizeWon}");

@@ -38,7 +38,8 @@ class SendWinnerVoucherEmailJob implements ShouldQueue
         if ($this->show_user && $this->show_user->discount_code != null) {
 
             try {
-                Mail::to($this->user->email)
+                Mail::mailer('smtp_winners')->to($this->user->email)
+                
                     ->send(new WinnerVoucherNotificationMail($this->show_user));
                 $this->show_user->winner_voucher_email_sent_at = now();
                 $this->show_user->save();

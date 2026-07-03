@@ -10,6 +10,7 @@ use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Address;
 
 class WinnerVoucherNotificationMail extends Mailable
 {
@@ -30,6 +31,7 @@ class WinnerVoucherNotificationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
+            from: new Address(env('MAIL_WINNERS_FROM_ADDRESS'), env('MAIL_WINNERS_FROM_NAME')),
             subject: 'Herzlichen Glückwunsch! 🎉',
         );
     }

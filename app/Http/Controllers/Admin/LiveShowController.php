@@ -230,9 +230,9 @@ class LiveShowController extends Controller
     {
         $liveShow = LiveShow::find($liveShowId);
         // if test show or env is local then return
-        if ($liveShow->is_test_show || env('APP_ENV') == 'local') {
-            return;
-        }
+        // if ($liveShow->is_test_show || env('APP_ENV') == 'local') {
+        //     return;
+        // }
 
         $errors = [];
         for ($rank = 1; $rank <= $maxWinners; $rank++) {
@@ -437,10 +437,14 @@ class LiveShowController extends Controller
             return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::check()], 401);
         }
 
+
+
         $liveShow = LiveShow::find($liveShowId);
         if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
+
+
 
         if ($liveShow->winners_announced) {
             return response()->json([
@@ -449,6 +453,9 @@ class LiveShowController extends Controller
                 'winners_announced' => true,
             ], 422);
         }
+
+
+
 
         // make all users is_winner = false
         $liveShow->users()->update(['is_winner' => false]);
@@ -525,7 +532,7 @@ class LiveShowController extends Controller
                             $winner['id'],
                             (int) $liveShowId,
                             $prize->discountRule->shopify_id
-                        )->delay(now()->addMinutes(2));
+                        )->delay(now()->addSeconds(20));
 
                         Log::info("GenerateWinnerDiscountCodeJob dispatched for user ID {$winner['id']}, live show ID {$liveShowId} ".now()->format('d M Y, H:i'));
                     } catch (\Exception $e) {
