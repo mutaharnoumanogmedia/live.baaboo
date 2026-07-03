@@ -111,7 +111,7 @@ class SendWinnerEmailJob implements ShouldQueue
             );
 
             if ($result['success']) {
-                $show_user->{$statusField} = 'sent';
+                $show_user->{$statusField} = $result['message_id'];
                 $show_user->{$sentAtField} = now();
                 $show_user->save();
 
