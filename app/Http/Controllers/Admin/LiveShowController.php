@@ -1097,7 +1097,7 @@ class LiveShowController extends Controller
         $liveShow = LiveShow::findOrFail($id);
 
         $players = $liveShow->users()
-            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at', 'winner_cash_email_sent_at', 'winner_voucher_email_sent_at', 'winner_email_sent_at', 'winner_prize_id', 'discount_code'])
+            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at', 'winner_cash_email_sent_at', 'winner_voucher_email_sent_at', 'winner_email_sent_at', 'winner_email_sent_status', 'winner_voucher_email_sent_status', 'winner_cash_email_sent_status', 'winner_prize_id', 'discount_code'])
 
             ->withExists(['blockedLiveShows as is_blocked_for_live_show' => function ($query) use ($id) {
                 $query->where('live_show_id', $id);
@@ -1184,6 +1184,77 @@ class LiveShowController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Player score reset successfully.',
+        ]);
+    }
+
+    /**
+     * Re-send a single winner email (generic winner, voucher, or cash) to a
+     * player. The relevant *_status field is cleared first so the
+     * SendWinnerEmailJob will attempt only that email again while skipping the
+     * others whose status is still set.
+     */
+    public function resendPlayerEmail(Request $request, $liveShowId, $userId): JsonResponse
+    {
+        $request->validate([
+            'type' => 'required|string|in:winner,voucher,cash',
+        ]);
+
+        $liveShow = LiveShow::findOrFail($liveShowId);
+
+        $showUser = UserLiveShow::where('live_show_id', $liveShowId)
+            ->where('user_id', $userId)
+            ->first();
+
+        if (! $showUser) {
+            return response()->json(['success' => false, 'message' => 'Player not found in this live show.'], 404);
+        }
+
+        $user = $showUser->user;
+
+        if (! $user || ! $user->email) {
+            return response()->json(['success' => false, 'message' => 'Player has no email address on file.'], 422);
+        }
+
+        $type = $request->input('type');
+
+        $fieldMap = [
+            'winner' => ['winner_email_sent_status', 'winner_email_sent_at'],
+            'voucher' => ['winner_voucher_email_sent_status', 'winner_voucher_email_sent_at'],
+            'cash' => ['winner_cash_email_sent_status', 'winner_cash_email_sent_at'],
+        ];
+
+        [$statusField, $sentAtField] = $fieldMap[$type];
+
+        // Clear the status/sent-at so the job re-sends only this email.
+        $showUser->{$statusField} = null;
+        $showUser->{$sentAtField} = null;
+        $showUser->save();
+
+        $prizeWon = (string) ($showUser->prize_won ?? 'n/a');
+
+        try {
+            // Run synchronously so we can report the outcome back to the admin.
+            SendWinnerEmailJob::dispatchSync((int) $userId, $prizeWon, $liveShow);
+        } catch (\Throwable $e) {
+            Log::error("Failed to re-send {$type} email for user ID {$userId}, live show ID {$liveShowId}: ".$e->getMessage().' '.now()->format('d M Y, H:i'));
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to re-send email: '.$e->getMessage(),
+            ], 500);
+        }
+
+        $showUser->refresh();
+
+        $sent = $showUser->{$sentAtField} !== null;
+
+        return response()->json([
+            'success' => $sent,
+            'message' => $sent
+                ? ucfirst($type).' email re-sent successfully.'
+                : 'Could not re-send '.$type.' email. '.($showUser->{$statusField} ?? ''),
+            'status' => $showUser->{$statusField},
+            'sent_at' => $showUser->{$sentAtField},
         ]);
     }
 

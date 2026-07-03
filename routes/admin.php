@@ -127,6 +127,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Route::post('live-shows/stream-management/{liveShowId}/block-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'blockUser'])->name('live-shows.block-user');
     Route::post('live-shows/stream-management/{liveShowId}/toggle-block-status-for-player/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'toggleBlockStatusForPlayer'])->name('live-shows.toggle-block-status-for-player');
     Route::post('live-shows/stream-management/{liveShowId}/reset-score/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'resetPlayerScore'])->name('live-shows.reset-player-score');
+    Route::post('live-shows/stream-management/{liveShowId}/resend-email/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'resendPlayerEmail'])->name('live-shows.resend-player-email');
 
     Route::get('live-shows/{id}/export-all-chats-as-csv', [\App\Http\Controllers\Admin\LiveShowController::class, 'exportAllChatsOfLiveShowAsCSV'])->name('live-shows.export-all-chats-as-csv');
     Route::get('live-shows/{id}/export-all-users-as-csv', [\App\Http\Controllers\Admin\LiveShowController::class, 'exportAllUsersOfLiveShowAsCSV'])->name('live-shows.export-all-users-as-csv');
