@@ -153,6 +153,8 @@
                                                 <tr>
                                                     <th>Rank</th>
                                                     <th>Prize</th>
+                                                    <th>Voucher Code</th>
+                                                    
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -161,6 +163,7 @@
                                                         <td><span class="badge bg-secondary">{{ $wp->rank }}</span>
                                                         </td>
                                                         <td>{{ $wp->prize }}</td>
+                                                        <td>{{ $wp->discount_code ?? '--' }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>

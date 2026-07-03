@@ -230,9 +230,9 @@ class LiveShowController extends Controller
     {
         $liveShow = LiveShow::find($liveShowId);
         // if test show or env is local then return
-        if ($liveShow->is_test_show || env('APP_ENV') == 'local') {
-            return;
-        }
+        // if ($liveShow->is_test_show || env('APP_ENV') == 'local') {
+        //     return;
+        // }
 
         $errors = [];
         for ($rank = 1; $rank <= $maxWinners; $rank++) {
@@ -278,8 +278,6 @@ class LiveShowController extends Controller
                         $discount_rule_id = $prizeRule->id;
                     }
                 } catch (\Exception $e) {
-                   
-
                     $errors[] = "Failed to create/update Shopify price rule for live show ID {$liveShowId}, rank {$rank}. Please check the logs for more details.";
                     Log::error("Failed to create Shopify price rule for live show ID {$liveShowId}, rank {$rank}: ".$e->getMessage());
                 }
@@ -439,10 +437,14 @@ class LiveShowController extends Controller
             return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::check()], 401);
         }
 
+
+
         $liveShow = LiveShow::find($liveShowId);
         if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
+
+
 
         if ($liveShow->winners_announced) {
             return response()->json([
@@ -451,6 +453,9 @@ class LiveShowController extends Controller
                 'winners_announced' => true,
             ], 422);
         }
+
+
+
 
         // make all users is_winner = false
         $liveShow->users()->update(['is_winner' => false]);
@@ -520,34 +525,39 @@ class LiveShowController extends Controller
                 if ($winner_user?->discount_code) {
                     Log::info("User ID {$winner['id']} already has a discount code: {$winner_user->discount_code}");
                 } elseif ($winner_user && $prize->discountRule?->shopify_id) {
-                    //job added to avoid the delay of the Shopify API
+                    // job added to avoid the delay of the Shopify API
                     try {
+                        // delay to avoid the delay of the Shopify API
                         GenerateWinnerDiscountCodeJob::dispatch(
                             $winner['id'],
                             (int) $liveShowId,
                             $prize->discountRule->shopify_id
-                        )->delay(now()->addMinutes(2));
-                        Log::info("GenerateWinnerDiscountCodeJob dispatched for user ID {$winner['id']}, live show ID {$liveShowId}");
+                        )->delay(now()->addSeconds(20));
+
+                        Log::info("GenerateWinnerDiscountCodeJob dispatched for user ID {$winner['id']}, live show ID {$liveShowId} ".now()->format('d M Y, H:i'));
                     } catch (\Exception $e) {
-                        Log::error("Failed to dispatch GenerateWinnerDiscountCodeJob for user ID {$winner['id']}: ".$e->getMessage());
+                        Log::error("Failed to dispatch GenerateWinnerDiscountCodeJob for user ID {$winner['id']}: ".$e->getMessage().' '.now()->format('d M Y, H:i'));
                     }
                 }
             }
 
             $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon, 'winner_prize_id' => $prize->id ?? null]);
-            // ShowPlayerAsWinnerEvent::dispatch($winner['id'], (string) $liveShowId);
-            // Log::info("ShowPlayerAsWinnerEvent dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
 
-            if (! $liveShow->is_test_show) {
+            // if (! $liveShow->is_test_show) {
                 // Dispatch job to send winner email after 30 minutes
                 try {
-                    SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now()->addMinutes(30));
-                    Log::info("SendWinnerEmailJob dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon}");
+                    // SendWinnerEmailJob routes to the correct email 30 minutes later:
+                    // voucher winners -> WinnerVoucherNotificationMail, cash winners
+                    // (prize is_voucher = 0) -> WinnerCashNotificationMail.
+                    SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now()->addMinutes((int) env('WINNER_EMAIL_DELAY', 30)));
+
+                    Log::info("SendWinnerEmailJob dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon} ".now()->format('d M Y, H:i'));
                 } catch (\Exception $e) {
                     // log the error
-                    Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage());
+                    Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage().' '.now()->format('d M Y, H:i'));
                 }
-            }
+            // }
+
         }
 
         $liveShow->update(['winners_announced' => true]);
@@ -1087,12 +1097,17 @@ class LiveShowController extends Controller
         $liveShow = LiveShow::findOrFail($id);
 
         $players = $liveShow->users()
-            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at'])
+            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at', 'winner_cash_email_sent_at', 'winner_voucher_email_sent_at', 'winner_email_sent_at', 'winner_prize_id', 'discount_code'])
+
             ->withExists(['blockedLiveShows as is_blocked_for_live_show' => function ($query) use ($id) {
                 $query->where('live_show_id', $id);
             }])
             ->orderByDesc('user_live_shows.score')
-            ->get();
+            ->get()->map(function ($player) {
+                $player->pivot->winnerPrize = LiveShowWinnerPrize::find($player->pivot->winner_prize_id);
+
+                return $player;
+            });
 
         $totalPlayers = $liveShow->users()->count();
 

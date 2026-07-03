@@ -110,8 +110,13 @@
             z-index: 2;
         }
 
-        .media-type-image { background: rgba(142, 59, 224, 0.92); }
-        .media-type-video { background: rgba(22, 163, 74, 0.92); }
+        .media-type-image {
+            background: rgba(142, 59, 224, 0.92);
+        }
+
+        .media-type-video {
+            background: rgba(22, 163, 74, 0.92);
+        }
 
         .media-duration-tag {
             position: absolute;
@@ -235,7 +240,9 @@
 
     <div class="py-6">
         <div class="container">
-            <x-admin.live-show-tabs :live-show-id="request('live_show_id')" active="gallery" />
+            @if (request('live_show_id'))
+                <x-admin.live-show-tabs :live-show-id="request('live_show_id')" active="gallery" />
+            @endif
 
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -253,11 +260,13 @@
                     </a>
                     <a href="{{ route('admin.media-gallery.index', array_filter(['live_show_id' => request('live_show_id'), 'type' => 'image', 'search' => request('search')])) }}"
                         class="mg-pill {{ request('type') === 'image' ? 'active' : '' }}">
-                        <i class="bi bi-image"></i> Images <span class="badge bg-light text-dark">{{ $counts['image'] }}</span>
+                        <i class="bi bi-image"></i> Images <span
+                            class="badge bg-light text-dark">{{ $counts['image'] }}</span>
                     </a>
                     <a href="{{ route('admin.media-gallery.index', array_filter(['live_show_id' => request('live_show_id'), 'type' => 'video', 'search' => request('search')])) }}"
                         class="mg-pill {{ request('type') === 'video' ? 'active' : '' }}">
-                        <i class="bi bi-film"></i> Videos <span class="badge bg-light text-dark">{{ $counts['video'] }}</span>
+                        <i class="bi bi-film"></i> Videos <span
+                            class="badge bg-light text-dark">{{ $counts['video'] }}</span>
                     </a>
                 </div>
 
@@ -286,7 +295,8 @@
                         <i class="bi bi-images d-block mb-3"></i>
                         @if (request('search') || request('type'))
                             <p class="mb-2">No media matches your filters.</p>
-                            <a href="{{ route('admin.media-gallery.index') }}" class="btn btn-outline-secondary btn-sm">Reset filters</a>
+                            <a href="{{ route('admin.media-gallery.index') }}"
+                                class="btn btn-outline-secondary btn-sm">Reset filters</a>
                         @else
                             <p class="mb-2">No media in gallery yet.</p>
                             <a href="{{ route('admin.media-gallery.create') }}" class="btn btn-success btn-sm">
@@ -308,7 +318,8 @@
                                     <div class="media-tag media-type-video"><i class="bi bi-film me-1"></i>Video</div>
                                     @if ($item->total_seconds)
                                         <div class="media-duration-tag">
-                                            <i class="bi bi-clock me-1"></i>{{ gmdate($item->total_seconds >= 3600 ? 'G:i:s' : 'i:s', $item->total_seconds) }}
+                                            <i
+                                                class="bi bi-clock me-1"></i>{{ gmdate($item->total_seconds >= 3600 ? 'G:i:s' : 'i:s', $item->total_seconds) }}
                                         </div>
                                     @endif
                                 @endif
@@ -329,14 +340,17 @@
                                         onclick="previewMedia('{{ $item->type }}', '{{ $item->url }}', @js($item->title ?: $item->original_name))">
                                         <i class="bi bi-eye"></i>
                                     </button>
-                                    <a href="{{ route('admin.media-gallery.edit', $item) }}" class="media-action-btn" title="Edit">
+                                    <a href="{{ route('admin.media-gallery.edit', $item) }}" class="media-action-btn"
+                                        title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <a href="{{ route('admin.media-gallery.attach-show', $item) }}" class="media-action-btn" title="Attach to Show">
+                                    <a href="{{ route('admin.media-gallery.attach-show', $item) }}"
+                                        class="media-action-btn" title="Attach to Show">
                                         <i class="bi bi-link-45deg"></i>
                                     </a>
                                     <form action="{{ route('admin.media-gallery.destroy', $item) }}" method="POST"
-                                        class="d-inline" onsubmit="return confirm('Delete “{{ addslashes($item->title ?: $item->original_name) }}”? This cannot be undone.');">
+                                        class="d-inline"
+                                        onsubmit="return confirm('Delete “{{ addslashes($item->title ?: $item->original_name) }}”? This cannot be undone.');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="media-action-btn danger" title="Delete">
@@ -411,7 +425,9 @@
                 // Stop playback when the modal is dismissed
                 modalEl.addEventListener('hidden.bs.modal', () => {
                     body.innerHTML = '';
-                }, { once: true });
+                }, {
+                    once: true
+                });
             }
         </script>
     @endpush

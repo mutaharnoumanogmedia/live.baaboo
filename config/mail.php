@@ -45,6 +45,15 @@ return [
             'local_domain' => env('MAIL_EHLO_DOMAIN'),
         ],
 
+        'smtp_winners' => [
+            'transport' => 'smtp',
+            'host' => env('MAIL_WINNERS_HOST', 'smtp.mailgun.org'),
+            'port' => env('MAIL_WINNERS_PORT', 587),
+            'encryption' => env('MAIL_WINNERS_ENCRYPTION', 'tls'),
+            'username' => env('MAIL_WINNERS_USERNAME'),
+            'password' => env('MAIL_WINNERS_PASSWORD'),
+        ],
+
         'ses' => [
             'transport' => 'ses',
         ],

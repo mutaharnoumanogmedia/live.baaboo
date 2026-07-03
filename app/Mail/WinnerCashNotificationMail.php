@@ -3,22 +3,22 @@
 namespace App\Mail;
 
 use App\Models\LiveShow;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Address;
-
+use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\User;
 
-class WinnerNotificationMail extends Mailable
+class WinnerCashNotificationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public User $user;
+
     public string $prizeWon;
+
     public LiveShow $liveShow;
 
     public function __construct(User $user, string $prizeWon, LiveShow $liveShow)
@@ -30,29 +30,28 @@ class WinnerNotificationMail extends Mailable
 
     /**
      * Get the message envelope.
-     *
-     * @return \Illuminate\Mail\Mailables\Envelope
      */
-    public function envelope()
+    public function envelope(): Envelope
     {
         return new Envelope(
             from: new Address('winners@badabing.show', 'Badabing Game Show'),
-            subject: 'Glückwunsch zu deinem Gewinn bei der Badabing Game Show',
+            subject: 'Herzlichen Glückwunsch 🎉',
         );
     }
 
     /**
      * Get the message content definition.
-     *
-     * @return \Illuminate\Mail\Mailables\Content
      */
-    public function content()
+    public function content(): Content
     {
+        // Prize is stored as free text (e.g. "50€", "50"). Normalise it to a bare amount.
+        $amount = $this->prizeWon;
+
         return new Content(
-            view: 'emails.winner_notification',
+            view: 'emails.cash_winner_notification',
             with: [
                 'user' => $this->user,
-                'prizeWon' => $this->prizeWon,
+                'amount' => $amount,
                 'liveShow' => $this->liveShow,
             ],
         );
@@ -63,7 +62,7 @@ class WinnerNotificationMail extends Mailable
      *
      * @return array
      */
-    public function attachments()
+    public function attachments(): array
     {
         return [];
     }

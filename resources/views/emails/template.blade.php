@@ -77,7 +77,8 @@
                                             </a>
 
                                             <a href="https://www.instagram.com/badabing.show/" target="_blank"
-                                                rel="noopener" title="Instagram" style="display: inline-block; margin-right: 10px;">
+                                                rel="noopener" title="Instagram"
+                                                style="display: inline-block; margin-right: 10px;">
                                                 <img src="{{ asset('images/Instagram.png') }}" alt="Instagram"
                                                     width="32" height="32" style="display: block; border: none;">
                                             </a>
@@ -97,13 +98,19 @@
                                             </a>
 
                                         </div>
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                            <img src="https://legal.baaboo.com/badabing-signature.php"
+                                                style="display: block; margin: 0 auto; width: 100%; max-width: 100vw;" />
                                     </td>
                                 </tr>
                             </table>
                         </td>
 
                     </tr>
-
 
                     <tr>
                         <td
@@ -131,6 +138,7 @@
 
         </tr>
     </table>
+
 </body>
 
 </html>
