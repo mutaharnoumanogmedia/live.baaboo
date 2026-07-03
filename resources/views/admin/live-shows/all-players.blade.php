@@ -254,7 +254,7 @@
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="emailModalLabel{{ $player->id }}">
+                        <h5 class="modal-title text-dark" id="emailModalLabel{{ $player->id }}">
                             <i class="fas fa-envelope me-1"></i>
                             Manage Emails &mdash; {{ $player->name }}
                         </h5>
