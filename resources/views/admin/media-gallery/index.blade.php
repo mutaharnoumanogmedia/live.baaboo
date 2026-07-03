@@ -235,7 +235,7 @@
 
     <div class="py-6">
         <div class="container">
-            <x-admin.live-show-tabs :live-show-id="request('live_show_id')" active="gallery" />
+            {{-- <x-admin.live-show-tabs :live-show-id="request('live_show_id')" active="gallery" /> --}}
 
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
