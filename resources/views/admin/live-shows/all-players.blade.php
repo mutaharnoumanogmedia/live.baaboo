@@ -49,12 +49,49 @@
                                     <th>Winner</th>
                                     <th>Prize</th>
                                     <th>Joined</th>
-                                    <th>Emails Sent At</th>
+                                    <th>Email Status</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse ($players as $index => $player)
+                                    @php
+                                        $pivot = $player->pivot;
+                                        $isVoucherWinner = $pivot->winnerPrize && $pivot->winnerPrize->is_voucher;
+                                        $isCashWinner = $pivot->is_winner && $pivot->winnerPrize && ! $pivot->winnerPrize->is_voucher;
+
+                                        $emailTypes = [
+                                            'winner' => [
+                                                'label' => 'Winner Email',
+                                                'status' => $pivot->winner_email_sent_status,
+                                                'sent_at' => $pivot->winner_email_sent_at,
+                                                'show' => true,
+                                            ],
+                                            'voucher' => [
+                                                'label' => 'Voucher Email',
+                                                'status' => $pivot->winner_voucher_email_sent_status,
+                                                'sent_at' => $pivot->winner_voucher_email_sent_at,
+                                                'show' => (bool) $isVoucherWinner,
+                                            ],
+                                            'cash' => [
+                                                'label' => 'Cash Email',
+                                                'status' => $pivot->winner_cash_email_sent_status,
+                                                'sent_at' => $pivot->winner_cash_email_sent_at,
+                                                'show' => (bool) $isCashWinner,
+                                            ],
+                                        ];
+
+                                        $emailState = function ($status, $sentAt) {
+                                            if ($sentAt && ! \Illuminate\Support\Str::startsWith(strtolower((string) $status), 'failed')) {
+                                                return 'sent';
+                                            }
+                                            if ($status && \Illuminate\Support\Str::startsWith(strtolower((string) $status), 'failed')) {
+                                                return 'failed';
+                                            }
+
+                                            return 'pending';
+                                        };
+                                    @endphp
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td>
@@ -93,19 +130,24 @@
                                         <td>
                                             {{ $player->pivot->created_at ? \Carbon\Carbon::parse($player->pivot->created_at)->format('d M Y, H:i') : '--' }}
                                         </td>
-                                        <td>
-                                            <div>
-                                                <span> Cash: </span>
-                                                {{ $player->pivot->winner_cash_email_sent_at ? \Carbon\Carbon::parse($player->pivot->winner_cash_email_sent_at)->format('d M Y, H:i') : '--' }}
-                                            </div>
-                                            <div>
-                                                <span> Voucher: </span>
-                                                {{ $player->pivot->winner_voucher_email_sent_at ? \Carbon\Carbon::parse($player->pivot->winner_voucher_email_sent_at)->format('d M Y, H:i') : '--' }}
-                                            </div>
-                                            <div>
-                                                <span> Email: </span>
-                                                {{ $player->pivot->winner_email_sent_at ? \Carbon\Carbon::parse($player->pivot->winner_email_sent_at)->format('d M Y, H:i') : '--' }}
-                                            </div>
+                                        <td style="min-width: 190px;">
+                                            @foreach ($emailTypes as $key => $email)
+                                                @if ($email['show'])
+                                                    @php $state = $emailState($email['status'], $email['sent_at']); @endphp
+                                                    <div class="d-flex align-items-center gap-1 mb-1 small">
+                                                        <span class="text-muted" style="min-width: 84px;">{{ $email['label'] }}:</span>
+                                                        @if ($state === 'sent')
+                                                            <span class="badge bg-success" data-bs-toggle="tooltip"
+                                                                title="{{ \Carbon\Carbon::parse($email['sent_at'])->format('d M Y, H:i') }}">Sent</span>
+                                                        @elseif ($state === 'failed')
+                                                            <span class="badge bg-danger" data-bs-toggle="tooltip"
+                                                                title="{{ $email['status'] }}">Failed</span>
+                                                        @else
+                                                            <span class="badge bg-secondary">Not sent</span>
+                                                        @endif
+                                                    </div>
+                                                @endif
+                                            @endforeach
                                         </td>
                                         <td class="text-end">
                                             <div class="dropdown">
@@ -138,13 +180,24 @@
                                                             Reset Score
                                                         </a>
                                                     </li>
+                                                    <li>
+                                                        <hr class="dropdown-divider">
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="javascript:void(0)"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#emailModal{{ $player->id }}">
+                                                            <i class="fas fa-envelope me-1"></i>
+                                                            Manage Emails
+                                                        </a>
+                                                    </li>
                                                 </ul>
                                             </div>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="10" class="text-center text-muted py-4">No players found.</td>
+                                        <td colspan="11" class="text-center text-muted py-4">No players found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -154,10 +207,122 @@
             </div>
         </div>
     </div>
-</x-app-dashboard-layout>
 
-@push('scripts')
-    <script>
+    @foreach ($players as $player)
+        @php
+            $pivot = $player->pivot;
+            $isVoucherWinner = $pivot->winnerPrize && $pivot->winnerPrize->is_voucher;
+            $isCashWinner = $pivot->is_winner && $pivot->winnerPrize && ! $pivot->winnerPrize->is_voucher;
+
+            $modalEmailTypes = [
+                'winner' => [
+                    'label' => 'Winner Email',
+                    'desc' => 'Generic winner notification email.',
+                    'status' => $pivot->winner_email_sent_status,
+                    'sent_at' => $pivot->winner_email_sent_at,
+                    'show' => true,
+                ],
+                'voucher' => [
+                    'label' => 'Voucher Email',
+                    'desc' => 'Voucher / discount code email (voucher winners).',
+                    'status' => $pivot->winner_voucher_email_sent_status,
+                    'sent_at' => $pivot->winner_voucher_email_sent_at,
+                    'show' => (bool) $isVoucherWinner,
+                ],
+                'cash' => [
+                    'label' => 'Cash Email',
+                    'desc' => 'Cash prize email (cash winners).',
+                    'status' => $pivot->winner_cash_email_sent_status,
+                    'sent_at' => $pivot->winner_cash_email_sent_at,
+                    'show' => (bool) $isCashWinner,
+                ],
+            ];
+
+            $modalEmailState = function ($status, $sentAt) {
+                if ($sentAt && ! \Illuminate\Support\Str::startsWith(strtolower((string) $status), 'failed')) {
+                    return 'sent';
+                }
+                if ($status && \Illuminate\Support\Str::startsWith(strtolower((string) $status), 'failed')) {
+                    return 'failed';
+                }
+
+                return 'pending';
+            };
+        @endphp
+        <div class="modal fade" id="emailModal{{ $player->id }}" tabindex="-1"
+            aria-labelledby="emailModalLabel{{ $player->id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title text-dark" id="emailModalLabel{{ $player->id }}">
+                            <i class="fas fa-envelope me-1"></i>
+                            Manage Emails &mdash; {{ $player->name }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3 small text-muted">
+                            Recipient: <span class="fw-semibold">{{ $player->email }}</span>
+                        </div>
+                        <div class="alert alert-info small py-2">
+                            Re-sending clears the email's status first, then sends only that email again.
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Sent At</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($modalEmailTypes as $key => $email)
+                                        @if ($email['show'])
+                                            @php $state = $modalEmailState($email['status'], $email['sent_at']); @endphp
+                                            <tr>
+                                                <td>
+                                                    <div class="fw-semibold">{{ $email['label'] }}</div>
+                                                    <div class="small text-muted">{{ $email['desc'] }}</div>
+                                                </td>
+                                                <td>
+                                                    @if ($state === 'sent')
+                                                        <span class="badge bg-success">Sent</span>
+                                                    @elseif ($state === 'failed')
+                                                        <span class="badge bg-danger" data-bs-toggle="tooltip"
+                                                            title="{{ $email['status'] }}">Failed</span>
+                                                    @else
+                                                        <span class="badge bg-secondary">Not sent</span>
+                                                    @endif
+                                                </td>
+                                                <td class="small">
+                                                    {{ $email['sent_at'] ? \Carbon\Carbon::parse($email['sent_at'])->format('d M Y, H:i') : '--' }}
+                                                </td>
+                                                <td class="text-end">
+                                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                                        onclick="resendPlayerEmail(this, '{{ $player->id }}', '{{ $key }}')">
+                                                        <i class="fas fa-paper-plane me-1"></i>
+                                                        {{ $state === 'pending' ? 'Send' : 'Re-send' }}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
+
+    @push('scripts')
+        <script>
         function toggleBlockStatusForPlayer(userId, action) {
             if (!confirm('Are you sure you want to ' + action + ' this player?')) {
                 return;
@@ -211,5 +376,52 @@
                     alert('Error resetting player score.');
                 });
         }
-    </script>
-@endpush
+
+        function resendPlayerEmail(button, userId, type) {
+            if (!confirm('Re-send the ' + type + ' email to this player?')) {
+                return;
+            }
+
+            const originalHtml = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Sending...';
+
+            fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/resend-email/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: type
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message || 'Email action completed.');
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        button.disabled = false;
+                        button.innerHTML = originalHtml;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error re-sending email:', error);
+                    alert('Error re-sending email.');
+                    button.disabled = false;
+                    button.innerHTML = originalHtml;
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.bootstrap && bootstrap.Tooltip) {
+                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
+                    new bootstrap.Tooltip(el);
+                });
+            }
+        });
+        </script>
+    @endpush
+</x-app-dashboard-layout>

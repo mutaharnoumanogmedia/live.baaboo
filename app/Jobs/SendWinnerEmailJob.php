@@ -98,9 +98,11 @@ class SendWinnerEmailJob implements ShouldQueue
         string $label,
     ): void {
         // Skip if this email was already attempted (sent or previously failed).
-        // if (! empty($show_user->{$statusField})) {
-        //     return;
-        // }
+        if (! empty($show_user->{$statusField})) {
+            Log::info("{$label} already sent to {$toEmail} , live show ID: {$show_user->live_show_id}, user ID: {$show_user->user_id}. Message ID: {$show_user->{$statusField}}. ".now()->format('d M Y, H:i:s'));
+            
+            return;
+        }
 
         try {
             $result = $brevo->send(
