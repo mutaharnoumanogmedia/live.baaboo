@@ -26,9 +26,11 @@ use App\Jobs\SendWinnerEmailJob;
 use App\Jobs\SendWinnerVoucherEmailJob;
 use App\Models\GalleryMedia;
 use App\Models\LiveShow;
+use App\Models\LiveShowEndMedia;
 use App\Models\LiveShowGalleryMedia;
 use App\Models\LiveShowGalleryState;
 use App\Models\LiveShowQuiz;
+use App\Models\LiveShowQuestionMedia;
 use App\Models\LiveShowWinnerPrize;
 use App\Models\QuizOption;
 use App\Models\UserLiveShow;
@@ -330,7 +332,7 @@ class LiveShowController extends Controller
 
     public function streamManagement($id)
     {
-        $liveShow = LiveShow::with(['quizzes.options', 'users', 'winnerPrizes', 'galleryMedia'])->findOrFail($id);
+        $liveShow = LiveShow::with(['quizzes.options', 'quizzes.questionMedia', 'endMedia', 'users', 'winnerPrizes', 'galleryMedia'])->findOrFail($id);
         $allGalleryMedia = \App\Models\GalleryMedia::orderBy('created_at', 'desc')->get();
 
         return view('admin.live-shows.stream-management', compact('liveShow', 'allGalleryMedia'));
@@ -946,43 +948,37 @@ class LiveShowController extends Controller
     {
         $request->validate([
             'gallery_media_id' => 'required|integer|exists:gallery_media,id',
+            'attachment_type' => 'nullable|in:show,question,end',
+            'attachment_id' => 'nullable|integer|min:1',
         ]);
 
         $liveShow = LiveShow::findOrFail($id);
         $media = GalleryMedia::findOrFail($request->input('gallery_media_id'));
 
-        if (! $liveShow->galleryMedia()->where('gallery_media.id', $media->id)->exists()) {
+        if (! $liveShow->isGalleryMediaAttached($media->id)) {
             return response()->json([
                 'success' => false,
                 'message' => 'This media is not attached to this stream.',
             ], 422);
         }
 
+        $this->markGalleryAttachmentPlayed(
+            $liveShow,
+            (int) $media->id,
+            $request->input('attachment_type'),
+            $request->input('attachment_id') ? (int) $request->input('attachment_id') : null
+        );
+
         $playbackStartedAt = $media->type === 'video' ? now() : null;
-        // DB::transaction(function () use ($liveShow, $media, $playbackStartedAt) {
-        //     LiveShowGalleryState::updateOrCreate(
-        //         ['live_show_id' => $liveShow->id],
-        //         [
-        //             'is_visible' => true,
-        //             'gallery_media_id' => $media->id,
-        //             'url' => $media->url,
-        //             'media_type' => $media->type,
-        //             'playback_started_at' => $playbackStartedAt,
-        //             'video_duration_seconds' => null,
-        //         ]
-        //     );
-        // });
         ShowGalleryImageEvent::dispatch(
             (string) $liveShow->id,
             $media->path,
             $media->type,
-
             $playbackStartedAt?->toIso8601String(),
             null,
             $media->thumbnail ?? null
         );
         $liveShow->update(['media_visible' => true]);
-        //  $this->injectMediaStream($liveShow->stream_id, $media->path);
 
         LiveShowMediaPlayed::dispatch((string) $liveShow->id);
 
@@ -991,6 +987,55 @@ class LiveShowController extends Controller
             'total_seconds' => $media->total_seconds,
             'message' => 'Image shown on stream.',
         ]);
+    }
+
+    /**
+     * Mark a specific show or question attachment row as played.
+     */
+    private function markGalleryAttachmentPlayed(
+        LiveShow $liveShow,
+        int $galleryMediaId,
+        ?string $attachmentType,
+        ?int $attachmentId
+    ): void {
+        if ($attachmentType === 'question' && $attachmentId) {
+            LiveShowQuestionMedia::where('id', $attachmentId)
+                ->where('live_show_id', $liveShow->id)
+                ->where('gallery_media_id', $galleryMediaId)
+                ->update(['media_played' => true]);
+
+            return;
+        }
+
+        if ($attachmentType === 'end' && $attachmentId) {
+            LiveShowEndMedia::where('id', $attachmentId)
+                ->where('live_show_id', $liveShow->id)
+                ->where('gallery_media_id', $galleryMediaId)
+                ->update(['media_played' => true]);
+
+            return;
+        }
+
+        if ($attachmentType === 'show' && $attachmentId) {
+            LiveShowGalleryMedia::where('id', $attachmentId)
+                ->where('live_show_id', $liveShow->id)
+                ->where('gallery_media_id', $galleryMediaId)
+                ->update(['media_played' => true]);
+
+            return;
+        }
+
+        LiveShowGalleryMedia::where('live_show_id', $liveShow->id)
+            ->where('gallery_media_id', $galleryMediaId)
+            ->update(['media_played' => true]);
+
+        LiveShowQuestionMedia::where('live_show_id', $liveShow->id)
+            ->where('gallery_media_id', $galleryMediaId)
+            ->update(['media_played' => true]);
+
+        LiveShowEndMedia::where('live_show_id', $liveShow->id)
+            ->where('gallery_media_id', $galleryMediaId)
+            ->update(['media_played' => true]);
     }
 
     public function hideGalleryImage($id): JsonResponse
@@ -1741,7 +1786,7 @@ class LiveShowController extends Controller
 
     public function copyLiveShow($id)
     {
-        $liveShow = LiveShow::findOrFail($id);
+        $liveShow = LiveShow::with('endMedia')->findOrFail($id);
         // change the title to the new title
         $newTitle = 'Copy :'.$liveShow->title.' - '.now()->format('Y-m-d').' - '.uniqid();
         $newLiveShow = $liveShow->replicate();
@@ -1750,7 +1795,7 @@ class LiveShowController extends Controller
         $newLiveShow->winners_announced = false;
         $newLiveShow->save();
         // copy the quizzes
-        $quizzes = $liveShow->quizzes()->get();
+        $quizzes = $liveShow->quizzes()->with('questionMedia')->get();
         foreach ($quizzes as $quiz) {
             $newQuiz = LiveShowQuiz::create([
                 'live_show_id' => $newLiveShow->id,
@@ -1762,6 +1807,16 @@ class LiveShowController extends Controller
                     'is_correct' => $option->is_correct,
                 ];
             }));
+
+            // copy media attached before this question
+            foreach ($quiz->questionMedia as $media) {
+                \App\Models\LiveShowQuestionMedia::create([
+                    'live_show_id' => $newLiveShow->id,
+                    'quiz_id' => $newQuiz->id,
+                    'gallery_media_id' => $media->id,
+                    'sort_order' => $media->pivot->sort_order ?? 0,
+                ]);
+            }
         }
         // winners
         $winnerPrizes = $liveShow->winnerPrizes()->get();
@@ -1781,6 +1836,15 @@ class LiveShowController extends Controller
                 'live_show_id' => $newLiveShow->id,
                 'gallery_media_id' => $media->id,
                 'sort_order' => $media->sort_order ?? 0,
+            ]);
+        }
+        // end-of-show media
+        foreach ($liveShow->endMedia as $media) {
+            LiveShowEndMedia::create([
+                'live_show_id' => $newLiveShow->id,
+                'gallery_media_id' => $media->id,
+                'sort_order' => $media->pivot->sort_order ?? 0,
+                'media_played' => false,
             ]);
         }
 

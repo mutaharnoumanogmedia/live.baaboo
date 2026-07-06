@@ -47,7 +47,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('media-gallery/{media_gallery}/attach-show', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'attachShow'])->name('media-gallery.attach-show');
     Route::post('media-gallery/attach-to-live-show', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'attachToLiveShow'])->name('media-gallery.attach-to-live-show');
     Route::post('media-gallery/detach-from-live-show', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'detachFromLiveShow'])->name('media-gallery.detach-from-live-show');
+    Route::post('media-gallery/attach-to-question', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'attachToQuestion'])->name('media-gallery.attach-to-question');
+    Route::post('media-gallery/detach-from-question', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'detachFromQuestion'])->name('media-gallery.detach-from-question');
+    Route::post('media-gallery/attach-to-end', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'attachToEnd'])->name('media-gallery.attach-to-end');
+    Route::post('media-gallery/detach-from-end', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'detachFromEnd'])->name('media-gallery.detach-from-end');
     Route::post('media-gallery/reorder', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'reorder'])->name('media-gallery.reorder');
+    Route::post('media-gallery/reorder-end', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'reorderEnd'])->name('media-gallery.reorder-end');
 
     Route::get('media-gallery/items/{id}', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'items'])->name('media-gallery.items');
 

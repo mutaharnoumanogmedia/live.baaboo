@@ -5,11 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class LiveShowGalleryMedia extends Model
+class LiveShowQuestionMedia extends Model
 {
-    //
+    protected $table = 'live_show_question_media';
+
     protected $fillable = [
         'live_show_id',
+        'quiz_id',
         'gallery_media_id',
         'sort_order',
         'media_played',
@@ -22,6 +24,11 @@ class LiveShowGalleryMedia extends Model
     public function liveShow(): BelongsTo
     {
         return $this->belongsTo(LiveShow::class);
+    }
+
+    public function quiz(): BelongsTo
+    {
+        return $this->belongsTo(LiveShowQuiz::class, 'quiz_id');
     }
 
     public function galleryMedia(): BelongsTo
