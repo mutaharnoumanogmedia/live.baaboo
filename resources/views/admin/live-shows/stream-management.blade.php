@@ -332,6 +332,13 @@
                              ];
                          }
                          $slideCount = count($carouselSlides);
+                         $showQuestionsForFlow = $liveShow->quizzes->values()->map(function ($q, $i) {
+                             return [
+                                 'id' => (int) $q->id,
+                                 'label' => 'Q' . ($i + 1),
+                                 'num' => $i + 1,
+                             ];
+                         })->all();
                      @endphp
                      <div class="p-0 card-header d-flex flex-wrap align-items-center gap-2">
                          <ul class="nav nav-tabs border-0 flex-grow-1" id="streamFlowTabs" role="tablist">
@@ -340,6 +347,13 @@
                                      data-bs-toggle="tab" data-bs-target="#quiz-show-slider-tab" type="button"
                                      role="tab" aria-controls="quiz-show-slider-tab" aria-selected="true">
                                      <i class="fas fa-play-circle me-1"></i> Quiz Show Slider
+                                 </button>
+                             </li>
+                             <li class="nav-item" role="presentation">
+                                 <button class="nav-link fw-bold" id="show-flow-order-tab-btn"
+                                     data-bs-toggle="tab" data-bs-target="#show-flow-order-tab" type="button"
+                                     role="tab" aria-controls="show-flow-order-tab" aria-selected="false">
+                                     <i class="fas fa-sitemap me-1"></i> Show Flow Order
                                  </button>
                              </li>
                              <li class="nav-item" role="presentation">
@@ -641,7 +655,229 @@
                                  </div>
                              </div>
 
-                             {{-- Tab 2: All Questions --}}
+                             {{-- Tab 2: Show Flow Order --}}
+                             <div class="tab-pane fade" id="show-flow-order-tab" role="tabpanel"
+                                 aria-labelledby="show-flow-order-tab-btn">
+                                 <div class="p-3 rounded bg-dark">
+                                     <div class="mb-3 p-3 border border-secondary rounded">
+                                         <h6 class="text-muted small text-uppercase fw-bold mb-2">Add media to show flow</h6>
+                                         <div class="row g-2 align-items-end">
+                                             <div class="col-md-5">
+                                                 <label class="form-label small mb-1" for="flow-add-media-select">Media</label>
+                                                 <select id="flow-add-media-select" class="form-select form-select-sm">
+                                                     <option value="">— Select media —</option>
+                                                     @foreach ($allGalleryMedia as $gm)
+                                                         <option value="{{ $gm->id }}">{{ $gm->title ?: $gm->original_name }}</option>
+                                                     @endforeach
+                                                 </select>
+                                             </div>
+                                             <div class="col-md-4">
+                                                 <label class="form-label small mb-1" for="flow-add-placement-select">Insert</label>
+                                                 <select id="flow-add-placement-select" class="form-select form-select-sm">
+                                                     @foreach ($liveShow->quizzes as $qIdx => $q)
+                                                         <option value="q:{{ $q->id }}">Before Question {{ $qIdx + 1 }}</option>
+                                                     @endforeach
+                                                     <option value="end">At the end</option>
+                                                 </select>
+                                             </div>
+                                             <div class="col-md-3 d-flex gap-2">
+                                                 <button type="button" class="btn btn-sm btn-primary flex-grow-1" onclick="flowAddMedia()">
+                                                     <i class="fas fa-plus me-1"></i> Add to flow
+                                                 </button>
+                                                 <button type="button" class="btn btn-sm btn-outline-success" onclick="refreshFlowOrderTable()" title="Refresh">
+                                                     <i class="fas fa-sync-alt"></i>
+                                                 </button>
+                                             </div>
+                                         </div>
+                                         <p class="mb-0 mt-2 small text-muted">
+                                             This order matches the Quiz Show Slider. Show-wide media (All Media tab) is separate and not listed here.
+                                         </p>
+                                     </div>
+
+                                     <h6 class="text-muted small text-uppercase fw-bold mb-2">Quiz flow preview</h6>
+                                     <div class="table-responsive mb-4">
+                                         <table class="table table-sm table-dark table-hover align-middle mb-0">
+                                             <thead>
+                                                 <tr>
+                                                     <th style="width: 48px;">#</th>
+                                                     <th style="width: 100px;">Type</th>
+                                                     <th>Content</th>
+                                                     <th style="width: 220px;">Placement</th>
+                                                     <th class="text-end" style="width: 160px;">Actions</th>
+                                                 </tr>
+                                             </thead>
+                                             <tbody id="flow-main-tbody">
+                                                 @php $flowMainRow = 0; @endphp
+                                                 @foreach ($carouselSlides as $slide)
+                                                     @if ($slide['type'] === 'end_media')
+                                                         @continue
+                                                     @endif
+                                                     @php $flowMainRow++; @endphp
+                                                     @if ($slide['type'] === 'media')
+                                                         @php
+                                                             $qMedia = $slide['media'];
+                                                             $qIdx = $slide['quizIndex'];
+                                                             $quiz = $slide['quiz'];
+                                                         @endphp
+                                                         <tr class="flow-main-row flow-media-row"
+                                                             data-gallery-media-id="{{ $qMedia->id }}"
+                                                             data-attachment-type="question"
+                                                             data-attachment-id="{{ $qMedia->pivot->id }}"
+                                                             data-quiz-id="{{ $quiz->id }}">
+                                                             <td>{{ $flowMainRow }}</td>
+                                                             <td><span class="badge bg-info">Media</span></td>
+                                                             <td>
+                                                                 <div class="d-flex align-items-center gap-2">
+                                                                     <img src="{{ $qMedia->isImage() ? $qMedia->path : ($qMedia->thumbnail ?? $qMedia->path) }}"
+                                                                         alt="" class="rounded" style="width: 48px; height: 36px; object-fit: cover;">
+                                                                     <div>
+                                                                         <div class="fw-semibold text-truncate" style="max-width: 280px;">
+                                                                             {{ $qMedia->title ?? $qMedia->original_name }}
+                                                                         </div>
+                                                                         <span class="badge {{ $qMedia->isVideo() ? 'bg-primary' : 'bg-warning text-dark' }}">{{ $qMedia->type }}</span>
+                                                                         @if ($qMedia->pivot->media_played ?? false)
+                                                                             <span class="badge bg-success">Played</span>
+                                                                         @endif
+                                                                     </div>
+                                                                 </div>
+                                                             </td>
+                                                             <td>
+                                                                 <select class="form-select form-select-sm flow-placement-select"
+                                                                     data-media-id="{{ $qMedia->id }}"
+                                                                     data-from-type="question"
+                                                                     data-from-quiz-id="{{ $quiz->id }}">
+                                                                     @foreach ($liveShow->quizzes as $optIdx => $optQ)
+                                                                         <option value="q:{{ $optQ->id }}" @if ($optQ->id === $quiz->id) selected @endif>
+                                                                             Before Question {{ $optIdx + 1 }}
+                                                                         </option>
+                                                                     @endforeach
+                                                                     <option value="end">At the end</option>
+                                                                 </select>
+                                                             </td>
+                                                             <td class="text-end">
+                                                                 <div class="btn-group btn-group-sm">
+                                                                     <button type="button" class="btn btn-outline-light flow-move-up-btn" title="Move up in this question group"
+                                                                         onclick="flowMoveQuestionMedia({{ $qMedia->id }}, {{ $quiz->id }}, -1)">
+                                                                         <i class="fas fa-arrow-up"></i>
+                                                                     </button>
+                                                                     <button type="button" class="btn btn-outline-light flow-move-down-btn" title="Move down in this question group"
+                                                                         onclick="flowMoveQuestionMedia({{ $qMedia->id }}, {{ $quiz->id }}, 1)">
+                                                                         <i class="fas fa-arrow-down"></i>
+                                                                     </button>
+                                                                     <button type="button" class="btn btn-outline-danger"
+                                                                         onclick="flowRemoveMedia('question', {{ $quiz->id }}, {{ $qMedia->id }})">
+                                                                         <i class="fas fa-times"></i>
+                                                                     </button>
+                                                                 </div>
+                                                             </td>
+                                                         </tr>
+                                                     @else
+                                                         @php $quiz = $slide['quiz']; $qIdx = $slide['quizIndex']; @endphp
+                                                         <tr class="flow-main-row flow-question-row" data-quiz-id="{{ $quiz->id }}">
+                                                             <td>{{ $flowMainRow }}</td>
+                                                             <td><span class="badge bg-primary">Question</span></td>
+                                                             <td>
+                                                                 <div class="fw-semibold">Question {{ $qIdx + 1 }}</div>
+                                                                 <div class="small text-muted text-truncate" style="max-width: 360px;">{{ $quiz->question }}</div>
+                                                                 @if ($quiz->has_shown)
+                                                                     <span class="badge bg-secondary mt-1">Shown</span>
+                                                                 @endif
+                                                             </td>
+                                                             <td><span class="text-muted small">Question {{ $qIdx + 1 }}</span></td>
+                                                             <td></td>
+                                                         </tr>
+                                                     @endif
+                                                 @endforeach
+                                                 @if ($flowMainRow === 0)
+                                                     <tr id="flow-main-empty">
+                                                         <td colspan="5" class="text-center text-muted py-3">No questions in this show yet.</td>
+                                                     </tr>
+                                                 @endif
+                                             </tbody>
+                                         </table>
+                                     </div>
+
+                                     <h6 class="text-muted small text-uppercase fw-bold mb-2">
+                                         End of show media
+                                         <span class="fw-normal text-lowercase">(drag to reorder)</span>
+                                     </h6>
+                                     <div class="table-responsive">
+                                         <table class="table table-sm table-dark table-hover align-middle mb-0">
+                                             <thead>
+                                                 <tr>
+                                                     <th style="width: 36px;"></th>
+                                                     <th style="width: 48px;">#</th>
+                                                     <th style="width: 100px;">Type</th>
+                                                     <th>Content</th>
+                                                     <th style="width: 220px;">Placement</th>
+                                                     <th class="text-end" style="width: 100px;">Actions</th>
+                                                 </tr>
+                                             </thead>
+                                             <tbody id="flow-end-tbody">
+                                                 @php $flowEndRow = 0; @endphp
+                                                 @foreach ($carouselSlides as $slide)
+                                                     @if ($slide['type'] !== 'end_media')
+                                                         @continue
+                                                     @endif
+                                                     @php
+                                                         $flowEndRow++;
+                                                         $endMedia = $slide['media'];
+                                                     @endphp
+                                                     <tr class="flow-end-row"
+                                                         data-gallery-media-id="{{ $endMedia->id }}"
+                                                         data-attachment-type="end"
+                                                         data-attachment-id="{{ $endMedia->pivot->id }}">
+                                                         <td class="flow-end-drag-handle text-muted" style="cursor: grab;">
+                                                             <i class="fas fa-grip-vertical"></i>
+                                                         </td>
+                                                         <td class="flow-end-index">{{ $flowEndRow }}</td>
+                                                         <td><span class="badge bg-success">End media</span></td>
+                                                         <td>
+                                                             <div class="d-flex align-items-center gap-2">
+                                                                 <img src="{{ $endMedia->isImage() ? $endMedia->path : ($endMedia->thumbnail ?? $endMedia->path) }}"
+                                                                     alt="" class="rounded" style="width: 48px; height: 36px; object-fit: cover;">
+                                                                 <div>
+                                                                     <div class="fw-semibold text-truncate" style="max-width: 280px;">
+                                                                         {{ $endMedia->title ?? $endMedia->original_name }}
+                                                                     </div>
+                                                                     <span class="badge {{ $endMedia->isVideo() ? 'bg-primary' : 'bg-warning text-dark' }}">{{ $endMedia->type }}</span>
+                                                                     @if ($endMedia->pivot->media_played ?? false)
+                                                                         <span class="badge bg-success">Played</span>
+                                                                     @endif
+                                                                 </div>
+                                                             </div>
+                                                         </td>
+                                                         <td>
+                                                             <select class="form-select form-select-sm flow-placement-select"
+                                                                 data-media-id="{{ $endMedia->id }}"
+                                                                 data-from-type="end"
+                                                                 data-from-quiz-id="">
+                                                                 @foreach ($liveShow->quizzes as $optIdx => $optQ)
+                                                                     <option value="q:{{ $optQ->id }}">Before Question {{ $optIdx + 1 }}</option>
+                                                                 @endforeach
+                                                                 <option value="end" selected>At the end</option>
+                                                             </select>
+                                                         </td>
+                                                         <td class="text-end">
+                                                             <button type="button" class="btn btn-sm btn-outline-danger"
+                                                                 onclick="flowRemoveMedia('end', null, {{ $endMedia->id }})">
+                                                                 <i class="fas fa-times"></i>
+                                                             </button>
+                                                         </td>
+                                                     </tr>
+                                                 @endforeach
+                                                 @if ($flowEndRow === 0)
+                                                     <tr id="flow-end-empty">
+                                                         <td colspan="6" class="text-center text-muted py-3">No end media. Use &quot;At the end&quot; when adding media.</td>
+                                                     </tr>
+                                                 @endif
+                                             </tbody>
+                                         </table>
+                                     </div>
+                                 </div>
+                             </div>
+
+                             {{-- Tab 3: All Questions --}}
                              <div class="tab-pane fade" id="all-questions-tab" role="tabpanel"
                                  aria-labelledby="all-questions-tab-btn">
                                  <div class="p-3 rounded bg-dark">
@@ -733,7 +969,7 @@
                                  </div>
                              </div>
 
-                             {{-- Tab 3: All Media --}}
+                             {{-- Tab 4: All Media --}}
                              <div class="tab-pane fade" id="all-media-tab" role="tabpanel"
                                  aria-labelledby="all-media-tab-btn">
                                  <div class="p-3 border rounded border-light bg-dark">
@@ -2953,6 +3189,13 @@
              const galleryDetachEndUrl = '{{ route('admin.media-gallery.detach-from-end') }}';
              const galleryReorderUrl = '{{ route('admin.media-gallery.reorder') }}';
              const galleryReorderEndUrl = '{{ route('admin.media-gallery.reorder-end') }}';
+             const galleryAttachQuestionUrl = '{{ route('admin.media-gallery.attach-to-question') }}';
+             const galleryDetachQuestionUrl = '{{ route('admin.media-gallery.detach-from-question') }}';
+             const galleryAttachEndUrl = '{{ route('admin.media-gallery.attach-to-end') }}';
+             const galleryMoveFlowUrl = '{{ route('admin.media-gallery.move-flow-media') }}';
+             const galleryReorderQuestionUrl = '{{ route('admin.media-gallery.reorder-question-media') }}';
+             const flowOrderUrl = '{{ route('admin.media-gallery.flow-order', ['id' => $liveShow->id]) }}';
+             const showFlowQuestions = @json($showQuestionsForFlow);
              const galleryMediaItemsUrl = '{{ route('admin.media-gallery.items', ['id' => $liveShow->id]) }}';
              const galleryShowOnStreamUrl =
                  '{{ route('admin.live-shows.stream-management.show-gallery-image', ['id' => $liveShow->id]) }}';
@@ -2976,6 +3219,237 @@
                     bootstrap.Carousel.getOrCreateInstance(el).next();
                 }
             }
+
+            function flowJsonPost(url, body) {
+                return fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': galleryCsrf,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(body),
+                }).then(r => r.json());
+            }
+
+            function flowPlacementOptionsHtml(selectedType, selectedQuizId) {
+                let html = '';
+                (showFlowQuestions || []).forEach(function(q) {
+                    const sel = selectedType === 'question' && selectedQuizId === q.id ? ' selected' : '';
+                    html += `<option value="q:${q.id}"${sel}>Before Question ${q.num}</option>`;
+                });
+                const endSel = selectedType === 'end' ? ' selected' : '';
+                html += `<option value="end"${endSel}>At the end</option>`;
+                return html;
+            }
+
+            function refreshFlowOrderTable() {
+                return fetch(flowOrderUrl, {
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': galleryCsrf },
+                }).then(r => r.json()).then(function(data) {
+                    if (!data.success) return;
+                    const mainTbody = document.getElementById('flow-main-tbody');
+                    const endTbody = document.getElementById('flow-end-tbody');
+                    if (!mainTbody || !endTbody) return;
+
+                    mainTbody.innerHTML = (data.main || []).length === 0
+                        ? '<tr id="flow-main-empty"><td colspan="5" class="text-center text-muted py-3">No questions in this show yet.</td></tr>'
+                        : (data.main || []).map(function(item) {
+                            if (item.type === 'question') {
+                                return `<tr class="flow-main-row flow-question-row" data-quiz-id="${item.quiz_id}">
+                                    <td>${item.row}</td>
+                                    <td><span class="badge bg-primary">Question</span></td>
+                                    <td><div class="fw-semibold">Question ${item.quiz_num}</div>
+                                        <div class="small text-muted text-truncate" style="max-width:360px">${escapeFlowHtml(item.question)}</div>
+                                        ${item.has_shown ? '<span class="badge bg-secondary mt-1">Shown</span>' : ''}</td>
+                                    <td><span class="text-muted small">Question ${item.quiz_num}</span></td><td></td></tr>`;
+                            }
+                            return `<tr class="flow-main-row flow-media-row" data-gallery-media-id="${item.gallery_media_id}"
+                                data-attachment-type="question" data-attachment-id="${item.attachment_id}" data-quiz-id="${item.quiz_id}">
+                                <td>${item.row}</td><td><span class="badge bg-info">Media</span></td>
+                                <td><div class="d-flex align-items-center gap-2">
+                                    <img src="${escapeFlowAttr(item.thumbnail)}" class="rounded" style="width:48px;height:36px;object-fit:cover">
+                                    <div><div class="fw-semibold text-truncate" style="max-width:280px">${escapeFlowHtml(item.title)}</div>
+                                    <span class="badge ${item.media_type === 'video' ? 'bg-primary' : 'bg-warning text-dark'}">${escapeFlowHtml(item.media_type)}</span>
+                                    ${item.media_played ? '<span class="badge bg-success">Played</span>' : ''}</div></div></td>
+                                <td><select class="form-select form-select-sm flow-placement-select" data-media-id="${item.gallery_media_id}"
+                                    data-from-type="question" data-from-quiz-id="${item.quiz_id}">
+                                    ${flowPlacementOptionsHtml('question', item.quiz_id)}</select></td>
+                                <td class="text-end"><div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-outline-light" onclick="flowMoveQuestionMedia(${item.gallery_media_id}, ${item.quiz_id}, -1)"><i class="fas fa-arrow-up"></i></button>
+                                    <button type="button" class="btn btn-outline-light" onclick="flowMoveQuestionMedia(${item.gallery_media_id}, ${item.quiz_id}, 1)"><i class="fas fa-arrow-down"></i></button>
+                                    <button type="button" class="btn btn-outline-danger" onclick="flowRemoveMedia('question', ${item.quiz_id}, ${item.gallery_media_id})"><i class="fas fa-times"></i></button>
+                                </div></td></tr>`;
+                        }).join('');
+
+                    endTbody.innerHTML = (data.end || []).length === 0
+                        ? '<tr id="flow-end-empty"><td colspan="6" class="text-center text-muted py-3">No end media. Use &quot;At the end&quot; when adding media.</td></tr>'
+                        : (data.end || []).map(function(item, i) {
+                            return `<tr class="flow-end-row" data-gallery-media-id="${item.gallery_media_id}"
+                                data-attachment-type="end" data-attachment-id="${item.attachment_id}">
+                                <td class="flow-end-drag-handle text-muted" style="cursor:grab"><i class="fas fa-grip-vertical"></i></td>
+                                <td class="flow-end-index">${i + 1}</td><td><span class="badge bg-success">End media</span></td>
+                                <td><div class="d-flex align-items-center gap-2">
+                                    <img src="${escapeFlowAttr(item.thumbnail)}" class="rounded" style="width:48px;height:36px;object-fit:cover">
+                                    <div><div class="fw-semibold text-truncate" style="max-width:280px">${escapeFlowHtml(item.title)}</div>
+                                    <span class="badge ${item.media_type === 'video' ? 'bg-primary' : 'bg-warning text-dark'}">${escapeFlowHtml(item.media_type)}</span>
+                                    ${item.media_played ? '<span class="badge bg-success">Played</span>' : ''}</div></div></td>
+                                <td><select class="form-select form-select-sm flow-placement-select" data-media-id="${item.gallery_media_id}"
+                                    data-from-type="end" data-from-quiz-id="">
+                                    ${flowPlacementOptionsHtml('end', null)}</select></td>
+                                <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger"
+                                    onclick="flowRemoveMedia('end', null, ${item.gallery_media_id})"><i class="fas fa-times"></i></button></td></tr>`;
+                        }).join('');
+
+                    if (endTbody._flowSortable) {
+                        endTbody._flowSortable.destroy();
+                        endTbody._flowSortable = null;
+                    }
+                    initFlowEndSortable();
+                }).catch(err => console.error('Flow refresh error:', err));
+            }
+
+            function escapeFlowHtml(s) {
+                return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            }
+            function escapeFlowAttr(s) { return escapeFlowHtml(s); }
+
+            function flowAddMedia() {
+                const mediaId = parseInt(document.getElementById('flow-add-media-select')?.value || '', 10);
+                const placement = document.getElementById('flow-add-placement-select')?.value || 'end';
+                if (!mediaId) {
+                    streamSwalError('Please select a media item first.', 'Required');
+                    return;
+                }
+                const body = { live_show_id: liveShowId, gallery_media_id: mediaId };
+                let url = galleryAttachEndUrl;
+                if (placement !== 'end') {
+                    url = galleryAttachQuestionUrl;
+                    body.quiz_id = parseInt(placement.split(':')[1], 10);
+                }
+                flowJsonPost(url, body).then(function(data) {
+                    if (data.success) location.reload();
+                    else streamSwalError(data.message || 'Could not add media to flow.', 'Failed');
+                }).catch(function() {
+                    streamSwalError('Could not add media to flow.', 'Failed');
+                });
+            }
+
+            function flowOnPlacementChange(select) {
+                const mediaId = parseInt(select.dataset.mediaId, 10);
+                const fromType = select.dataset.fromType;
+                const fromQuizId = select.dataset.fromQuizId ? parseInt(select.dataset.fromQuizId, 10) : null;
+                const val = select.value;
+                let toType = 'end';
+                let toQuizId = null;
+                if (val !== 'end') {
+                    toType = 'question';
+                    toQuizId = parseInt(val.split(':')[1], 10);
+                }
+                if (fromType === toType && (fromType === 'end' || fromQuizId === toQuizId)) return;
+
+                select.disabled = true;
+                flowJsonPost(galleryMoveFlowUrl, {
+                    live_show_id: liveShowId,
+                    gallery_media_id: mediaId,
+                    from_type: fromType,
+                    from_quiz_id: fromQuizId,
+                    to_type: toType,
+                    to_quiz_id: toQuizId,
+                }).then(function(data) {
+                    if (data.success) location.reload();
+                    else {
+                        streamSwalError(data.message || 'Could not move media.', 'Failed');
+                        select.disabled = false;
+                        refreshFlowOrderTable();
+                    }
+                }).catch(function() {
+                    streamSwalError('Could not move media.', 'Failed');
+                    select.disabled = false;
+                });
+            }
+
+            function flowRemoveMedia(fromType, quizId, mediaId) {
+                streamSwalConfirm({
+                    title: 'Remove from show flow?',
+                    text: 'This media will be removed from the quiz flow (not deleted from gallery).',
+                    confirmButtonText: 'Yes, remove',
+                    confirmButtonColor: '#d33',
+                }).then(function(result) {
+                    if (!result.isConfirmed) return;
+                    const url = fromType === 'end' ? galleryDetachEndUrl : galleryDetachQuestionUrl;
+                    const body = fromType === 'end'
+                        ? { live_show_id: liveShowId, gallery_media_id: mediaId }
+                        : { quiz_id: quizId, gallery_media_id: mediaId };
+                    flowJsonPost(url, body).then(function(data) {
+                        if (data.success) location.reload();
+                        else streamSwalError(data.message || 'Could not remove media.', 'Failed');
+                    });
+                });
+            }
+
+            function flowMoveQuestionMedia(mediaId, quizId, direction) {
+                const rows = Array.from(document.querySelectorAll(
+                    '#flow-main-tbody tr.flow-media-row[data-quiz-id="' + quizId + '"]'
+                ));
+                const ids = rows.map(function(r) { return parseInt(r.dataset.galleryMediaId, 10); });
+                const idx = ids.indexOf(mediaId);
+                if (idx < 0) return;
+                const newIdx = idx + direction;
+                if (newIdx < 0 || newIdx >= ids.length) return;
+                const swapped = ids.slice();
+                const tmp = swapped[newIdx];
+                swapped[newIdx] = swapped[idx];
+                swapped[idx] = tmp;
+                flowJsonPost(galleryReorderQuestionUrl, { quiz_id: quizId, order: swapped })
+                    .then(function(data) {
+                        if (data.success) location.reload();
+                        else streamSwalError(data.message || 'Could not reorder.', 'Failed');
+                    });
+            }
+
+            function initFlowEndSortable() {
+                const tbody = document.getElementById('flow-end-tbody');
+                if (!tbody || typeof Sortable === 'undefined') return;
+                if (tbody._flowSortable) {
+                    tbody._flowSortable.destroy();
+                    tbody._flowSortable = null;
+                }
+                if (!tbody.querySelector('.flow-end-row')) return;
+                tbody._flowSortable = new Sortable(tbody, {
+                    handle: '.flow-end-drag-handle',
+                    draggable: '.flow-end-row',
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    chosenClass: 'sortable-chosen',
+                    onEnd: function() {
+                        const order = Array.from(tbody.querySelectorAll('.flow-end-row'))
+                            .map(function(r) { return parseInt(r.dataset.galleryMediaId, 10); });
+                        tbody.querySelectorAll('.flow-end-index').forEach(function(cell, i) {
+                            cell.textContent = i + 1;
+                        });
+                        fetch(galleryReorderEndUrl, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': galleryCsrf,
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ live_show_id: liveShowId, order: order }),
+                        }).then(function(r) { return r.json(); }).then(function(data) {
+                            if (!data.success) streamSwalError('Could not save end media order.', 'Failed');
+                        });
+                    },
+                });
+            }
+
+            document.getElementById('show-flow-order-tab')?.addEventListener('change', function(e) {
+                if (e.target.classList.contains('flow-placement-select')) {
+                    flowOnPlacementChange(e.target);
+                }
+            });
+            document.getElementById('show-flow-order-tab-btn')?.addEventListener('shown.bs.tab', initFlowEndSortable);
+            document.addEventListener('DOMContentLoaded', initFlowEndSortable);
 
             function markMediaPlayedInUI(attachmentType, attachmentId, mediaId) {
                 if (attachmentType && attachmentId) {

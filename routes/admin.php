@@ -53,6 +53,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('media-gallery/detach-from-end', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'detachFromEnd'])->name('media-gallery.detach-from-end');
     Route::post('media-gallery/reorder', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'reorder'])->name('media-gallery.reorder');
     Route::post('media-gallery/reorder-end', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'reorderEnd'])->name('media-gallery.reorder-end');
+    Route::post('media-gallery/reorder-question-media', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'reorderQuestionMedia'])->name('media-gallery.reorder-question-media');
+    Route::post('media-gallery/move-flow-media', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'moveFlowMedia'])->name('media-gallery.move-flow-media');
+    Route::get('media-gallery/flow/{id}', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'flowOrder'])->name('media-gallery.flow-order');
 
     Route::get('media-gallery/items/{id}', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'items'])->name('media-gallery.items');
 

@@ -440,6 +440,167 @@ class MediaGalleryController extends Controller
         return response()->json(['success' => true, 'message' => 'End media order updated.']);
     }
 
+    public function reorderQuestionMedia(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'quiz_id' => 'required|exists:live_show_quizzes,id',
+            'order' => 'required|array',
+            'order.*' => 'integer|exists:gallery_media,id',
+        ]);
+
+        $quizId = (int) $validated['quiz_id'];
+
+        DB::transaction(function () use ($quizId, $validated) {
+            foreach ($validated['order'] as $position => $mediaId) {
+                LiveShowQuestionMedia::where('quiz_id', $quizId)
+                    ->where('gallery_media_id', $mediaId)
+                    ->update(['sort_order' => $position]);
+            }
+        });
+
+        return response()->json(['success' => true, 'message' => 'Question media order updated.']);
+    }
+
+    /**
+     * Move media between "before question" and "at end" placements in the show flow.
+     */
+    public function moveFlowMedia(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'live_show_id' => 'required|exists:live_shows,id',
+            'gallery_media_id' => 'required|exists:gallery_media,id',
+            'from_type' => 'required|in:question,end',
+            'from_quiz_id' => 'nullable|integer|exists:live_show_quizzes,id',
+            'to_type' => 'required|in:question,end',
+            'to_quiz_id' => 'nullable|integer|exists:live_show_quizzes,id',
+        ]);
+
+        if ($validated['from_type'] === 'question' && empty($validated['from_quiz_id'])) {
+            return response()->json(['success' => false, 'message' => 'from_quiz_id is required.'], 422);
+        }
+        if ($validated['to_type'] === 'question' && empty($validated['to_quiz_id'])) {
+            return response()->json(['success' => false, 'message' => 'to_quiz_id is required.'], 422);
+        }
+
+        $liveShow = LiveShow::findOrFail($validated['live_show_id']);
+        $mediaId = (int) $validated['gallery_media_id'];
+
+        if ($validated['from_type'] === $validated['to_type']) {
+            if ($validated['from_type'] === 'end') {
+                return response()->json(['success' => true, 'message' => 'Already at end.']);
+            }
+            if ((int) $validated['from_quiz_id'] === (int) $validated['to_quiz_id']) {
+                return response()->json(['success' => true, 'message' => 'Already before this question.']);
+            }
+        }
+
+        DB::transaction(function () use ($validated, $liveShow, $mediaId) {
+            if ($validated['from_type'] === 'question') {
+                LiveShowQuiz::findOrFail($validated['from_quiz_id'])
+                    ->questionMedia()
+                    ->detach($mediaId);
+            } else {
+                $liveShow->endMedia()->detach($mediaId);
+            }
+
+            if ($validated['to_type'] === 'question') {
+                $toQuiz = $liveShow->quizzes()->findOrFail($validated['to_quiz_id']);
+                if (! $toQuiz->questionMedia()->where('gallery_media.id', $mediaId)->exists()) {
+                    $maxOrder = $toQuiz->questionMedia()->max('live_show_question_media.sort_order') ?? 0;
+                    $toQuiz->questionMedia()->attach($mediaId, [
+                        'live_show_id' => $liveShow->id,
+                        'sort_order' => $maxOrder + 1,
+                    ]);
+                }
+            } elseif (! $liveShow->endMedia()->where('gallery_media.id', $mediaId)->exists()) {
+                $maxOrder = LiveShowEndMedia::where('live_show_id', $liveShow->id)->max('sort_order') ?? 0;
+                $liveShow->endMedia()->attach($mediaId, ['sort_order' => $maxOrder + 1]);
+            }
+        });
+
+        return response()->json(['success' => true, 'message' => 'Placement updated.']);
+    }
+
+    /** Show flow order: questions + before-question media + end media. */
+    public function flowOrder($live_show): JsonResponse
+    {
+        $liveShow = LiveShow::with([
+            'quizzes' => fn ($q) => $q->orderBy('id'),
+            'quizzes.questionMedia',
+            'endMedia',
+        ])->findOrFail($live_show);
+
+        return response()->json([
+            'success' => true,
+            ...$this->buildShowFlowItems($liveShow),
+        ]);
+    }
+
+    /**
+     * @return array{main: array<int, array<string, mixed>>, end: array<int, array<string, mixed>>, questions: array<int, array<string, mixed>>}
+     */
+    private function buildShowFlowItems(LiveShow $liveShow): array
+    {
+        $main = [];
+        $row = 0;
+
+        foreach ($liveShow->quizzes as $qIndex => $quiz) {
+            foreach ($quiz->questionMedia as $media) {
+                $row++;
+                $main[] = [
+                    'row' => $row,
+                    'type' => 'media',
+                    'attachment_type' => 'question',
+                    'attachment_id' => (int) $media->pivot->id,
+                    'gallery_media_id' => (int) $media->id,
+                    'quiz_id' => (int) $quiz->id,
+                    'quiz_num' => $qIndex + 1,
+                    'title' => $media->title ?? $media->original_name,
+                    'media_type' => $media->type,
+                    'thumbnail' => $media->thumbnail ?? $media->path,
+                    'placement_label' => 'Before Question '.($qIndex + 1),
+                    'media_played' => (bool) ($media->pivot->media_played ?? false),
+                ];
+            }
+            $row++;
+            $main[] = [
+                'row' => $row,
+                'type' => 'question',
+                'quiz_id' => (int) $quiz->id,
+                'quiz_num' => $qIndex + 1,
+                'question' => $quiz->question,
+                'placement_label' => 'Question '.($qIndex + 1),
+                'has_shown' => (bool) $quiz->has_shown,
+            ];
+        }
+
+        $end = [];
+        $endRow = 0;
+        foreach ($liveShow->endMedia as $media) {
+            $endRow++;
+            $end[] = [
+                'row' => $endRow,
+                'type' => 'media',
+                'attachment_type' => 'end',
+                'attachment_id' => (int) $media->pivot->id,
+                'gallery_media_id' => (int) $media->id,
+                'title' => $media->title ?? $media->original_name,
+                'media_type' => $media->type,
+                'thumbnail' => $media->thumbnail ?? $media->path,
+                'placement_label' => 'After all questions',
+                'media_played' => (bool) ($media->pivot->media_played ?? false),
+            ];
+        }
+
+        $questions = $liveShow->quizzes->values()->map(fn ($q, $i) => [
+            'id' => (int) $q->id,
+            'label' => 'Q'.($i + 1),
+            'num' => $i + 1,
+        ])->all();
+
+        return compact('main', 'end', 'questions');
+    }
+
     public function reorder(Request $request): JsonResponse
     {
         $validated = $request->validate([
