@@ -5,9 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class LiveShowGalleryMedia extends Model
+class LiveShowEndMedia extends Model
 {
-    //
+    protected $table = 'live_show_end_media';
+
     protected $fillable = [
         'live_show_id',
         'gallery_media_id',

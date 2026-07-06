@@ -141,7 +141,7 @@ class LiveShow extends Model
     public function galleryMedia()
     {
         return $this->belongsToMany(GalleryMedia::class, 'live_show_gallery_media')
-            ->withPivot('sort_order')
+            ->withPivot(['id', 'sort_order', 'media_played', 'play_with_live'])
             ->orderBy('live_show_gallery_media.sort_order')
             ->withTimestamps();
     }
@@ -156,6 +156,46 @@ class LiveShow extends Model
     public function galleryState()
     {
         return $this->hasOne(LiveShowGalleryState::class);
+    }
+
+    /**
+     * Question-level media attachments for this show (media shown before a
+     * specific quiz question). Kept separate from the show-level gallery.
+     */
+    public function questionMedia()
+    {
+        return $this->hasMany(LiveShowQuestionMedia::class);
+    }
+
+    /**
+     * Media that plays after all quiz questions in the show flow.
+     */
+    public function endMedia()
+    {
+        return $this->belongsToMany(GalleryMedia::class, 'live_show_end_media')
+            ->withPivot(['id', 'sort_order', 'media_played'])
+            ->orderBy('live_show_end_media.sort_order')
+            ->withTimestamps();
+    }
+
+    public function endMediaItems()
+    {
+        return $this->hasMany(LiveShowEndMedia::class)->with('galleryMedia')
+            ->orderBy('live_show_end_media.sort_order');
+    }
+
+    /**
+     * Whether a gallery media item is attached to this show at all — either
+     * as general show media, before one of the show's questions, or at the
+     * end of all questions. Used to authorise showing media on the live stream.
+     */
+    public function isGalleryMediaAttached($mediaId): bool
+    {
+        $mediaId = (int) $mediaId;
+
+        return $this->galleryMedia()->where('gallery_media.id', $mediaId)->exists()
+            || $this->questionMedia()->where('gallery_media_id', $mediaId)->exists()
+            || $this->endMedia()->where('gallery_media.id', $mediaId)->exists();
     }
 
     // public function getStreamIdAttribute()

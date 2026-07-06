@@ -29,4 +29,15 @@ class LiveShowQuiz extends Model
     {
         return $this->hasMany(UserQuiz::class, 'quiz_id');
     }
+
+    /**
+     * Gallery media configured to play *before* this question.
+     */
+    public function questionMedia()
+    {
+        return $this->belongsToMany(GalleryMedia::class, 'live_show_question_media', 'quiz_id', 'gallery_media_id')
+            ->withPivot(['id', 'sort_order', 'live_show_id', 'media_played'])
+            ->orderBy('live_show_question_media.sort_order')
+            ->withTimestamps();
+    }
 }
