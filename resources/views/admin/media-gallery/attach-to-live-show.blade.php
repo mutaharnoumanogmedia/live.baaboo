@@ -794,7 +794,7 @@
                             <div class="attached-title text-truncate" title="${escapeAttr(title)}">${escapeHtml(title)}</div>
                             <div class="attached-sub small text-muted">${escapeHtml(sub)}</div>
                             <div class="q-attach-indicator small mt-1 d-none" data-media-id="${media.id}">
-                                <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle"></span>
+                                <span class="badge bg-success text-white border border-info-subtle"></span>
                             </div>
                         </div>
                         ${hasQuizzes ? `<button type="button" class="btn btn-sm btn-outline-primary open-q-modal-btn"

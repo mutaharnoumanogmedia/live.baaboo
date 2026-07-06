@@ -225,7 +225,7 @@
                             <button type="button"
                                 class="list-group-item list-group-item-action d-flex align-items-center gap-2 qam-question-btn ${isAttached ? 'active' : ''}"
                                 data-quiz-id="${q.id}" data-attached="${isAttached ? '1' : '0'}">
-                                <span class="badge ${isAttached ? 'bg-light text-dark' : 'bg-dark'}">${escapeHtml(q.label)}</span>
+                                <span class="badge ${isAttached ? 'bg-success text-white' : 'bg-dark'}">${escapeHtml(q.label)}</span>
                                 <span class="flex-grow-1 text-start text-truncate" title="${escapeHtml(q.text)}">${escapeHtml(q.text)}</span>
                                 <span class="badge ${isAttached ? 'bg-success' : 'bg-secondary'} qam-state">
                                     ${isAttached ? '<i class="fas fa-check me-1"></i>Attached before ' + escapeHtml(q.label) : 'Attach before this question'}
