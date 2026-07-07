@@ -29,97 +29,6 @@
     @include('partials.gtm', ['part' => 'head'])
 
     <style>
-        /* Top navbar layout (replaces SB Admin sidebar) */
-        .app-topnav-fixed {
-            padding-top: 5px;
-        }
-
-        .app-topnav {
-            min-height: 60px;
-            z-index: 1040;
-        }
-
-        .app-topnav .navbar-nav .nav-link {
-            padding-left: .85rem;
-            padding-right: .85rem;
-            font-weight: 500;
-            border-radius: .375rem;
-            transition: background-color .15s ease-in-out, color .15s ease-in-out;
-        }
-
-        .app-topnav .navbar-nav .nav-link:hover,
-        .app-topnav .navbar-nav .nav-link:focus {
-            background-color: rgba(255, 255, 255, .08);
-            color: #fff;
-        }
-
-        .app-topnav .navbar-nav .nav-link.active {
-            background-color: rgba(13, 110, 253, .25);
-            color: #fff;
-        }
-
-        .app-topnav .dropdown-menu {
-            border: 0;
-            box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15);
-            border-radius: .5rem;
-            padding: .35rem;
-        }
-
-        .app-topnav .dropdown-item {
-            border-radius: .375rem;
-            padding: .5rem .75rem;
-        }
-
-        .app-topnav .dropdown-item:hover,
-        .app-topnav .dropdown-item:focus {
-            background-color: rgba(13, 110, 253, .1);
-        }
-
-        .app-topnav .form-check-label {
-            cursor: pointer;
-            user-select: none;
-        }
-
-        #app-layout-content {
-            display: flex;
-            flex-direction: column;
-            min-height: calc(100vh - 64px);
-        }
-
-        #app-layout-content>.container-fluid {
-            flex: 1 1 auto;
-        }
-
-        /* Collapsed (mobile) menu adjustments */
-        @media (max-width: 991.98px) {
-            .app-topnav .navbar-collapse {
-                max-height: calc(100vh - 60px);
-                overflow-y: auto;
-                padding-bottom: .75rem;
-            }
-
-            .app-topnav .navbar-nav .nav-link {
-                padding: .6rem .75rem;
-            }
-
-            .app-topnav .dropdown-menu {
-                box-shadow: none;
-                background-color: rgba(255, 255, 255, .05);
-                margin-left: .75rem;
-            }
-
-            .app-topnav .dropdown-item {
-                color: #e9ecef;
-            }
-
-            .app-topnav .dropdown-item:hover,
-            .app-topnav .dropdown-item:focus {
-                background-color: rgba(255, 255, 255, .1);
-                color: #fff;
-            }
-        }
-
-
         table.data-table {
             overflow: visible;
             /* override the hidden above */
@@ -153,19 +62,23 @@
 <body class="app-topnav-fixed">
     @include('partials.gtm', ['part' => 'body'])
 
-    <nav class="navbar navbar-collapse-lg navbar-dark bg-dark fixed-top app-topnav shadow-sm">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="{{ route('admin.dashboard') }}">
-                {{ env('APP_NAME') }}
+    <nav class="navbar navbar-expand-xl navbar-dark fixed-top app-topnav">
+        <div class="container-fluid app-topnav__inner">
+            <a class="navbar-brand app-topnav__brand" href="{{ route('admin.dashboard') }}">
+                <span class="app-topnav__brand-mark" aria-hidden="true">
+                    <i class="fas fa-play"></i>
+                </span>
+                <span class="app-topnav__brand-text">{{ env('APP_NAME') }}</span>
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#appPrimaryNav"
-                aria-controls="appPrimaryNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler app-topnav__toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#appPrimaryNav" aria-controls="appPrimaryNav" aria-expanded="false"
+                aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="appPrimaryNav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav app-topnav__nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
                             href="{{ route('admin.dashboard') }}">
@@ -225,7 +138,7 @@
                                 aria-expanded="false">
                                 <i class="bi bi-sliders me-1"></i> Settings
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="settingsDropdown">
+                            <ul class="dropdown-menu app-topnav__dropdown" aria-labelledby="settingsDropdown">
                                 @can('can-manage-settings')
                                     <li>
                                         <a class="dropdown-item" href="{{ route('admin.settings.index') }}">
@@ -265,7 +178,7 @@
                                 aria-expanded="false">
                                 <i class="bi bi-shield-lock-fill me-1"></i> Access Control
                             </a>
-                            <ul class="dropdown-menu" aria-labelledby="accessDropdown">
+                            <ul class="dropdown-menu app-topnav__dropdown" aria-labelledby="accessDropdown">
                                 @can('can-manage-users')
                                     <li>
                                         <a class="dropdown-item" href="{{ route('admin.users.index') }}">
@@ -292,15 +205,19 @@
                     @endcanany
                 </ul>
 
-                <div class="d-flex align-items-center gap-3 flex-wrap">
+                <div class="app-topnav__user ms-lg-2">
                     <ul class="navbar-nav">
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center" id="navbarUserDropdown"
-                                href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user fa-fw me-1"></i>
-                                <span class="text-truncate" style="max-width: 160px;">{{ Auth::user()->name }}</span>
+                            <a class="nav-link dropdown-toggle app-topnav__user-btn d-flex align-items-center gap-2"
+                                id="navbarUserDropdown" href="#" role="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                <span class="app-topnav__avatar" aria-hidden="true">
+                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                </span>
+                                <span class="app-topnav__user-name text-truncate">{{ Auth::user()->name }}</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUserDropdown">
+                            <ul class="dropdown-menu dropdown-menu-end app-topnav__dropdown"
+                                aria-labelledby="navbarUserDropdown">
                                 @can('can-manage-settings')
                                     <li>
                                         <a class="dropdown-item" href="{{ route('admin.settings.index') }}">
@@ -341,7 +258,7 @@
                 {{ $slot }}
             </main>
         </div>
-        <footer class="py-4 bg-light mt-auto">
+        <footer class="py-4 app-dashboard-footer mt-auto">
             <div class="container-fluid px-4">
                 <div class="d-flex align-items-center justify-content-between small">
                     <div class="text-muted">Copyright &copy; {{ env('APP_NAME') }} {{ date('Y') }}</div>

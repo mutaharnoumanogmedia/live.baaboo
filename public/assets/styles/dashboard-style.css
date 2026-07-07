@@ -75,8 +75,191 @@
             color: var(--text-primary);
         }
 
-        /* Navbar */
-        .navbar {
+        /* ── Top navigation (app dashboard) ── */
+        :root {
+            --app-topnav-height: 64px;
+        }
+
+        .app-topnav {
+            min-height: var(--app-topnav-height);
+            z-index: 1040;
+            background: linear-gradient(180deg, rgba(26, 26, 26, 0.98) 0%, rgba(15, 15, 15, 0.96) 100%) !important;
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+            padding-top: 0.35rem;
+            padding-bottom: 0.35rem;
+        }
+
+        .app-topnav__inner {
+            gap: 0.5rem;
+        }
+
+        .app-topnav__brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.65rem;
+            padding: 0.35rem 0.75rem 0.35rem 0.35rem !important;
+            margin-right: 0.5rem;
+            border-radius: 999px;
+            background: transparent !important;
+            color: var(--text-primary) !important;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .app-topnav__brand:hover,
+        .app-topnav__brand:focus {
+            background: rgba(255, 255, 255, 0.06) !important;
+            color: var(--text-primary) !important;
+            transform: translateY(-1px);
+        }
+
+        .app-topnav__brand-mark {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--youtube-red), var(--youtube-red-dark));
+            color: #fff;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 14px rgba(255, 0, 0, 0.35);
+        }
+
+        .app-topnav__brand-text {
+            font-size: 1.05rem;
+            line-height: 1.2;
+        }
+
+        .app-topnav__toggler {
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.35rem 0.55rem;
+        }
+
+        .app-topnav__toggler:focus {
+            box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.25);
+        }
+
+        .app-topnav__nav {
+            gap: 0.15rem;
+        }
+
+        .app-topnav .navbar-nav .nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.5rem 0.85rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-secondary) !important;
+            border-radius: 0.5rem;
+            border: 1px solid transparent;
+            transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .app-topnav .navbar-nav .nav-link:hover,
+        .app-topnav .navbar-nav .nav-link:focus {
+            color: var(--text-primary) !important;
+            background-color: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .app-topnav .navbar-nav .nav-link.active {
+            color: #fff !important;
+            background: rgba(255, 0, 0, 0.14);
+            border-color: rgba(255, 0, 0, 0.35);
+            box-shadow: inset 0 0 0 1px rgba(255, 0, 0, 0.08);
+        }
+
+        .app-topnav .navbar-nav .nav-link.active i {
+            color: var(--youtube-red);
+        }
+
+        .app-topnav__dropdown {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.65rem;
+            padding: 0.4rem;
+            min-width: 13rem;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+            margin-top: 0.45rem;
+        }
+
+        .app-topnav__dropdown .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-radius: 0.45rem;
+            padding: 0.55rem 0.75rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .app-topnav__dropdown .dropdown-item:hover,
+        .app-topnav__dropdown .dropdown-item:focus {
+            background-color: var(--hover-bg);
+            color: var(--text-primary);
+        }
+
+        .app-topnav__dropdown .dropdown-item.active {
+            background-color: rgba(255, 0, 0, 0.12);
+            color: var(--text-primary);
+        }
+
+        .app-topnav__dropdown .dropdown-divider {
+            border-color: var(--border-color);
+            margin: 0.35rem 0;
+        }
+
+        .app-topnav__user {
+            padding-top: 0.35rem;
+        }
+
+        .app-topnav__user-btn {
+            padding: 0.35rem 0.65rem 0.35rem 0.35rem !important;
+            border-radius: 999px !important;
+            border: 1px solid var(--border-color) !important;
+            background: rgba(255, 255, 255, 0.04);
+            max-width: 220px;
+        }
+
+        .app-topnav__user-btn:hover,
+        .app-topnav__user-btn:focus,
+        .app-topnav__user-btn.show {
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-color: rgba(255, 255, 255, 0.12) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .app-topnav__avatar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3a3a3a, #222);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .app-topnav__user-name {
+            max-width: 140px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        /* Legacy generic navbar (non-topnav pages) */
+        .navbar:not(.app-topnav) {
             background: var(--card-bg) !important;
             border-bottom: 1px solid var(--border-color);
             backdrop-filter: blur(10px);
@@ -85,7 +268,7 @@
             z-index: 999;
         }
 
-        .navbar-brand {
+        .navbar:not(.app-topnav) .navbar-brand {
             color: var(--text-primary) !important;
             font-weight: 700;
             padding: 15px;
@@ -538,4 +721,81 @@
         .form-control::placeholder {
             color: var(--text-secondary);
             opacity: 1;
+        }
+
+        /* Dashboard layout — sticky footer */
+        html {
+            height: 100%;
+        }
+
+        body.app-topnav-fixed {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-top: var(--app-topnav-height);
+        }
+
+        #app-layout-content {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            width: 100%;
+            min-height: calc(100vh - var(--app-topnav-height));
+        }
+
+        #app-layout-content > .container-fluid {
+            flex: 1 1 auto;
+        }
+
+        .app-dashboard-footer {
+            flex-shrink: 0;
+            margin-top: auto;
+            background-color: var(--card-bg) !important;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .app-dashboard-footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .app-dashboard-footer a:hover {
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 1199.98px) {
+            .app-topnav .navbar-collapse {
+                max-height: calc(100vh - var(--app-topnav-height));
+                overflow-y: auto;
+                padding: 0.75rem 0 0.5rem;
+                margin-top: 0.35rem;
+                border-top: 1px solid var(--border-color);
+            }
+
+            .app-topnav__nav {
+                gap: 0.25rem;
+            }
+
+            .app-topnav .navbar-nav .nav-link {
+                padding: 0.65rem 0.75rem;
+            }
+
+            .app-topnav__dropdown {
+                background: rgba(255, 255, 255, 0.04);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+                box-shadow: none;
+                margin-left: 0.75rem;
+            }
+
+            .app-topnav__user {
+                width: 100%;
+                padding-top: 0.5rem;
+                margin-top: 0.35rem;
+                border-top: 1px solid var(--border-color);
+            }
+
+            .app-topnav__user-btn {
+                max-width: none;
+                width: 100%;
+            }
         }

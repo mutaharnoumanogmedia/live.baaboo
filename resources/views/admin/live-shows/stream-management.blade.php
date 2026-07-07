@@ -30,27 +30,29 @@
                  </button>
              </div>
          </div>
+         <button type="button" class="btn btn-outline-light btn-sm" id="toggleLeftSidebarBtn" title="Show/Hide sidebar"
+             data-bs-toggle="tooltip" data-bs-placement="bottom">
+             <i class="fa fa-angle-double-right"></i>
+         </button>
          <div class="row g-4">
-             <div class="col-12">
-                 <button type="button" class="btn btn-outline-light btn-sm" id="toggleLeftSidebarBtn"
-                     title="Show/Hide sidebar" data-bs-toggle="tooltip" data-bs-placement="bottom">
-                     <i class="fa fa-angle-double-right"></i>
-                 </button>
-             </div>
+
              <div class="col-lg-2" id="left-sidebar">
-                 <label class="mb-2 small text-muted d-block">Join via QR Code</label>
-                 <div id="qrcode" class="p-2 rounded "></div>
-                 <div class="mt-1 mb-3 d-flex">
-                     <a href="{{ url('live-show-play/' . $liveShow->id) }}" target="_blank"
-                         class="text-decoration-none small text-truncate d-block ">
-                         {{ url('live-show-play/' . $liveShow->id) }}
-                     </a>
-                     <button type="button" class="btn btn-sm btn-link" id="copyLiveShowLinkBtn"
-                         data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link to clipboard">
-                         <i class="fas fa-copy"></i>
-                     </button>
+
+                 <div class="p-3">
+                     <label class="mb-2 small text-muted d-block">Join via QR Code</label>
+                     <div id="qrcode" class="p-2 rounded "></div>
+                     <div class="mt-1 mb-3 d-flex">
+                         <a href="{{ url('live-show-play/' . $liveShow->id) }}" target="_blank"
+                             class="text-decoration-none small text-truncate d-block ">
+                             {{ url('live-show-play/' . $liveShow->id) }}
+                         </a>
+                         <button type="button" class="btn btn-sm btn-link" id="copyLiveShowLinkBtn"
+                             data-bs-toggle="tooltip" data-bs-placement="top" title="Copy link to clipboard">
+                             <i class="fas fa-copy"></i>
+                         </button>
+                     </div>
                  </div>
-                 <div class="border-0 shadow-sm card h-100">
+                 <div class="border-0 shadow-sm card">
                      <div class="py-3 card-header border-bottom">
                          <h6 class="mb-0 fw-bold text-uppercase small text-muted">
                              <i class="fas fa-users me-2 text-primary"></i>
@@ -177,9 +179,9 @@
                                              </div>
 
                                              <div>
-                                                 <div class="d-grid">
+                                                 <div class="d-flex gap-2 align-items-stretch">
                                                      <button type="button" id="announceWinnersBtn"
-                                                         class="py-2 text-white shadow-sm btn btn-warning w-100 fw-bold "
+                                                         class="py-2 text-white shadow-sm btn btn-warning flex-grow-1 fw-bold"
                                                          onclick="updateWinners()"
                                                          @if ($liveShow->winners_announced) disabled aria-disabled="true" @endif>
                                                          <span id="announceWinnersBtnContent"
@@ -197,42 +199,19 @@
                                                              <i class="fas fa-check me-2"></i> Winners announced
                                                          </span>
                                                      </button>
-                                                     <div class="gap-2 mt-2 d-flex @if (!$liveShow->winners_announced) d-none @endif"
-                                                         id="winnersAnnouncedActions">
-                                                         <button
-                                                             class="py-2 mt-2 text-white shadow-sm btn btn-secondary w-100 fw-bold"
-                                                             id="regenerateWinnersBtn" onclick="regenerateWinners()">
-                                                             <i class="fas fa-sync-alt me-2"></i>
-                                                             ReGenerate Winners
-                                                         </button>
-                                                         <button
-                                                             class="py-2 mt-2 text-white shadow-sm btn btn-info w-100 fw-bold"
-                                                             id="resendVoucherWinnersBtn"
-                                                             onclick="resendVoucherWinners()">
-                                                             <i class="fas fa-envelope me-2"></i>
-                                                             Resend Email To Voucher Winners
-                                                         </button>
-                                                     </div>
+                                                     <button type="button" id="winnersExtraActionsBtn"
+                                                         class="btn btn-outline-secondary btn-sm @if (!$liveShow->winners_announced) d-none @endif"
+                                                         data-bs-toggle="modal"
+                                                         data-bs-target="#winnersExtraActionsModal"
+                                                         title="More winner actions" aria-label="More winner actions">
+                                                         <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+
+                                                     </button>
                                                  </div>
                                                  <p id="announceWinnersAckMessage"
-                                                     class="small text-success mb-0 mt-2 px-1 @if (!$liveShow->winners_announced) d-none @endif">
-                                                     Winners have been announced. Winner notification emails have been
-                                                     queued for the winners.
+                                                     class="small text-success mb-0 mt-1 @if (!$liveShow->winners_announced) d-none @endif">
+                                                     Emails queued for winners.
                                                  </p>
-                                                 <button type="button" id="unannounceWinnersBtn"
-                                                     class="btn btn-outline-secondary w-100 py-2 fw-bold shadow-sm my-2 @if (!$liveShow->winners_announced) d-none @endif"
-                                                     onclick="unannounceWinners()">
-                                                     <span id="unannounceWinnersBtnLabel"
-                                                         class="unannounce-winners-btn-label">
-                                                         <i class="fas fa-undo me-2"></i> Un-announce winners
-                                                     </span>
-                                                     <span id="unannounceWinnersBtnLoader"
-                                                         class="unannounce-winners-btn-loader d-none">
-                                                         <i class="fas fa-spinner fa-spin me-2"
-                                                             aria-hidden="true"></i>
-                                                         Updating…
-                                                     </span>
-                                                 </button>
                                              </div>
 
                                          </div>
@@ -242,26 +221,26 @@
                                                      Winner Tab Management
                                                  </h6>
                                              </div>
-                                            <div>
-                                                <button type="button" id="showWinnerTabBtn"
-                                                    class="mb-2 text-white shadow-sm btn btn-primary fw-bold"
-                                                    onclick="showWinnerTab(this)"
-                                                    @if (!$liveShow->winners_announced) disabled aria-disabled="true" @endif>
-                                                    <i class="fas fa-eye me-2"></i> Show
-                                                </button>
-                                                <button type="button" id="hideWinnerTabBtn"
-                                                    class="mb-2 text-white shadow-sm btn btn-danger fw-bold"
-                                                    onclick="hideWinnerTab(this)"
-                                                    @if (!$liveShow->winners_announced) disabled aria-disabled="true" @endif>
-                                                    <i class="fas fa-eye-slash me-2"></i> Hide
-                                                </button>
-                                            </div>
+                                             <div>
+                                                 <button type="button" id="showWinnerTabBtn"
+                                                     class="mb-2 text-white shadow-sm btn btn-primary fw-bold"
+                                                     onclick="showWinnerTab(this)"
+                                                     @if (!$liveShow->winners_announced) disabled aria-disabled="true" @endif>
+                                                     <i class="fas fa-eye me-2"></i> Show
+                                                 </button>
+                                                 <button type="button" id="hideWinnerTabBtn"
+                                                     class="mb-2 text-white shadow-sm btn btn-danger fw-bold"
+                                                     onclick="hideWinnerTab(this)"
+                                                     @if (!$liveShow->winners_announced) disabled aria-disabled="true" @endif>
+                                                     <i class="fas fa-eye-slash me-2"></i> Hide
+                                                 </button>
+                                             </div>
                                          </div>
                                      </div>
                                  </div>
 
-                                {{-- Push notification trigger: alert every player of this show on their devices --}}
-                                <div class="col-12 pt-3 mt-2 border-top">
+                                 {{-- Push notification trigger: alert every player of this show on their devices --}}
+                                 {{-- <div class="col-12 pt-3 mt-2 border-top">
                                     <h6 class="mb-3 text-muted small text-uppercase fw-bold">
                                         <i class="fas fa-bell me-2 text-warning"></i> Push Notification To Players
                                     </h6>
@@ -295,8 +274,46 @@
                                     <p class="mt-2 mb-0 small text-muted">
                                         Only players who enabled browser notifications will receive this alert.
                                     </p>
-                                </div>
+                                </div> --}}
 
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+
+                 {{-- Extra winner actions (after announce) --}}
+                 <div class="modal fade" id="winnersExtraActionsModal" tabindex="-1"
+                     aria-labelledby="winnersExtraActionsModalLabel" aria-hidden="true">
+                     <div class="modal-dialog modal-dialog-centered modal-sm">
+                         <div class="modal-content">
+                             <div class="modal-header py-2">
+                                 <h5 class="modal-title text-dark fs-6" id="winnersExtraActionsModalLabel">
+                                     <i class="fas fa-trophy me-2 text-warning"></i>Winner actions
+                                 </h5>
+                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                     aria-label="Close"></button>
+                             </div>
+                             <div class="modal-body d-grid gap-2">
+                                 <button type="button" class="btn btn-secondary btn-sm fw-bold"
+                                     id="regenerateWinnersBtn" onclick="regenerateWinners()">
+                                     <i class="fas fa-sync-alt me-2"></i> ReGenerate Winners
+                                 </button>
+                                 <button type="button" class="btn btn-info btn-sm fw-bold text-white"
+                                     id="resendVoucherWinnersBtn" onclick="resendVoucherWinners()">
+                                     <i class="fas fa-envelope me-2"></i> Resend Email To Voucher Winners
+                                 </button>
+                                 <hr class="my-1">
+                                 <button type="button" id="unannounceWinnersBtn"
+                                     class="btn btn-outline-danger btn-sm fw-bold" onclick="unannounceWinners()">
+                                     <span id="unannounceWinnersBtnLabel" class="unannounce-winners-btn-label">
+                                         <i class="fas fa-undo me-2"></i> Un-announce winners
+                                     </span>
+                                     <span id="unannounceWinnersBtnLoader"
+                                         class="unannounce-winners-btn-loader d-none">
+                                         <i class="fas fa-spinner fa-spin me-2" aria-hidden="true"></i>
+                                         Updating…
+                                     </span>
+                                 </button>
                              </div>
                          </div>
                      </div>
@@ -332,13 +349,16 @@
                              ];
                          }
                          $slideCount = count($carouselSlides);
-                         $showQuestionsForFlow = $liveShow->quizzes->values()->map(function ($q, $i) {
-                             return [
-                                 'id' => (int) $q->id,
-                                 'label' => 'Q' . ($i + 1),
-                                 'num' => $i + 1,
-                             ];
-                         })->all();
+                         $showQuestionsForFlow = $liveShow->quizzes
+                             ->values()
+                             ->map(function ($q, $i) {
+                                 return [
+                                     'id' => (int) $q->id,
+                                     'label' => 'Q' . ($i + 1),
+                                     'num' => $i + 1,
+                                 ];
+                             })
+                             ->all();
                      @endphp
                      <div class="p-0 card-header d-flex flex-wrap align-items-center gap-2">
                          <ul class="nav nav-tabs border-0 flex-grow-1" id="streamFlowTabs" role="tablist">
@@ -350,23 +370,23 @@
                                  </button>
                              </li>
                              <li class="nav-item" role="presentation">
-                                 <button class="nav-link fw-bold" id="show-flow-order-tab-btn"
-                                     data-bs-toggle="tab" data-bs-target="#show-flow-order-tab" type="button"
-                                     role="tab" aria-controls="show-flow-order-tab" aria-selected="false">
+                                 <button class="nav-link fw-bold" id="show-flow-order-tab-btn" data-bs-toggle="tab"
+                                     data-bs-target="#show-flow-order-tab" type="button" role="tab"
+                                     aria-controls="show-flow-order-tab" aria-selected="false">
                                      <i class="fas fa-sitemap me-1"></i> Show Flow Order
                                  </button>
                              </li>
                              <li class="nav-item" role="presentation">
-                                 <button class="nav-link fw-bold" id="all-questions-tab-btn"
-                                     data-bs-toggle="tab" data-bs-target="#all-questions-tab" type="button"
-                                     role="tab" aria-controls="all-questions-tab" aria-selected="false">
+                                 <button class="nav-link fw-bold" id="all-questions-tab-btn" data-bs-toggle="tab"
+                                     data-bs-target="#all-questions-tab" type="button" role="tab"
+                                     aria-controls="all-questions-tab" aria-selected="false">
                                      <i class="fas fa-list-ol me-1"></i> All Questions
                                  </button>
                              </li>
                              <li class="nav-item" role="presentation">
-                                 <button class="nav-link fw-bold" id="all-media-tab-btn"
-                                     data-bs-toggle="tab" data-bs-target="#all-media-tab" type="button"
-                                     role="tab" aria-controls="all-media-tab" aria-selected="false">
+                                 <button class="nav-link fw-bold" id="all-media-tab-btn" data-bs-toggle="tab"
+                                     data-bs-target="#all-media-tab" type="button" role="tab"
+                                     aria-controls="all-media-tab" aria-selected="false">
                                      <i class="fas fa-photo-film me-1"></i> All Media
                                  </button>
                              </li>
@@ -399,248 +419,281 @@
                                                  </div>
                                              @endif
                                              <div class="carousel-inner">
-                                             @foreach ($carouselSlides as $slideIndex => $slide)
-                                                 @if ($slide['type'] === 'end_media')
-                                                     @php $endMedia = $slide['media']; @endphp
-                                                     <div class="carousel-item px-2 question-media-slide @if ($slideIndex === 0) active @endif"
-                                                         data-slide-type="end_media"
-                                                         data-attachment-type="end"
-                                                         data-attachment-id="{{ $endMedia->pivot->id }}">
-                                                         <div class="mb-5 border border-success border-2 card bg-light">
-                                                             <div class="card-body">
-                                                                 <div class="mb-3 text-center fw-bold text-success">
-                                                                     <i class="fas fa-flag-checkered me-1"></i>
-                                                                     Media after all questions
-                                                                     <span class="badge bg-secondary ms-1 media-played-badge {{ ($endMedia->pivot->media_played ?? false) ? '' : 'd-none' }}">Played</span>
-                                                                 </div>
-                                                                 <div class="mx-auto mb-3" style="max-width: 480px;">
-                                                                     <div class="position-relative">
-                                                                         <img src="{{ $endMedia->isImage() ? $endMedia->path : ($endMedia->thumbnail ?? $endMedia->path) }}"
-                                                                             alt=""
-                                                                             title="{{ $endMedia->title ?? $endMedia->original_name }}"
-                                                                             class="w-100 rounded shadow-sm"
-                                                                             style="height: 220px; object-fit: cover;">
-                                                                         <span class="badge {{ $endMedia->isVideo() ? 'bg-primary' : 'bg-warning text-dark' }} position-absolute top-0 end-0 m-2">
-                                                                             {{ $endMedia->type }}
-                                                                         </span>
+                                                 @foreach ($carouselSlides as $slideIndex => $slide)
+                                                     @if ($slide['type'] === 'end_media')
+                                                         @php $endMedia = $slide['media']; @endphp
+                                                         <div class="carousel-item px-2 question-media-slide @if ($slideIndex === 0) active @endif"
+                                                             data-slide-type="end_media" data-attachment-type="end"
+                                                             data-attachment-id="{{ $endMedia->pivot->id }}">
+                                                             <div
+                                                                 class="mb-5 border border-success border-2 card bg-light">
+                                                                 <div class="card-body">
+                                                                     <div
+                                                                         class="mb-3 text-center fw-bold text-success">
+                                                                         <i class="fas fa-flag-checkered me-1"></i>
+                                                                         Media after all questions
+                                                                         <span
+                                                                             class="badge bg-secondary ms-1 media-played-badge {{ $endMedia->pivot->media_played ?? false ? '' : 'd-none' }}">Played</span>
                                                                      </div>
-                                                                     <div class="mt-2 text-center fw-semibold text-truncate"
-                                                                         title="{{ $endMedia->title ?? $endMedia->original_name }}">
-                                                                         {{ $endMedia->title ?? $endMedia->original_name }}
+                                                                     <div class="mx-auto mb-3"
+                                                                         style="max-width: 480px;">
+                                                                         <div class="position-relative">
+                                                                             <img src="{{ $endMedia->isImage() ? $endMedia->path : $endMedia->thumbnail ?? $endMedia->path }}"
+                                                                                 alt=""
+                                                                                 title="{{ $endMedia->title ?? $endMedia->original_name }}"
+                                                                                 class="w-100 rounded shadow-sm"
+                                                                                 style="height: 250px; object-fit: contain;">
+                                                                             <span
+                                                                                 class="badge {{ $endMedia->isVideo() ? 'bg-primary' : 'bg-warning text-dark' }} position-absolute top-0 end-0 m-2">
+                                                                                 {{ $endMedia->type }}
+                                                                             </span>
+                                                                         </div>
+                                                                         <div class="mt-2 text-center fw-semibold text-truncate"
+                                                                             title="{{ $endMedia->title ?? $endMedia->original_name }}">
+                                                                             {{ $endMedia->title ?? $endMedia->original_name }}
+                                                                         </div>
                                                                      </div>
-                                                                 </div>
-                                                                 <div class="gap-2 d-flex flex-wrap justify-content-center">
-                                                                     <button type="button"
-                                                                         class="btn btn-success"
-                                                                         onclick="galleryShowOnStream('{{ $endMedia->id }}', this, 'end', {{ (int) $endMedia->pivot->id }})"
-                                                                         title="Play on live stream">
-                                                                         <i class="fas fa-play me-1"></i> {{ ($endMedia->pivot->media_played ?? false) ? 'Replay' : 'Play' }}
-                                                                     </button>
-                                                                     <button type="button"
-                                                                         class="btn btn-outline-secondary"
-                                                                         onclick="galleryHideOnStream(this)"
-                                                                         title="Hide from live stream">
-                                                                         <i class="fas fa-eye-slash me-1"></i> Hide
-                                                                     </button>
-                                                                     <button type="button"
+                                                                     <div
+                                                                         class="gap-2 d-flex flex-wrap justify-content-center">
+                                                                         <button type="button"
+                                                                             class="btn btn-success"
+                                                                             onclick="galleryShowOnStream('{{ $endMedia->id }}', this, 'end', {{ (int) $endMedia->pivot->id }})"
+                                                                             title="Play on live stream">
+                                                                             <i class="fas fa-play me-1"></i>
+                                                                             {{ $endMedia->pivot->media_played ?? false ? 'Replay' : 'Play' }}
+                                                                         </button>
+                                                                         <button type="button"
+                                                                             class="btn btn-outline-secondary"
+                                                                             onclick="galleryHideOnStream(this)"
+                                                                             title="Hide from live stream">
+                                                                             <i class="fas fa-eye-slash me-1"></i> Hide
+                                                                         </button>
+                                                                         {{-- <button type="button"
                                                                          class="btn btn-outline-dark"
                                                                          onclick="skipQuestionMediaSlide()"
                                                                          title="Skip this media and continue">
                                                                          <i class="fas fa-forward me-1"></i> Skip
-                                                                     </button>
-                                                                 </div>
-                                                                 <div class="mt-3 text-center small text-muted">
-                                                                     <i class="fas fa-info-circle me-1"></i>
-                                                                     Plays after the last question. Use Next to continue.
+                                                                     </button> --}}
+                                                                     </div>
+                                                                     <div class="mt-3 text-center small text-muted">
+                                                                         <i class="fas fa-info-circle me-1"></i>
+                                                                         Plays after the last question. Use Next to
+                                                                         continue.
+                                                                     </div>
                                                                  </div>
                                                              </div>
                                                          </div>
-                                                     </div>
-                                                 @else
-                                                 @php
-                                                     $quiz = $slide['quiz'];
-                                                     $index = $slide['quizIndex'];
-                                                 @endphp
-                                                 @if ($slide['type'] === 'media')
-                                                     @php $qMedia = $slide['media']; @endphp
-                                                     <div class="carousel-item px-2 question-media-slide @if ($slideIndex === 0) active @endif"
-                                                         data-slide-type="media"
-                                                         data-quiz-id="{{ $quiz->id }}"
-                                                         data-attachment-type="question"
-                                                         data-attachment-id="{{ $qMedia->pivot->id }}">
-                                                         <div class="mb-5 border border-info border-2 card bg-light">
-                                                             <div class="card-body">
-                                                                 <div class="mb-3 text-center fw-bold text-info">
-                                                                     <i class="fas fa-photo-film me-1"></i>
-                                                                     Media before Question {{ $index + 1 }}
-                                                                     <span class="badge bg-secondary ms-1 media-played-badge {{ ($qMedia->pivot->media_played ?? false) ? '' : 'd-none' }}">Played</span>
-                                                                 </div>
-                                                                 <div class="mx-auto mb-3" style="max-width: 480px;">
-                                                                     <div class="position-relative">
-                                                                         <img src="{{ $qMedia->isImage() ? $qMedia->path : ($qMedia->thumbnail ?? $qMedia->path) }}"
-                                                                             alt=""
-                                                                             title="{{ $qMedia->title ?? $qMedia->original_name }}"
-                                                                             class="w-100 rounded shadow-sm"
-                                                                             style="height: 220px; object-fit: cover;">
-                                                                         <span class="badge {{ $qMedia->isVideo() ? 'bg-primary' : 'bg-warning text-dark' }} position-absolute top-0 end-0 m-2">
-                                                                             {{ $qMedia->type }}
-                                                                         </span>
-                                                                     </div>
-                                                                     <div class="mt-2 text-center fw-semibold text-truncate"
-                                                                         title="{{ $qMedia->title ?? $qMedia->original_name }}">
-                                                                         {{ $qMedia->title ?? $qMedia->original_name }}
-                                                                     </div>
-                                                                 </div>
-                                                                 <div class="gap-2 d-flex flex-wrap justify-content-center">
-                                                                     <button type="button"
-                                                                         class="btn btn-success"
-                                                                         onclick="galleryShowOnStream('{{ $qMedia->id }}', this, 'question', {{ (int) $qMedia->pivot->id }})"
-                                                                         title="Play on live stream">
-                                                                         <i class="fas fa-play me-1"></i> {{ ($qMedia->pivot->media_played ?? false) ? 'Replay' : 'Play' }}
-                                                                     </button>
-                                                                     <button type="button"
-                                                                         class="btn btn-outline-secondary"
-                                                                         onclick="galleryHideOnStream(this)"
-                                                                         title="Hide from live stream">
-                                                                         <i class="fas fa-eye-slash me-1"></i> Hide
-                                                                     </button>
-                                                                     <button type="button"
-                                                                         class="btn btn-outline-dark"
-                                                                         onclick="skipQuestionMediaSlide()"
-                                                                         title="Skip this media and continue">
-                                                                         <i class="fas fa-forward me-1"></i> Skip
-                                                                     </button>
-                                                                 </div>
-                                                                 <div class="mt-3 text-center small text-muted">
-                                                                     <i class="fas fa-info-circle me-1"></i>
-                                                                     Play or skip, then use Next to continue in the show flow.
-                                                                 </div>
-                                                             </div>
-                                                         </div>
-                                                     </div>
-                                                 @else
-                                                 <div class="carousel-item px-2 @if ($slideIndex === 0) active @endif"
-                                                     data-slide-type="question"
-                                                     data-quiz-id="{{ $quiz->id }}">
-                                                     <div class="mb-5 border card">
-                                                        <div class="position-relative card-body"
-                                                            style="height: auto; overflow-y:hidden">
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 reset-shown-status-btn @if (!$quiz->has_shown) d-none @endif"
-                                                                onclick="resetShownStatus({{ $quiz->id }}, this)"
-                                                                id="resetShownStatusBtn-{{ $quiz->id }}"
-                                                                title="Reset shown status">
-                                                                <i class="fas fa-undo me-1"></i> Reset shown status
-                                                            </button>
-
-                                                            <div class="mb-4 text-center fw-bold">
-                                                                <div class="mb-2">Question {{ $index + 1 }} /
-                                                                    {{ $totalQuestions }}</div>
-                                                                <div class="question-text">{{ $quiz->question }}
-                                                                </div>
-                                                            </div>
-
-                                                             @if ($quiz->options)
-                                                                 <div class="mb-4 row g-3">
-                                                                     @foreach ($quiz->options as $option)
-                                                                         <div class="col-md-12">
-                                                                             <div
-                                                                                 class="p-3 border rounded @if ($option->is_correct) border-success @endif">
-                                                                                 <div
-                                                                                     class="mb-2 d-flex justify-content-between">
-                                                                                     <span
-                                                                                         class="fw-bold @if ($option->is_correct) text-success @endif">
-                                                                                         {{ $option->option_text }}
-                                                                                         @if ($option->is_correct)
-                                                                                             <i
-                                                                                                 class="fas fa-check-circle ms-1"></i>
-                                                                                         @endif
-                                                                                     </span>
-                                                                                     <span class="small fw-bold"
-                                                                                         id="option-result-label-{{ $option->id }}">0%</span>
-                                                                                 </div>
-                                                                                 <div class="progress"
-                                                                                     style="height: 8px;">
-                                                                                     <div id="option-result-bar-{{ $option->id }}"
-                                                                                         class="progress-bar @if ($option->is_correct) bg-success @else bg-primary @endif"
-                                                                                         role="progressbar"
-                                                                                         style="width: 0%">
-                                                                                     </div>
-                                                                                 </div>
+                                                     @else
+                                                         @php
+                                                             $quiz = $slide['quiz'];
+                                                             $index = $slide['quizIndex'];
+                                                         @endphp
+                                                         @if ($slide['type'] === 'media')
+                                                             @php $qMedia = $slide['media']; @endphp
+                                                             <div class="carousel-item px-2 question-media-slide @if ($slideIndex === 0) active @endif"
+                                                                 data-slide-type="media"
+                                                                 data-quiz-id="{{ $quiz->id }}"
+                                                                 data-attachment-type="question"
+                                                                 data-attachment-id="{{ $qMedia->pivot->id }}">
+                                                                 <div
+                                                                     class="mb-5 border border-info border-2 card bg-light">
+                                                                     <div class="card-body">
+                                                                         <div
+                                                                             class="mb-3 text-center fw-bold text-info">
+                                                                             <i class="fas fa-photo-film me-1"></i>
+                                                                             Media before Question {{ $index + 1 }}
+                                                                             <span
+                                                                                 class="badge bg-secondary ms-1 media-played-badge {{ $qMedia->pivot->media_played ?? false ? '' : 'd-none' }}">Played</span>
+                                                                         </div>
+                                                                         <div class="mx-auto mb-3"
+                                                                             style="max-width: 480px;">
+                                                                             <div class="position-relative">
+                                                                                 <img src="{{ $qMedia->isImage() ? $qMedia->path : $qMedia->thumbnail ?? $qMedia->path }}"
+                                                                                     alt=""
+                                                                                     title="{{ $qMedia->title ?? $qMedia->original_name }}"
+                                                                                     class="w-100 rounded shadow-sm"
+                                                                                     style="height: 250px; object-fit: contain;">
+                                                                                 <span
+                                                                                     class="badge {{ $qMedia->isVideo() ? 'bg-primary' : 'bg-warning text-dark' }} position-absolute top-0 end-0 m-2">
+                                                                                     {{ $qMedia->type }}
+                                                                                 </span>
+                                                                             </div>
+                                                                             <div class="mt-2 text-center fw-semibold text-truncate"
+                                                                                 title="{{ $qMedia->title ?? $qMedia->original_name }}">
+                                                                                 {{ $qMedia->title ?? $qMedia->original_name }}
                                                                              </div>
                                                                          </div>
-                                                                     @endforeach
-                                                                 </div>
-
-                                                                 <form method="POST"
-                                                                     id="quiz-timer-form-{{ $quiz->id }}"
-                                                                     onsubmit="submitQuizTimerForm(event, {{ $quiz->id }})"
-                                                                     data-has-shown="{{ $quiz->has_shown ? 1 : 0 }}"
-                                                                     class="row g-2 align-items-center justify-content-center">
-                                                                     @csrf
-                                                                     <div class="col-auto">
-                                                                         <div class="input-group">
-                                                                             <span class="bg-white input-group-text"><i
-                                                                                     class="fas fa-stopwatch text-muted"></i></span>
-                                                                             <input type="number" min="1"
-                                                                                 name="seconds"
-                                                                                 id="timer-{{ $quiz->id }}"
-                                                                                 value="10"
-                                                                                 class="text-center form-control fw-bold"
-                                                                                 style="width: 80px;" required>
-                                                                         </div>
-                                                                     </div>
-                                                                     @if ($index === $totalQuestions - 1)
-                                                                         <input type="hidden" name="is_last"
-                                                                             value="1">
-                                                                     @endif
-                                                                     <div class="col-auto">
-                                                                         <div class="shadow-sm btn-group">
-                                                                             <button
-                                                                                 type="{{ $quiz->has_shown ? 'button' : 'submit' }}"
-                                                                                 class="px-3 btn btn-success"
-                                                                                 data-quiz-start
-                                                                                 @if ($quiz->has_shown) disabled
-                                                                                 aria-disabled="true" @endif>
-                                                                                 @if ($quiz->has_shown)
-                                                                                     Question shown
-                                                                                 @else
-                                                                                     <i class="fas fa-play me-2"></i>
-                                                                                     Show
-                                                                                 @endif
+                                                                         <div
+                                                                             class="gap-2 d-flex flex-wrap justify-content-center">
+                                                                             <button type="button"
+                                                                                 class="btn btn-success"
+                                                                                 onclick="galleryShowOnStream('{{ $qMedia->id }}', this, 'question', {{ (int) $qMedia->pivot->id }})"
+                                                                                 title="Play on live stream">
+                                                                                 <i class="fas fa-play me-1"></i>
+                                                                                 {{ $qMedia->pivot->media_played ?? false ? 'Replay' : 'Play' }}
                                                                              </button>
                                                                              <button type="button"
-                                                                                 onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }}, this)"
-                                                                                 class="px-3 text-white btn btn-info">
-                                                                                 <i class="fas fa-chart-bar me-2"></i>
-                                                                                 Show Responses
+                                                                                 class="btn btn-outline-secondary"
+                                                                                 onclick="galleryHideOnStream(this)"
+                                                                                 title="Hide from live stream">
+                                                                                 <i class="fas fa-eye-slash me-1"></i>
+                                                                                 Hide
                                                                              </button>
-                                                                             <button class="px-3 btn btn-danger"
-                                                                                 type="button"
-                                                                                 onclick="removeQuiz({{ $quiz->id }}, this)">
-                                                                                 <i class="fas fa-times me-2"></i> Hide
+                                                                             <button type="button"
+                                                                                 class="btn btn-outline-dark"
+                                                                                 onclick="skipQuestionMediaSlide()"
+                                                                                 title="Skip this media and continue">
+                                                                                 <i class="fas fa-forward me-1"></i>
+                                                                                 Skip
                                                                              </button>
-
+                                                                         </div>
+                                                                         <div
+                                                                             class="mt-3 text-center small text-muted">
+                                                                             <i class="fas fa-info-circle me-1"></i>
+                                                                             Play or skip, then use Next to continue in
+                                                                             the show flow.
                                                                          </div>
                                                                      </div>
-                                                                 </form>
-                                                             @endif
-                                                         </div>
-                                                     </div>
-                                                 </div>
-                                                 @endif
-                                                 @endif
-                                             @endforeach
+                                                                 </div>
+                                                             </div>
+                                                         @else
+                                                             <div class="carousel-item px-2 @if ($slideIndex === 0) active @endif"
+                                                                 data-slide-type="question"
+                                                                 data-quiz-id="{{ $quiz->id }}">
+                                                                 <div class="mb-5 border card">
+                                                                     <div class="position-relative card-body"
+                                                                         style="height: auto; overflow-y:hidden">
+                                                                         <button type="button"
+                                                                             class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 reset-shown-status-btn @if (!$quiz->has_shown) d-none @endif"
+                                                                             onclick="resetShownStatus({{ $quiz->id }}, this)"
+                                                                             id="resetShownStatusBtn-{{ $quiz->id }}"
+                                                                             title="Reset shown status">
+                                                                             <i class="fas fa-undo me-1"></i> Reset
+                                                                             shown status
+                                                                         </button>
+
+                                                                         <div class="mb-4 text-center fw-bold">
+                                                                             <div class="mb-2">Question
+                                                                                 {{ $index + 1 }} /
+                                                                                 {{ $totalQuestions }}</div>
+                                                                             <div class="question-text">
+                                                                                 {{ $quiz->question }}
+                                                                             </div>
+                                                                         </div>
+
+                                                                         @if ($quiz->options)
+                                                                             <div class="mb-4 row g-3">
+                                                                                 @foreach ($quiz->options as $option)
+                                                                                     <div class="col-md-12">
+                                                                                         <div
+                                                                                             class="p-3 border rounded @if ($option->is_correct) border-success @endif">
+                                                                                             <div
+                                                                                                 class="mb-2 d-flex justify-content-between">
+                                                                                                 <span
+                                                                                                     class="fw-bold @if ($option->is_correct) text-success @endif">
+                                                                                                     {{ $option->option_text }}
+                                                                                                     @if ($option->is_correct)
+                                                                                                         <i
+                                                                                                             class="fas fa-check-circle ms-1"></i>
+                                                                                                     @endif
+                                                                                                 </span>
+                                                                                                 <span
+                                                                                                     class="small fw-bold"
+                                                                                                     id="option-result-label-{{ $option->id }}">0%</span>
+                                                                                             </div>
+                                                                                             <div class="progress"
+                                                                                                 style="height: 8px;">
+                                                                                                 <div id="option-result-bar-{{ $option->id }}"
+                                                                                                     class="progress-bar @if ($option->is_correct) bg-success @else bg-primary @endif"
+                                                                                                     role="progressbar"
+                                                                                                     style="width: 0%">
+                                                                                                 </div>
+                                                                                             </div>
+                                                                                         </div>
+                                                                                     </div>
+                                                                                 @endforeach
+                                                                             </div>
+
+                                                                             <form method="POST"
+                                                                                 id="quiz-timer-form-{{ $quiz->id }}"
+                                                                                 onsubmit="submitQuizTimerForm(event, {{ $quiz->id }})"
+                                                                                 data-has-shown="{{ $quiz->has_shown ? 1 : 0 }}"
+                                                                                 class="row g-2 align-items-center justify-content-center">
+                                                                                 @csrf
+                                                                                 <div class="col-auto">
+                                                                                     <div class="input-group">
+                                                                                         <span
+                                                                                             class="bg-white input-group-text"><i
+                                                                                                 class="fas fa-stopwatch text-muted"></i></span>
+                                                                                         <input type="number"
+                                                                                             min="1"
+                                                                                             name="seconds"
+                                                                                             id="timer-{{ $quiz->id }}"
+                                                                                             value="10"
+                                                                                             class="text-center form-control fw-bold"
+                                                                                             style="width: 80px;"
+                                                                                             required>
+                                                                                     </div>
+                                                                                 </div>
+                                                                                 @if ($index === $totalQuestions - 1)
+                                                                                     <input type="hidden"
+                                                                                         name="is_last"
+                                                                                         value="1">
+                                                                                 @endif
+                                                                                 <div class="col-auto">
+                                                                                     <div class="shadow-sm btn-group">
+                                                                                         <button
+                                                                                             type="{{ $quiz->has_shown ? 'button' : 'submit' }}"
+                                                                                             class="px-3 btn btn-success"
+                                                                                             data-quiz-start
+                                                                                             @if ($quiz->has_shown) disabled
+                                                                                 aria-disabled="true" @endif>
+                                                                                             @if ($quiz->has_shown)
+                                                                                                 Question shown
+                                                                                             @else
+                                                                                                 <i
+                                                                                                     class="fas fa-play me-2"></i>
+                                                                                                 Show
+                                                                                             @endif
+                                                                                         </button>
+                                                                                         <button type="button"
+                                                                                             onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }}, this)"
+                                                                                             class="px-3 text-white btn btn-info">
+                                                                                             <i
+                                                                                                 class="fas fa-chart-bar me-2"></i>
+                                                                                             Show Responses
+                                                                                         </button>
+                                                                                         <button
+                                                                                             class="px-3 btn btn-danger"
+                                                                                             type="button"
+                                                                                             onclick="removeQuiz({{ $quiz->id }}, this)">
+                                                                                             <i
+                                                                                                 class="fas fa-times me-2"></i>
+                                                                                             Hide
+                                                                                         </button>
+
+                                                                                     </div>
+                                                                                 </div>
+                                                                             </form>
+                                                                         @endif
+                                                                     </div>
+                                                                 </div>
+                                                             </div>
+                                                         @endif
+                                                     @endif
+                                                 @endforeach
                                              </div>
                                              @if ($slideCount > 1)
                                                  <button class="carousel-control-prev" type="button"
                                                      data-bs-target="#quizQuestionsCarousel" data-bs-slide="prev">
-                                                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                                     <span class="carousel-control-prev-icon"
+                                                         aria-hidden="true"></span>
                                                      <span class="visually-hidden">Previous</span>
                                                  </button>
                                                  <button class="carousel-control-next" type="button"
                                                      data-bs-target="#quizQuestionsCarousel" data-bs-slide="next">
-                                                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                                     <span class="carousel-control-next-icon"
+                                                         aria-hidden="true"></span>
                                                      <span class="visually-hidden">Next</span>
                                                  </button>
                                              @endif
@@ -660,37 +713,47 @@
                                  aria-labelledby="show-flow-order-tab-btn">
                                  <div class="p-3 rounded bg-dark">
                                      <div class="mb-3 p-3 border border-secondary rounded">
-                                         <h6 class="text-muted small text-uppercase fw-bold mb-2">Add media to show flow</h6>
+                                         <h6 class="text-muted small text-uppercase fw-bold mb-2">Add media to show
+                                             flow</h6>
                                          <div class="row g-2 align-items-end">
                                              <div class="col-md-5">
-                                                 <label class="form-label small mb-1" for="flow-add-media-select">Media</label>
-                                                 <select id="flow-add-media-select" class="form-select form-select-sm">
+                                                 <label class="form-label small mb-1"
+                                                     for="flow-add-media-select">Media</label>
+                                                 <select id="flow-add-media-select"
+                                                     class="form-select form-select-sm">
                                                      <option value="">— Select media —</option>
                                                      @foreach ($allGalleryMedia as $gm)
-                                                         <option value="{{ $gm->id }}">{{ $gm->title ?: $gm->original_name }}</option>
+                                                         <option value="{{ $gm->id }}">
+                                                             {{ $gm->title ?: $gm->original_name }}</option>
                                                      @endforeach
                                                  </select>
                                              </div>
                                              <div class="col-md-4">
-                                                 <label class="form-label small mb-1" for="flow-add-placement-select">Insert</label>
-                                                 <select id="flow-add-placement-select" class="form-select form-select-sm">
+                                                 <label class="form-label small mb-1"
+                                                     for="flow-add-placement-select">Insert</label>
+                                                 <select id="flow-add-placement-select"
+                                                     class="form-select form-select-sm">
                                                      @foreach ($liveShow->quizzes as $qIdx => $q)
-                                                         <option value="q:{{ $q->id }}">Before Question {{ $qIdx + 1 }}</option>
+                                                         <option value="q:{{ $q->id }}">Before Question
+                                                             {{ $qIdx + 1 }}</option>
                                                      @endforeach
                                                      <option value="end">At the end</option>
                                                  </select>
                                              </div>
                                              <div class="col-md-3 d-flex gap-2">
-                                                 <button type="button" class="btn btn-sm btn-primary flex-grow-1" onclick="flowAddMedia()">
+                                                 <button type="button" class="btn btn-sm btn-primary flex-grow-1"
+                                                     onclick="flowAddMedia()">
                                                      <i class="fas fa-plus me-1"></i> Add to flow
                                                  </button>
-                                                 <button type="button" class="btn btn-sm btn-outline-success" onclick="refreshFlowOrderTable()" title="Refresh">
+                                                 <button type="button" class="btn btn-sm btn-outline-success"
+                                                     onclick="refreshFlowOrderTable()" title="Refresh">
                                                      <i class="fas fa-sync-alt"></i>
                                                  </button>
                                              </div>
                                          </div>
                                          <p class="mb-0 mt-2 small text-muted">
-                                             This order matches the Quiz Show Slider. Show-wide media (All Media tab) is separate and not listed here.
+                                             This order matches the Quiz Show Slider. Show-wide media (All Media tab) is
+                                             separate and not listed here.
                                          </p>
                                      </div>
 
@@ -728,26 +791,32 @@
                                                              <td><span class="badge bg-info">Media</span></td>
                                                              <td>
                                                                  <div class="d-flex align-items-center gap-2">
-                                                                     <img src="{{ $qMedia->isImage() ? $qMedia->path : ($qMedia->thumbnail ?? $qMedia->path) }}"
-                                                                         alt="" class="rounded" style="width: 48px; height: 36px; object-fit: cover;">
+                                                                     <img src="{{ $qMedia->isImage() ? $qMedia->path : $qMedia->thumbnail ?? $qMedia->path }}"
+                                                                         alt="" class="rounded"
+                                                                         style="width: 48px; height: 36px; object-fit: cover;">
                                                                      <div>
-                                                                         <div class="fw-semibold text-truncate" style="max-width: 280px;">
+                                                                         <div class="fw-semibold text-truncate"
+                                                                             style="max-width: 280px;">
                                                                              {{ $qMedia->title ?? $qMedia->original_name }}
                                                                          </div>
-                                                                         <span class="badge {{ $qMedia->isVideo() ? 'bg-primary' : 'bg-warning text-dark' }}">{{ $qMedia->type }}</span>
+                                                                         <span
+                                                                             class="badge {{ $qMedia->isVideo() ? 'bg-primary' : 'bg-warning text-dark' }}">{{ $qMedia->type }}</span>
                                                                          @if ($qMedia->pivot->media_played ?? false)
-                                                                             <span class="badge bg-success">Played</span>
+                                                                             <span
+                                                                                 class="badge bg-success">Played</span>
                                                                          @endif
                                                                      </div>
                                                                  </div>
                                                              </td>
                                                              <td>
-                                                                 <select class="form-select form-select-sm flow-placement-select"
+                                                                 <select
+                                                                     class="form-select form-select-sm flow-placement-select"
                                                                      data-media-id="{{ $qMedia->id }}"
                                                                      data-from-type="question"
                                                                      data-from-quiz-id="{{ $quiz->id }}">
                                                                      @foreach ($liveShow->quizzes as $optIdx => $optQ)
-                                                                         <option value="q:{{ $optQ->id }}" @if ($optQ->id === $quiz->id) selected @endif>
+                                                                         <option value="q:{{ $optQ->id }}"
+                                                                             @if ($optQ->id === $quiz->id) selected @endif>
                                                                              Before Question {{ $optIdx + 1 }}
                                                                          </option>
                                                                      @endforeach
@@ -756,15 +825,20 @@
                                                              </td>
                                                              <td class="text-end">
                                                                  <div class="btn-group btn-group-sm">
-                                                                     <button type="button" class="btn btn-outline-light flow-move-up-btn" title="Move up in this question group"
+                                                                     <button type="button"
+                                                                         class="btn btn-outline-light flow-move-up-btn"
+                                                                         title="Move up in this question group"
                                                                          onclick="flowMoveQuestionMedia({{ $qMedia->id }}, {{ $quiz->id }}, -1)">
                                                                          <i class="fas fa-arrow-up"></i>
                                                                      </button>
-                                                                     <button type="button" class="btn btn-outline-light flow-move-down-btn" title="Move down in this question group"
+                                                                     <button type="button"
+                                                                         class="btn btn-outline-light flow-move-down-btn"
+                                                                         title="Move down in this question group"
                                                                          onclick="flowMoveQuestionMedia({{ $qMedia->id }}, {{ $quiz->id }}, 1)">
                                                                          <i class="fas fa-arrow-down"></i>
                                                                      </button>
-                                                                     <button type="button" class="btn btn-outline-danger"
+                                                                     <button type="button"
+                                                                         class="btn btn-outline-danger"
                                                                          onclick="flowRemoveMedia('question', {{ $quiz->id }}, {{ $qMedia->id }})">
                                                                          <i class="fas fa-times"></i>
                                                                      </button>
@@ -772,25 +846,34 @@
                                                              </td>
                                                          </tr>
                                                      @else
-                                                         @php $quiz = $slide['quiz']; $qIdx = $slide['quizIndex']; @endphp
-                                                         <tr class="flow-main-row flow-question-row" data-quiz-id="{{ $quiz->id }}">
+                                                         @php
+                                                             $quiz = $slide['quiz'];
+                                                             $qIdx = $slide['quizIndex'];
+                                                         @endphp
+                                                         <tr class="flow-main-row flow-question-row"
+                                                             data-quiz-id="{{ $quiz->id }}">
                                                              <td>{{ $flowMainRow }}</td>
                                                              <td><span class="badge bg-primary">Question</span></td>
                                                              <td>
-                                                                 <div class="fw-semibold">Question {{ $qIdx + 1 }}</div>
-                                                                 <div class="small text-muted text-truncate" style="max-width: 360px;">{{ $quiz->question }}</div>
+                                                                 <div class="fw-semibold">Question {{ $qIdx + 1 }}
+                                                                 </div>
+                                                                 <div class="small text-muted text-truncate"
+                                                                     style="max-width: 360px;">{{ $quiz->question }}
+                                                                 </div>
                                                                  @if ($quiz->has_shown)
                                                                      <span class="badge bg-secondary mt-1">Shown</span>
                                                                  @endif
                                                              </td>
-                                                             <td><span class="text-muted small">Question {{ $qIdx + 1 }}</span></td>
+                                                             <td><span class="text-muted small">Question
+                                                                     {{ $qIdx + 1 }}</span></td>
                                                              <td></td>
                                                          </tr>
                                                      @endif
                                                  @endforeach
                                                  @if ($flowMainRow === 0)
                                                      <tr id="flow-main-empty">
-                                                         <td colspan="5" class="text-center text-muted py-3">No questions in this show yet.</td>
+                                                         <td colspan="5" class="text-center text-muted py-3">No
+                                                             questions in this show yet.</td>
                                                      </tr>
                                                  @endif
                                              </tbody>
@@ -827,20 +910,24 @@
                                                          data-gallery-media-id="{{ $endMedia->id }}"
                                                          data-attachment-type="end"
                                                          data-attachment-id="{{ $endMedia->pivot->id }}">
-                                                         <td class="flow-end-drag-handle text-muted" style="cursor: grab;">
+                                                         <td class="flow-end-drag-handle text-muted"
+                                                             style="cursor: grab;">
                                                              <i class="fas fa-grip-vertical"></i>
                                                          </td>
                                                          <td class="flow-end-index">{{ $flowEndRow }}</td>
                                                          <td><span class="badge bg-success">End media</span></td>
                                                          <td>
                                                              <div class="d-flex align-items-center gap-2">
-                                                                 <img src="{{ $endMedia->isImage() ? $endMedia->path : ($endMedia->thumbnail ?? $endMedia->path) }}"
-                                                                     alt="" class="rounded" style="width: 48px; height: 36px; object-fit: cover;">
+                                                                 <img src="{{ $endMedia->isImage() ? $endMedia->path : $endMedia->thumbnail ?? $endMedia->path }}"
+                                                                     alt="" class="rounded"
+                                                                     style="width: 48px; height: 36px; object-fit: cover;">
                                                                  <div>
-                                                                     <div class="fw-semibold text-truncate" style="max-width: 280px;">
+                                                                     <div class="fw-semibold text-truncate"
+                                                                         style="max-width: 280px;">
                                                                          {{ $endMedia->title ?? $endMedia->original_name }}
                                                                      </div>
-                                                                     <span class="badge {{ $endMedia->isVideo() ? 'bg-primary' : 'bg-warning text-dark' }}">{{ $endMedia->type }}</span>
+                                                                     <span
+                                                                         class="badge {{ $endMedia->isVideo() ? 'bg-primary' : 'bg-warning text-dark' }}">{{ $endMedia->type }}</span>
                                                                      @if ($endMedia->pivot->media_played ?? false)
                                                                          <span class="badge bg-success">Played</span>
                                                                      @endif
@@ -848,18 +935,20 @@
                                                              </div>
                                                          </td>
                                                          <td>
-                                                             <select class="form-select form-select-sm flow-placement-select"
+                                                             <select
+                                                                 class="form-select form-select-sm flow-placement-select"
                                                                  data-media-id="{{ $endMedia->id }}"
-                                                                 data-from-type="end"
-                                                                 data-from-quiz-id="">
+                                                                 data-from-type="end" data-from-quiz-id="">
                                                                  @foreach ($liveShow->quizzes as $optIdx => $optQ)
-                                                                     <option value="q:{{ $optQ->id }}">Before Question {{ $optIdx + 1 }}</option>
+                                                                     <option value="q:{{ $optQ->id }}">Before
+                                                                         Question {{ $optIdx + 1 }}</option>
                                                                  @endforeach
                                                                  <option value="end" selected>At the end</option>
                                                              </select>
                                                          </td>
                                                          <td class="text-end">
-                                                             <button type="button" class="btn btn-sm btn-outline-danger"
+                                                             <button type="button"
+                                                                 class="btn btn-sm btn-outline-danger"
                                                                  onclick="flowRemoveMedia('end', null, {{ $endMedia->id }})">
                                                                  <i class="fas fa-times"></i>
                                                              </button>
@@ -868,7 +957,8 @@
                                                  @endforeach
                                                  @if ($flowEndRow === 0)
                                                      <tr id="flow-end-empty">
-                                                         <td colspan="6" class="text-center text-muted py-3">No end media. Use &quot;At the end&quot; when adding media.</td>
+                                                         <td colspan="6" class="text-center text-muted py-3">No end
+                                                             media. Use &quot;At the end&quot; when adding media.</td>
                                                      </tr>
                                                  @endif
                                              </tbody>
@@ -881,91 +971,109 @@
                              <div class="tab-pane fade" id="all-questions-tab" role="tabpanel"
                                  aria-labelledby="all-questions-tab-btn">
                                  <div class="p-3 rounded bg-dark">
-                                     @forelse ($liveShow->quizzes as $index => $quiz)
-                                         <div class="mb-4 border card" id="all-questions-item-{{ $quiz->id }}">
-                                             <div class="position-relative card-body">
-                                                 <button type="button"
-                                                     class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 reset-shown-status-btn @if (!$quiz->has_shown) d-none @endif"
-                                                     onclick="resetShownStatus({{ $quiz->id }}, this)"
-                                                     id="allQuestionsResetBtn-{{ $quiz->id }}"
-                                                     title="Reset shown status">
-                                                     <i class="fas fa-undo me-1"></i> Reset shown status
-                                                 </button>
-                                                 <div class="mb-4 text-center fw-bold">
-                                                     <div class="mb-2">Question {{ $index + 1 }} / {{ $totalQuestions }}</div>
-                                                     <div class="question-text">{{ $quiz->question }}</div>
-                                                 </div>
-                                                 @if ($quiz->options)
-                                                     <div class="mb-4 row g-3">
-                                                         @foreach ($quiz->options as $option)
-                                                             <div class="col-md-12">
-                                                                 <div class="p-3 border rounded @if ($option->is_correct) border-success @endif">
-                                                                     <div class="mb-2 d-flex justify-content-between">
-                                                                         <span class="fw-bold @if ($option->is_correct) text-success @endif">
-                                                                             {{ $option->option_text }}
-                                                                             @if ($option->is_correct)
-                                                                                 <i class="fas fa-check-circle ms-1"></i>
+                                     @if ($liveShow->quizzes->isEmpty())
+                                         <p class="mb-0 text-center text-muted py-4">No questions in this show.</p>
+                                     @else
+                                         <div class="table-responsive">
+                                             <table class="table table-dark table-hover align-middle mb-0 all-questions-table">
+                                                 <thead class="table-secondary">
+                                                     <tr>
+                                                         <th style="width: 52px;" class="text-center">#</th>
+                                                         <th>Question</th>
+                                                     </tr>
+                                                 </thead>
+                                                 <tbody>
+                                                     @foreach ($liveShow->quizzes as $index => $quiz)
+                                                         <tr id="all-questions-item-{{ $quiz->id }}">
+                                                             <td class="text-center fw-bold text-muted align-top pt-3">
+                                                                 {{ $index + 1 }}
+                                                             </td>
+                                                             <td class="p-0">
+                                                                 <div class="p-3">
+                                                                     <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
+                                                                         <div class="flex-grow-1">
+                                                                             <span class="badge bg-secondary mb-2">Question {{ $index + 1 }} / {{ $totalQuestions }}</span>
+                                                                             @if ($quiz->has_shown)
+                                                                                 <span class="badge bg-success ms-1" id="allQuestionsShownBadge-{{ $quiz->id }}">Shown</span>
+                                                                             @else
+                                                                                 <span class="badge bg-success ms-1 d-none" id="allQuestionsShownBadge-{{ $quiz->id }}">Shown</span>
                                                                              @endif
-                                                                         </span>
-                                                                         <span class="small fw-bold" id="all-q-option-label-{{ $option->id }}">0%</span>
+                                                                             <div class="fw-semibold question-text mt-1">{{ $quiz->question }}</div>
+                                                                         </div>
+                                                                         <button type="button"
+                                                                             class="btn btn-sm btn-outline-danger reset-shown-status-btn flex-shrink-0 @if (!$quiz->has_shown) d-none @endif"
+                                                                             onclick="resetShownStatus({{ $quiz->id }}, this)"
+                                                                             id="allQuestionsResetBtn-{{ $quiz->id }}"
+                                                                             title="Reset shown status">
+                                                                             <i class="fas fa-undo me-1"></i> Reset
+                                                                         </button>
                                                                      </div>
-                                                                     <div class="progress" style="height: 8px;">
-                                                                         <div id="all-q-option-bar-{{ $option->id }}"
-                                                                             class="progress-bar @if ($option->is_correct) bg-success @else bg-primary @endif"
-                                                                             role="progressbar" style="width: 0%"></div>
-                                                                     </div>
-                                                                 </div>
-                                                             </div>
-                                                         @endforeach
-                                                     </div>
-                                                     <form method="POST"
-                                                         id="all-questions-timer-form-{{ $quiz->id }}"
-                                                         onsubmit="submitQuizTimerForm(event, {{ $quiz->id }})"
-                                                         data-has-shown="{{ $quiz->has_shown ? 1 : 0 }}"
-                                                         class="row g-2 align-items-center justify-content-center">
-                                                         @csrf
-                                                         <div class="col-auto">
-                                                             <div class="input-group">
-                                                                 <span class="bg-white input-group-text"><i class="fas fa-stopwatch text-muted"></i></span>
-                                                                 <input type="number" min="1" name="seconds"
-                                                                     id="all-questions-timer-{{ $quiz->id }}"
-                                                                     value="10"
-                                                                     class="text-center form-control fw-bold"
-                                                                     style="width: 80px;" required>
-                                                             </div>
-                                                         </div>
-                                                         @if ($index === $totalQuestions - 1)
-                                                             <input type="hidden" name="is_last" value="1">
-                                                         @endif
-                                                         <div class="col-auto">
-                                                             <div class="shadow-sm btn-group">
-                                                                 <button type="{{ $quiz->has_shown ? 'button' : 'submit' }}"
-                                                                     class="px-3 btn btn-success" data-quiz-start
-                                                                     @if ($quiz->has_shown) disabled aria-disabled="true" @endif>
-                                                                     @if ($quiz->has_shown)
-                                                                         Question shown
-                                                                     @else
-                                                                         <i class="fas fa-play me-2"></i> Show
+
+                                                                     @if ($quiz->options)
+                                                                         <div class="row g-2 mb-3">
+                                                                             @foreach ($quiz->options as $option)
+                                                                                 <div class="col-6 col-xl-3">
+                                                                                     <div class="p-2 h-100 border rounded all-q-option-cell @if ($option->is_correct) border-success @endif">
+                                                                                         <div class="mb-1 d-flex justify-content-between gap-1">
+                                                                                             <span class="small fw-semibold @if ($option->is_correct) text-success @endif">
+                                                                                                 {{ $option->option_text }}
+                                                                                                 @if ($option->is_correct)
+                                                                                                     <i class="fas fa-check-circle ms-1"></i>
+                                                                                                 @endif
+                                                                                             </span>
+                                                                                             <span class="small fw-bold text-nowrap"
+                                                                                                 id="all-q-option-label-{{ $option->id }}">0%</span>
+                                                                                         </div>
+                                                                                         <div class="progress" style="height: 6px;">
+                                                                                             <div id="all-q-option-bar-{{ $option->id }}"
+                                                                                                 class="progress-bar @if ($option->is_correct) bg-success @else bg-primary @endif"
+                                                                                                 role="progressbar" style="width: 0%"></div>
+                                                                                         </div>
+                                                                                     </div>
+                                                                                 </div>
+                                                                             @endforeach
+                                                                         </div>
+
+                                                                         <form method="POST"
+                                                                             id="all-questions-timer-form-{{ $quiz->id }}"
+                                                                             onsubmit="submitQuizTimerForm(event, {{ $quiz->id }})"
+                                                                             data-has-shown="{{ $quiz->has_shown ? 1 : 0 }}"
+                                                                             class="d-flex flex-wrap align-items-center gap-2 pt-2 border-top border-secondary">
+                                                                             @csrf
+                                                                             <input type="hidden" name="seconds" value="10">
+                                                                             @if ($index === $totalQuestions - 1)
+                                                                                 <input type="hidden" name="is_last" value="1">
+                                                                             @endif
+                                                                             <div class="btn-group btn-group-sm shadow-sm">
+                                                                                 <button type="{{ $quiz->has_shown ? 'button' : 'submit' }}"
+                                                                                     class="btn btn-success" data-quiz-start
+                                                                                     @if ($quiz->has_shown) disabled aria-disabled="true" @endif>
+                                                                                     @if ($quiz->has_shown)
+                                                                                         Question shown
+                                                                                     @else
+                                                                                         <i class="fas fa-play me-1"></i> Show
+                                                                                     @endif
+                                                                                 </button>
+                                                                                 <button type="button"
+                                                                                     onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }}, this)"
+                                                                                     class="btn btn-info text-white">
+                                                                                     <i class="fas fa-chart-bar me-1"></i> Responses
+                                                                                 </button>
+                                                                                 <button type="button" class="btn btn-danger"
+                                                                                     onclick="removeQuiz({{ $quiz->id }}, this)">
+                                                                                     <i class="fas fa-times me-1"></i> Hide
+                                                                                 </button>
+                                                                             </div>
+                                                                         </form>
                                                                      @endif
-                                                                 </button>
-                                                                 <button type="button"
-                                                                     onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }}, this)"
-                                                                     class="px-3 text-white btn btn-info">
-                                                                     <i class="fas fa-chart-bar me-2"></i> Show Responses
-                                                                 </button>
-                                                                 <button class="px-3 btn btn-danger" type="button"
-                                                                     onclick="removeQuiz({{ $quiz->id }}, this)">
-                                                                     <i class="fas fa-times me-2"></i> Hide
-                                                                 </button>
-                                                             </div>
-                                                         </div>
-                                                     </form>
-                                                 @endif
-                                             </div>
+                                                                 </div>
+                                                             </td>
+                                                         </tr>
+                                                     @endforeach
+                                                 </tbody>
+                                             </table>
                                          </div>
-                                     @empty
-                                         <p class="mb-0 text-center text-muted">No questions in this show.</p>
-                                     @endforelse
+                                     @endif
                                  </div>
                              </div>
 
@@ -1048,7 +1156,7 @@
                              </li>
                          </ul>
                      </div>
-                     <div class="p-0 card-body" style="overflow: scroll;  min-height: 80vh; height: auto">
+                     <div class="p-0 card-body" style="o height: auto">
                          <div class="tab-content">
                              <div class="tab-pane fade show active" id="chat-tab">
                                  <div class="p-3">
@@ -1302,6 +1410,14 @@
              #quizQuestionsCarousel .carousel-control-next:hover .carousel-control-next-icon {
                  background-color: rgba(13, 110, 253, 1);
              }
+
+             .all-questions-table tbody tr:not(:last-child) td {
+                 border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+             }
+
+             .all-questions-table .all-q-option-cell {
+                 background: rgba(255, 255, 255, 0.04);
+             }
          </style>
          <style>
              /* Custom Styling for the Admin Dashboard */
@@ -1444,6 +1560,8 @@
              let playerSearchDebounceTimer = null;
              let liveShowStatus = '{{ $liveShow->status }}';
              let liveShowWinnersAnnounced = {{ $liveShow->winners_announced ? 'true' : 'false' }};
+             let mediaSkipWarningShown = false;
+             let carouselSlideBypass = false;
 
              var pusher = new Pusher('{{ env('PUSHER_APP_KEY', '2a66d003a7ded9fe567a') }}', {
                  cluster: '{{ env('PUSHER_APP_CLUSTER', 'eu') }}',
@@ -2154,93 +2272,125 @@
                  }, 500);
              }
 
-            function markQuizQuestionAsShown(form) {
-                const btn = form.querySelector('[data-quiz-start]');
-                if (!btn) {
-                    return;
-                }
-                btn.type = 'button';
-                btn.disabled = true;
-                btn.setAttribute('aria-disabled', 'true');
-                btn.innerHTML = 'Question shown';
+             function markQuizQuestionAsShown(form) {
+                 const quizId = form.id
+                     .replace('quiz-timer-form-', '')
+                     .replace('all-questions-timer-form-', '');
+                 const forms = [
+                     document.getElementById(`quiz-timer-form-${quizId}`),
+                     document.getElementById(`all-questions-timer-form-${quizId}`),
+                 ].filter(Boolean);
+                 forms.forEach(function(f) {
+                     f.dataset.hasShown = '1';
+                     const btn = f.querySelector('[data-quiz-start]');
+                     if (!btn) {
+                         return;
+                     }
+                     btn.type = 'button';
+                     btn.disabled = true;
+                     btn.setAttribute('aria-disabled', 'true');
+                     btn.innerHTML = 'Question shown';
+                 });
+                 const resetBtn = document.getElementById(`resetShownStatusBtn-${quizId}`);
+                 if (resetBtn) {
+                     resetBtn.classList.remove('d-none');
+                 }
+                 const allResetBtn = document.getElementById(`allQuestionsResetBtn-${quizId}`);
+                 if (allResetBtn) {
+                     allResetBtn.classList.remove('d-none');
+                 }
+                 const shownBadge = document.getElementById(`allQuestionsShownBadge-${quizId}`);
+                 if (shownBadge) {
+                     shownBadge.classList.remove('d-none');
+                 }
+             }
 
-                const quizId = form.id.replace('quiz-timer-form-', '');
-                const resetBtn = document.getElementById(`resetShownStatusBtn-${quizId}`);
-                if (resetBtn) {
-                    resetBtn.classList.remove('d-none');
-                }
-            }
+             function revertQuizQuestionToShowable(quizId) {
+                 const forms = [
+                     document.getElementById(`quiz-timer-form-${quizId}`),
+                     document.getElementById(`all-questions-timer-form-${quizId}`),
+                 ].filter(Boolean);
+                 forms.forEach(function(form) {
+                     form.dataset.hasShown = '0';
+                     const btn = form.querySelector('[data-quiz-start]');
+                     if (btn) {
+                         btn.type = 'submit';
+                         btn.disabled = false;
+                         btn.removeAttribute('aria-disabled');
+                         btn.innerHTML = '<i class="fas fa-play me-1"></i> Show';
+                     }
+                 });
+                 const resetBtn = document.getElementById(`resetShownStatusBtn-${quizId}`);
+                 if (resetBtn) {
+                     resetBtn.classList.add('d-none');
+                 }
+                 const allResetBtn = document.getElementById(`allQuestionsResetBtn-${quizId}`);
+                 if (allResetBtn) {
+                     allResetBtn.classList.add('d-none');
+                 }
+                 const shownBadge = document.getElementById(`allQuestionsShownBadge-${quizId}`);
+                 if (shownBadge) {
+                     shownBadge.classList.add('d-none');
+                 }
+             }
 
-            function revertQuizQuestionToShowable(quizId) {
-                const form = document.getElementById(`quiz-timer-form-${quizId}`);
-                if (form) {
-                    form.dataset.hasShown = '0';
-                    const btn = form.querySelector('[data-quiz-start]');
-                    if (btn) {
-                        btn.type = 'submit';
-                        btn.disabled = false;
-                        btn.removeAttribute('aria-disabled');
-                        btn.innerHTML = '<i class="fas fa-play me-2"></i> Show';
-                    }
-                }
-                const resetBtn = document.getElementById(`resetShownStatusBtn-${quizId}`);
-                if (resetBtn) {
-                    resetBtn.classList.add('d-none');
-                }
-            }
-
-            function resetShownStatus(quizId, btn) {
-                streamSwalConfirm({
-                    title: 'Reset shown status?',
-                    text: 'This will mark the question as not shown so you can show it again.',
-                    confirmButtonText: 'Yes, reset',
-                }).then(function(result) {
-                    if (!result.isConfirmed) {
-                        return;
-                    }
-                    if (btn) {
-                        setBtnBusy(btn, true, 'Resetting\u2026');
-                    }
-                    fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/quizzes/${quizId}/reset-shown-status`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Accept': 'application/json',
-                            },
-                        })
-                        .then(async response => {
-                            const data = await response.json();
-                            if (!response.ok) {
-                                const error = new Error(data.message || 'Could not reset shown status');
-                                error.status = response.status;
-                                throw error;
-                            }
-                            return data;
-                        })
-                        .then(data => {
-                            hideQuizTimer();
-                            revertQuizQuestionToShowable(quizId);
-                            streamSwalSuccess(data.message || 'Question shown status has been reset.',
-                                'Status reset');
-                        })
-                        .catch(error => {
-                            console.error('Error resetting shown status:', error);
-                            streamSwalError(error?.message ||
-                                'Could not reset the shown status. Please try again.', 'Reset failed');
-                        })
-                        .finally(() => {
-                            if (btn) {
-                                setBtnBusy(btn, false);
-                            }
-                        });
-                });
-            }
+             function resetShownStatus(quizId, btn) {
+                 streamSwalConfirm({
+                     title: 'Reset shown status?',
+                     text: 'This will mark the question as not shown so you can show it again.',
+                     confirmButtonText: 'Yes, reset',
+                 }).then(function(result) {
+                     if (!result.isConfirmed) {
+                         return;
+                     }
+                     if (btn) {
+                         setBtnBusy(btn, true, 'Resetting\u2026');
+                     }
+                     fetch(`{{ url('admin/live-shows/stream-management') }}/{{ $liveShow->id }}/quizzes/${quizId}/reset-shown-status`, {
+                             method: 'POST',
+                             headers: {
+                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                 'Accept': 'application/json',
+                             },
+                         })
+                         .then(async response => {
+                             const data = await response.json();
+                             if (!response.ok) {
+                                 const error = new Error(data.message || 'Could not reset shown status');
+                                 error.status = response.status;
+                                 throw error;
+                             }
+                             return data;
+                         })
+                         .then(data => {
+                             hideQuizTimer();
+                             revertQuizQuestionToShowable(quizId);
+                             streamSwalSuccess(data.message || 'Question shown status has been reset.',
+                                 'Status reset');
+                         })
+                         .catch(error => {
+                             console.error('Error resetting shown status:', error);
+                             streamSwalError(error?.message ||
+                                 'Could not reset the shown status. Please try again.', 'Reset failed');
+                         })
+                         .finally(() => {
+                             if (btn) {
+                                 setBtnBusy(btn, false);
+                             }
+                         });
+                 });
+             }
 
              function submitQuizTimerForm(event, quizId) {
                  event.preventDefault();
-                 const form = document.getElementById(`quiz-timer-form-${quizId}`);
+                 const form = event.target.closest('form')
+                     || document.getElementById(`quiz-timer-form-${quizId}`)
+                     || document.getElementById(`all-questions-timer-form-${quizId}`);
+                 if (!form) {
+                     return;
+                 }
                  const formData = new FormData(form);
-                 const seconds = formData.get('seconds');
+                 const seconds = formData.get('seconds') || 10;
                  const isLast = formData.get('is_last') ? true : false;
                  const startBtn = form.querySelector('[data-quiz-start]');
                  const hasShown = form.dataset.hasShown === '1';
@@ -2500,13 +2650,13 @@
                      if (payload.seconds) {
                          showQuizTimer(payload.seconds, payload.quizId);
                      }
-                } else if (payload.action === 'hidden') {
-                    hideQuizTimer();
-                } else if (payload.action === 'reset') {
-                    hideQuizTimer();
-                    revertQuizQuestionToShowable(payload.quizId);
-                }
-            }
+                 } else if (payload.action === 'hidden') {
+                     hideQuizTimer();
+                 } else if (payload.action === 'reset') {
+                     hideQuizTimer();
+                     revertQuizQuestionToShowable(payload.quizId);
+                 }
+             }
 
              var channelAdminState = pusher.subscribe('live-show-admin.{{ $liveShow->id }}');
              channelAdminState.bind('pusher:subscription_succeeded', function() {
@@ -2607,28 +2757,23 @@
                      ack.classList.remove('d-none');
                  }
                  liveShowWinnersAnnounced = true;
-                 const unBtn = document.getElementById('unannounceWinnersBtn');
-                 if (unBtn) {
-                     unBtn.classList.remove('d-none');
-                     unBtn.disabled = false;
+                 const extraBtn = document.getElementById('winnersExtraActionsBtn');
+                 if (extraBtn) {
+                     extraBtn.classList.remove('d-none');
                  }
-                const announcedActions = document.getElementById('winnersAnnouncedActions');
-                if (announcedActions) {
-                    announcedActions.classList.remove('d-none');
-                }
-                const showWinnerTabBtn = document.getElementById('showWinnerTabBtn');
-                const hideWinnerTabBtn = document.getElementById('hideWinnerTabBtn');
-                if (showWinnerTabBtn) {
-                    showWinnerTabBtn.disabled = false;
-                    showWinnerTabBtn.removeAttribute('aria-disabled');
-                }
-                if (hideWinnerTabBtn) {
-                    hideWinnerTabBtn.disabled = false;
-                    hideWinnerTabBtn.removeAttribute('aria-disabled');
-                }
-            }
+                 const showWinnerTabBtn = document.getElementById('showWinnerTabBtn');
+                 const hideWinnerTabBtn = document.getElementById('hideWinnerTabBtn');
+                 if (showWinnerTabBtn) {
+                     showWinnerTabBtn.disabled = false;
+                     showWinnerTabBtn.removeAttribute('aria-disabled');
+                 }
+                 if (hideWinnerTabBtn) {
+                     hideWinnerTabBtn.disabled = false;
+                     hideWinnerTabBtn.removeAttribute('aria-disabled');
+                 }
+             }
 
-            function setUnannounceWinnersLoading(isLoading) {
+             function setUnannounceWinnersLoading(isLoading) {
                  const btn = document.getElementById('unannounceWinnersBtn');
                  const label = document.getElementById('unannounceWinnersBtnLabel');
                  const loader = document.getElementById('unannounceWinnersBtnLoader');
@@ -2652,7 +2797,6 @@
                  const loader = document.getElementById('announceWinnersBtnLoader');
                  const done = document.getElementById('announceWinnersBtnDone');
                  const ack = document.getElementById('announceWinnersAckMessage');
-                 const unBtn = document.getElementById('unannounceWinnersBtn');
                  liveShowWinnersAnnounced = false;
                  if (btn) {
                      btn.disabled = false;
@@ -2669,27 +2813,27 @@
                  if (ack) {
                      ack.classList.add('d-none');
                  }
+                 const extraBtn = document.getElementById('winnersExtraActionsBtn');
+                 if (extraBtn) {
+                     extraBtn.classList.add('d-none');
+                 }
+                 const unBtn = document.getElementById('unannounceWinnersBtn');
                  if (unBtn) {
-                     unBtn.classList.add('d-none');
                      unBtn.disabled = false;
                  }
-                const announcedActions = document.getElementById('winnersAnnouncedActions');
-                if (announcedActions) {
-                    announcedActions.classList.add('d-none');
-                }
-                const showWinnerTabBtn = document.getElementById('showWinnerTabBtn');
-                const hideWinnerTabBtn = document.getElementById('hideWinnerTabBtn');
-                if (showWinnerTabBtn) {
-                    showWinnerTabBtn.disabled = true;
-                    showWinnerTabBtn.setAttribute('aria-disabled', 'true');
-                }
-                if (hideWinnerTabBtn) {
-                    hideWinnerTabBtn.disabled = true;
-                    hideWinnerTabBtn.setAttribute('aria-disabled', 'true');
-                }
-            }
+                 const showWinnerTabBtn = document.getElementById('showWinnerTabBtn');
+                 const hideWinnerTabBtn = document.getElementById('hideWinnerTabBtn');
+                 if (showWinnerTabBtn) {
+                     showWinnerTabBtn.disabled = true;
+                     showWinnerTabBtn.setAttribute('aria-disabled', 'true');
+                 }
+                 if (hideWinnerTabBtn) {
+                     hideWinnerTabBtn.disabled = true;
+                     hideWinnerTabBtn.setAttribute('aria-disabled', 'true');
+                 }
+             }
 
-            function unannounceWinners() {
+             function unannounceWinners() {
                  if (!liveShowWinnersAnnounced) {
                      return;
                  }
@@ -2728,6 +2872,10 @@
                                  return;
                              }
                              applyUnannounceWinnersCompleted();
+                             const modalEl = document.getElementById('winnersExtraActionsModal');
+                             if (modalEl && typeof bootstrap !== 'undefined') {
+                                 bootstrap.Modal.getInstance(modalEl)?.hide();
+                             }
                              streamSwalSuccess(
                                  (result.data && result.data.message) ? result.data.message :
                                  'Winners announcement cleared.',
@@ -2806,89 +2954,89 @@
                  });
              }
 
-            // Send a web-push notification to every player of this live show.
-            function notifyPlayers() {
-                var btn = document.getElementById('notifyPlayersBtn');
-                var titleInput = document.getElementById('pushNotifyTitle');
-                var messageInput = document.getElementById('pushNotifyMessage');
+             // Send a web-push notification to every player of this live show.
+             function notifyPlayers() {
+                 var btn = document.getElementById('notifyPlayersBtn');
+                 var titleInput = document.getElementById('pushNotifyTitle');
+                 var messageInput = document.getElementById('pushNotifyMessage');
 
-                var title = titleInput ? titleInput.value.trim() : '';
-                var message = messageInput ? messageInput.value.trim() : '';
+                 var title = titleInput ? titleInput.value.trim() : '';
+                 var message = messageInput ? messageInput.value.trim() : '';
 
-                if (!message) {
-                    streamSwalWarning('Please enter a notification message.', 'Message required');
-                    return;
-                }
+                 if (!message) {
+                     streamSwalWarning('Please enter a notification message.', 'Message required');
+                     return;
+                 }
 
-                streamSwalConfirm({
-                    title: 'Send push notification?',
-                    text: 'All players of this show who enabled notifications will receive this alert on their devices.',
-                    confirmButtonText: 'Yes, send notification',
-                }).then(function(result) {
-                    if (!result.isConfirmed) {
-                        return;
-                    }
+                 streamSwalConfirm({
+                     title: 'Send push notification?',
+                     text: 'All players of this show who enabled notifications will receive this alert on their devices.',
+                     confirmButtonText: 'Yes, send notification',
+                 }).then(function(result) {
+                     if (!result.isConfirmed) {
+                         return;
+                     }
 
-                    // Swap the button into its loading state while we queue the push.
-                    setNotifyPlayersLoading(btn, true);
+                     // Swap the button into its loading state while we queue the push.
+                     setNotifyPlayersLoading(btn, true);
 
-                    fetch(`{{ route('admin.live-shows.notify-players', ['liveShowId' => $liveShow->id]) }}`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                title: title,
-                                message: message,
-                            }),
-                        })
-                        .then(function(response) {
-                            return response.json().then(function(data) {
-                                return {
-                                    ok: response.ok,
-                                    status: response.status,
-                                    data: data
-                                };
-                            });
-                        })
-                        .then(function(result) {
-                            setNotifyPlayersLoading(btn, false);
-                            if (!result.ok) {
-                                streamSwalWarning(
-                                    (result.data && result.data.message) ? result.data.message :
-                                    'Could not send the push notification.',
-                                    'Notification not sent');
-                                return;
-                            }
-                            streamSwalSuccess(
-                                (result.data && result.data.message) ? result.data.message :
-                                'Push notification has been queued.',
-                                'Notification queued');
-                        })
-                        .catch(function(error) {
-                            console.error('Error sending push notification:', error);
-                            setNotifyPlayersLoading(btn, false);
-                            streamSwalError('Could not send the push notification. Please try again.',
-                                'Notification failed');
-                        });
-                });
-            }
+                     fetch(`{{ route('admin.live-shows.notify-players', ['liveShowId' => $liveShow->id]) }}`, {
+                             method: 'POST',
+                             headers: {
+                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                 'Content-Type': 'application/json',
+                                 'Accept': 'application/json',
+                             },
+                             body: JSON.stringify({
+                                 title: title,
+                                 message: message,
+                             }),
+                         })
+                         .then(function(response) {
+                             return response.json().then(function(data) {
+                                 return {
+                                     ok: response.ok,
+                                     status: response.status,
+                                     data: data
+                                 };
+                             });
+                         })
+                         .then(function(result) {
+                             setNotifyPlayersLoading(btn, false);
+                             if (!result.ok) {
+                                 streamSwalWarning(
+                                     (result.data && result.data.message) ? result.data.message :
+                                     'Could not send the push notification.',
+                                     'Notification not sent');
+                                 return;
+                             }
+                             streamSwalSuccess(
+                                 (result.data && result.data.message) ? result.data.message :
+                                 'Push notification has been queued.',
+                                 'Notification queued');
+                         })
+                         .catch(function(error) {
+                             console.error('Error sending push notification:', error);
+                             setNotifyPlayersLoading(btn, false);
+                             streamSwalError('Could not send the push notification. Please try again.',
+                                 'Notification failed');
+                         });
+                 });
+             }
 
-            // Toggle the spinner/label on the "Send Push" button.
-            function setNotifyPlayersLoading(btn, loading) {
-                if (!btn) return;
-                var label = btn.querySelector('.notify-players-label');
-                var loader = btn.querySelector('.notify-players-loader');
-                btn.disabled = loading;
-                if (label) label.classList.toggle('d-none', loading);
-                if (loader) loader.classList.toggle('d-none', !loading);
-            }
+             // Toggle the spinner/label on the "Send Push" button.
+             function setNotifyPlayersLoading(btn, loading) {
+                 if (!btn) return;
+                 var label = btn.querySelector('.notify-players-label');
+                 var loader = btn.querySelector('.notify-players-loader');
+                 btn.disabled = loading;
+                 if (label) label.classList.toggle('d-none', loading);
+                 if (loader) loader.classList.toggle('d-none', !loading);
+             }
 
-            function hideWinnerTab(btn) {
-                streamSwalConfirm({
-                    title: 'Hide winner tab?',
+             function hideWinnerTab(btn) {
+                 streamSwalConfirm({
+                     title: 'Hide winner tab?',
                      text: 'Participants will no longer see the winners tab in the live show.',
                      confirmButtonText: 'Yes, hide tab',
                  }).then(function(result) {
@@ -2961,6 +3109,59 @@
              }
          </script>
          <script>
+             function isQuestionMediaCarouselSlide(slideEl) {
+                 return slideEl &&
+                     slideEl.dataset.slideType === 'media' &&
+                     slideEl.dataset.attachmentType === 'question';
+             }
+
+             function initCarouselMediaSkipGuard(carouselEl) {
+                 if (!carouselEl) return;
+
+                 carouselEl.addEventListener('slid.bs.carousel', function(e) {
+                     const items = carouselEl.querySelectorAll('.carousel-item');
+                     const activeSlide = items[e.to];
+                     if (isQuestionMediaCarouselSlide(activeSlide)) {
+                         mediaSkipWarningShown = false;
+                     }
+                 });
+
+                 carouselEl.addEventListener('slide.bs.carousel', function(e) {
+                     if (carouselSlideBypass) {
+                         carouselSlideBypass = false;
+                         return;
+                     }
+                     if (liveShowStatus !== 'live' || e.direction !== 'left') {
+                         return;
+                     }
+
+                     const items = carouselEl.querySelectorAll('.carousel-item');
+                     const fromSlide = items[e.from];
+                     if (!isQuestionMediaCarouselSlide(fromSlide)) {
+                         return;
+                     }
+
+                     if (mediaSkipWarningShown) {
+                         return;
+                     }
+
+                     e.preventDefault();
+                     mediaSkipWarningShown = true;
+
+                     streamSwalConfirm({
+                         title: 'Skip media?',
+                         text: 'Do you want to skip the media before this question?',
+                         confirmButtonText: 'Yes, skip',
+                         cancelButtonText: 'No, stay',
+                     }).then(function(result) {
+                         if (result.isConfirmed) {
+                             carouselSlideBypass = true;
+                             bootstrap.Carousel.getOrCreateInstance(carouselEl).to(e.to);
+                         }
+                     });
+                 });
+             }
+
              document.addEventListener('DOMContentLoaded', function() {
                  const quizCarouselEl = document.getElementById('quizQuestionsCarousel');
                  if (quizCarouselEl && typeof bootstrap !== 'undefined') {
@@ -2969,6 +3170,11 @@
                          wrap: false,
                          touch: true
                      });
+                     initCarouselMediaSkipGuard(quizCarouselEl);
+                     const initialSlide = quizCarouselEl.querySelector('.carousel-item.active');
+                     if (isQuestionMediaCarouselSlide(initialSlide)) {
+                         mediaSkipWarningShown = false;
+                     }
                  }
              });
 
@@ -3145,8 +3351,8 @@
                  // Syntax: new QRCode(element, options);
                  const qrcode = new QRCode(qrcodeContainer, {
                      text: dataToEncode,
-                     width: 120,
-                     height: 120,
+                     width: 160,
+                     height: 160,
                      colorDark: "#000000",
                      colorLight: "#ffffff",
                      correctLevel: QRCode.CorrectLevel.H // High error correction level
@@ -3212,59 +3418,62 @@
 
 
 
-            // Advance to the next carousel slide (media → question, or next item).
-            function skipQuestionMediaSlide() {
-                const el = document.getElementById('quizQuestionsCarousel');
-                if (el && typeof bootstrap !== 'undefined') {
-                    bootstrap.Carousel.getOrCreateInstance(el).next();
-                }
-            }
+             // Advance to the next carousel slide (media → question, or next item).
+             function skipQuestionMediaSlide() {
+                 const el = document.getElementById('quizQuestionsCarousel');
+                 if (el && typeof bootstrap !== 'undefined') {
+                     bootstrap.Carousel.getOrCreateInstance(el).next();
+                 }
+             }
 
-            function flowJsonPost(url, body) {
-                return fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': galleryCsrf,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(body),
-                }).then(r => r.json());
-            }
+             function flowJsonPost(url, body) {
+                 return fetch(url, {
+                     method: 'POST',
+                     headers: {
+                         'X-CSRF-TOKEN': galleryCsrf,
+                         'Accept': 'application/json',
+                         'Content-Type': 'application/json',
+                     },
+                     body: JSON.stringify(body),
+                 }).then(r => r.json());
+             }
 
-            function flowPlacementOptionsHtml(selectedType, selectedQuizId) {
-                let html = '';
-                (showFlowQuestions || []).forEach(function(q) {
-                    const sel = selectedType === 'question' && selectedQuizId === q.id ? ' selected' : '';
-                    html += `<option value="q:${q.id}"${sel}>Before Question ${q.num}</option>`;
-                });
-                const endSel = selectedType === 'end' ? ' selected' : '';
-                html += `<option value="end"${endSel}>At the end</option>`;
-                return html;
-            }
+             function flowPlacementOptionsHtml(selectedType, selectedQuizId) {
+                 let html = '';
+                 (showFlowQuestions || []).forEach(function(q) {
+                     const sel = selectedType === 'question' && selectedQuizId === q.id ? ' selected' : '';
+                     html += `<option value="q:${q.id}"${sel}>Before Question ${q.num}</option>`;
+                 });
+                 const endSel = selectedType === 'end' ? ' selected' : '';
+                 html += `<option value="end"${endSel}>At the end</option>`;
+                 return html;
+             }
 
-            function refreshFlowOrderTable() {
-                return fetch(flowOrderUrl, {
-                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': galleryCsrf },
-                }).then(r => r.json()).then(function(data) {
-                    if (!data.success) return;
-                    const mainTbody = document.getElementById('flow-main-tbody');
-                    const endTbody = document.getElementById('flow-end-tbody');
-                    if (!mainTbody || !endTbody) return;
+             function refreshFlowOrderTable() {
+                 return fetch(flowOrderUrl, {
+                     headers: {
+                         'Accept': 'application/json',
+                         'X-CSRF-TOKEN': galleryCsrf
+                     },
+                 }).then(r => r.json()).then(function(data) {
+                     if (!data.success) return;
+                     const mainTbody = document.getElementById('flow-main-tbody');
+                     const endTbody = document.getElementById('flow-end-tbody');
+                     if (!mainTbody || !endTbody) return;
 
-                    mainTbody.innerHTML = (data.main || []).length === 0
-                        ? '<tr id="flow-main-empty"><td colspan="5" class="text-center text-muted py-3">No questions in this show yet.</td></tr>'
-                        : (data.main || []).map(function(item) {
-                            if (item.type === 'question') {
-                                return `<tr class="flow-main-row flow-question-row" data-quiz-id="${item.quiz_id}">
+                     mainTbody.innerHTML = (data.main || []).length === 0 ?
+                         '<tr id="flow-main-empty"><td colspan="5" class="text-center text-muted py-3">No questions in this show yet.</td></tr>' :
+                         (data.main || []).map(function(item) {
+                             if (item.type === 'question') {
+                                 return `<tr class="flow-main-row flow-question-row" data-quiz-id="${item.quiz_id}">
                                     <td>${item.row}</td>
                                     <td><span class="badge bg-primary">Question</span></td>
                                     <td><div class="fw-semibold">Question ${item.quiz_num}</div>
                                         <div class="small text-muted text-truncate" style="max-width:360px">${escapeFlowHtml(item.question)}</div>
                                         ${item.has_shown ? '<span class="badge bg-secondary mt-1">Shown</span>' : ''}</td>
                                     <td><span class="text-muted small">Question ${item.quiz_num}</span></td><td></td></tr>`;
-                            }
-                            return `<tr class="flow-main-row flow-media-row" data-gallery-media-id="${item.gallery_media_id}"
+                             }
+                             return `<tr class="flow-main-row flow-media-row" data-gallery-media-id="${item.gallery_media_id}"
                                 data-attachment-type="question" data-attachment-id="${item.attachment_id}" data-quiz-id="${item.quiz_id}">
                                 <td>${item.row}</td><td><span class="badge bg-info">Media</span></td>
                                 <td><div class="d-flex align-items-center gap-2">
@@ -3280,12 +3489,12 @@
                                     <button type="button" class="btn btn-outline-light" onclick="flowMoveQuestionMedia(${item.gallery_media_id}, ${item.quiz_id}, 1)"><i class="fas fa-arrow-down"></i></button>
                                     <button type="button" class="btn btn-outline-danger" onclick="flowRemoveMedia('question', ${item.quiz_id}, ${item.gallery_media_id})"><i class="fas fa-times"></i></button>
                                 </div></td></tr>`;
-                        }).join('');
+                         }).join('');
 
-                    endTbody.innerHTML = (data.end || []).length === 0
-                        ? '<tr id="flow-end-empty"><td colspan="6" class="text-center text-muted py-3">No end media. Use &quot;At the end&quot; when adding media.</td></tr>'
-                        : (data.end || []).map(function(item, i) {
-                            return `<tr class="flow-end-row" data-gallery-media-id="${item.gallery_media_id}"
+                     endTbody.innerHTML = (data.end || []).length === 0 ?
+                         '<tr id="flow-end-empty"><td colspan="6" class="text-center text-muted py-3">No end media. Use &quot;At the end&quot; when adding media.</td></tr>' :
+                         (data.end || []).map(function(item, i) {
+                             return `<tr class="flow-end-row" data-gallery-media-id="${item.gallery_media_id}"
                                 data-attachment-type="end" data-attachment-id="${item.attachment_id}">
                                 <td class="flow-end-drag-handle text-muted" style="cursor:grab"><i class="fas fa-grip-vertical"></i></td>
                                 <td class="flow-end-index">${i + 1}</td><td><span class="badge bg-success">End media</span></td>
@@ -3299,197 +3508,220 @@
                                     ${flowPlacementOptionsHtml('end', null)}</select></td>
                                 <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger"
                                     onclick="flowRemoveMedia('end', null, ${item.gallery_media_id})"><i class="fas fa-times"></i></button></td></tr>`;
-                        }).join('');
+                         }).join('');
 
-                    if (endTbody._flowSortable) {
-                        endTbody._flowSortable.destroy();
-                        endTbody._flowSortable = null;
-                    }
-                    initFlowEndSortable();
-                }).catch(err => console.error('Flow refresh error:', err));
-            }
+                     if (endTbody._flowSortable) {
+                         endTbody._flowSortable.destroy();
+                         endTbody._flowSortable = null;
+                     }
+                     initFlowEndSortable();
+                 }).catch(err => console.error('Flow refresh error:', err));
+             }
 
-            function escapeFlowHtml(s) {
-                return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-            }
-            function escapeFlowAttr(s) { return escapeFlowHtml(s); }
+             function escapeFlowHtml(s) {
+                 return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(
+                     /"/g, '&quot;');
+             }
 
-            function flowAddMedia() {
-                const mediaId = parseInt(document.getElementById('flow-add-media-select')?.value || '', 10);
-                const placement = document.getElementById('flow-add-placement-select')?.value || 'end';
-                if (!mediaId) {
-                    streamSwalError('Please select a media item first.', 'Required');
-                    return;
-                }
-                const body = { live_show_id: liveShowId, gallery_media_id: mediaId };
-                let url = galleryAttachEndUrl;
-                if (placement !== 'end') {
-                    url = galleryAttachQuestionUrl;
-                    body.quiz_id = parseInt(placement.split(':')[1], 10);
-                }
-                flowJsonPost(url, body).then(function(data) {
-                    if (data.success) location.reload();
-                    else streamSwalError(data.message || 'Could not add media to flow.', 'Failed');
-                }).catch(function() {
-                    streamSwalError('Could not add media to flow.', 'Failed');
-                });
-            }
+             function escapeFlowAttr(s) {
+                 return escapeFlowHtml(s);
+             }
 
-            function flowOnPlacementChange(select) {
-                const mediaId = parseInt(select.dataset.mediaId, 10);
-                const fromType = select.dataset.fromType;
-                const fromQuizId = select.dataset.fromQuizId ? parseInt(select.dataset.fromQuizId, 10) : null;
-                const val = select.value;
-                let toType = 'end';
-                let toQuizId = null;
-                if (val !== 'end') {
-                    toType = 'question';
-                    toQuizId = parseInt(val.split(':')[1], 10);
-                }
-                if (fromType === toType && (fromType === 'end' || fromQuizId === toQuizId)) return;
+             function flowAddMedia() {
+                 const mediaId = parseInt(document.getElementById('flow-add-media-select')?.value || '', 10);
+                 const placement = document.getElementById('flow-add-placement-select')?.value || 'end';
+                 if (!mediaId) {
+                     streamSwalError('Please select a media item first.', 'Required');
+                     return;
+                 }
+                 const body = {
+                     live_show_id: liveShowId,
+                     gallery_media_id: mediaId
+                 };
+                 let url = galleryAttachEndUrl;
+                 if (placement !== 'end') {
+                     url = galleryAttachQuestionUrl;
+                     body.quiz_id = parseInt(placement.split(':')[1], 10);
+                 }
+                 flowJsonPost(url, body).then(function(data) {
+                     if (data.success) location.reload();
+                     else streamSwalError(data.message || 'Could not add media to flow.', 'Failed');
+                 }).catch(function() {
+                     streamSwalError('Could not add media to flow.', 'Failed');
+                 });
+             }
 
-                select.disabled = true;
-                flowJsonPost(galleryMoveFlowUrl, {
-                    live_show_id: liveShowId,
-                    gallery_media_id: mediaId,
-                    from_type: fromType,
-                    from_quiz_id: fromQuizId,
-                    to_type: toType,
-                    to_quiz_id: toQuizId,
-                }).then(function(data) {
-                    if (data.success) location.reload();
-                    else {
-                        streamSwalError(data.message || 'Could not move media.', 'Failed');
-                        select.disabled = false;
-                        refreshFlowOrderTable();
-                    }
-                }).catch(function() {
-                    streamSwalError('Could not move media.', 'Failed');
-                    select.disabled = false;
-                });
-            }
+             function flowOnPlacementChange(select) {
+                 const mediaId = parseInt(select.dataset.mediaId, 10);
+                 const fromType = select.dataset.fromType;
+                 const fromQuizId = select.dataset.fromQuizId ? parseInt(select.dataset.fromQuizId, 10) : null;
+                 const val = select.value;
+                 let toType = 'end';
+                 let toQuizId = null;
+                 if (val !== 'end') {
+                     toType = 'question';
+                     toQuizId = parseInt(val.split(':')[1], 10);
+                 }
+                 if (fromType === toType && (fromType === 'end' || fromQuizId === toQuizId)) return;
 
-            function flowRemoveMedia(fromType, quizId, mediaId) {
-                streamSwalConfirm({
-                    title: 'Remove from show flow?',
-                    text: 'This media will be removed from the quiz flow (not deleted from gallery).',
-                    confirmButtonText: 'Yes, remove',
-                    confirmButtonColor: '#d33',
-                }).then(function(result) {
-                    if (!result.isConfirmed) return;
-                    const url = fromType === 'end' ? galleryDetachEndUrl : galleryDetachQuestionUrl;
-                    const body = fromType === 'end'
-                        ? { live_show_id: liveShowId, gallery_media_id: mediaId }
-                        : { quiz_id: quizId, gallery_media_id: mediaId };
-                    flowJsonPost(url, body).then(function(data) {
-                        if (data.success) location.reload();
-                        else streamSwalError(data.message || 'Could not remove media.', 'Failed');
-                    });
-                });
-            }
+                 select.disabled = true;
+                 flowJsonPost(galleryMoveFlowUrl, {
+                     live_show_id: liveShowId,
+                     gallery_media_id: mediaId,
+                     from_type: fromType,
+                     from_quiz_id: fromQuizId,
+                     to_type: toType,
+                     to_quiz_id: toQuizId,
+                 }).then(function(data) {
+                     if (data.success) location.reload();
+                     else {
+                         streamSwalError(data.message || 'Could not move media.', 'Failed');
+                         select.disabled = false;
+                         refreshFlowOrderTable();
+                     }
+                 }).catch(function() {
+                     streamSwalError('Could not move media.', 'Failed');
+                     select.disabled = false;
+                 });
+             }
 
-            function flowMoveQuestionMedia(mediaId, quizId, direction) {
-                const rows = Array.from(document.querySelectorAll(
-                    '#flow-main-tbody tr.flow-media-row[data-quiz-id="' + quizId + '"]'
-                ));
-                const ids = rows.map(function(r) { return parseInt(r.dataset.galleryMediaId, 10); });
-                const idx = ids.indexOf(mediaId);
-                if (idx < 0) return;
-                const newIdx = idx + direction;
-                if (newIdx < 0 || newIdx >= ids.length) return;
-                const swapped = ids.slice();
-                const tmp = swapped[newIdx];
-                swapped[newIdx] = swapped[idx];
-                swapped[idx] = tmp;
-                flowJsonPost(galleryReorderQuestionUrl, { quiz_id: quizId, order: swapped })
-                    .then(function(data) {
-                        if (data.success) location.reload();
-                        else streamSwalError(data.message || 'Could not reorder.', 'Failed');
-                    });
-            }
+             function flowRemoveMedia(fromType, quizId, mediaId) {
+                 streamSwalConfirm({
+                     title: 'Remove from show flow?',
+                     text: 'This media will be removed from the quiz flow (not deleted from gallery).',
+                     confirmButtonText: 'Yes, remove',
+                     confirmButtonColor: '#d33',
+                 }).then(function(result) {
+                     if (!result.isConfirmed) return;
+                     const url = fromType === 'end' ? galleryDetachEndUrl : galleryDetachQuestionUrl;
+                     const body = fromType === 'end' ? {
+                         live_show_id: liveShowId,
+                         gallery_media_id: mediaId
+                     } : {
+                         quiz_id: quizId,
+                         gallery_media_id: mediaId
+                     };
+                     flowJsonPost(url, body).then(function(data) {
+                         if (data.success) location.reload();
+                         else streamSwalError(data.message || 'Could not remove media.', 'Failed');
+                     });
+                 });
+             }
 
-            function initFlowEndSortable() {
-                const tbody = document.getElementById('flow-end-tbody');
-                if (!tbody || typeof Sortable === 'undefined') return;
-                if (tbody._flowSortable) {
-                    tbody._flowSortable.destroy();
-                    tbody._flowSortable = null;
-                }
-                if (!tbody.querySelector('.flow-end-row')) return;
-                tbody._flowSortable = new Sortable(tbody, {
-                    handle: '.flow-end-drag-handle',
-                    draggable: '.flow-end-row',
-                    animation: 150,
-                    ghostClass: 'sortable-ghost',
-                    chosenClass: 'sortable-chosen',
-                    onEnd: function() {
-                        const order = Array.from(tbody.querySelectorAll('.flow-end-row'))
-                            .map(function(r) { return parseInt(r.dataset.galleryMediaId, 10); });
-                        tbody.querySelectorAll('.flow-end-index').forEach(function(cell, i) {
-                            cell.textContent = i + 1;
-                        });
-                        fetch(galleryReorderEndUrl, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': galleryCsrf,
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ live_show_id: liveShowId, order: order }),
-                        }).then(function(r) { return r.json(); }).then(function(data) {
-                            if (!data.success) streamSwalError('Could not save end media order.', 'Failed');
-                        });
-                    },
-                });
-            }
+             function flowMoveQuestionMedia(mediaId, quizId, direction) {
+                 const rows = Array.from(document.querySelectorAll(
+                     '#flow-main-tbody tr.flow-media-row[data-quiz-id="' + quizId + '"]'
+                 ));
+                 const ids = rows.map(function(r) {
+                     return parseInt(r.dataset.galleryMediaId, 10);
+                 });
+                 const idx = ids.indexOf(mediaId);
+                 if (idx < 0) return;
+                 const newIdx = idx + direction;
+                 if (newIdx < 0 || newIdx >= ids.length) return;
+                 const swapped = ids.slice();
+                 const tmp = swapped[newIdx];
+                 swapped[newIdx] = swapped[idx];
+                 swapped[idx] = tmp;
+                 flowJsonPost(galleryReorderQuestionUrl, {
+                         quiz_id: quizId,
+                         order: swapped
+                     })
+                     .then(function(data) {
+                         if (data.success) location.reload();
+                         else streamSwalError(data.message || 'Could not reorder.', 'Failed');
+                     });
+             }
 
-            document.getElementById('show-flow-order-tab')?.addEventListener('change', function(e) {
-                if (e.target.classList.contains('flow-placement-select')) {
-                    flowOnPlacementChange(e.target);
-                }
-            });
-            document.getElementById('show-flow-order-tab-btn')?.addEventListener('shown.bs.tab', initFlowEndSortable);
-            document.addEventListener('DOMContentLoaded', initFlowEndSortable);
+             function initFlowEndSortable() {
+                 const tbody = document.getElementById('flow-end-tbody');
+                 if (!tbody || typeof Sortable === 'undefined') return;
+                 if (tbody._flowSortable) {
+                     tbody._flowSortable.destroy();
+                     tbody._flowSortable = null;
+                 }
+                 if (!tbody.querySelector('.flow-end-row')) return;
+                 tbody._flowSortable = new Sortable(tbody, {
+                     handle: '.flow-end-drag-handle',
+                     draggable: '.flow-end-row',
+                     animation: 150,
+                     ghostClass: 'sortable-ghost',
+                     chosenClass: 'sortable-chosen',
+                     onEnd: function() {
+                         const order = Array.from(tbody.querySelectorAll('.flow-end-row'))
+                             .map(function(r) {
+                                 return parseInt(r.dataset.galleryMediaId, 10);
+                             });
+                         tbody.querySelectorAll('.flow-end-index').forEach(function(cell, i) {
+                             cell.textContent = i + 1;
+                         });
+                         fetch(galleryReorderEndUrl, {
+                             method: 'POST',
+                             headers: {
+                                 'X-CSRF-TOKEN': galleryCsrf,
+                                 'Accept': 'application/json',
+                                 'Content-Type': 'application/json',
+                             },
+                             body: JSON.stringify({
+                                 live_show_id: liveShowId,
+                                 order: order
+                             }),
+                         }).then(function(r) {
+                             return r.json();
+                         }).then(function(data) {
+                             if (!data.success) streamSwalError('Could not save end media order.', 'Failed');
+                         });
+                     },
+                 });
+             }
 
-            function markMediaPlayedInUI(attachmentType, attachmentId, mediaId) {
-                if (attachmentType && attachmentId) {
-                    document.querySelectorAll(
-                        `[data-attachment-type="${attachmentType}"][data-attachment-id="${attachmentId}"] .media-played-badge`
-                    ).forEach(el => el.classList.remove('d-none'));
+             document.getElementById('show-flow-order-tab')?.addEventListener('change', function(e) {
+                 if (e.target.classList.contains('flow-placement-select')) {
+                     flowOnPlacementChange(e.target);
+                 }
+             });
+             document.getElementById('show-flow-order-tab-btn')?.addEventListener('shown.bs.tab', initFlowEndSortable);
+             document.addEventListener('DOMContentLoaded', initFlowEndSortable);
 
-                    const listRow = document.querySelector(
-                        `tr.gallery-media-card[data-attachment-type="${attachmentType}"][data-attachment-id="${attachmentId}"]`
-                    );
-                    if (listRow) {
-                        const badge = listRow.querySelector('.media-played-badge');
-                        if (badge) badge.classList.remove('d-none');
-                        const showBtn = listRow.querySelector('.gallery-show-on-stream-btn');
-                        if (showBtn) {
-                            showBtn.innerHTML = '<i class="fas fa-tv"></i> Replay';
-                        }
-                    }
-                } else if (mediaId) {
-                    document.querySelectorAll(`tr.gallery-media-card[data-media-id="${mediaId}"] .media-played-badge`)
-                        .forEach(el => el.classList.remove('d-none'));
-                    document.querySelectorAll(`tr.gallery-media-card[data-media-id="${mediaId}"] .gallery-show-on-stream-btn`)
-                        .forEach(btn => {
-                            btn.innerHTML = '<i class="fas fa-tv"></i> Replay';
-                        });
-                }
-            }
+             function markMediaPlayedInUI(attachmentType, attachmentId, mediaId) {
+                 if (attachmentType && attachmentId) {
+                     document.querySelectorAll(
+                         `[data-attachment-type="${attachmentType}"][data-attachment-id="${attachmentId}"] .media-played-badge`
+                     ).forEach(el => el.classList.remove('d-none'));
 
-            function galleryShowOnStream(mediaId, btn, attachmentType, attachmentId) {
-                if (!btn) return;
-                setBtnBusy(btn, true, 'Showing\u2026');
-                const payload = {
-                    gallery_media_id: parseInt(mediaId, 10)
-                };
-                if (attachmentType) {
-                    payload.attachment_type = attachmentType;
-                }
-                if (attachmentId) {
-                    payload.attachment_id = parseInt(attachmentId, 10);
-                }
+                     const listRow = document.querySelector(
+                         `tr.gallery-media-card[data-attachment-type="${attachmentType}"][data-attachment-id="${attachmentId}"]`
+                     );
+                     if (listRow) {
+                         const badge = listRow.querySelector('.media-played-badge');
+                         if (badge) badge.classList.remove('d-none');
+                         const showBtn = listRow.querySelector('.gallery-show-on-stream-btn');
+                         if (showBtn) {
+                             showBtn.innerHTML = '<i class="fas fa-tv"></i> Replay';
+                         }
+                     }
+                 } else if (mediaId) {
+                     document.querySelectorAll(`tr.gallery-media-card[data-media-id="${mediaId}"] .media-played-badge`)
+                         .forEach(el => el.classList.remove('d-none'));
+                     document.querySelectorAll(`tr.gallery-media-card[data-media-id="${mediaId}"] .gallery-show-on-stream-btn`)
+                         .forEach(btn => {
+                             btn.innerHTML = '<i class="fas fa-tv"></i> Replay';
+                         });
+                 }
+             }
+
+             function galleryShowOnStream(mediaId, btn, attachmentType, attachmentId) {
+                 if (!btn) return;
+                 setBtnBusy(btn, true, 'Showing\u2026');
+                 const payload = {
+                     gallery_media_id: parseInt(mediaId, 10)
+                 };
+                 if (attachmentType) {
+                     payload.attachment_type = attachmentType;
+                 }
+                 if (attachmentId) {
+                     payload.attachment_id = parseInt(attachmentId, 10);
+                 }
                  fetch(galleryShowOnStreamUrl, {
                          method: 'POST',
                          headers: {
@@ -3504,7 +3736,8 @@
                          if (data.success) {
                              updateGalleryShowStatus('showing');
                              markMediaPlayedInUI(attachmentType, attachmentId, mediaId);
-                             if (btn.classList.contains('gallery-show-on-stream-btn') || btn.classList.contains('btn-success')) {
+                             if (btn.classList.contains('gallery-show-on-stream-btn') || btn.classList.contains(
+                                     'btn-success')) {
                                  const label = btn.querySelector('i') ? btn.innerHTML.replace(/Play|Show/, 'Replay') : null;
                                  if (label && btn.closest('.question-media-slide')) {
                                      btn.innerHTML = '<i class="fas fa-play me-1"></i> Replay';
@@ -3757,9 +3990,9 @@
                  const isShowWide = attachmentType === 'show';
                  const isEnd = attachmentType === 'end';
                  const isSortable = isShowWide || isEnd;
-                 const playedBadge = data.media_played
-                     ? '<span class="badge bg-success ms-1 media-played-badge">Played</span>'
-                     : '<span class="badge bg-success ms-1 media-played-badge d-none">Played</span>';
+                 const playedBadge = data.media_played ?
+                     '<span class="badge bg-success ms-1 media-played-badge">Played</span>' :
+                     '<span class="badge bg-success ms-1 media-played-badge d-none">Played</span>';
                  const showLabel = data.media_played ? 'Replay' : 'Show';
                  const detachBtn = isShowWide ? `
                     <button type="button"
@@ -3786,9 +4019,9 @@
                             Play on live start
                         </label>
                     </div>` : '';
-                 const dragHandle = isSortable
-                     ? '<div class="drag-handle" style="cursor: grab;"><i class="fas fa-grip-vertical text-muted"></i></div>'
-                     : '<span class="text-muted small">—</span>';
+                 const dragHandle = isSortable ?
+                     '<div class="drag-handle" style="cursor: grab;"><i class="fas fa-grip-vertical text-muted"></i></div>' :
+                     '<span class="text-muted small">—</span>';
                  const contextBadgeClass = isShowWide ? 'bg-info' : (isEnd ? 'bg-success' : 'bg-secondary');
 
                  return `
@@ -3975,7 +4208,8 @@
              }
 
              function persistOrder() {
-                 const rows = document.querySelectorAll('#attached-media-list tr.gallery-media-card[data-attachment-type="show"]');
+                 const rows = document.querySelectorAll(
+                     '#attached-media-list tr.gallery-media-card[data-attachment-type="show"]');
                  const order = Array.from(rows).map(r => parseInt(r.dataset.mediaId, 10));
                  if (order.length === 0) {
                      return;
@@ -4001,7 +4235,8 @@
              }
 
              function persistEndOrder() {
-                 const rows = document.querySelectorAll('#attached-media-list tr.gallery-media-card[data-attachment-type="end"]');
+                 const rows = document.querySelectorAll(
+                     '#attached-media-list tr.gallery-media-card[data-attachment-type="end"]');
                  const order = Array.from(rows).map(r => parseInt(r.dataset.mediaId, 10));
                  if (order.length === 0) return;
 
@@ -4176,6 +4411,15 @@
 
              .gallery-detach-btn:hover {
                  opacity: 1;
+             }
+
+             #toggleLeftSidebarBtn {
+                 position: absolute;
+                 top: 150px;
+                 left: 10px;
+                 opacity: 0.5;
+                 transition: opacity 0.3s ease;
+                 z-index: 1000;
              }
          </style>
      @endpush
