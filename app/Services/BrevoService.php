@@ -19,10 +19,16 @@ class BrevoService
 {
     protected Brevo $client;
 
-    public function __construct(?string $apiKey = null)
+    /**
+     * @param  array<string,mixed>|null  $options  Passed straight to the Brevo SDK. Accepts
+     *                                              a PSR-18 'client' (handy for faking HTTP in
+     *                                              tests), 'baseUrl', 'timeout', etc.
+     */
+    public function __construct(?string $apiKey = null, ?array $options = null)
     {
         $this->client = new Brevo(
             apiKey: $apiKey ?? config('brevo.api_key', env('BREVO_API_KEY')),
+            options: $options,
         );
     }
 

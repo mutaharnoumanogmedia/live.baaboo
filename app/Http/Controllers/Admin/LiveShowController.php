@@ -459,7 +459,7 @@ class LiveShowController extends Controller
 
 
         // make all users is_winner = false
-        $liveShow->users()->update(['is_winner' => false]);
+        UserLiveShow::where('live_show_id', $liveShow->id)->update(['is_winner' => false]);
 
         $maxWinners = (int) $liveShow->max_winners;
         $topMaxWinnersByScore =
@@ -608,7 +608,7 @@ class LiveShowController extends Controller
         // }
 
         // make all users is_winner = false
-        $liveShow->users()->update(['is_winner' => false]);
+        UserLiveShow::where('live_show_id', $liveShow->id)->update(['is_winner' => false]);
 
         $maxWinners = (int) $liveShow->max_winners;
         $topMaxWinnersByScore =
@@ -745,7 +745,7 @@ class LiveShowController extends Controller
         }
 
         $liveShow->update(['winners_announced' => false]);
-        $liveShow->users()->update(['is_winner' => false]);
+        UserLiveShow::where('live_show_id', $liveShow->id)->update(['is_winner' => false]);
 
         LiveShowAdminStateEvent::dispatch((string) $liveShow->id, 'winners', [
             'winners_announced' => false,

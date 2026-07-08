@@ -2,306 +2,321 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\LiveShow;
+use App\Models\LiveShowQuiz;
+use App\Models\LiveShowWinnerPrize;
+use App\Models\User;
+use App\Models\UserQuiz;
+use App\Models\UserQuizResponse;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Hash;
 
+/**
+ * Deterministic fixture for the winner-email test suite.
+ *
+ * It builds a single, fully-formed live show that mirrors how a real show
+ * looks once winners have been decided:
+ *
+ *  - 10 winner prizes: ranks 1-3 are CASH prizes (is_voucher = 0) and ranks
+ *    4-10 are VOUCHER prizes (is_voucher = 1), matching the app's real prize
+ *    tiers.
+ *  - 10 quiz questions (4 options each, first option correct).
+ *  - 10 winner players, each with a distinct random total score between 1000
+ *    and 2000 points (materialised as real quiz responses so the computed
+ *    {@see \App\Models\UserLiveShow::getScoreAttribute()} matches). The highest
+ *    scorer takes rank 1, and so on, so the top three are cash winners and the
+ *    rest are voucher winners — exactly what
+ *    {@see \App\Http\Controllers\Admin\LiveShowController::updateWinners()}
+ *    would compute.
+ *  - A handful of extra registered (non-winning) players and a couple of users
+ *    who never joined the show, so tests can exercise "not a winner" and "not a
+ *    participant" paths.
+ *
+ * Winners are pre-marked (is_winner = true, winner_prize_id set, voucher
+ * winners get a discount_code) but the show is left with
+ * winners_announced = false so the announce-winners endpoint can still be
+ * exercised against it.
+ */
 class TestLiveShowSeeder extends Seeder
 {
+    /** Title used by the tests to locate the seeded show. */
+    public const SHOW_TITLE = 'Test Winner Show';
+
+    /** Ranks 1..CASH_WINNER_RANKS are cash prizes; the rest are vouchers. */
+    public const CASH_WINNER_RANKS = 3;
+
+    /** Total number of prizes / winners for the show. */
+    public const TOTAL_PRIZES = 10;
+
+    /** Number of quiz questions on the show. */
+    public const TOTAL_QUESTIONS = 10;
+
+    /** Number of extra registered players who do not win. */
+    public const EXTRA_PLAYERS = 5;
+
     public function run(): void
     {
-        DB::transaction(function () {
-            // Adjust scheduled time as needed
-            $scheduledAt = Carbon::parse('2026-01-09 20:00:00');
+        // Roles + permissions (and their guards) exactly as the real app sets
+        // them up, so User::role('admin') / actingAs(..., 'admin') behave.
+        $this->call([
+            PermissionSeeder::class,
+            RoleSeeder::class,
+        ]);
 
-            // 1) Create Live Show (table name assumed: live_shows)
-            $liveShowId = DB::table('live_shows')->insertGetId([
-                'title'        => 'Friday Night Mixed Trivia: Geo • Fun • Brands',
-                'stream_id'    => 'stream_20260109_001',
-                'description'  => 'A fast-paced live quiz with 10 questions across geography, fun facts, and well-known brands.',
-                'scheduled_at' => $scheduledAt,
-                'status'       => 'scheduled',
-                'thumbnail'    => 'https://cdn.example.com/thumbnails/liveshow-trivia-20260109.jpg',
-                'stream_link'  => 'https://example.com/live/stream_20260109_001',
-                'host_name'    => 'Mutahar Nouman',
-                'prize_amount' => 1000.00,
-                'currency'     => 'EUR',
-                'created_by'   => 1,
-                'created_at'   => now(),
-                'updated_at'   => now(),
+        $admin = $this->createAdmin();
+
+        $show = $this->createShow($admin);
+        $prizes = $this->createPrizes($show);
+        $quizzes = $this->createQuizzes($show, $admin);
+
+        $this->createWinners($show, $prizes, $quizzes);
+        $this->createExtraPlayers($show, $quizzes);
+        $this->createNonParticipants();
+    }
+
+    private function createAdmin(): User
+    {
+        $admin = User::create([
+            'name' => 'Test Admin',
+            'email' => 'admin@baaboo.test',
+            'password' => Hash::make('password'),
+        ]);
+        $admin->assignRole('admin');
+
+        return $admin;
+    }
+
+    private function createShow(User $admin): LiveShow
+    {
+        $airedAt = Carbon::now()->subDay()->setTime(18, 0);
+
+        return LiveShow::create([
+            'title' => self::SHOW_TITLE,
+            'description' => 'Seeded show used by the winner-email test suite.',
+            'scheduled_at' => $airedAt,
+            'status' => 'completed',
+            'is_test_show' => false,
+            'host_name' => 'Test Host',
+            'prize_amount' => 1000,
+            'currency' => 'EUR',
+            'max_winners' => self::TOTAL_PRIZES,
+            'max_players' => 100,
+            'chat_enabled' => true,
+            'winners_announced' => false,
+            'start_time' => $airedAt,
+            'end_time' => (clone $airedAt)->addMinutes(45),
+            'created_by' => $admin->id,
+        ]);
+    }
+
+    /**
+     * Ranks 1-3 => cash prizes (is_voucher = 0), ranks 4-10 => voucher prizes
+     * (is_voucher = 1).
+     *
+     * @return Collection<int, LiveShowWinnerPrize>
+     */
+    private function createPrizes(LiveShow $show): Collection
+    {
+        $cashPrizes = ['1000.00', '500.00', '250.00'];      // ranks 1-3
+        $voucherAmounts = [100, 90, 80, 70, 60, 50, 40];    // ranks 4-10
+
+        $prizes = collect();
+
+        foreach (range(1, self::TOTAL_PRIZES) as $rank) {
+            if ($rank <= self::CASH_WINNER_RANKS) {
+                $prizes->push(LiveShowWinnerPrize::create([
+                    'live_show_id' => $show->id,
+                    'rank' => $rank,
+                    'prize' => $cashPrizes[$rank - 1],
+                    'is_voucher' => false,
+                    'voucher_amount' => null,
+                ]));
+
+                continue;
+            }
+
+            $amount = $voucherAmounts[$rank - self::CASH_WINNER_RANKS - 1];
+
+            $prizes->push(LiveShowWinnerPrize::create([
+                'live_show_id' => $show->id,
+                'rank' => $rank,
+                'prize' => number_format($amount, 2, '.', ''),
+                'is_voucher' => true,
+                'voucher_amount' => $amount,
+            ]));
+        }
+
+        return $prizes;
+    }
+
+    /**
+     * 10 questions, each with 4 options where the first option is correct.
+     *
+     * @return Collection<int, LiveShowQuiz>
+     */
+    private function createQuizzes(LiveShow $show, User $admin): Collection
+    {
+        return collect(range(1, self::TOTAL_QUESTIONS))->map(function (int $n) use ($show, $admin) {
+            $quiz = LiveShowQuiz::create([
+                'live_show_id' => $show->id,
+                'question' => "Test question {$n}?",
+                'created_by' => $admin->id,
+                'has_shown' => true,
             ]);
 
-            // 2) Questions + Options (tables assumed: live_show_quizzes, quiz_options)
-            $items = [
-                [
-                    'question' => 'Which country has the largest land area in the world?',
-                    'options'  => [
-                        ['text' => 'Canada',         'correct' => false],
-                        ['text' => 'Russia',         'correct' => true],
-                        ['text' => 'China',          'correct' => false],
-                        ['text' => 'United States',  'correct' => false],
-                    ],
-                ],
-                [
-                    'question' => 'Which company is best known for the iPhone?',
-                    'options'  => [
-                        ['text' => 'Apple',   'correct' => true],
-                        ['text' => 'Samsung', 'correct' => false],
-                        ['text' => 'Nokia',   'correct' => false],
-                        ['text' => 'Sony',    'correct' => false],
-                    ],
-                ],
-                [
-                    'question' => 'What is the common name for a group of crows?',
-                    'options'  => [
-                        ['text' => 'A flock',   'correct' => false],
-                        ['text' => 'A murder',  'correct' => true],
-                        ['text' => 'A pack',    'correct' => false],
-                        ['text' => 'A school',  'correct' => false],
-                    ],
-                ],
-                [
-                    'question' => 'Which river runs through Paris?',
-                    'options'  => [
-                        ['text' => 'Thames', 'correct' => false],
-                        ['text' => 'Seine',  'correct' => true],
-                        ['text' => 'Rhine',  'correct' => false],
-                        ['text' => 'Danube', 'correct' => false],
-                    ],
-                ],
-                [
-                    'question' => 'Which brand slogan is "Just Do It"?',
-                    'options'  => [
-                        ['text' => 'Adidas', 'correct' => false],
-                        ['text' => 'Nike',   'correct' => true],
-                        ['text' => 'Puma',   'correct' => false],
-                        ['text' => 'Reebok', 'correct' => false],
-                    ],
-                ],
-                [
-                    'question' => 'How many sides does a hexagon have?',
-                    'options'  => [
-                        ['text' => '5', 'correct' => false],
-                        ['text' => '6', 'correct' => true],
-                        ['text' => '7', 'correct' => false],
-                        ['text' => '8', 'correct' => false],
-                    ],
-                ],
-                [
-                    'question' => 'Mount Kilimanjaro is located in which country?',
-                    'options'  => [
-                        ['text' => 'Kenya',     'correct' => false],
-                        ['text' => 'Tanzania',  'correct' => true],
-                        ['text' => 'Uganda',    'correct' => false],
-                        ['text' => 'Ethiopia',  'correct' => false],
-                    ],
-                ],
-                [
-                    'question' => 'Which company is associated with the PlayStation brand?',
-                    'options'  => [
-                        ['text' => 'Microsoft', 'correct' => false],
-                        ['text' => 'Nintendo',  'correct' => false],
-                        ['text' => 'Sony',      'correct' => true],
-                        ['text' => 'Valve',     'correct' => false],
-                    ],
-                ],
-                [
-                    'question' => 'Which planet is known as the Red Planet?',
-                    'options'  => [
-                        ['text' => 'Venus',   'correct' => false],
-                        ['text' => 'Mars',    'correct' => true],
-                        ['text' => 'Jupiter', 'correct' => false],
-                        ['text' => 'Mercury', 'correct' => false],
-                    ],
-                ],
-                [
-                    'question' => 'Which city is the capital of Australia?',
-                    'options'  => [
-                        ['text' => 'Sydney',    'correct' => false],
-                        ['text' => 'Melbourne', 'correct' => false],
-                        ['text' => 'Canberra',  'correct' => true],
-                        ['text' => 'Perth',     'correct' => false],
-                    ],
-                ],
-            ];
-
-            foreach ($items as $item) {
-                $quizId = DB::table('live_show_quizzes')->insertGetId([
-                    'live_show_id' => $liveShowId,
-                    'question'     => $item['question'],
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
+            foreach (range(1, 4) as $optionIndex) {
+                $quiz->options()->create([
+                    'option_text' => "Q{$n} Option {$optionIndex}",
+                    'is_correct' => $optionIndex === 1,
                 ]);
-
-                $optionsPayload = [];
-                foreach ($item['options'] as $opt) {
-                    $optionsPayload[] = [
-                        'quiz_id'     => $quizId,
-                        'option_text' => $opt['text'],
-                        'is_correct'  => $opt['correct'] ? 1 : 0,
-                        'created_at'  => now(),
-                        'updated_at'  => now(),
-                    ];
-                }
-
-                DB::table('quiz_options')->insert($optionsPayload);
             }
+
+            return $quiz->load('options');
         });
     }
+
+    /**
+     * Create the 10 winners. The highest score becomes rank 1 (cash) and the
+     * lowest of the ten becomes rank 10 (voucher).
+     *
+     * @param  Collection<int, LiveShowWinnerPrize>  $prizes
+     * @param  Collection<int, LiveShowQuiz>  $quizzes
+     */
+    private function createWinners(LiveShow $show, Collection $prizes, Collection $quizzes): void
+    {
+        // Distinct random scores in [1000, 2000], highest first => rank order.
+        $scores = $this->distinctScores(self::TOTAL_PRIZES, 1000, 2000)->sortDesc()->values();
+
+        foreach (range(1, self::TOTAL_PRIZES) as $rank) {
+            $score = (int) $scores[$rank - 1];
+            $prize = $prizes->firstWhere('rank', $rank);
+            $isVoucher = (bool) $prize->is_voucher;
+
+            $user = User::create([
+                'name' => "Winner {$rank}",
+                'email' => "winner{$rank}@baaboo.test",
+                'password' => Hash::make('password'),
+            ]);
+            $user->assignRole('user');
+
+            $show->users()->attach($user->id, [
+                'score' => $score,
+                'status' => 'registered',
+                'is_online' => false,
+                'is_winner' => true,
+                'winner_prize_id' => $prize->id,
+                'prize_won' => $prize->prize,
+                // Only voucher winners carry a discount code; this is what the
+                // SendWinnerEmailJob keys off to send the voucher email.
+                'discount_code' => $isVoucher ? "TESTVOUCHER{$rank}" : null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $this->recordGameplay($show, $user, $quizzes, $score);
+        }
+    }
+
+    /**
+     * Registered players who took part but did not finish in the top 10.
+     *
+     * @param  Collection<int, LiveShowQuiz>  $quizzes
+     */
+    private function createExtraPlayers(LiveShow $show, Collection $quizzes): void
+    {
+        foreach (range(1, self::EXTRA_PLAYERS) as $i) {
+            $user = User::create([
+                'name' => "Player {$i}",
+                'email' => "player{$i}@baaboo.test",
+                'password' => Hash::make('password'),
+            ]);
+            $user->assignRole('user');
+
+            // Below every winner's score so they never rank into the top 10.
+            $score = rand(100, 500);
+
+            $show->users()->attach($user->id, [
+                'score' => $score,
+                'status' => 'registered',
+                'is_online' => false,
+                'is_winner' => false,
+                'prize_won' => 'n/a',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $this->recordGameplay($show, $user, $quizzes, $score);
+        }
+    }
+
+    /**
+     * A couple of users who never joined the show, for "not a participant" paths.
+     */
+    private function createNonParticipants(): void
+    {
+        foreach (range(1, 2) as $i) {
+            $user = User::create([
+                'name' => "Guest {$i}",
+                'email' => "guest{$i}@baaboo.test",
+                'password' => Hash::make('password'),
+            ]);
+            $user->assignRole('user');
+        }
+    }
+
+    /**
+     * Persist one UserQuiz + UserQuizResponse per question so the player's
+     * computed pivot score sums to (approximately) $score.
+     *
+     * @param  Collection<int, LiveShowQuiz>  $quizzes
+     */
+    private function recordGameplay(LiveShow $show, User $user, Collection $quizzes, int $score): void
+    {
+        $perQuestion = round($score / $quizzes->count(), 2);
+
+        foreach ($quizzes as $quiz) {
+            $correctOption = $quiz->options->firstWhere('is_correct', true);
+
+            $userQuiz = UserQuiz::create([
+                'user_id' => $user->id,
+                'live_show_id' => $show->id,
+                'quiz_id' => $quiz->id,
+                'total_questions' => 1,
+                'correct_answers' => 1,
+                'score_percentage' => 100,
+                'status' => 'completed',
+            ]);
+
+            UserQuizResponse::create([
+                'user_quiz_id' => $userQuiz->id,
+                'quiz_option_id' => $correctOption?->id,
+                'quiz_id' => $quiz->id,
+                'user_id' => $user->id,
+                'is_correct' => true,
+                'seconds_to_submit' => rand(80, 950) / 100,
+                'response_score' => $perQuestion,
+                'user_response' => $correctOption?->option_text,
+            ]);
+        }
+    }
+
+    /**
+     * @return Collection<int, int>  distinct integers in [$min, $max]
+     */
+    private function distinctScores(int $count, int $min, int $max): Collection
+    {
+        $scores = collect();
+
+        while ($scores->count() < $count) {
+            $candidate = rand($min, $max);
+
+            if (! $scores->contains($candidate)) {
+                $scores->push($candidate);
+            }
+        }
+
+        return $scores;
+    }
 }
-
-
-
-/* 
-  Assumptions about table names/columns (adjust if yours differ):
-  - live_shows: id (AI PK), title, stream_id, description, scheduled_at, status, thumbnail, stream_link,
-               host_name, prize_amount, currency, created_by, created_at, updated_at
-  - live_show_quizzes: id (AI PK), live_show_id, question, created_at, updated_at
-  - quiz_options: id (AI PK), quiz_id, option_text, is_correct, created_at, updated_at
-*/
-
-// START TRANSACTION;
-
-// -- 1) Create the Live Show
-// INSERT INTO live_shows
-//   (title, stream_id, description, scheduled_at, status, thumbnail, stream_link, host_name, prize_amount, currency, created_by, created_at, updated_at)
-// VALUES
-//   (
-//     'Friday Night Mixed Trivia: Geo • Fun • Brands',
-//     'stream_20260109_001',
-//     'A fast-paced live quiz with 10 questions across geography, fun facts, and well-known brands.',
-//     '2026-01-09 20:00:00',
-//     'scheduled',
-//     'https://cdn.example.com/thumbnails/liveshow-trivia-20260109.jpg',
-//     'https://example.com/live/stream_20260109_001',
-//     'Alex Morgan',
-//     1000.00,
-//     'AED',
-//     1,
-//     NOW(),
-//     NOW()
-//   );
-
-// SET @live_show_id := LAST_INSERT_ID();
-
-// -- 2) Insert 10 questions + options (4 options each; exactly one correct)
-
-// -- Q1 (Geography)
-// INSERT INTO live_show_quizzes (live_show_id, question, created_at, updated_at)
-// VALUES (@live_show_id, 'Which country has the largest land area in the world?', NOW(), NOW());
-// SET @q1 := LAST_INSERT_ID();
-
-// INSERT INTO quiz_options (quiz_id, option_text, is_correct, created_at, updated_at) VALUES
-// (@q1, 'Canada', 0, NOW(), NOW()),
-// (@q1, 'Russia', 1, NOW(), NOW()),
-// (@q1, 'China', 0, NOW(), NOW()),
-// (@q1, 'United States', 0, NOW(), NOW());
-
-// -- Q2 (Brands)
-// INSERT INTO live_show_quizzes (live_show_id, question, created_at, updated_at)
-// VALUES (@live_show_id, 'Which company is best known for the iPhone?', NOW(), NOW());
-// SET @q2 := LAST_INSERT_ID();
-
-// INSERT INTO quiz_options (quiz_id, option_text, is_correct, created_at, updated_at) VALUES
-// (@q2, 'Apple', 1, NOW(), NOW()),
-// (@q2, 'Samsung', 0, NOW(), NOW()),
-// (@q2, 'Nokia', 0, NOW(), NOW()),
-// (@q2, 'Sony', 0, NOW(), NOW());
-
-// -- Q3 (Fun)
-// INSERT INTO live_show_quizzes (live_show_id, question, created_at, updated_at)
-// VALUES (@live_show_id, 'What is the common name for a group of crows?', NOW(), NOW());
-// SET @q3 := LAST_INSERT_ID();
-
-// INSERT INTO quiz_options (quiz_id, option_text, is_correct, created_at, updated_at) VALUES
-// (@q3, 'A flock', 0, NOW(), NOW()),
-// (@q3, 'A murder', 1, NOW(), NOW()),
-// (@q3, 'A pack', 0, NOW(), NOW()),
-// (@q3, 'A school', 0, NOW(), NOW());
-
-// -- Q4 (Geography)
-// INSERT INTO live_show_quizzes (live_show_id, question, created_at, updated_at)
-// VALUES (@live_show_id, 'Which river runs through Paris?', NOW(), NOW());
-// SET @q4 := LAST_INSERT_ID();
-
-// INSERT INTO quiz_options (quiz_id, option_text, is_correct, created_at, updated_at) VALUES
-// (@q4, 'Thames', 0, NOW(), NOW()),
-// (@q4, 'Seine', 1, NOW(), NOW()),
-// (@q4, 'Rhine', 0, NOW(), NOW()),
-// (@q4, 'Danube', 0, NOW(), NOW());
-
-// -- Q5 (Brands)
-// INSERT INTO live_show_quizzes (live_show_id, question, created_at, updated_at)
-// VALUES (@live_show_id, 'Which brand slogan is "Just Do It"?', NOW(), NOW());
-// SET @q5 := LAST_INSERT_ID();
-
-// INSERT INTO quiz_options (quiz_id, option_text, is_correct, created_at, updated_at) VALUES
-// (@q5, 'Adidas', 0, NOW(), NOW()),
-// (@q5, 'Nike', 1, NOW(), NOW()),
-// (@q5, 'Puma', 0, NOW(), NOW()),
-// (@q5, 'Reebok', 0, NOW(), NOW());
-
-// -- Q6 (Fun)
-// INSERT INTO live_show_quizzes (live_show_id, question, created_at, updated_at)
-// VALUES (@live_show_id, 'How many sides does a hexagon have?', NOW(), NOW());
-// SET @q6 := LAST_INSERT_ID();
-
-// INSERT INTO quiz_options (quiz_id, option_text, is_correct, created_at, updated_at) VALUES
-// (@q6, '5', 0, NOW(), NOW()),
-// (@q6, '6', 1, NOW(), NOW()),
-// (@q6, '7', 0, NOW(), NOW()),
-// (@q6, '8', 0, NOW(), NOW());
-
-// -- Q7 (Geography)
-// INSERT INTO live_show_quizzes (live_show_id, question, created_at, updated_at)
-// VALUES (@live_show_id, 'Mount Kilimanjaro is located in which country?', NOW(), NOW());
-// SET @q7 := LAST_INSERT_ID();
-
-// INSERT INTO quiz_options (quiz_id, option_text, is_correct, created_at, updated_at) VALUES
-// (@q7, 'Kenya', 0, NOW(), NOW()),
-// (@q7, 'Tanzania', 1, NOW(), NOW()),
-// (@q7, 'Uganda', 0, NOW(), NOW()),
-// (@q7, 'Ethiopia', 0, NOW(), NOW());
-
-// -- Q8 (Brands)
-// INSERT INTO live_show_quizzes (live_show_id, question, created_at, updated_at)
-// VALUES (@live_show_id, 'Which company is associated with the PlayStation brand?', NOW(), NOW());
-// SET @q8 := LAST_INSERT_ID();
-
-// INSERT INTO quiz_options (quiz_id, option_text, is_correct, created_at, updated_at) VALUES
-// (@q8, 'Microsoft', 0, NOW(), NOW()),
-// (@q8, 'Nintendo', 0, NOW(), NOW()),
-// (@q8, 'Sony', 1, NOW(), NOW()),
-// (@q8, 'Valve', 0, NOW(), NOW());
-
-// -- Q9 (Fun)
-// INSERT INTO live_show_quizzes (live_show_id, question, created_at, updated_at)
-// VALUES (@live_show_id, 'Which planet is known as the Red Planet?', NOW(), NOW());
-// SET @q9 := LAST_INSERT_ID();
-
-// INSERT INTO quiz_options (quiz_id, option_text, is_correct, created_at, updated_at) VALUES
-// (@q9, 'Venus', 0, NOW(), NOW()),
-// (@q9, 'Mars', 1, NOW(), NOW()),
-// (@q9, 'Jupiter', 0, NOW(), NOW()),
-// (@q9, 'Mercury', 0, NOW(), NOW());
-
-// -- Q10 (Geography)
-// INSERT INTO live_show_quizzes (live_show_id, question, created_at, updated_at)
-// VALUES (@live_show_id, 'Which city is the capital of Australia?', NOW(), NOW());
-// SET @q10 := LAST_INSERT_ID();
-
-// INSERT INTO quiz_options (quiz_id, option_text, is_correct, created_at, updated_at) VALUES
-// (@q10, 'Sydney', 0, NOW(), NOW()),
-// (@q10, 'Melbourne', 0, NOW(), NOW()),
-// (@q10, 'Canberra', 1, NOW(), NOW()),
-// (@q10, 'Perth', 0, NOW(), NOW());
-
-// COMMIT;
-
-// /* Optional: verify inserts */
-// -- SELECT * FROM live_shows WHERE id = @live_show_id;
-// -- SELECT q.id, q.question FROM live_show_quizzes q WHERE q.live_show_id = @live_show_id;
-// -- SELECT o.* FROM quiz_options o
-// -- JOIN live_show_quizzes q ON q.id = o.quiz_id
-// -- WHERE q.live_show_id = @live_show_id
-// -- ORDER BY q.id, o.id;

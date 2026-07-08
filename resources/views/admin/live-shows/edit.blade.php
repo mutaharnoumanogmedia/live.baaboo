@@ -6,7 +6,9 @@
     </x-slot>
 
     <div class="container-fluid form-container px-3">
-        <x-admin.live-show-tabs :live-show-id="$liveShow->id" active="info" />
+        @if (request('live_show_id'))
+            <x-admin.live-show-tabs :live-show-id="$liveShow->id" active="info" />
+        @endif
 
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -44,8 +46,7 @@
 
                                 <div class="mb-3 col-md-12">
                                     <label class="form-label">Description</label>
-                                    <textarea name="description" class="form-control" rows="4"
-                                        placeholder="Provide a description of your live show">{{ old('description', $liveShow->description ?? '') }}</textarea>
+                                    <textarea name="description" class="form-control" rows="4" placeholder="Provide a description of your live show">{{ old('description', $liveShow->description ?? '') }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -71,7 +72,8 @@
                                             {{ old('status', $liveShow->status ?? '') == 'scheduled' ? 'selected' : '' }}>
                                             Scheduled</option>
                                         <option value="live"
-                                            {{ old('status', $liveShow->status ?? '') == 'live' ? 'selected' : '' }}>Live
+                                            {{ old('status', $liveShow->status ?? '') == 'live' ? 'selected' : '' }}>
+                                            Live
                                         </option>
                                         <option value="completed"
                                             {{ old('status', $liveShow->status ?? '') == 'completed' ? 'selected' : '' }}>
@@ -82,18 +84,22 @@
                                     <label class="form-label">Is Test Show</label>
                                     <select name="is_test_show" class="form-select">
                                         <option value="0"
-                                            {{ old('is_test_show', $liveShow->is_test_show ?? '') == 0 ? 'selected' : '' }}>No
+                                            {{ old('is_test_show', $liveShow->is_test_show ?? '') == 0 ? 'selected' : '' }}>
+                                            No
                                         </option>
                                         <option value="1"
-                                            {{ old('is_test_show', $liveShow->is_test_show ?? '') == 1 ? 'selected' : '' }}>Yes
+                                            {{ old('is_test_show', $liveShow->is_test_show ?? '') == 1 ? 'selected' : '' }}>
+                                            Yes
                                         </option>
                                     </select>
                                 </div>
                                 <div class="mb-3 col-md-6">
                                     <label class="form-label required-field">Max Players</label>
-                                    <input type="number" name="max_players" class="form-control" min="1" max="100000"
-                                        required value="{{ old('max_players', $liveShow->max_players ?? 1000) }}">
-                                    <div class="form-text">Maximum number of participants allowed to join this show</div>
+                                    <input type="number" name="max_players" class="form-control" min="1"
+                                        max="100000" required
+                                        value="{{ old('max_players', $liveShow->max_players ?? 1000) }}">
+                                    <div class="form-text">Maximum number of participants allowed to join this show
+                                    </div>
                                 </div>
                                 <div class="mb-3 col-md-6">
                                     <label class="form-label required-field">Chat Status</label>
@@ -107,7 +113,8 @@
                                             Disabled
                                         </option>
                                     </select>
-                                    <div class="form-text">Participants can send messages only when chat is enabled</div>
+                                    <div class="form-text">Participants can send messages only when chat is enabled
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -144,8 +151,7 @@
 
             <!-- Right: Winners & Prize Split -->
             <div class="col-lg-6">
-                <form method="POST"
-                    action="{{ route('admin.live-shows.winner-prizes.update', $liveShow->id) }}"
+                <form method="POST" action="{{ route('admin.live-shows.winner-prizes.update', $liveShow->id) }}"
                     id="liveShowWinnerPrizesForm">
                     @csrf
                     @method('PUT')
@@ -162,15 +168,16 @@
                                     <input type="number" name="max_winners" id="maxWinners" class="form-control"
                                         min="1" max="{{ $maxWinnerSlots }}" required
                                         value="{{ old('max_winners', $liveShow->max_winners ?? 3) }}">
-                                    <div class="form-text">Number of winners (1–{{ $maxWinnerSlots }}) who share the prizes
+                                    <div class="form-text">Number of winners (1–{{ $maxWinnerSlots }}) who share the
+                                        prizes
                                     </div>
                                 </div>
                             </div>
                             @error('winner_prizes')
                                 <div class="py-2 alert alert-danger">{{ $message }}</div>
                             @enderror
-                            <p class="mb-2 text-muted small">Prize percentage per rank (must total 100% for the first <span
-                                    id="maxWinnersLabel">3</span> winner(s):</p>
+                            <p class="mb-2 text-muted small">Prize percentage per rank (must total 100% for the first
+                                <span id="maxWinnersLabel">3</span> winner(s):</p>
                             <div class="table-responsive">
                                 <table class="table align-middle table-bordered">
                                     <thead class="table-light">
