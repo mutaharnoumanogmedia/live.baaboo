@@ -131,7 +131,7 @@
         <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title text-dark" id="question-attach-modal-label">
+                    <h5 class="modal-title text-dark" id="question-attach-modal-label text-dark">
                         <i class="fas fa-list-ol me-2"></i>Attach before a question
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

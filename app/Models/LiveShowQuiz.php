@@ -32,12 +32,15 @@ class LiveShowQuiz extends Model
 
     /**
      * Gallery media configured to play *before* this question.
+     *
+     * Stored in the shared `live_show_gallery_media` pivot where the
+     * `before_question` column points at this quiz.
      */
     public function questionMedia()
     {
-        return $this->belongsToMany(GalleryMedia::class, 'live_show_question_media', 'quiz_id', 'gallery_media_id')
-            ->withPivot(['id', 'sort_order', 'live_show_id', 'media_played'])
-            ->orderBy('live_show_question_media.sort_order')
+        return $this->belongsToMany(GalleryMedia::class, 'live_show_gallery_media', 'before_question', 'gallery_media_id')
+            ->withPivot(['id', 'sort_order', 'live_show_id', 'media_played', 'before_question'])
+            ->orderBy('live_show_gallery_media.sort_order')
             ->withTimestamps();
     }
 }

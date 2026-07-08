@@ -1,14 +1,13 @@
 <x-app-dashboard-layout>
     <div class="container mt-4">
-        @if(request('live_show_id'))
+        @if (request('live_show_id'))
             <x-admin.live-show-tabs :live-show-id="request('live_show_id')" active="quiz" />
-       
         @endif
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>Quizzes</h2>
             <div class="d-flex gap-2">
-                @if(request('live_show_id'))
+                @if (request('live_show_id'))
                     <a href="{{ route('admin.live-shows.view-details', request('live_show_id')) }}"
                         class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left me-1"></i> Back to Show Details

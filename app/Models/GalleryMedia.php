@@ -24,7 +24,8 @@ class GalleryMedia extends Model
     public function liveShows()
     {
         return $this->belongsToMany(LiveShow::class, 'live_show_gallery_media')
-            ->withPivot('sort_order')
+            ->withPivot(['sort_order', 'before_question'])
+            ->wherePivotNull('before_question')
             ->withTimestamps();
     }
 

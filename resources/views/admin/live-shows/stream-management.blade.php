@@ -1084,7 +1084,7 @@
                                  <div class="p-3 border rounded border-light bg-dark">
                                      <div class="mb-3 d-flex flex-wrap align-items-center gap-2">
                                          <h6 class="mb-0 text-muted small text-uppercase fw-bold flex-grow-1">
-                                             All attached media (show-wide and question-specific)
+                                             All attached media
                                          </h6>
                                          <button type="button" class="btn btn-sm btn-outline-primary"
                                              title="Attach media from gallery" data-bs-toggle="modal"
@@ -3878,9 +3878,7 @@
                              streamSwalError(data.message || 'Could not remove this item.', 'Remove failed');
                              return;
                          }
-                         row.remove();
-                         persistEndOrder();
-                         ensureGalleryAttachedEmptyRow();
+                         fetchGalleryMediaItems();
                          streamSwalSuccess(data.message || 'Removed.', 'Removed');
                      }).catch(function(err) {
                          console.error('Gallery detach end error:', err);
@@ -3934,10 +3932,7 @@
                                      'Remove failed');
                                  return;
                              }
-                             row.remove();
-                             updateRowIndices();
-                             persistOrder();
-                             ensureGalleryAttachedEmptyRow();
+                             fetchGalleryMediaItems();
                              streamSwalSuccess(res.data.message || 'Removed from this stream.', 'Removed');
                          })
                          .catch(function(err) {
@@ -3961,16 +3956,15 @@
                      .then(data => {
                          console.log('Gallery media items:', data);
                          if (data.success) {
-                             //append gallery media items to gallery-available-list
                              const galleryAvailableList = document.getElementById('attached-media-list');
                              if (galleryAvailableList) {
                                  galleryAvailableList.innerHTML = '';
-                                 data.media.forEach((media, idx) => {
-
+                                 const items = data.groupedByMedia || data.media || [];
+                                 items.forEach((media, idx) => {
                                      galleryAvailableList.insertAdjacentHTML('beforeend', attachGalleryMediaItemRow(
                                          media, idx));
                                  });
-                                 if (!data.media.length) {
+                                 if (!items.length) {
                                      ensureGalleryAttachedEmptyRow();
                                  }
                              }
@@ -3985,33 +3979,36 @@
              }
 
              function attachGalleryMediaItemRow(data, idx) {
+                 const contexts = Array.isArray(data.contexts) ? data.contexts : [];
+                 const hasShow = contexts.some(c => c.type === 'show');
+                 const hasEnd = contexts.some(c => c.type === 'end');
                  const attachmentType = data.attachment_type || 'show';
                  const attachmentId = data.attachment_id || '';
-                 const rowKey = `${attachmentType}-${attachmentId}`;
-                 const isShowWide = attachmentType === 'show';
-                 const isEnd = attachmentType === 'end';
-                 const isSortable = isShowWide || isEnd;
+                 const rowKey = `media-${data.id}`;
+                 const isSortable = hasShow || hasEnd;
+                 const rowClass = hasShow ? ' show-wide-row' : (hasEnd ? ' end-row' : '');
                  const playedBadge = data.media_played ?
                      '<span class="badge bg-success ms-1 media-played-badge">Played</span>' :
                      '<span class="badge bg-success ms-1 media-played-badge d-none">Played</span>';
                  const showLabel = data.media_played ? 'Replay' : 'Show';
-                 const detachBtn = isShowWide ? `
+                 const detachBtn = hasShow ? `
                     <button type="button"
                         class="btn btn-sm btn-outline-danger gallery-detach-btn"
                         data-media-id="${data.id}"
-                        title="Remove from stream"
+                        title="Remove show-wide attachment"
                         onclick="galleryDetach('${data.id}', this)">
                         <i class="fas fa-times"></i>
-                    </button>` : (isEnd ? `
+                    </button>` : '';
+                 const detachEndBtn = hasEnd ? `
                     <button type="button"
                         class="btn btn-sm btn-outline-danger gallery-detach-end-btn"
                         data-media-id="${data.id}"
                         title="Remove from end of show"
                         onclick="galleryDetachEnd('${data.id}', this)">
-                        <i class="fas fa-times"></i>
-                    </button>` : '');
-                 const playWithLive = isShowWide ? `
-                    <div class="form-check mt-1">
+                        <i class="fas fa-flag-checkered"></i>
+                    </button>` : '';
+                 const playWithLive = hasShow ? `
+                    <span class='me-4'>
                         <input class="form-check-input" type="radio" name="play_with_live"
                             id="playWithLiveRadio_${rowKey}" value="${data.id}"
                             onchange="askConfirmationWhenSelectThisMediaForLive(this)"
@@ -4019,14 +4016,20 @@
                         <label class="form-check-label ms-1 small" for="playWithLiveRadio_${rowKey}">
                             Play on live start
                         </label>
-                    </div>` : '';
+                        </span>
+                  ` : '';
                  const dragHandle = isSortable ?
                      '<div class="drag-handle" style="cursor: grab;"><i class="fas fa-grip-vertical text-muted"></i></div>' :
                      '<span class="text-muted small">—</span>';
-                 const contextBadgeClass = isShowWide ? 'bg-info' : (isEnd ? 'bg-success' : 'bg-secondary');
+                 const contextBadges = contexts.length ?
+                     contexts.map(c => {
+                         const cls = c.type === 'show' ? 'bg-info' : (c.type === 'end' ? 'bg-success' : 'bg-secondary');
+                         return `<span class="badge ${cls} me-1 mb-1">${c.label}</span>`;
+                     }).join('') :
+                     `<span class="badge bg-secondary">${data.attachment_label || 'Attached'}</span>`;
 
                  return `
-                <tr class="gallery-media-card${isShowWide ? ' show-wide-row' : ''}${isEnd ? ' end-row' : ''}"
+                <tr class="gallery-media-card${rowClass}"
                     data-media-id="${data.id}"
                     data-attachment-type="${attachmentType}"
                     data-attachment-id="${attachmentId}"
@@ -4047,10 +4050,11 @@
                         </div>
                     </td>
                     <td class="align-middle">
-                        <span class="badge ${contextBadgeClass}">${data.attachment_label || (isShowWide ? 'Show-wide' : (isEnd ? 'After all questions' : 'Question'))}</span>
+                        <div class="d-flex flex-wrap gap-1">${contextBadges}</div>
                     </td>
                     <td class="align-middle text-end">
                         <div class="btn-group btn-group-sm">
+                            ${playWithLive}
                             <button type="button"
                                 class="btn btn-success gallery-show-on-stream-btn"
                                 onclick="galleryShowOnStream('${data.id}', this, '${attachmentType}', ${attachmentId})"
@@ -4070,8 +4074,8 @@
                                 <i class="fas fa-eye"></i>
                             </button>
                             ${detachBtn}
+                            ${detachEndBtn}
                         </div>
-                        ${playWithLive}
                     </td>
                 </tr>
             `;

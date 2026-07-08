@@ -11,11 +11,11 @@ use App\Models\LiveShowEndMedia;
 use App\Models\LiveShowGalleryMedia;
 use App\Models\LiveShowGalleryState;
 use App\Models\LiveShowQuiz;
-use App\Models\LiveShowQuestionMedia;
 use FFMpeg\Coordinate\TimeCode;
 use FFMpeg\FFMpeg;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -210,7 +210,7 @@ class MediaGalleryController extends Controller
      *
      * @throws ValidationException
      */
-    private function assertFileSizeAllowed(\Illuminate\Http\UploadedFile $file, bool $isVideo): void
+    private function assertFileSizeAllowed(UploadedFile $file, bool $isVideo): void
     {
         $maxBytes = $isVideo ? self::VIDEO_MAX_BYTES : self::IMAGE_MAX_BYTES;
 
@@ -226,7 +226,7 @@ class MediaGalleryController extends Controller
      * Store a thumbnail for a video on S3: prefer the client-captured frame, fall back to FFmpeg.
      * Returns the public URL, or null if no thumbnail could be produced.
      */
-    private function storeVideoThumbnail(\Illuminate\Http\UploadedFile $video, ?\Illuminate\Http\UploadedFile $clientThumb): ?string
+    private function storeVideoThumbnail(UploadedFile $video, ?UploadedFile $clientThumb): ?string
     {
         $thumbS3Path = 'thumbnails/thumb_'.time().'_'.Str::random(5).'.jpg';
 
@@ -330,13 +330,15 @@ class MediaGalleryController extends Controller
         LiveShow::findOrFail($validated['live_show_id'])
             ->galleryMedia()
             ->detach($validated['gallery_media_id']);
+        LiveShowGalleryMedia::where('live_show_id', $validated['live_show_id'])
+            ->where('gallery_media_id', $validated['gallery_media_id'])
+            ->delete();
 
         return response()->json(['success' => true, 'message' => 'Detached from live show.']);
     }
 
     /**
      * Attach a gallery media item so it plays *before* a specific quiz question.
-     * Independent of full-show attachments.
      */
     public function attachToQuestion(Request $request): JsonResponse
     {
@@ -354,7 +356,7 @@ class MediaGalleryController extends Controller
             return response()->json(['success' => true, 'message' => 'Already attached before this question.']);
         }
 
-        $maxOrder = $quiz->questionMedia()->max('live_show_question_media.sort_order') ?? 0;
+        $maxOrder = $quiz->questionMedia()->max('live_show_gallery_media.sort_order') ?? 0;
         $quiz->questionMedia()->attach($media->id, [
             'live_show_id' => $liveShow->id,
             'sort_order' => $maxOrder + 1,
@@ -452,7 +454,7 @@ class MediaGalleryController extends Controller
 
         DB::transaction(function () use ($quizId, $validated) {
             foreach ($validated['order'] as $position => $mediaId) {
-                LiveShowQuestionMedia::where('quiz_id', $quizId)
+                LiveShowGalleryMedia::where('before_question', $quizId)
                     ->where('gallery_media_id', $mediaId)
                     ->update(['sort_order' => $position]);
             }
@@ -506,7 +508,7 @@ class MediaGalleryController extends Controller
             if ($validated['to_type'] === 'question') {
                 $toQuiz = $liveShow->quizzes()->findOrFail($validated['to_quiz_id']);
                 if (! $toQuiz->questionMedia()->where('gallery_media.id', $mediaId)->exists()) {
-                    $maxOrder = $toQuiz->questionMedia()->max('live_show_question_media.sort_order') ?? 0;
+                    $maxOrder = $toQuiz->questionMedia()->max('live_show_gallery_media.sort_order') ?? 0;
                     $toQuiz->questionMedia()->attach($mediaId, [
                         'live_show_id' => $liveShow->id,
                         'sort_order' => $maxOrder + 1,
@@ -632,8 +634,9 @@ class MediaGalleryController extends Controller
         $attachedIds = $media_gallery->liveShows()->pluck('live_shows.id')->toArray();
 
         // Quiz ids where THIS media is already attached before the question.
-        $attachedQuestionIds = LiveShowQuestionMedia::where('gallery_media_id', $media_gallery->id)
-            ->pluck('quiz_id')
+        $attachedQuestionIds = LiveShowGalleryMedia::where('gallery_media_id', $media_gallery->id)
+            ->whereNotNull('before_question')
+            ->pluck('before_question')
             ->map(fn ($id) => (int) $id)
             ->toArray();
 
@@ -659,12 +662,12 @@ class MediaGalleryController extends Controller
         }]);
         $allMedia = GalleryMedia::orderBy('created_at', 'desc')->get();
 
-        // Map of gallery_media_id => [quiz_id, ...] for question-level
-        // attachments within this show, so each tile can show its state.
-        $questionAttachments = LiveShowQuestionMedia::where('live_show_id', $liveShow->id)
-            ->get(['gallery_media_id', 'quiz_id'])
+        // Map of gallery_media_id => [quiz_id, ...] for question-level attachments.
+        $questionAttachments = LiveShowGalleryMedia::where('live_show_id', $liveShow->id)
+            ->whereNotNull('before_question')
+            ->get(['gallery_media_id', 'before_question'])
             ->groupBy('gallery_media_id')
-            ->map(fn ($rows) => $rows->pluck('quiz_id')->map(fn ($id) => (int) $id)->values()->all())
+            ->map(fn ($rows) => $rows->pluck('before_question')->map(fn ($id) => (int) $id)->values()->all())
             ->toArray();
 
         return view('admin.media-gallery.attach-to-live-show', [
@@ -903,89 +906,126 @@ class MediaGalleryController extends Controller
     public function items($live_show): JsonResponse
     {
         $liveShow = LiveShow::with([
-            'galleryMedia',
             'endMedia',
             'quizzes' => fn ($q) => $q->orderBy('id'),
-            'quizzes.questionMedia',
         ])->findOrFail($live_show);
 
-        $items = collect();
+        $quizNumById = $liveShow->quizzes->values()
+            ->mapWithKeys(fn ($q, $i) => [(int) $q->id => $i + 1]);
 
-        foreach ($liveShow->galleryMedia as $media) {
-            $items->push([
-                'id' => $media->id,
-                'attachment_id' => (int) $media->pivot->id,
-                'attachment_type' => 'show',
-                'attachment_label' => 'Show-wide',
-                'media_played' => (bool) ($media->pivot->media_played ?? false),
-                'type' => $media->type,
-                'title' => $media->title,
-                'original_name' => $media->original_name,
-                'url' => $media->url,
-                'path' => $media->path,
-                'thumbnail' => $media->thumbnail,
-                'total_seconds' => $media->total_seconds,
-                'mime_type' => $media->mime_type,
-                'file_size' => $media->file_size,
-                'sort_order' => (int) ($media->pivot->sort_order ?? 0),
-                'is_image' => $media->isImage(),
-                'play_with_live' => (bool) ($media->pivot->play_with_live ?? false),
-            ]);
-        }
+        $grouped = [];
 
-        foreach ($liveShow->quizzes as $qIndex => $quiz) {
-            foreach ($quiz->questionMedia as $media) {
-                $items->push([
-                    'id' => $media->id,
-                    'attachment_id' => (int) $media->pivot->id,
-                    'attachment_type' => 'question',
-                    'attachment_label' => 'Before Q'.($qIndex + 1),
-                    'quiz_id' => (int) $quiz->id,
-                    'media_played' => (bool) ($media->pivot->media_played ?? false),
-                    'type' => $media->type,
-                    'title' => $media->title,
-                    'original_name' => $media->original_name,
-                    'url' => $media->url,
-                    'path' => $media->path,
-                    'thumbnail' => $media->thumbnail,
-                    'total_seconds' => $media->total_seconds,
-                    'mime_type' => $media->mime_type,
-                    'file_size' => $media->file_size,
-                    'sort_order' => 1000 + ($qIndex * 100) + (int) ($media->pivot->sort_order ?? 0),
-                    'is_image' => $media->isImage(),
-                    'play_with_live' => false,
-                ]);
+        $galleryRows = LiveShowGalleryMedia::where('live_show_id', $liveShow->id)
+            ->with('galleryMedia')
+            ->orderBy('sort_order')
+            ->get();
+
+        foreach ($galleryRows as $pivot) {
+            $media = $pivot->galleryMedia;
+            if (! $media) {
+                continue;
+            }
+
+            $mediaId = (int) $media->id;
+            if (! isset($grouped[$mediaId])) {
+                $grouped[$mediaId] = $this->baseGroupedGalleryItem($media);
+            }
+
+            if ($pivot->before_question) {
+                $qNum = $quizNumById[(int) $pivot->before_question] ?? '?';
+                $grouped[$mediaId]['contexts'][] = [
+                    'type' => 'question',
+                    'attachment_id' => (int) $pivot->id,
+                    'label' => 'Before Q'.$qNum,
+                    'quiz_id' => (int) $pivot->before_question,
+                    'sort_order' => 1000 + ((int) ($quizNumById[(int) $pivot->before_question] ?? 1) * 100) + (int) $pivot->sort_order,
+                    'media_played' => (bool) $pivot->media_played,
+                ];
+            } else {
+                $grouped[$mediaId]['contexts'][] = [
+                    'type' => 'show',
+                    'attachment_id' => (int) $pivot->id,
+                    'label' => 'Show-wide',
+                    'sort_order' => (int) $pivot->sort_order,
+                    'media_played' => (bool) $pivot->media_played,
+                    'play_with_live' => (bool) $pivot->play_with_live,
+                ];
+                $grouped[$mediaId]['play_with_live'] = (bool) $pivot->play_with_live;
+            }
+
+            if ($pivot->media_played) {
+                $grouped[$mediaId]['media_played'] = true;
             }
         }
 
         foreach ($liveShow->endMedia as $media) {
-            $items->push([
-                'id' => $media->id,
+            $mediaId = (int) $media->id;
+            if (! isset($grouped[$mediaId])) {
+                $grouped[$mediaId] = $this->baseGroupedGalleryItem($media);
+            }
+
+            $grouped[$mediaId]['contexts'][] = [
+                'type' => 'end',
                 'attachment_id' => (int) $media->pivot->id,
-                'attachment_type' => 'end',
-                'attachment_label' => 'After all questions',
-                'media_played' => (bool) ($media->pivot->media_played ?? false),
-                'type' => $media->type,
-                'title' => $media->title,
-                'original_name' => $media->original_name,
-                'url' => $media->url,
-                'path' => $media->path,
-                'thumbnail' => $media->thumbnail,
-                'total_seconds' => $media->total_seconds,
-                'mime_type' => $media->mime_type,
-                'file_size' => $media->file_size,
+                'label' => 'After all questions',
                 'sort_order' => 200000 + (int) ($media->pivot->sort_order ?? 0),
-                'is_image' => $media->isImage(),
-                'play_with_live' => false,
-            ]);
+                'media_played' => (bool) ($media->pivot->media_played ?? false),
+            ];
+
+            if ($media->pivot->media_played ?? false) {
+                $grouped[$mediaId]['media_played'] = true;
+            }
         }
 
-        $sorted = $items->sortBy('sort_order')->values();
+        $items = collect($grouped)
+            ->map(function (array $item) {
+                $contexts = $item['contexts'];
+                $item['attachment_label'] = collect($contexts)->pluck('label')->implode(' · ');
+                $item['sort_order'] = collect($contexts)->min('sort_order') ?? 999999;
+
+                $primary = collect($contexts)->firstWhere('type', 'show')
+                    ?? collect($contexts)->firstWhere('type', 'question')
+                    ?? collect($contexts)->first();
+
+                $item['attachment_type'] = $primary['type'] ?? 'show';
+                $item['attachment_id'] = $primary['attachment_id'] ?? null;
+                if (($primary['type'] ?? null) === 'question') {
+                    $item['quiz_id'] = $primary['quiz_id'] ?? null;
+                }
+
+                return $item;
+            })
+            ->sortBy('sort_order')
+            ->values();
 
         return response()->json([
             'success' => true,
-            'media' => $sorted,
+            'media' => $items,
+            'groupedByMedia' => $items,
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function baseGroupedGalleryItem(GalleryMedia $media): array
+    {
+        return [
+            'id' => (int) $media->id,
+            'type' => $media->type,
+            'title' => $media->title,
+            'original_name' => $media->original_name,
+            'url' => $media->url,
+            'path' => $media->path,
+            'thumbnail' => $media->thumbnail,
+            'total_seconds' => $media->total_seconds,
+            'mime_type' => $media->mime_type,
+            'file_size' => $media->file_size,
+            'is_image' => $media->isImage(),
+            'contexts' => [],
+            'media_played' => false,
+            'play_with_live' => false,
+        ];
     }
 
     public function allMedia(): JsonResponse

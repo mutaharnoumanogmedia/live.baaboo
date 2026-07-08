@@ -141,7 +141,8 @@ class LiveShow extends Model
     public function galleryMedia()
     {
         return $this->belongsToMany(GalleryMedia::class, 'live_show_gallery_media')
-            ->withPivot(['id', 'sort_order', 'media_played', 'play_with_live'])
+            ->withPivot(['id', 'sort_order', 'media_played', 'play_with_live', 'before_question'])
+            ->wherePivotNull('before_question')
             ->orderBy('live_show_gallery_media.sort_order')
             ->withTimestamps();
     }
@@ -149,6 +150,7 @@ class LiveShow extends Model
     public function galleryMediaItems()
     {
         return $this->hasMany(LiveShowGalleryMedia::class)->with('galleryMedia')
+            ->whereNull('before_question')
             ->orderBy('live_show_gallery_media.sort_order');
 
     }
@@ -160,11 +162,12 @@ class LiveShow extends Model
 
     /**
      * Question-level media attachments for this show (media shown before a
-     * specific quiz question). Kept separate from the show-level gallery.
+     * specific quiz question). These live in the same `live_show_gallery_media`
+     * table as show-wide media but have a non-null `before_question`.
      */
     public function questionMedia()
     {
-        return $this->hasMany(LiveShowQuestionMedia::class);
+        return $this->hasMany(LiveShowGalleryMedia::class)->whereNotNull('before_question');
     }
 
     /**
