@@ -1,6 +1,9 @@
 <x-app-dashboard-layout>
     <div class="container mt-4">
-        <x-admin.live-show-tabs :live-show-id="request('live_show_id')" active="quiz" />
+        @if(request('live_show_id'))
+            <x-admin.live-show-tabs :live-show-id="request('live_show_id')" active="quiz" />
+       
+        @endif
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2>Quizzes</h2>

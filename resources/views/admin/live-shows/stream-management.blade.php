@@ -205,6 +205,7 @@
                                                          data-bs-target="#winnersExtraActionsModal"
                                                          title="More winner actions" aria-label="More winner actions">
                                                          <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+                                                         winners actions
 
                                                      </button>
                                                  </div>

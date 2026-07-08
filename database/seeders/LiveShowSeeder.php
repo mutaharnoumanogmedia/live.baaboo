@@ -6,7 +6,12 @@ use Illuminate\Database\Seeder;
 use App\Models\LiveShow;
 use App\Models\LiveShowQuiz;
 use App\Models\QuizOption as LiveShowQuizOption;
+use App\Models\LiveShowWinnerPrize;
+use App\Models\User;
+use App\Models\UserQuiz;
+use App\Models\UserQuizResponse;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -14,6 +19,14 @@ class LiveShowSeeder extends Seeder
 {
     public function run(): void
     {
+        // Resolve the admin (creator) and the pool of players that can join shows.
+        $admin = User::role('admin')->first() ?? User::first();
+        $players = User::role('user')->get();
+
+        if ($players->isEmpty()) {
+            $this->command?->warn('No players found (role "user"). Run UsersByRoleSeeder first. Skipping user attachment.');
+        }
+
         $topics = ['General Knowledge', 'Science Basics', 'World Geography', 'Language Guessing', 'Brands & Logos', 'Technology', 'Sports', 'Movies & Entertainment', 'Animals & Nature', 'History & Culture'];
 
         $quizData = [
@@ -151,39 +164,283 @@ class LiveShowSeeder extends Seeder
         ];
 
 
-        // Create 10 shows
-        foreach (range(0, 9) as $i) {
-            $topic = $topics[$i];
-            $title = $topic . ' Live Show';
-            $status = ['live', 'scheduled', 'completed'][array_rand(['live', 'scheduled', 'completed'])];
+        // Guarantee a predictable mix of statuses across the 10 shows:
+        // 4 completed (past, with full gameplay), 2 live (in progress),
+        // 4 scheduled (upcoming, players registered only).
+        $statuses = [
+            'completed', 'completed', 'completed', 'completed',
+            'live', 'live',
+            'scheduled', 'scheduled', 'scheduled', 'scheduled',
+        ];
 
-            $liveShow = LiveShow::create([
-                'title'        => $title,
-                'description'  => 'Interactive quiz session covering ' . strtolower($topic) . '.',
-                'scheduled_at' => Carbon::now()->addDays($i)->setTime(18, 0),
-                'status'       => $status,
-                'thumbnail'    => 'https://picsum.photos/seed/' . Str::slug($topic) . '/400/250',
+        DB::transaction(function () use ($topics, $quizData, $statuses, $admin, $players) {
+            foreach (range(0, 9) as $i) {
+                $topic = $topics[$i];
+                $status = $statuses[$i];
 
-                'host_name'    => fake()->name(),
-                'prize_amount' => rand(50, 500),
-                'currency'     => 'EUR',
-                'created_by'   => 1, // adjust for your admin user
-            ]);
+                $liveShow = $this->createShow($topic, $status, $i, $admin);
+                $quizzes = $this->createQuizzes($liveShow, $quizData[$topic], $admin);
+                $prizes = $this->createWinnerPrizes($liveShow);
 
-            foreach ($quizData[$topic] as [$question, $options, $correctIndex]) {
-                $quiz = LiveShowQuiz::create([
-                    'live_show_id' => $liveShow->id,
-                    'question'     => $question,
-                ]);
-
-                foreach ($options as $idx => $opt) {
-                    LiveShowQuizOption::create([
-                        'quiz_id' => $quiz->id,
-                        'option_text'       => $opt,
-                        'is_correct'        => $idx === $correctIndex ? 1 : 0,
-                    ]);
+                if ($players->isNotEmpty()) {
+                    $this->attachPlayers($liveShow, $quizzes, $prizes, $players, $status);
                 }
             }
+        });
+    }
+
+    /**
+     * Create a single live show with sensible timing for its status.
+     */
+    private function createShow(string $topic, string $status, int $index, ?User $admin): LiveShow
+    {
+        switch ($status) {
+            case 'completed':
+                // Shows that already happened over the past couple of weeks.
+                $scheduledAt = Carbon::now()->subDays(($index + 1) * 3)->setTime(18, 0);
+                $startTime = (clone $scheduledAt);
+                $endTime = (clone $scheduledAt)->addMinutes(45);
+                $winnersAnnounced = true;
+                break;
+
+            case 'live':
+                // Currently running.
+                $scheduledAt = Carbon::now()->setTime(18, 0);
+                $startTime = Carbon::now()->subMinutes(15);
+                $endTime = null;
+                $winnersAnnounced = false;
+                break;
+
+            default: // scheduled
+                $scheduledAt = Carbon::now()->addDays($index + 1)->setTime(18, 0);
+                $startTime = null;
+                $endTime = null;
+                $winnersAnnounced = false;
+                break;
         }
+
+        return LiveShow::create([
+            'title'             => $topic . ' Live Show',
+            'description'       => 'Interactive quiz session covering ' . strtolower($topic) . '.',
+            'scheduled_at'      => $scheduledAt,
+            'status'            => $status,
+            'thumbnail'         => 'https://picsum.photos/seed/' . Str::slug($topic) . '/400/250',
+            'host_name'         => fake()->name(),
+            'prize_amount'      => rand(50, 500),
+            'currency'          => 'EUR',
+            'max_winners'       => 3,
+            'max_players'       => 100,
+            'chat_enabled'      => true,
+            'winners_announced' => $winnersAnnounced,
+            'start_time'        => $startTime,
+            'end_time'          => $endTime,
+            'created_by'        => $admin?->id ?? 1,
+        ]);
+    }
+
+    /**
+     * Create the quiz questions and their options for a show.
+     *
+     * @return \Illuminate\Support\Collection<int, LiveShowQuiz>
+     */
+    private function createQuizzes(LiveShow $liveShow, array $questions, ?User $admin)
+    {
+        return collect($questions)->map(function ($item) use ($liveShow, $admin) {
+            [$question, $options, $correctIndex] = $item;
+
+            $quiz = LiveShowQuiz::create([
+                'live_show_id' => $liveShow->id,
+                'question'     => $question,
+                'created_by'   => $admin?->id,
+                'has_shown'    => $liveShow->status === 'completed',
+            ]);
+
+            foreach ($options as $idx => $opt) {
+                LiveShowQuizOption::create([
+                    'quiz_id'     => $quiz->id,
+                    'option_text' => $opt,
+                    'is_correct'  => $idx === $correctIndex ? 1 : 0,
+                ]);
+            }
+
+            return $quiz->load('options');
+        });
+    }
+
+    /**
+     * Create the winner prize tiers (ranks 1-3) for a show.
+     *
+     * @return \Illuminate\Support\Collection<int, LiveShowWinnerPrize>
+     */
+    private function createWinnerPrizes(LiveShow $liveShow)
+    {
+        $base = (float) $liveShow->prize_amount;
+        $tiers = [
+            1 => $base,
+            2 => round($base * 0.5, 2),
+            3 => round($base * 0.25, 2),
+        ];
+
+        return collect($tiers)->map(function ($amount, $rank) use ($liveShow) {
+            return LiveShowWinnerPrize::create([
+                'live_show_id' => $liveShow->id,
+                'rank'         => $rank,
+                'prize'        => number_format($amount, 2, '.', ''),
+                'is_voucher'   => false,
+            ]);
+        });
+    }
+
+    /**
+     * Attach a random subset of players to a show and, for completed/live
+     * shows, generate realistic gameplay so that scores and winners are
+     * consistent with the rest of the application.
+     *
+     * @param  \Illuminate\Support\Collection<int, LiveShowQuiz>  $quizzes
+     * @param  \Illuminate\Support\Collection<int, LiveShowWinnerPrize>  $prizes
+     * @param  \Illuminate\Support\Collection<int, User>  $players
+     */
+    private function attachPlayers(LiveShow $liveShow, $quizzes, $prizes, $players, string $status): void
+    {
+        // Pick a random subset of the player pool to join this show.
+        $participantCount = min($players->count(), rand(15, 40));
+        $participants = $players->shuffle()->take($participantCount)->values();
+
+        $scores = []; // user_id => total score, used to rank winners later.
+
+        foreach ($participants as $player) {
+            $isOnline = $status === 'live' ? (bool) rand(0, 1) : false;
+
+            $liveShow->users()->attach($player->id, [
+                'score'      => 0,
+                'status'     => 'registered',
+                'is_online'  => $isOnline,
+                'is_winner'  => false,
+                'prize_won'  => 'n/a',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // Only completed and live shows have actual answers.
+            if ($status === 'scheduled') {
+                continue;
+            }
+
+            $scores[$player->id] = $this->generateGameplay($liveShow, $quizzes, $player, $status);
+        }
+
+        // Reflect the computed totals on the pivot.
+        foreach ($scores as $userId => $score) {
+            $liveShow->users()->updateExistingPivot($userId, [
+                'score'  => round($score, 2),
+                'status' => 'active',
+            ]);
+        }
+
+        if ($status === 'completed' && ! empty($scores)) {
+            $this->assignWinners($liveShow, $prizes, $scores);
+        }
+    }
+
+    /**
+     * Simulate a player answering the show's questions and persist the
+     * UserQuiz / UserQuizResponse records. Returns the player's total score.
+     *
+     * @param  \Illuminate\Support\Collection<int, LiveShowQuiz>  $quizzes
+     */
+    private function generateGameplay(LiveShow $liveShow, $quizzes, User $player, string $status): float
+    {
+        $total = 0.0;
+
+        // For live shows the game is in progress, so players have only
+        // answered a portion of the questions so far.
+        $answerable = $status === 'live'
+            ? $quizzes->take(rand(1, max(1, (int) ceil($quizzes->count() / 2))))
+            : $quizzes;
+
+        foreach ($answerable as $quiz) {
+            // Not every player answers every question.
+            if (rand(1, 100) > 88) {
+                continue;
+            }
+
+            $correctOption = $quiz->options->firstWhere('is_correct', 1);
+            $answersCorrectly = rand(1, 100) <= 62; // ~62% accuracy
+
+            $chosenOption = $answersCorrectly
+                ? $correctOption
+                : $quiz->options->where('is_correct', 0)->random();
+
+            $seconds = round(mt_rand(80, 950) / 100, 2); // 0.80s - 9.50s
+            $responseScore = $answersCorrectly
+                ? $this->calculateScoreFromMilliseconds($seconds * 1000)
+                : 0.0;
+
+            $userQuiz = UserQuiz::create([
+                'user_id'      => $player->id,
+                'live_show_id' => $liveShow->id,
+                'quiz_id'      => $quiz->id,
+                'created_at'   => now(),
+            ]);
+
+            UserQuizResponse::create([
+                'user_quiz_id'      => $userQuiz->id,
+                'quiz_option_id'    => $chosenOption?->id,
+                'quiz_id'           => $quiz->id,
+                'user_id'           => $player->id,
+                'is_correct'        => $answersCorrectly,
+                'seconds_to_submit' => $seconds,
+                'response_score'    => $responseScore,
+                'user_response'     => $chosenOption?->option_text,
+            ]);
+
+            $total += $responseScore;
+        }
+
+        return $total;
+    }
+
+    /**
+     * Rank participants by score and flag the top performers as winners,
+     * assigning them a prize tier.
+     *
+     * @param  \Illuminate\Support\Collection<int, LiveShowWinnerPrize>  $prizes
+     * @param  array<int, float>  $scores
+     */
+    private function assignWinners(LiveShow $liveShow, $prizes, array $scores): void
+    {
+        arsort($scores);
+        $maxWinners = (int) ($liveShow->max_winners ?: 3);
+        $rank = 1;
+
+        foreach (array_slice($scores, 0, $maxWinners, true) as $userId => $score) {
+            if ($score <= 0) {
+                continue;
+            }
+
+            $prize = $prizes->firstWhere('rank', $rank);
+
+            $liveShow->users()->updateExistingPivot($userId, [
+                'is_winner'       => true,
+                'status'          => 'active',
+                'winner_prize_id' => $prize?->id,
+                'prize_won'       => $prize ? $liveShow->currency . ' ' . $prize->prize : 'n/a',
+            ]);
+
+            $rank++;
+        }
+    }
+
+    /**
+     * Mirror of GamePlayController::calculateScoreFromMilliseconds so seeded
+     * scores match the values the live app would produce.
+     */
+    private function calculateScoreFromMilliseconds(float $timeToSubmitMs): float
+    {
+        $seconds = max($timeToSubmitMs / 1000, 0);
+        $numerator = exp(-0.05 * $seconds) - exp(-0.5);
+        $denominator = 1 - exp(-0.5);
+
+        return round(100 + 100 * ($numerator / $denominator), 2);
     }
 }
