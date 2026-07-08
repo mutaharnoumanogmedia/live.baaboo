@@ -11,7 +11,6 @@ use App\Models\LiveShowEndMedia;
 use App\Models\LiveShowGalleryMedia;
 use App\Models\LiveShowGalleryState;
 use App\Models\LiveShowQuiz;
-use App\Models\LiveShowQuestionMedia;
 use FFMpeg\Coordinate\TimeCode;
 use FFMpeg\FFMpeg;
 use Illuminate\Http\JsonResponse;
@@ -330,13 +329,15 @@ class MediaGalleryController extends Controller
         LiveShow::findOrFail($validated['live_show_id'])
             ->galleryMedia()
             ->detach($validated['gallery_media_id']);
+        LiveShowGalleryMedia::where('live_show_id', $validated['live_show_id'])
+            ->where('gallery_media_id', $validated['gallery_media_id'])
+            ->delete();
 
         return response()->json(['success' => true, 'message' => 'Detached from live show.']);
     }
 
     /**
      * Attach a gallery media item so it plays *before* a specific quiz question.
-     * Independent of full-show attachments.
      */
     public function attachToQuestion(Request $request): JsonResponse
     {
@@ -354,7 +355,7 @@ class MediaGalleryController extends Controller
             return response()->json(['success' => true, 'message' => 'Already attached before this question.']);
         }
 
-        $maxOrder = $quiz->questionMedia()->max('live_show_question_media.sort_order') ?? 0;
+        $maxOrder = $quiz->questionMedia()->max('live_show_gallery_media.sort_order') ?? 0;
         $quiz->questionMedia()->attach($media->id, [
             'live_show_id' => $liveShow->id,
             'sort_order' => $maxOrder + 1,
@@ -452,7 +453,7 @@ class MediaGalleryController extends Controller
 
         DB::transaction(function () use ($quizId, $validated) {
             foreach ($validated['order'] as $position => $mediaId) {
-                LiveShowQuestionMedia::where('quiz_id', $quizId)
+                LiveShowGalleryMedia::where('before_question', $quizId)
                     ->where('gallery_media_id', $mediaId)
                     ->update(['sort_order' => $position]);
             }
@@ -506,7 +507,7 @@ class MediaGalleryController extends Controller
             if ($validated['to_type'] === 'question') {
                 $toQuiz = $liveShow->quizzes()->findOrFail($validated['to_quiz_id']);
                 if (! $toQuiz->questionMedia()->where('gallery_media.id', $mediaId)->exists()) {
-                    $maxOrder = $toQuiz->questionMedia()->max('live_show_question_media.sort_order') ?? 0;
+                    $maxOrder = $toQuiz->questionMedia()->max('live_show_gallery_media.sort_order') ?? 0;
                     $toQuiz->questionMedia()->attach($mediaId, [
                         'live_show_id' => $liveShow->id,
                         'sort_order' => $maxOrder + 1,
@@ -632,8 +633,9 @@ class MediaGalleryController extends Controller
         $attachedIds = $media_gallery->liveShows()->pluck('live_shows.id')->toArray();
 
         // Quiz ids where THIS media is already attached before the question.
-        $attachedQuestionIds = LiveShowQuestionMedia::where('gallery_media_id', $media_gallery->id)
-            ->pluck('quiz_id')
+        $attachedQuestionIds = LiveShowGalleryMedia::where('gallery_media_id', $media_gallery->id)
+            ->whereNotNull('before_question')
+            ->pluck('before_question')
             ->map(fn ($id) => (int) $id)
             ->toArray();
 
@@ -659,12 +661,12 @@ class MediaGalleryController extends Controller
         }]);
         $allMedia = GalleryMedia::orderBy('created_at', 'desc')->get();
 
-        // Map of gallery_media_id => [quiz_id, ...] for question-level
-        // attachments within this show, so each tile can show its state.
-        $questionAttachments = LiveShowQuestionMedia::where('live_show_id', $liveShow->id)
-            ->get(['gallery_media_id', 'quiz_id'])
+        // Map of gallery_media_id => [quiz_id, ...] for question-level attachments.
+        $questionAttachments = LiveShowGalleryMedia::where('live_show_id', $liveShow->id)
+            ->whereNotNull('before_question')
+            ->get(['gallery_media_id', 'before_question'])
             ->groupBy('gallery_media_id')
-            ->map(fn ($rows) => $rows->pluck('quiz_id')->map(fn ($id) => (int) $id)->values()->all())
+            ->map(fn ($rows) => $rows->pluck('before_question')->map(fn ($id) => (int) $id)->values()->all())
             ->toArray();
 
         return view('admin.media-gallery.attach-to-live-show', [

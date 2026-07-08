@@ -30,7 +30,6 @@ use App\Models\LiveShowEndMedia;
 use App\Models\LiveShowGalleryMedia;
 use App\Models\LiveShowGalleryState;
 use App\Models\LiveShowQuiz;
-use App\Models\LiveShowQuestionMedia;
 use App\Models\LiveShowWinnerPrize;
 use App\Models\QuizOption;
 use App\Models\UserLiveShow;
@@ -999,9 +998,10 @@ class LiveShowController extends Controller
         ?int $attachmentId
     ): void {
         if ($attachmentType === 'question' && $attachmentId) {
-            LiveShowQuestionMedia::where('id', $attachmentId)
+            LiveShowGalleryMedia::where('id', $attachmentId)
                 ->where('live_show_id', $liveShow->id)
                 ->where('gallery_media_id', $galleryMediaId)
+                ->whereNotNull('before_question')
                 ->update(['media_played' => true]);
 
             return;
@@ -1025,11 +1025,9 @@ class LiveShowController extends Controller
             return;
         }
 
+        // Covers both show-wide and before-question rows (both live in
+        // live_show_gallery_media now).
         LiveShowGalleryMedia::where('live_show_id', $liveShow->id)
-            ->where('gallery_media_id', $galleryMediaId)
-            ->update(['media_played' => true]);
-
-        LiveShowQuestionMedia::where('live_show_id', $liveShow->id)
             ->where('gallery_media_id', $galleryMediaId)
             ->update(['media_played' => true]);
 
@@ -1810,9 +1808,9 @@ class LiveShowController extends Controller
 
             // copy media attached before this question
             foreach ($quiz->questionMedia as $media) {
-                \App\Models\LiveShowQuestionMedia::create([
+                LiveShowGalleryMedia::create([
                     'live_show_id' => $newLiveShow->id,
-                    'quiz_id' => $newQuiz->id,
+                    'before_question' => $newQuiz->id,
                     'gallery_media_id' => $media->id,
                     'sort_order' => $media->pivot->sort_order ?? 0,
                 ]);

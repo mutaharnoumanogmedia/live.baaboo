@@ -3995,6 +3995,7 @@
                      '<span class="badge bg-success ms-1 media-played-badge d-none">Played</span>';
                  const showLabel = data.media_played ? 'Replay' : 'Show';
                  const detachBtn = isShowWide ? `
+                 
                     <button type="button"
                         class="btn btn-sm btn-outline-danger gallery-detach-btn"
                         data-media-id="${data.id}"
@@ -4010,7 +4011,7 @@
                         <i class="fas fa-times"></i>
                     </button>` : '');
                  const playWithLive = isShowWide ? `
-                    <div class="form-check mt-1">
+                    <span class='me-4'>
                         <input class="form-check-input" type="radio" name="play_with_live"
                             id="playWithLiveRadio_${rowKey}" value="${data.id}"
                             onchange="askConfirmationWhenSelectThisMediaForLive(this)"
@@ -4018,7 +4019,8 @@
                         <label class="form-check-label ms-1 small" for="playWithLiveRadio_${rowKey}">
                             Play on live start
                         </label>
-                    </div>` : '';
+                        </span>
+                  ` : '';
                  const dragHandle = isSortable ?
                      '<div class="drag-handle" style="cursor: grab;"><i class="fas fa-grip-vertical text-muted"></i></div>' :
                      '<span class="text-muted small">—</span>';
@@ -4050,6 +4052,7 @@
                     </td>
                     <td class="align-middle text-end">
                         <div class="btn-group btn-group-sm">
+                            ${playWithLive}
                             <button type="button"
                                 class="btn btn-success gallery-show-on-stream-btn"
                                 onclick="galleryShowOnStream('${data.id}', this, '${attachmentType}', ${attachmentId})"
@@ -4070,7 +4073,7 @@
                             </button>
                             ${detachBtn}
                         </div>
-                        ${playWithLive}
+                       
                     </td>
                 </tr>
             `;

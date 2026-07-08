@@ -50,8 +50,7 @@
             data-attach-question-url="{{ route('admin.media-gallery.attach-to-question') }}"
             data-detach-question-url="{{ route('admin.media-gallery.detach-from-question') }}"
             data-attach-end-url="{{ route('admin.media-gallery.attach-to-end') }}"
-            data-detach-end-url="{{ route('admin.media-gallery.detach-from-end') }}"
-            data-csrf="{{ csrf_token() }}">
+            data-detach-end-url="{{ route('admin.media-gallery.detach-from-end') }}" data-csrf="{{ csrf_token() }}">
 
             {{-- ───────────────────  LEFT PANE — All gallery media  ─────────────────── --}}
             <div class="col-lg-6">
@@ -156,7 +155,7 @@
                                                 @if ($liveShow->quizzes->isNotEmpty())
                                                     @php $qAttached = $questionAttachments[$item->id] ?? []; @endphp
                                                     <button type="button"
-                                                        class="btn btn-sm btn-outline-dark w-100 mt-1 open-q-modal-btn"
+                                                        class="btn btn-sm btn-outline-success w-100 mt-1 open-q-modal-btn"
                                                         data-media-id="{{ $item->id }}"
                                                         data-media-title="{{ $item->title ?? $item->original_name }}">
                                                         <i class="fas fa-list-ol me-1"></i> Before question
@@ -306,7 +305,8 @@
                                         <img src="{{ $item->path }}" class="attached-thumb" alt="">
                                     @else
                                         <div class="attached-thumb-wrap">
-                                            <img src="{{ $item->thumbnail ?? $item->path }}" class="attached-thumb" alt="">
+                                            <img src="{{ $item->thumbnail ?? $item->path }}" class="attached-thumb"
+                                                alt="">
                                             <span class="attached-thumb-badge"><i class="fas fa-play"></i></span>
                                         </div>
                                     @endif
@@ -387,6 +387,14 @@
             .media-card.is-attached {
                 border-color: #198754;
                 background: #f0fdf4;
+            }
+
+            .media-card .media-title {
+                color: #fff !important;
+            }
+
+            .media-card.is-attached .media-title {
+                color: #000 !important;
             }
 
             .media-thumb-wrapper {
@@ -620,9 +628,9 @@
                         btn.dataset.attached = isAttached ? '1' : '0';
                         btn.classList.toggle('btn-success', isAttached);
                         btn.classList.toggle('btn-outline-success', !isAttached);
-                        btn.innerHTML = isAttached
-                            ? '<i class="fas fa-check me-1"></i> At end'
-                            : '<i class="fas fa-flag-checkered me-1"></i> Attach at end';
+                        btn.innerHTML = isAttached ?
+                            '<i class="fas fa-check me-1"></i> At end' :
+                            '<i class="fas fa-flag-checkered me-1"></i> Attach at end';
                     }
                 }
 
@@ -650,9 +658,9 @@
                         ${isImage
                             ? `<img src="${escapeAttr(thumb)}" class="attached-thumb" alt="">`
                             : `<div class="attached-thumb-wrap">
-                                  <img src="${escapeAttr(thumb)}" class="attached-thumb" alt="">
-                                  <span class="attached-thumb-badge"><i class="fas fa-play"></i></span>
-                               </div>`}
+                                          <img src="${escapeAttr(thumb)}" class="attached-thumb" alt="">
+                                          <span class="attached-thumb-badge"><i class="fas fa-play"></i></span>
+                                       </div>`}
                         <div class="flex-grow-1 min-w-0">
                             <div class="attached-title text-truncate" title="${escapeAttr(title)}">${escapeHtml(title)}</div>
                             <div class="attached-sub small text-muted">${escapeHtml(sub)}</div>
@@ -721,7 +729,8 @@
                             if (btn) btn.disabled = false;
                             return;
                         }
-                        const row = endAttachedList && endAttachedList.querySelector('.end-attached-row[data-media-id="' + mediaId + '"]');
+                        const row = endAttachedList && endAttachedList.querySelector(
+                            '.end-attached-row[data-media-id="' + mediaId + '"]');
                         if (row) row.remove();
                         setTileEndAttached(mediaId, false);
                         refreshEndIndices();
@@ -741,7 +750,10 @@
                         method: 'POST',
                         headers: jsonHeaders(),
                         credentials: 'same-origin',
-                        body: JSON.stringify({ live_show_id: liveShowId, order: order }),
+                        body: JSON.stringify({
+                            live_show_id: liveShowId,
+                            order: order
+                        }),
                     }).then(r => r.json()).then(data => {
                         if (!data || !data.success) console.warn('End reorder failed:', data);
                     }).catch(err => console.error('End reorder error:', err));
@@ -753,6 +765,9 @@
                     if (!tile) return;
                     const card = tile.querySelector('.media-card');
                     const btn = tile.querySelector('.attach-btn');
+                    //remvoe q-count-badge if it exists
+                    const qCountBadge = tile.querySelector('.q-count-badge');
+                    if (qCountBadge) qCountBadge.remove();
                     if (card) card.classList.toggle('is-attached', isAttached);
                     if (btn) {
                         btn.disabled = isAttached;
@@ -787,9 +802,9 @@
                         ${isImage
                             ? `<img src="${escapeAttr(thumb)}" class="attached-thumb" alt="">`
                             : `<div class="attached-thumb-wrap">
-                                          <img src="${escapeAttr(thumb)}" class="attached-thumb" alt="">
-                                          <span class="attached-thumb-badge"><i class="fas fa-play"></i></span>
-                                       </div>`}
+                                                  <img src="${escapeAttr(thumb)}" class="attached-thumb" alt="">
+                                                  <span class="attached-thumb-badge"><i class="fas fa-play"></i></span>
+                                               </div>`}
                         <div class="flex-grow-1 min-w-0">
                             <div class="attached-title text-truncate" title="${escapeAttr(title)}">${escapeHtml(title)}</div>
                             <div class="attached-sub small text-muted">${escapeHtml(sub)}</div>
@@ -798,9 +813,9 @@
                             </div>
                         </div>
                         ${hasQuizzes ? `<button type="button" class="btn btn-sm btn-outline-primary open-q-modal-btn"
-                                        data-media-id="${media.id}" data-media-title="${escapeAttr(title)}" title="Attach before a question">
-                                    <i class="fas fa-list-ol"></i>
-                                </button>` : ''}
+                                                data-media-id="${media.id}" data-media-title="${escapeAttr(title)}" title="Attach before a question">
+                                            <i class="fas fa-list-ol"></i>
+                                        </button>` : ''}
                         <button type="button" class="btn btn-sm btn-outline-danger detach-btn"
                                 data-media-id="${media.id}" title="Detach">
                             <i class="fas fa-times"></i>
@@ -882,6 +897,7 @@
                         const row = attachedList.querySelector('.attached-row[data-media-id="' + mediaId + '"]');
                         if (row) row.remove();
                         setTileAttached(mediaId, false);
+
                         refreshIndices();
                     }).catch(err => {
                         console.error('Detach error:', err);
