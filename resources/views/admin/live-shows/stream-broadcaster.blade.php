@@ -1676,8 +1676,8 @@
         qrcodeContainer.innerHTML = '';
         new QRCode(qrcodeContainer, {
             text: link,
-            width: 110,
-            height: 110
+            width: 160,
+            height: 160
         });
     }
 </script>
