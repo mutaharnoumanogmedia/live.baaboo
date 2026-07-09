@@ -51,6 +51,10 @@
                              <i class="fas fa-copy"></i>
                          </button>
                      </div>
+                     <div>
+                         Stream only: <a
+                             href="{{ url('live-show-boradcast/' . $liveShow->id) }}">{{ url('live-show-boradcast/' . $liveShow->id) }}</a>
+                     </div>
                  </div>
                  <div class="border-0 shadow-sm card">
                      <div class="py-3 card-header border-bottom">
@@ -976,7 +980,8 @@
                                          <p class="mb-0 text-center text-muted py-4">No questions in this show.</p>
                                      @else
                                          <div class="table-responsive">
-                                             <table class="table table-dark table-hover align-middle mb-0 all-questions-table">
+                                             <table
+                                                 class="table table-dark table-hover align-middle mb-0 all-questions-table">
                                                  <thead class="table-secondary">
                                                      <tr>
                                                          <th style="width: 52px;" class="text-center">#</th>
@@ -991,15 +996,24 @@
                                                              </td>
                                                              <td class="p-0">
                                                                  <div class="p-3">
-                                                                     <div class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
+                                                                     <div
+                                                                         class="d-flex flex-wrap align-items-start justify-content-between gap-2 mb-3">
                                                                          <div class="flex-grow-1">
-                                                                             <span class="badge bg-secondary mb-2">Question {{ $index + 1 }} / {{ $totalQuestions }}</span>
+                                                                             <span
+                                                                                 class="badge bg-secondary mb-2">Question
+                                                                                 {{ $index + 1 }} /
+                                                                                 {{ $totalQuestions }}</span>
                                                                              @if ($quiz->has_shown)
-                                                                                 <span class="badge bg-success ms-1" id="allQuestionsShownBadge-{{ $quiz->id }}">Shown</span>
+                                                                                 <span class="badge bg-success ms-1"
+                                                                                     id="allQuestionsShownBadge-{{ $quiz->id }}">Shown</span>
                                                                              @else
-                                                                                 <span class="badge bg-success ms-1 d-none" id="allQuestionsShownBadge-{{ $quiz->id }}">Shown</span>
+                                                                                 <span
+                                                                                     class="badge bg-success ms-1 d-none"
+                                                                                     id="allQuestionsShownBadge-{{ $quiz->id }}">Shown</span>
                                                                              @endif
-                                                                             <div class="fw-semibold question-text mt-1">{{ $quiz->question }}</div>
+                                                                             <div
+                                                                                 class="fw-semibold question-text mt-1">
+                                                                                 {{ $quiz->question }}</div>
                                                                          </div>
                                                                          <button type="button"
                                                                              class="btn btn-sm btn-outline-danger reset-shown-status-btn flex-shrink-0 @if (!$quiz->has_shown) d-none @endif"
@@ -1014,21 +1028,29 @@
                                                                          <div class="row g-2 mb-3">
                                                                              @foreach ($quiz->options as $option)
                                                                                  <div class="col-6 col-xl-3">
-                                                                                     <div class="p-2 h-100 border rounded all-q-option-cell @if ($option->is_correct) border-success @endif">
-                                                                                         <div class="mb-1 d-flex justify-content-between gap-1">
-                                                                                             <span class="small fw-semibold @if ($option->is_correct) text-success @endif">
+                                                                                     <div
+                                                                                         class="p-2 h-100 border rounded all-q-option-cell @if ($option->is_correct) border-success @endif">
+                                                                                         <div
+                                                                                             class="mb-1 d-flex justify-content-between gap-1">
+                                                                                             <span
+                                                                                                 class="small fw-semibold @if ($option->is_correct) text-success @endif">
                                                                                                  {{ $option->option_text }}
                                                                                                  @if ($option->is_correct)
-                                                                                                     <i class="fas fa-check-circle ms-1"></i>
+                                                                                                     <i
+                                                                                                         class="fas fa-check-circle ms-1"></i>
                                                                                                  @endif
                                                                                              </span>
-                                                                                             <span class="small fw-bold text-nowrap"
+                                                                                             <span
+                                                                                                 class="small fw-bold text-nowrap"
                                                                                                  id="all-q-option-label-{{ $option->id }}">0%</span>
                                                                                          </div>
-                                                                                         <div class="progress" style="height: 6px;">
+                                                                                         <div class="progress"
+                                                                                             style="height: 6px;">
                                                                                              <div id="all-q-option-bar-{{ $option->id }}"
                                                                                                  class="progress-bar @if ($option->is_correct) bg-success @else bg-primary @endif"
-                                                                                                 role="progressbar" style="width: 0%"></div>
+                                                                                                 role="progressbar"
+                                                                                                 style="width: 0%">
+                                                                                             </div>
                                                                                          </div>
                                                                                      </div>
                                                                                  </div>
@@ -1041,28 +1063,39 @@
                                                                              data-has-shown="{{ $quiz->has_shown ? 1 : 0 }}"
                                                                              class="d-flex flex-wrap align-items-center gap-2 pt-2 border-top border-secondary">
                                                                              @csrf
-                                                                             <input type="hidden" name="seconds" value="10">
+                                                                             <input type="hidden" name="seconds"
+                                                                                 value="10">
                                                                              @if ($index === $totalQuestions - 1)
-                                                                                 <input type="hidden" name="is_last" value="1">
+                                                                                 <input type="hidden" name="is_last"
+                                                                                     value="1">
                                                                              @endif
-                                                                             <div class="btn-group btn-group-sm shadow-sm">
-                                                                                 <button type="{{ $quiz->has_shown ? 'button' : 'submit' }}"
-                                                                                     class="btn btn-success" data-quiz-start
+                                                                             <div
+                                                                                 class="btn-group btn-group-sm shadow-sm">
+                                                                                 <button
+                                                                                     type="{{ $quiz->has_shown ? 'button' : 'submit' }}"
+                                                                                     class="btn btn-success"
+                                                                                     data-quiz-start
                                                                                      @if ($quiz->has_shown) disabled aria-disabled="true" @endif>
                                                                                      @if ($quiz->has_shown)
                                                                                          Question shown
                                                                                      @else
-                                                                                         <i class="fas fa-play me-1"></i> Show
+                                                                                         <i
+                                                                                             class="fas fa-play me-1"></i>
+                                                                                         Show
                                                                                      @endif
                                                                                  </button>
                                                                                  <button type="button"
                                                                                      onclick="viewResponses({{ $liveShow->id }}, {{ $quiz->id }}, this)"
                                                                                      class="btn btn-info text-white">
-                                                                                     <i class="fas fa-chart-bar me-1"></i> Responses
+                                                                                     <i
+                                                                                         class="fas fa-chart-bar me-1"></i>
+                                                                                     Responses
                                                                                  </button>
-                                                                                 <button type="button" class="btn btn-danger"
+                                                                                 <button type="button"
+                                                                                     class="btn btn-danger"
                                                                                      onclick="removeQuiz({{ $quiz->id }}, this)">
-                                                                                     <i class="fas fa-times me-1"></i> Hide
+                                                                                     <i class="fas fa-times me-1"></i>
+                                                                                     Hide
                                                                                  </button>
                                                                              </div>
                                                                          </form>
@@ -2384,9 +2417,9 @@
 
              function submitQuizTimerForm(event, quizId) {
                  event.preventDefault();
-                 const form = event.target.closest('form')
-                     || document.getElementById(`quiz-timer-form-${quizId}`)
-                     || document.getElementById(`all-questions-timer-form-${quizId}`);
+                 const form = event.target.closest('form') ||
+                     document.getElementById(`quiz-timer-form-${quizId}`) ||
+                     document.getElementById(`all-questions-timer-form-${quizId}`);
                  if (!form) {
                      return;
                  }
@@ -3227,7 +3260,7 @@
                                      console.log('showBtn:', showBtn);
                                      if (showBtn) {
                                          showBtn.click();
-                                        
+
                                      }
                                  }
                              }
@@ -3686,8 +3719,8 @@
              document.getElementById('show-flow-order-tab-btn')?.addEventListener('shown.bs.tab', initFlowEndSortable);
              document.addEventListener('DOMContentLoaded', initFlowEndSortable);
 
-             function markMediaPlayedInUI(attachmentType, attachmentId, mediaId) { 
-                
+             function markMediaPlayedInUI(attachmentType, attachmentId, mediaId) {
+
                  if (attachmentType && attachmentId) {
                      document.querySelectorAll(
                          `[data-attachment-type="${attachmentType}"][data-attachment-id="${attachmentId}"] .media-played-badge`
