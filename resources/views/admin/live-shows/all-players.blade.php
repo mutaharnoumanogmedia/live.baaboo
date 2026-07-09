@@ -268,7 +268,7 @@
                             Re-sending clears the email's status first, then sends only that email again.
                         </div>
                         <div class="table-responsive">
-                            <table class="table table-sm align-middle mb-0">
+                            <table class="table table-sm align-middle mb-0 text-dark">
                                 <thead>
                                     <tr>
                                         <th>Email</th>
