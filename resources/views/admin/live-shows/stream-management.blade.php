@@ -51,7 +51,7 @@
                              <i class="fas fa-copy"></i>
                          </button>
                      </div>
-                     <div>
+                     <div class="text-decoration-none small text-truncate d-block ">
                          Stream only: <a target="_blank"
                              href="{{ url('live-show-broadcast/' . $liveShow->id) }}">{{ url('live-show-broadcast/' . $liveShow->id) }}</a>
                      </div>
