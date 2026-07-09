@@ -52,8 +52,8 @@
                          </button>
                      </div>
                      <div>
-                         Stream only: <a
-                             href="{{ url('live-show-boradcast/' . $liveShow->id) }}">{{ url('live-show-boradcast/' . $liveShow->id) }}</a>
+                         Stream only: <a target="_blank"
+                             href="{{ url('live-show-broadcast/' . $liveShow->id) }}">{{ url('live-show-broadcast/' . $liveShow->id) }}</a>
                      </div>
                  </div>
                  <div class="border-0 shadow-sm card">
