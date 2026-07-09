@@ -1428,6 +1428,7 @@ class LiveShowController extends Controller
         $liveShow->users()->detach();
         $liveShow->update(['winners_announced' => false]);
         LiveShowQuiz::where('live_show_id', $liveShowId)->update(['has_shown' => false]);
+        LiveShowGalleryMedia::where('live_show_id', $liveShowId)->update(['media_played' => false]);
 
         event(new GameResetEvent($liveShowId));
 
