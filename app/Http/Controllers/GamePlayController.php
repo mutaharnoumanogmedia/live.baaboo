@@ -189,6 +189,7 @@ class GamePlayController extends Controller
                     'score' => 0,
                     'status' => 'registered',
                     'last_active_at' => now(),
+                    
                 ]
             );
 

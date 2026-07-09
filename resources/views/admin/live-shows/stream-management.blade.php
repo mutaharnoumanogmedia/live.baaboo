@@ -540,13 +540,13 @@
                                                                                  <i class="fas fa-eye-slash me-1"></i>
                                                                                  Hide
                                                                              </button>
-                                                                             <button type="button"
+                                                                             {{-- <button type="button"
                                                                                  class="btn btn-outline-dark"
                                                                                  onclick="skipQuestionMediaSlide()"
                                                                                  title="Skip this media and continue">
                                                                                  <i class="fas fa-forward me-1"></i>
                                                                                  Skip
-                                                                             </button>
+                                                                             </button> --}}
                                                                          </div>
                                                                          <div
                                                                              class="mt-3 text-center small text-muted">
@@ -3684,7 +3684,8 @@
              document.getElementById('show-flow-order-tab-btn')?.addEventListener('shown.bs.tab', initFlowEndSortable);
              document.addEventListener('DOMContentLoaded', initFlowEndSortable);
 
-             function markMediaPlayedInUI(attachmentType, attachmentId, mediaId) {
+             function markMediaPlayedInUI(attachmentType, attachmentId, mediaId) { 
+                
                  if (attachmentType && attachmentId) {
                      document.querySelectorAll(
                          `[data-attachment-type="${attachmentType}"][data-attachment-id="${attachmentId}"] .media-played-badge`
@@ -3737,6 +3738,8 @@
                          if (data.success) {
                              updateGalleryShowStatus('showing');
                              markMediaPlayedInUI(attachmentType, attachmentId, mediaId);
+                             carouselSlideBypass = true;
+                             
                              if (btn.classList.contains('gallery-show-on-stream-btn') || btn.classList.contains(
                                      'btn-success')) {
                                  const label = btn.querySelector('i') ? btn.innerHTML.replace(/Play|Show/, 'Replay') : null;
