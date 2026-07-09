@@ -3224,8 +3224,10 @@
                                  if (playWithLiveRadio) {
                                      const mediaId = playWithLiveRadio.value;
                                      const showBtn = document.getElementById(`show-media-btn-${mediaId}`);
+                                     console.log('showBtn:', showBtn);
                                      if (showBtn) {
                                          showBtn.click();
+                                        
                                      }
                                  }
                              }
@@ -3739,7 +3741,7 @@
                              updateGalleryShowStatus('showing');
                              markMediaPlayedInUI(attachmentType, attachmentId, mediaId);
                              carouselSlideBypass = true;
-                             
+
                              if (btn.classList.contains('gallery-show-on-stream-btn') || btn.classList.contains(
                                      'btn-success')) {
                                  const label = btn.querySelector('i') ? btn.innerHTML.replace(/Play|Show/, 'Replay') : null;
@@ -4060,18 +4062,21 @@
                             ${playWithLive}
                             <button type="button"
                                 class="btn btn-success gallery-show-on-stream-btn"
+                                id="show-media-btn-${data.id}"
                                 onclick="galleryShowOnStream('${data.id}', this, '${attachmentType}', ${attachmentId})"
                                 title="Show on live stream">
                                 <i class="fas fa-tv"></i> ${showLabel}
                             </button>
                             <button type="button"
                                 class="btn btn-warning gallery-hide-on-stream-btn"
+                                id="hide-media-btn-${data.id}"
                                 onclick="galleryHideOnStream(this)"
                                 title="Hide on live stream">
                                 <i class="fas fa-eye-slash"></i>
                             </button>
                             <button type="button"
                                 class="btn btn-secondary"
+                                id="preview-media-btn-${data.id}"
                                 title="Preview"
                                 onclick="openMediaPreviewModal('${data.is_image ? data.path : (data.thumbnail ?? data.path)}')">
                                 <i class="fas fa-eye"></i>
@@ -4094,6 +4099,7 @@
                  }).then(function(result) {
                      if (result.isConfirmed) {
                          radio.checked = true;
+
                      } else {
                          radio.checked = false;
                      }
