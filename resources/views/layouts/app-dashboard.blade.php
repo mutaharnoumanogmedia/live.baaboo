@@ -114,11 +114,26 @@
                     @endcan
 
                     @can('can-manage-players')
-                        <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('admin.players.*') ? 'active' : '' }}"
-                                href="{{ route('admin.players.index') }}">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle {{ request()->routeIs(['admin.players.*', 'admin.all-live-show-players']) ? 'active' : '' }}"
+                                href="#" id="playersDropdown" role="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
                                 <i class="bi bi-people-fill me-1"></i> Players
                             </a>
+                            <ul class="dropdown-menu app-topnav__dropdown" aria-labelledby="playersDropdown">
+                                <li>
+                                    <a class="dropdown-item {{ request()->routeIs('admin.players.*') ? 'active' : '' }}"
+                                        href="{{ route('admin.players.index') }}">
+                                        <i class="bi bi-people-fill me-2"></i> All Players
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item {{ request()->routeIs('admin.all-live-show-players') ? 'active' : '' }}"
+                                        href="{{ route('admin.all-live-show-players') }}">
+                                        <i class="bi bi-broadcast me-2"></i> All Live Show Participants
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     @endcan
 

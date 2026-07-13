@@ -60,7 +60,14 @@
                             <a class="text-warning"
                                 href="{{ route('admin.live-shows.show', $quiz->liveShow->id ?? -1) }}">{{ $quiz->liveShow->title ?? 'N/A' }}</a>
                         </td>
-                        <td>{{ $quiz->question }}</td>
+                        <td>
+                            @if ($quiz->is_special)
+                                <span class="badge bg-warning text-dark me-1">SPECIAL QUIZ</span>
+                            @else
+                                <span class="badge bg-info text-dark me-1">MAIN</span>
+                            @endif
+                            {{ $quiz->question }}
+                        </td>
                         <td>
                             <div class="d-flex flex-wrap gap-1">
                                 @foreach ($quiz->options as $option)

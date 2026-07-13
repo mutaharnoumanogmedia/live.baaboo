@@ -49,6 +49,20 @@
                             required placeholder="Enter the quiz question # 0">
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label d-block"><strong>Question Type</strong></label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="is_special" value="0"
+                                {{ empty($quiz->is_special) ? 'checked' : '' }}>
+                            <label class="form-check-label">Main Quiz Question</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="is_special" value="1"
+                                {{ !empty($quiz->is_special) ? 'checked' : '' }}>
+                            <label class="form-check-label">Special Quiz Question</label>
+                        </div>
+                    </div>
+
                     <h5>Options</h5>
                     <div id="options-wrapper" class="row">
                         @php $options = $quiz->options ?? collect([['option_text'=>'','is_correct'=>false],['option_text'=>'','is_correct'=>false],['option_text'=>'','is_correct'=>false],['option_text'=>'','is_correct'=>false]]) @endphp

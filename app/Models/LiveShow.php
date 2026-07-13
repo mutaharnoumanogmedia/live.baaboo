@@ -22,9 +22,11 @@ class LiveShow extends Model
         'prize_amount',
         'currency',
         'max_winners',
+        'special_max_winners',
         'max_players',
         'chat_enabled',
         'winners_announced',
+        'special_winners_announced',
         'created_by',
 
         'start_time',
@@ -45,6 +47,8 @@ class LiveShow extends Model
         'is_test_show' => 'boolean',
         'chat_enabled' => 'boolean',
         'winners_announced' => 'boolean',
+        'special_winners_announced' => 'boolean',
+        'special_max_winners' => 'integer',
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'media_visible' => 'boolean',
@@ -120,9 +124,24 @@ class LiveShow extends Model
         return $this->hasMany(LiveShowQuiz::class, 'live_show_id');
     }
 
+    public function mainQuizzes()
+    {
+        return $this->hasMany(LiveShowQuiz::class, 'live_show_id')->where('is_special', false);
+    }
+
+    public function specialQuizzes()
+    {
+        return $this->hasMany(LiveShowQuiz::class, 'live_show_id')->where('is_special', true);
+    }
+
     public function winnerPrizes()
     {
         return $this->hasMany(LiveShowWinnerPrize::class)->orderBy('rank');
+    }
+
+    public function specialGifts()
+    {
+        return $this->hasMany(SpecialGift::class)->orderBy('rank');
     }
 
     public function creator()

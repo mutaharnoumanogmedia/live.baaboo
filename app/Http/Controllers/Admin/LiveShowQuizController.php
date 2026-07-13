@@ -47,6 +47,7 @@ class LiveShowQuizController extends Controller
 
             'questions' => 'required|array|min:1',
             'questions.*.question' => 'required|string|max:255',
+            'questions.*.is_special' => 'nullable|boolean',
 
             'questions.*.options' => 'required|array|min:2',
             'questions.*.options.*.option_text' => 'required|string|max:255',
@@ -59,6 +60,7 @@ class LiveShowQuizController extends Controller
             $quiz = LiveShowQuiz::create([
                 'live_show_id' => $request->live_show_id,
                 'question' => $qData['question'],
+                'is_special' => ! empty($qData['is_special']),
                 'created_by' => auth()->user()->id,
             ]);
 
@@ -103,6 +105,7 @@ class LiveShowQuizController extends Controller
         $request->validate([
             'live_show_id' => 'required|exists:live_shows,id',
             'question' => 'required|string|max:255',
+            'is_special' => 'nullable|boolean',
 
             'questions' => 'required|array',
             'questions.0.options' => 'required|array|min:2',
@@ -111,13 +114,16 @@ class LiveShowQuizController extends Controller
             'questions.0.correct' => 'nullable|integer',
         ]);
 
-        // Remove old options
+        // Remove old options and any responses in both response tables so a
+        // quiz-type switch never leaves stale answers in the wrong scope.
         UserQuizResponse::where('quiz_id', $quiz->id)->delete();
+        \App\Models\UserSpecialQuizResponse::where('quiz_id', $quiz->id)->delete();
         QuizOption::where('quiz_id', $quiz->id)->delete();
         // Update main quiz fields
         $quiz->update([
             'live_show_id' => $request->live_show_id,
             'question' => $request->question,
+            'is_special' => $request->boolean('is_special'),
             'created_by' => auth()->user()->id,
         ]);
 
@@ -142,6 +148,7 @@ class LiveShowQuizController extends Controller
     {
         $quiz = LiveShowQuiz::findOrFail($id);
         UserQuizResponse::where('quiz_id', $quiz->id)->delete();
+        \App\Models\UserSpecialQuizResponse::where('quiz_id', $quiz->id)->delete();
         QuizOption::where('quiz_id', $quiz->id)->delete();
 
         LiveShowQuiz::where('id', $id)->delete();

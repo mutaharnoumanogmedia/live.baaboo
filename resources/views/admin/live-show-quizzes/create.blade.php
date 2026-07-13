@@ -50,6 +50,18 @@
                         <input type="text" class="form-control mb-3 question-input"
                                placeholder="Enter question" required>
 
+                        <div class="mb-3">
+                            <label class="form-label d-block"><strong>Question Type</strong></label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input quiz-type-radio" type="radio" value="0" checked>
+                                <label class="form-check-label">Main Quiz Question</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input quiz-type-radio" type="radio" value="1">
+                                <label class="form-check-label">Special Quiz Question</label>
+                            </div>
+                        </div>
+
                         <h5>Options</h5>
                         <div class="row options-wrapper"></div>
 
@@ -123,6 +135,12 @@
                 // question name
                 const qInput = question.querySelector(".question-input");
                 qInput.name = `questions[${qIndex}][question]`;
+
+                // quiz-type (main/special) radio group name, per question
+                const typeRadios = question.querySelectorAll(".quiz-type-radio");
+                typeRadios.forEach((typeRadio) => {
+                    typeRadio.name = `questions[${qIndex}][is_special]`;
+                });
 
                 // correct radio group name
                 const radios = question.querySelectorAll(".is-correct");

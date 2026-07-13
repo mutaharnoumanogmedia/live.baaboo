@@ -43,6 +43,7 @@ Route::middleware(['auth:sanctum'])->prefix('chat')->group(function () {
 
 Route::prefix('live-show')->group(function () {
     Route::get('/{id}/get-live-show-users', [AdminLiveShowController::class, 'apiGetLiveShowUsers']);
+    Route::get('/{id}/get-special-live-show-users', [AdminLiveShowController::class, 'apiGetSpecialLiveShowUsers']);
     Route::get('/{id}/get-live-show-messages', [AdminLiveShowController::class, 'apiGetLiveShowMessages']);
 
     Route::post('/{id}/user/updateOnlineStatus', [UserLiveShowController::class, 'updateOnlineStatus']);

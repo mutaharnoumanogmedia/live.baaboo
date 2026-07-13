@@ -271,7 +271,7 @@ class ShopifyDiscountService
         return ! empty($result['discount_code']['id']);
     }
 
-    public function setUserDiscountCode($shopify_rule_id, UserLiveShow $user)
+    public function setUserDiscountCode($shopify_rule_id, UserLiveShow $user, string $column = 'discount_code')
     {
         $priceRuleId = $shopify_rule_id;
         if ($priceRuleId == null) {
@@ -321,7 +321,7 @@ class ShopifyDiscountService
             return null;
         }
 
-        $user->discount_code = $discountCode['code'] ?? $code;
+        $user->{$column} = $discountCode['code'] ?? $code;
         $user->save();
 
         return $discountCode['code'] ?? $code;
