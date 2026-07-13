@@ -66,67 +66,118 @@
                              </span>
                          </h6>
                      </div>
-                     <div class="p-0 card-body" style="overflow: scroll;  max-height: 80vh;">
-                         <div class="flex-wrap gap-2 p-2 mb-2 d-flex justify-content-between align-items-center">
-                             <div class="input-group input-group-sm" style="max-width: 100%;">
-                                 <span class="input-group-text">
-                                     <i class="fas fa-search"></i>
-                                 </span>
-                                 <input type="text" class="form-control" id="playerSearchInput"
-                                     placeholder="Search players by name, username, or email">
-                             </div>
-                             <div class="gap-2 d-flex ms-auto">
-                                 <a target="_blank" href="{{ route('admin.live-shows.players', $liveShow->id) }}"
-                                     class="btn btn-outline-light btn-sm text-nowrap">
-                                     <i class="fas fa-external-link-alt me-1"></i> View All
-                                 </a>
-                                 <button type="button" class="btn btn-primary btn-sm text-nowrap"
-                                     id="fetchPlayersButton">
-                                     <i class="fas fa-sync"></i> Refresh Players
-                                 </button>
-                                 <a href="{{ route('admin.live-shows.export-all-users-as-csv', $liveShow->id) }}"
-                                     title="Export Users" class="btn btn-primary btn-sm" id="exportUsersBtn"
-                                     data-bs-toggle="tooltip" data-bs-placement="top">
-                                     <i class="fas fa-file-export"></i>
-                                 </a>
-                             </div>
-                         </div>
-                         <div class="px-2 pb-2 d-flex justify-content-between align-items-center small text-muted">
-                             <span id="playersSearchSummary">Showing players</span>
+                    @php $specialQuestionsCount = $liveShow->quizzes->where('is_special', true)->count(); @endphp
+                    <div class="p-0 card-body" style="overflow: scroll; max-height: 80vh;">
+                        <div class="flex-wrap gap-2 p-2 mb-2 d-flex justify-content-between align-items-center">
+                            <div class="input-group input-group-sm" style="max-width: 100%;">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="playerSearchInput"
+                                    placeholder="Search players by name, username, or email">
+                            </div>
+                            <div class="gap-2 d-flex ms-auto">
+                                <a target="_blank" href="{{ route('admin.live-shows.players', $liveShow->id) }}"
+                                    class="btn btn-outline-light btn-sm text-nowrap">
+                                    <i class="fas fa-external-link-alt me-1"></i> View All
+                                </a>
+                                <button type="button" class="btn btn-primary btn-sm text-nowrap"
+                                    id="fetchPlayersButton">
+                                    <i class="fas fa-sync"></i> Refresh Players
+                                </button>
+                                <a href="{{ route('admin.live-shows.export-all-users-as-csv', $liveShow->id) }}"
+                                    title="Export Users" class="btn btn-primary btn-sm" id="exportUsersBtn"
+                                    data-bs-toggle="tooltip" data-bs-placement="top">
+                                    <i class="fas fa-file-export"></i>
+                                </a>
+                            </div>
+                        </div>
 
-                         </div>
-                         <table class="table mb-0 align-middle table-sm table-dark table-hover"
-                             style=" overflow-y: scroll; max-height: 80vh; padding-bottom: 30px;">
-                             <thead>
-                                 <tr>
-                                     <th>Player</th>
-                                     <th>Score</th>
-                                     <th>Actions</th>
-                                 </tr>
-                             </thead>
-                             <tbody id="activePlayersList">
-                                 <tr class="align-middle bg-dark">
-                                     <td>
-                                         <span class="position-relative me-3">
-                                             <div class="bg-secondary rounded-circle"
-                                                 style="width: 32px; height: 32px;">
-                                             </div>
-                                             <span
-                                                 class="bottom-0 p-1 border position-absolute end-0 bg-success border-light rounded-circle"></span>
-                                         </span>
-                                         <div class="small fw-medium">Loading...</div>
-                                     </td>
-                                 </tr>
-                             </tbody>
+                        <ul class="px-2 nav nav-tabs border-0" id="playerRankingTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active fw-bold small" id="mainPlayersRankingTabBtn"
+                                    data-bs-toggle="tab" data-bs-target="#mainPlayersRankingTab" type="button"
+                                    role="tab" aria-controls="mainPlayersRankingTab" aria-selected="true">
+                                    <i class="fas fa-trophy me-1"></i> Main Quiz
+                                </button>
+                            </li>
+                            @if ($specialQuestionsCount > 0)
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link fw-bold small" id="specialPlayersRankingTabBtn"
+                                        data-bs-toggle="tab" data-bs-target="#specialPlayersRankingTab" type="button"
+                                        role="tab" aria-controls="specialPlayersRankingTab" aria-selected="false">
+                                        <i class="fas fa-star me-1 text-warning"></i> Special Quiz
+                                    </button>
+                                </li>
+                            @endif
+                        </ul>
 
-                         </table>
-                         <div class="p-2 border-top">
-                             <button type="button" class="btn btn-outline-primary btn-sm w-100 d-none"
-                                 id="loadMorePlayersButton">
-                                 <i class="fas fa-plus-circle me-1"></i> Load More Players
-                             </button>
-                         </div>
-                     </div>
+                        <div class="tab-content" id="playerRankingTabContent">
+                            {{-- Main quiz ranking (unchanged data source) --}}
+                            <div class="tab-pane fade show active" id="mainPlayersRankingTab" role="tabpanel"
+                                aria-labelledby="mainPlayersRankingTabBtn">
+                                <div class="px-2 pb-2 d-flex justify-content-between align-items-center small text-muted">
+                                    <span id="playersSearchSummary">Showing players</span>
+                                </div>
+                                <table class="table mb-0 align-middle table-sm table-dark table-hover"
+                                    style="overflow-y: scroll; max-height: 80vh; padding-bottom: 30px;">
+                                    <thead>
+                                        <tr>
+                                            <th>Player</th>
+                                            <th>Score</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="activePlayersList">
+                                        <tr class="align-middle bg-dark">
+                                            <td colspan="3">
+                                                <i class="fas fa-spinner fa-spin me-2"></i> Loading...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <div class="p-2 border-top">
+                                    <button type="button" class="btn btn-outline-primary btn-sm w-100 d-none"
+                                        id="loadMorePlayersButton">
+                                        <i class="fas fa-plus-circle me-1"></i> Load More Players
+                                    </button>
+                                </div>
+                            </div>
+
+                            @if ($specialQuestionsCount > 0)
+                                {{-- Special quiz ranking (independent score / winners) --}}
+                                <div class="tab-pane fade" id="specialPlayersRankingTab" role="tabpanel"
+                                    aria-labelledby="specialPlayersRankingTabBtn">
+                                    <div class="px-2 pb-2 d-flex justify-content-between align-items-center small text-muted">
+                                        <span id="specialPlayersSearchSummary">Showing special quiz players</span>
+                                    </div>
+                                    <table class="table mb-0 align-middle table-sm table-dark table-hover"
+                                        style="overflow-y: scroll; max-height: 80vh; padding-bottom: 30px;">
+                                        <thead>
+                                            <tr>
+                                                <th>Player</th>
+                                                <th>Special Score</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="specialActivePlayersList">
+                                            <tr class="align-middle bg-dark">
+                                                <td colspan="3" class="text-muted small">
+                                                    Open this tab to load special quiz rankings.
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div class="p-2 border-top">
+                                        <button type="button" class="btn btn-outline-warning btn-sm w-100 d-none"
+                                            id="loadMoreSpecialPlayersButton">
+                                            <i class="fas fa-plus-circle me-1"></i> Load More Players
+                                        </button>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                  </div>
              </div>
 
@@ -242,6 +293,60 @@
                                              </div>
                                          </div>
                                      </div>
+
+                                     @php $specialQuestionsCount = $liveShow->quizzes->where('is_special', true)->count(); @endphp
+                                     @if ($specialQuestionsCount > 0)
+                                         <div class="col-lg-12 pt-3 mt-2 border-top">
+                                             <div class="row align-items-end">
+                                                 <div class="col-lg-6">
+                                                     <h6 class="mb-3 text-warning small text-uppercase fw-bold">
+                                                         <i class="fas fa-star me-1"></i> Special Quiz Ceremony
+                                                     </h6>
+                                                     <div class="d-flex gap-2 align-items-stretch">
+                                                         <button type="button" id="announceSpecialWinnersBtn"
+                                                             class="py-2 shadow-sm btn btn-warning flex-grow-1 fw-bold"
+                                                             onclick="announceSpecialWinners()"
+                                                             @if ($liveShow->special_winners_announced) disabled aria-disabled="true" @endif>
+                                                             <span id="announceSpecialWinnersBtnLabel"
+                                                                 class="@if ($liveShow->special_winners_announced) d-none @endif">
+                                                                 <i class="fas fa-gift me-2"></i> Announce Special Quiz Winner
+                                                             </span>
+                                                             <span id="announceSpecialWinnersBtnLoader" class="d-none">
+                                                                 <i class="fas fa-spinner fa-spin me-2"></i> Announcing…
+                                                             </span>
+                                                             <span id="announceSpecialWinnersBtnDone"
+                                                                 class="@if (!$liveShow->special_winners_announced) d-none @endif">
+                                                                 <i class="fas fa-check me-2"></i> Special winners announced
+                                                             </span>
+                                                         </button>
+                                                         <button type="button" id="unannounceSpecialWinnersBtn"
+                                                             class="btn btn-outline-secondary btn-sm @if (!$liveShow->special_winners_announced) d-none @endif"
+                                                             onclick="unannounceSpecialWinners()"
+                                                             title="Un-announce special winners">
+                                                             <i class="fas fa-undo"></i>
+                                                         </button>
+                                                     </div>
+                                                 </div>
+                                                 <div class="col-lg-6">
+                                                     <h6 class="mb-3 text-muted small text-uppercase fw-bold">
+                                                         Special Winner Tab
+                                                     </h6>
+                                                     <button type="button" id="showSpecialWinnerTabBtn"
+                                                         class="mb-2 text-white shadow-sm btn btn-primary fw-bold"
+                                                         onclick="showSpecialWinnerTab(this)"
+                                                         @if (!$liveShow->special_winners_announced) disabled aria-disabled="true" @endif>
+                                                         <i class="fas fa-eye me-2"></i> Show
+                                                     </button>
+                                                     <button type="button" id="hideSpecialWinnerTabBtn"
+                                                         class="mb-2 text-white shadow-sm btn btn-danger fw-bold"
+                                                         onclick="hideSpecialWinnerTab(this)"
+                                                         @if (!$liveShow->special_winners_announced) disabled aria-disabled="true" @endif>
+                                                         <i class="fas fa-eye-slash me-2"></i> Hide
+                                                     </button>
+                                                 </div>
+                                             </div>
+                                         </div>
+                                     @endif
                                  </div>
 
                                  {{-- Push notification trigger: alert every player of this show on their devices --}}
@@ -564,8 +669,10 @@
                                                          @else
                                                              <div class="carousel-item px-2 @if ($slideIndex === 0) active @endif"
                                                                  data-slide-type="question"
-                                                                 data-quiz-id="{{ $quiz->id }}">
-                                                                 <div class="mb-5 border card">
+                                                                 data-quiz-id="{{ $quiz->id }}"
+                                                                 data-is-special="{{ $quiz->is_special ? 1 : 0 }}">
+                                                                 <div
+                                                                     class="mb-5 border card @if ($quiz->is_special) border-warning bg-special-quiz border-2 @endif">
                                                                      <div class="position-relative card-body"
                                                                          style="height: auto; overflow-y:hidden">
                                                                          <button type="button"
@@ -578,6 +685,13 @@
                                                                          </button>
 
                                                                          <div class="mb-4 text-center fw-bold">
+                                                                             @if ($quiz->is_special)
+                                                                                 <div class="mb-2">
+                                                                                     <span class="badge bg-warning text-dark">
+                                                                                         <i class="fas fa-star me-1"></i> SPECIAL QUIZ
+                                                                                     </span>
+                                                                                 </div>
+                                                                             @endif
                                                                              <div class="mb-2">Question
                                                                                  {{ $index + 1 }} /
                                                                                  {{ $totalQuestions }}</div>
@@ -1404,6 +1518,10 @@
 
              }
 
+             .bg-special-quiz {
+                 background-color: rgba(255, 183, 0, 0.4);
+             }
+
 
 
              #live-chat-messages .message {
@@ -1583,15 +1701,24 @@
          <script>
              Pusher.logToConsole = true;
              let isChatEnabled = {{ $liveShow->chat_enabled ? 'true' : 'false' }};
-             const playerPageSize = 100;
-             const playerListState = {
-                 loadedCount: playerPageSize,
-                 search: '',
-                 totalUsers: 0,
-                 filteredUsers: 0,
-                 hasMore: false,
-             };
-             let playerSearchDebounceTimer = null;
+            const playerPageSize = 100;
+            const playerListState = {
+                loadedCount: playerPageSize,
+                search: '',
+                totalUsers: 0,
+                filteredUsers: 0,
+                hasMore: false,
+            };
+            const specialPlayerListState = {
+                loadedCount: playerPageSize,
+                search: '',
+                totalUsers: 0,
+                filteredUsers: 0,
+                hasMore: false,
+                loaded: false,
+            };
+            let activePlayerRankingTab = 'main';
+            let playerSearchDebounceTimer = null;
              let liveShowStatus = '{{ $liveShow->status }}';
              let liveShowWinnersAnnounced = {{ $liveShow->winners_announced ? 'true' : 'false' }};
              let mediaSkipWarningShown = false;
@@ -1726,18 +1853,40 @@
                      appendChatMessages(messages);
                  });
 
-                 document.getElementById('playerSearchInput')?.addEventListener('input', function(event) {
-                     clearTimeout(playerSearchDebounceTimer);
-                     playerSearchDebounceTimer = setTimeout(() => {
-                         playerListState.search = event.target.value.trim();
-                         playerListState.loadedCount = playerPageSize;
-                         fetchAndAppendPlayers();
-                     }, 250);
-                 });
+                document.getElementById('playerSearchInput')?.addEventListener('input', function(event) {
+                    clearTimeout(playerSearchDebounceTimer);
+                    playerSearchDebounceTimer = setTimeout(() => {
+                        const search = event.target.value.trim();
+                        playerListState.search = search;
+                        playerListState.loadedCount = playerPageSize;
+                        specialPlayerListState.search = search;
+                        specialPlayerListState.loadedCount = playerPageSize;
+                        if (activePlayerRankingTab === 'special') {
+                            fetchAndAppendSpecialPlayers();
+                        } else {
+                            fetchAndAppendPlayers();
+                        }
+                    }, 250);
+                });
 
-                 document.getElementById('loadMorePlayersButton')?.addEventListener('click', function() {
-                     loadMorePlayers();
-                 });
+                document.getElementById('loadMorePlayersButton')?.addEventListener('click', function() {
+                    loadMorePlayers();
+                });
+
+                document.getElementById('loadMoreSpecialPlayersButton')?.addEventListener('click', function() {
+                    loadMoreSpecialPlayers();
+                });
+
+                document.getElementById('specialPlayersRankingTabBtn')?.addEventListener('shown.bs.tab', function() {
+                    activePlayerRankingTab = 'special';
+                    if (!specialPlayerListState.loaded) {
+                        fetchAndAppendSpecialPlayers();
+                    }
+                });
+
+                document.getElementById('mainPlayersRankingTabBtn')?.addEventListener('shown.bs.tab', function() {
+                    activePlayerRankingTab = 'main';
+                });
 
                  document.getElementById('resetChatBtn').addEventListener('click', function() {
                      streamSwalConfirm({
@@ -1891,8 +2040,8 @@
                          .then(data => {
                              console.log('Player block status updated:', data);
                              if (data.success) {
-                                 streamSwalSuccess(data.message, 'Player updated');
-                                 refreshVisiblePlayers();
+                                streamSwalSuccess(data.message, 'Player updated');
+                                refreshAllPlayerRankings();
                              } else {
                                  streamSwalError(data.message || 'Could not update this player.');
                              }
@@ -1925,8 +2074,8 @@
                          .then(response => response.json())
                          .then(data => {
                              if (data.success) {
-                                 streamSwalSuccess(data.message, 'Score reset');
-                                 refreshVisiblePlayers();
+                                streamSwalSuccess(data.message, 'Score reset');
+                                refreshAllPlayerRankings();
                              } else {
                                  streamSwalError(data.message || 'Could not reset this player\'s score.',
                                      'Reset failed');
@@ -1940,11 +2089,14 @@
              }
 
 
-             //onlick #fetchPlayersButton execute fetchActivePlayers and appendPlayerList
-             document.getElementById('fetchPlayersButton').addEventListener('click', function() {
-
-                 refreshVisiblePlayers();
-             });
+            //onclick #fetchPlayersButton refresh the active ranking tab
+            document.getElementById('fetchPlayersButton').addEventListener('click', function() {
+                if (activePlayerRankingTab === 'special') {
+                    refreshVisibleSpecialPlayers();
+                } else {
+                    refreshVisiblePlayers();
+                }
+            });
 
 
 
@@ -2044,36 +2196,51 @@
                      .replace(/'/g, '&#39;');
              }
 
-             function setPlayersLoading() {
-                 const activePlayerUlElement = document.getElementById('activePlayersList');
-                 activePlayerUlElement.innerHTML =
-                     '<tr class="align-middle bg-dark"><td colspan="3"><i class="fas fa-spinner fa-spin me-2"></i> Loading...</td></tr>';
-             }
+            function setPlayersLoading(listId = 'activePlayersList') {
+                const activePlayerUlElement = document.getElementById(listId);
+                if (!activePlayerUlElement) return;
+                activePlayerUlElement.innerHTML =
+                    '<tr class="align-middle bg-dark"><td colspan="3"><i class="fas fa-spinner fa-spin me-2"></i> Loading...</td></tr>';
+            }
 
-             function updatePlayerListMeta() {
-                 const totalUsersCount = document.getElementById('total-users-count');
-                 const summary = document.getElementById('playersSearchSummary');
-                 const loadMoreButton = document.getElementById('loadMorePlayersButton');
-                 const searchActive = playerListState.search !== '';
+            function updatePlayerListMeta(state, options = {}) {
+                const {
+                    summaryId = 'playersSearchSummary',
+                    loadMoreButtonId = 'loadMorePlayersButton',
+                } = options;
+                const totalUsersCount = document.getElementById('total-users-count');
+                const summary = document.getElementById(summaryId);
+                const loadMoreButton = document.getElementById(loadMoreButtonId);
+                const searchActive = state.search !== '';
 
-                 totalUsersCount.innerText = searchActive ?
-                     `(${playerListState.filteredUsers}/${playerListState.totalUsers})` :
-                     `(${playerListState.totalUsers})`;
+                if (totalUsersCount && state === playerListState) {
+                    totalUsersCount.innerText = searchActive ?
+                        `(${state.filteredUsers}/${state.totalUsers})` :
+                        `(${state.totalUsers})`;
+                }
 
-                 summary.textContent = searchActive ?
-                     `Showing ${playerListState.filteredUsers} matching player(s)` :
-                     `Showing ${playerListState.totalUsers} participating player(s)`;
+                if (summary) {
+                    summary.textContent = searchActive ?
+                        `Showing ${state.filteredUsers} matching player(s)` :
+                        `Showing ${state.filteredUsers} player(s)`;
+                }
 
-                 loadMoreButton.classList.toggle('d-none', !playerListState.hasMore);
-             }
+                if (loadMoreButton) {
+                    loadMoreButton.classList.toggle('d-none', !state.hasMore);
+                }
+            }
 
-             function buildPlayerListItem(player, index) {
-                 const playerName = escapeHtml(player.name);
-                 const playerEmail = escapeHtml(player.email);
-                 const prizeWon = escapeHtml(player.prize_won ?? '');
-                 const playerShowUrl = `{{ url('admin/players') }}/${player.id}`;
+            function buildPlayerListItem(player, index, options = {}) {
+                const {
+                    winnerIcon = '<i class="bi bi-trophy-fill text-warning"></i>',
+                    prizeBadgeClass = 'bg-primary',
+                } = options;
+                const playerName = escapeHtml(player.name);
+                const playerEmail = escapeHtml(player.email);
+                const prizeWon = escapeHtml(player.prize_won ?? '');
+                const playerShowUrl = `{{ url('admin/players') }}/${player.id}`;
 
-                 return `<tr class="align-middle bg-dark">
+                return `<tr class="align-middle bg-dark">
                     <td class='text-white'>
                         ${index}.
                         <strong class='${player.status != 'eliminated' ? 'text-white' : 'text-secondary'}'>${playerName}</strong>
@@ -2081,10 +2248,10 @@
                             <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
                         </span>
 
-                        ${player.is_winner ? '<i class="bi bi-trophy-fill text-warning"></i>' : ''}
+                        ${player.is_winner ? winnerIcon : ''}
                         <div class='text-white small text-secondary'>${playerEmail}</div>
                         <div class='text-white'>
-                            ${player.is_winner && prizeWon ? `Prize:  <span class='badge bg-primary'> ${prizeWon} </span>` : ''}
+                            ${player.is_winner && prizeWon ? `Prize:  <span class='badge ${prizeBadgeClass}'> ${prizeWon} </span>` : ''}
                         </div>
                     </td>
                     <td class='text-white '>${player.score !== null ? ` ${player.score}` : ''}</td>
@@ -2123,133 +2290,247 @@
                     </td>
                 </tr>`;
 
-             }
+            }
 
-             function appendPlayerList(data, options = {}) {
-                 const {
-                     append = false
-                 } = options;
-                 const activePlayersList = document.getElementById('activePlayersList');
+            function appendPlayerList(data, options = {}) {
+                const {
+                    append = false,
+                    listId = 'activePlayersList',
+                    state = playerListState,
+                    itemOptions = {},
+                } = options;
+                const activePlayersList = document.getElementById(listId);
+                if (!activePlayersList) return;
 
-                 if (!append) {
-                     activePlayersList.innerHTML = '';
-                 }
+                if (!append) {
+                    activePlayersList.innerHTML = '';
+                }
 
-                 if (data.users.length === 0 && !append) {
-                     activePlayersList.innerHTML =
-                         '<tr class="align-middle bg-dark"><td colspan="3">No players found.</td></tr>';
-                     return;
-                 }
+                if (data.users.length === 0 && !append) {
+                    activePlayersList.innerHTML =
+                        '<tr class="align-middle bg-dark"><td colspan="3">No players found.</td></tr>';
+                    return;
+                }
 
-                 const startIndex = append ? (playerListState.loadedCount - data.users.length) : 0;
+                const startIndex = append ? (state.loadedCount - data.users.length) : 0;
 
-                 data.users.forEach((player, index) => {
-                     activePlayersList.insertAdjacentHTML('beforeend', buildPlayerListItem(player, startIndex + index +
-                         1));
-                 });
-             }
+                data.users.forEach((player, index) => {
+                    activePlayersList.insertAdjacentHTML('beforeend', buildPlayerListItem(player, startIndex + index +
+                        1, itemOptions));
+                });
+            }
 
-             function fetchActivePlayers({
-                 skip = 0,
-                 take = playerPageSize,
-                 search = ''
-             } = {}) {
-                 const query = new URLSearchParams({
-                     skip,
-                     take,
-                     search,
-                 });
+            function fetchActivePlayers({
+                skip = 0,
+                take = playerPageSize,
+                search = '',
+                endpoint = '{{ url('api/live-show') }}/{{ $liveShow->id }}/get-live-show-users',
+            } = {}) {
+                const query = new URLSearchParams({
+                    skip,
+                    take,
+                    search,
+                });
 
+                return fetch(`${endpoint}?${query.toString()}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        return {
+                            users: data.users.map(player => ({
+                                name: player.name,
+                                id: player.id,
+                                email: player.email,
+                                is_online: player.is_online,
+                                is_winner: player.is_winner,
+                                prize_won: player.prize_won,
+                                status: player.status,
+                                score: player.score,
+                                is_blocked: player.is_blocked
+                            })),
+                            totalUsers: data.totalUsers,
+                            filteredUsers: data.filteredUsers ?? data.totalUsers,
+                            hasMore: !!data.hasMore,
+                        };
+                    })
+                    .catch(error => {
+                        console.error('Error fetching active players:', error);
+                        return {
+                            users: [],
+                            totalUsers: 0,
+                            filteredUsers: 0,
+                            hasMore: false,
+                        };
+                    });
+            }
 
-                 return fetch(`{{ url('api/live-show') }}/{{ $liveShow->id }}/get-live-show-users?${query.toString()}`)
-                     .then(response => response.json())
-                     .then(data => {
-                         return {
-                             users: data.users.map(player => ({
-                                 name: player.name,
-                                 id: player.id,
-                                 email: player.email,
-                                 is_online: player.is_online,
-                                 is_winner: player.is_winner,
-                                 prize_won: player.prize_won,
-                                 status: player.status,
-                                 score: player.score,
-                                 is_blocked: player.is_blocked
-                             })),
-                             totalUsers: data.totalUsers,
-                             filteredUsers: data.filteredUsers ?? data.totalUsers,
-                             hasMore: !!data.hasMore,
-                         };
-                     })
-                     .catch(error => {
-                         console.error('Error fetching active players:', error);
-                         return {
-                             users: [],
-                             totalUsers: 0,
-                             filteredUsers: 0,
-                             hasMore: false,
-                         };
-                     });
-             }
+            function refreshVisiblePlayers() {
+                const take = Math.max(playerListState.loadedCount, playerPageSize);
+                setPlayersLoading('activePlayersList');
 
-             function refreshVisiblePlayers() {
-                 const take = Math.max(playerListState.loadedCount, playerPageSize);
-                 setPlayersLoading();
+                return fetchActivePlayers({
+                    skip: 0,
+                    take,
+                    search: playerListState.search,
+                }).then(data => {
+                    playerListState.loadedCount = Math.max(data.users.length, playerPageSize);
+                    playerListState.totalUsers = data.totalUsers;
+                    playerListState.filteredUsers = data.filteredUsers;
+                    playerListState.hasMore = data.hasMore;
+                    appendPlayerList(data, {
+                        listId: 'activePlayersList',
+                        state: playerListState,
+                    });
+                    updatePlayerListMeta(playerListState);
+                });
+            }
 
-                 return fetchActivePlayers({
-                     skip: 0,
-                     take
-                 }).then(data => {
-                     playerListState.loadedCount = Math.max(data.users.length, playerPageSize);
-                     playerListState.totalUsers = data.totalUsers;
-                     playerListState.filteredUsers = data.filteredUsers;
-                     playerListState.hasMore = data.hasMore;
-                     appendPlayerList(data);
-                     updatePlayerListMeta();
-                 });
-             }
+            function refreshVisibleSpecialPlayers() {
+                const take = Math.max(specialPlayerListState.loadedCount, playerPageSize);
+                setPlayersLoading('specialActivePlayersList');
 
-             function fetchAndAppendPlayers() {
-                 setPlayersLoading();
-                 playerListState.loadedCount = playerPageSize;
+                return fetchActivePlayers({
+                    skip: 0,
+                    take,
+                    search: specialPlayerListState.search,
+                    endpoint: '{{ url('api/live-show') }}/{{ $liveShow->id }}/get-special-live-show-users',
+                }).then(data => {
+                    specialPlayerListState.loadedCount = Math.max(data.users.length, playerPageSize);
+                    specialPlayerListState.totalUsers = data.totalUsers;
+                    specialPlayerListState.filteredUsers = data.filteredUsers;
+                    specialPlayerListState.hasMore = data.hasMore;
+                    specialPlayerListState.loaded = true;
+                    appendPlayerList(data, {
+                        listId: 'specialActivePlayersList',
+                        state: specialPlayerListState,
+                        itemOptions: {
+                            winnerIcon: '<i class="bi bi-gift-fill text-warning"></i>',
+                            prizeBadgeClass: 'bg-warning text-dark',
+                        },
+                    });
+                    updatePlayerListMeta(specialPlayerListState, {
+                        summaryId: 'specialPlayersSearchSummary',
+                        loadMoreButtonId: 'loadMoreSpecialPlayersButton',
+                    });
+                });
+            }
 
-                 return fetchActivePlayers({
-                     skip: 0,
-                     take: playerListState.loadedCount,
-                     search: playerListState.search
+            function refreshAllPlayerRankings() {
+                const promises = [refreshVisiblePlayers()];
+                if (specialPlayerListState.loaded) {
+                    promises.push(refreshVisibleSpecialPlayers());
+                }
+                return Promise.all(promises);
+            }
 
-                 }).then(data => {
-                     playerListState.totalUsers = data.totalUsers;
-                     playerListState.filteredUsers = data.filteredUsers;
-                     playerListState.hasMore = data.hasMore;
-                     appendPlayerList(data);
-                     updatePlayerListMeta();
-                 });
-             }
+            function fetchAndAppendPlayers() {
+                setPlayersLoading('activePlayersList');
+                playerListState.loadedCount = playerPageSize;
 
-             function loadMorePlayers() {
-                 const loadMoreButton = document.getElementById('loadMorePlayersButton');
-                 loadMoreButton.disabled = true;
-                 loadMoreButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Loading...';
+                return fetchActivePlayers({
+                    skip: 0,
+                    take: playerListState.loadedCount,
+                    search: playerListState.search
 
-                 return fetchActivePlayers({
-                     skip: playerListState.loadedCount,
-                     take: playerPageSize,
-                     search: playerListState.search,
-                 }).then(data => {
-                     playerListState.loadedCount += data.users.length;
-                     playerListState.totalUsers = data.totalUsers;
-                     playerListState.filteredUsers = data.filteredUsers;
-                     playerListState.hasMore = data.hasMore;
-                     appendPlayerList(data, {
-                         append: true
-                     });
-                     updatePlayerListMeta();
-                 }).finally(() => {
-                     loadMoreButton.disabled = false;
-                     loadMoreButton.innerHTML = '<i class="fas fa-plus-circle me-1"></i> Load More Players';
-                 });
-             }
+                }).then(data => {
+                    playerListState.totalUsers = data.totalUsers;
+                    playerListState.filteredUsers = data.filteredUsers;
+                    playerListState.hasMore = data.hasMore;
+                    appendPlayerList(data, {
+                        listId: 'activePlayersList',
+                        state: playerListState,
+                    });
+                    updatePlayerListMeta(playerListState);
+                });
+            }
+
+            function fetchAndAppendSpecialPlayers() {
+                setPlayersLoading('specialActivePlayersList');
+                specialPlayerListState.loadedCount = playerPageSize;
+
+                return fetchActivePlayers({
+                    skip: 0,
+                    take: specialPlayerListState.loadedCount,
+                    search: specialPlayerListState.search,
+                    endpoint: '{{ url('api/live-show') }}/{{ $liveShow->id }}/get-special-live-show-users',
+                }).then(data => {
+                    specialPlayerListState.totalUsers = data.totalUsers;
+                    specialPlayerListState.filteredUsers = data.filteredUsers;
+                    specialPlayerListState.hasMore = data.hasMore;
+                    specialPlayerListState.loaded = true;
+                    appendPlayerList(data, {
+                        listId: 'specialActivePlayersList',
+                        state: specialPlayerListState,
+                        itemOptions: {
+                            winnerIcon: '<i class="bi bi-gift-fill text-warning"></i>',
+                            prizeBadgeClass: 'bg-warning text-dark',
+                        },
+                    });
+                    updatePlayerListMeta(specialPlayerListState, {
+                        summaryId: 'specialPlayersSearchSummary',
+                        loadMoreButtonId: 'loadMoreSpecialPlayersButton',
+                    });
+                });
+            }
+
+            function loadMorePlayers() {
+                const loadMoreButton = document.getElementById('loadMorePlayersButton');
+                loadMoreButton.disabled = true;
+                loadMoreButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Loading...';
+
+                return fetchActivePlayers({
+                    skip: playerListState.loadedCount,
+                    take: playerPageSize,
+                    search: playerListState.search,
+                }).then(data => {
+                    playerListState.loadedCount += data.users.length;
+                    playerListState.totalUsers = data.totalUsers;
+                    playerListState.filteredUsers = data.filteredUsers;
+                    playerListState.hasMore = data.hasMore;
+                    appendPlayerList(data, {
+                        append: true,
+                        listId: 'activePlayersList',
+                        state: playerListState,
+                    });
+                    updatePlayerListMeta(playerListState);
+                }).finally(() => {
+                    loadMoreButton.disabled = false;
+                    loadMoreButton.innerHTML = '<i class="fas fa-plus-circle me-1"></i> Load More Players';
+                });
+            }
+
+            function loadMoreSpecialPlayers() {
+                const loadMoreButton = document.getElementById('loadMoreSpecialPlayersButton');
+                loadMoreButton.disabled = true;
+                loadMoreButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Loading...';
+
+                return fetchActivePlayers({
+                    skip: specialPlayerListState.loadedCount,
+                    take: playerPageSize,
+                    search: specialPlayerListState.search,
+                    endpoint: '{{ url('api/live-show') }}/{{ $liveShow->id }}/get-special-live-show-users',
+                }).then(data => {
+                    specialPlayerListState.loadedCount += data.users.length;
+                    specialPlayerListState.totalUsers = data.totalUsers;
+                    specialPlayerListState.filteredUsers = data.filteredUsers;
+                    specialPlayerListState.hasMore = data.hasMore;
+                    appendPlayerList(data, {
+                        append: true,
+                        listId: 'specialActivePlayersList',
+                        state: specialPlayerListState,
+                        itemOptions: {
+                            winnerIcon: '<i class="bi bi-gift-fill text-warning"></i>',
+                            prizeBadgeClass: 'bg-warning text-dark',
+                        },
+                    });
+                    updatePlayerListMeta(specialPlayerListState, {
+                        summaryId: 'specialPlayersSearchSummary',
+                        loadMoreButtonId: 'loadMoreSpecialPlayersButton',
+                    });
+                }).finally(() => {
+                    loadMoreButton.disabled = false;
+                    loadMoreButton.innerHTML = '<i class="fas fa-plus-circle me-1"></i> Load More Players';
+                });
+            }
 
              const questionSliderTimerOverlay = document.getElementById('questionSliderTimerOverlay');
              const questionSliderTimerText = document.getElementById('questionSliderTimerText');
@@ -2284,8 +2565,8 @@
                          }, 500);
 
                          setTimeout(() => {
-                             console.log('viewing responses after timer finishes..');
-                             refreshVisiblePlayers();
+                            console.log('viewing responses after timer finishes..');
+                            refreshAllPlayerRankings();
                              viewResponses('{{ $liveShow->id }}', quizId, null);
                          }, 5000);
                      }
@@ -3132,16 +3413,176 @@
                                      'Request failed');
                              }
                          })
-                         .catch(error => {
-                             console.error('Error showing winners tab:', error);
-                             streamSwalError('Could not show the winners tab. Please try again.', 'Request failed');
-                         })
-                         .finally(() => {
-                             setBtnBusy(btn, false);
-                         });
-                 });
-             }
-         </script>
+                        .catch(error => {
+                            console.error('Error showing winners tab:', error);
+                            streamSwalError('Could not show the winners tab. Please try again.', 'Request failed');
+                        })
+                        .finally(() => {
+                            setBtnBusy(btn, false);
+                        });
+                });
+            }
+
+            // ===== Special Quiz ceremony controls =====
+            function setSpecialAnnounceState(state) {
+                var label = document.getElementById('announceSpecialWinnersBtnLabel');
+                var loader = document.getElementById('announceSpecialWinnersBtnLoader');
+                var done = document.getElementById('announceSpecialWinnersBtnDone');
+                var btn = document.getElementById('announceSpecialWinnersBtn');
+                var extra = document.getElementById('unannounceSpecialWinnersBtn');
+                var showBtn = document.getElementById('showSpecialWinnerTabBtn');
+                var hideBtn = document.getElementById('hideSpecialWinnerTabBtn');
+                if (!btn) return;
+                if (label) label.classList.toggle('d-none', state !== 'idle');
+                if (loader) loader.classList.toggle('d-none', state !== 'loading');
+                if (done) done.classList.toggle('d-none', state !== 'done');
+                btn.disabled = (state === 'loading' || state === 'done');
+                if (state === 'done') {
+                    if (extra) extra.classList.remove('d-none');
+                    if (showBtn) showBtn.disabled = false;
+                    if (hideBtn) hideBtn.disabled = false;
+                } else if (state === 'idle') {
+                    if (extra) extra.classList.add('d-none');
+                    if (showBtn) showBtn.disabled = true;
+                    if (hideBtn) hideBtn.disabled = true;
+                }
+            }
+
+            function announceSpecialWinners() {
+                streamSwalConfirm({
+                    title: 'Announce Special Quiz winners?',
+                    text: 'This ranks players by their Special Quiz score, awards special gifts, and queues special winner emails. The main quiz is not affected.',
+                    confirmButtonText: 'Yes, announce special winners',
+                }).then(function(result) {
+                    if (!result.isConfirmed) {
+                        return;
+                    }
+                    setSpecialAnnounceState('loading');
+                    fetch(`{{ route('admin.live-shows.announce-special-winners', ['liveShowId' => $liveShow->id]) }}`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                            },
+                        })
+                        .then(response => response.json().then(data => ({
+                            ok: response.ok,
+                            status: response.status,
+                            data
+                        })))
+                        .then(function(result) {
+                            if (!result.ok) {
+                                setSpecialAnnounceState('idle');
+                                streamSwalWarning((result.data && result.data.message) ? result.data
+                                    .message : 'Could not announce special winners.',
+                                    'Special winners');
+                                return;
+                            }
+                            setSpecialAnnounceState('done');
+                            streamSwalSuccess((result.data && result.data.message) ? result.data
+                                .message : 'Special Quiz winners announced.', 'Special winners');
+                            refreshVisiblePlayers();
+                            refreshVisibleSpecialPlayers();
+                        })
+                        .catch(function(error) {
+                            console.error('Error announcing special winners:', error);
+                            setSpecialAnnounceState('idle');
+                            streamSwalError('Could not announce special winners. Please try again.',
+                                'Special winners');
+                        });
+                });
+            }
+
+            function unannounceSpecialWinners() {
+                streamSwalConfirm({
+                    title: 'Un-announce special winners?',
+                    text: 'This clears the Special Quiz winners so you can announce them again.',
+                    confirmButtonText: 'Yes, clear special winners',
+                }).then(function(result) {
+                    if (!result.isConfirmed) {
+                        return;
+                    }
+                    fetch(`{{ route('admin.live-shows.unannounce-special-winners', ['liveShowId' => $liveShow->id]) }}`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json',
+                            },
+                        })
+                        .then(response => response.json())
+                        .then(function(data) {
+                            if (data.success) {
+                                setSpecialAnnounceState('idle');
+                                streamSwalSuccess(data.message || 'Special winners cleared.',
+                                    'Special winners');
+                                refreshVisibleSpecialPlayers();
+                            } else {
+                                streamSwalError(data.message || 'Could not clear special winners.',
+                                    'Request failed');
+                            }
+                        })
+                        .catch(function(error) {
+                            console.error('Error clearing special winners:', error);
+                            streamSwalError('Could not clear special winners. Please try again.',
+                                'Request failed');
+                        });
+                });
+            }
+
+            function showSpecialWinnerTab(btn) {
+                setBtnBusy(btn, true, 'Showing\u2026');
+                fetch(`{{ route('admin.live-shows.stream-management.show-special-winners-tab', ['id' => $liveShow->id]) }}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            streamSwalSuccess(data.message || 'Special winners tab shown.',
+                                'Special winners tab');
+                        } else {
+                            streamSwalError(data.message || 'Could not show the special winners tab.',
+                                'Request failed');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error showing special winners tab:', error);
+                        streamSwalError('Could not show the special winners tab. Please try again.',
+                            'Request failed');
+                    })
+                    .finally(() => setBtnBusy(btn, false));
+            }
+
+            function hideSpecialWinnerTab(btn) {
+                setBtnBusy(btn, true, 'Hiding\u2026');
+                fetch(`{{ route('admin.live-shows.stream-management.hide-special-winners-tab', ['id' => $liveShow->id]) }}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            streamSwalSuccess(data.message || 'Special winners tab hidden.',
+                                'Special winners tab');
+                        } else {
+                            streamSwalError(data.message || 'Could not hide the special winners tab.',
+                                'Request failed');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error hiding special winners tab:', error);
+                        streamSwalError('Could not hide the special winners tab. Please try again.',
+                            'Request failed');
+                    })
+                    .finally(() => setBtnBusy(btn, false));
+            }
+        </script>
          <script>
              function isQuestionMediaCarouselSlide(slideEl) {
                  return slideEl &&

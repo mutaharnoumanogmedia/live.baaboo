@@ -7,11 +7,13 @@ use App\Events\LiveShowMessageEvent;
 use App\Events\LiveShowOnlineUsersEvent;
 use App\Models\LiveShow;
 use App\Models\LiveShowMessages;
+use App\Models\LiveShowQuiz;
 use App\Models\QuizOption;
 use App\Models\User;
 use App\Models\UserLiveShow;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
+use App\Models\UserSpecialQuizResponse;
 use App\Models\Viewer;
 use App\Services\ActiveCampaign\ActiveCampaignClient;
 use App\Services\AffiliateAPIService;
@@ -334,6 +336,13 @@ class GamePlayController extends Controller
             return response()->json(['success' => false, 'message' => 'User is eliminated and cannot submit quiz.'], 403);
         }
 
+        // Special Quiz answers are stored in a dedicated table and never touch
+        // the main pivot score, keeping the two rankings fully isolated.
+        $quizModel = LiveShowQuiz::find($quizId);
+        if ($quizModel && $quizModel->is_special) {
+            return $this->submitSpecialQuiz($user, $liveShow, $quizModel, (int) $option, $totalMilliSecondsToSubmit, $totalSecondsToSubmit);
+        }
+
         // $userQuiz = UserQuiz::firstOrCreate(
         //     [
         //         'user_id' => $user->id,
@@ -453,6 +462,50 @@ class GamePlayController extends Controller
                 'response_score' => $responseScore,
             ], 200);
         }
+    }
+
+    /**
+     * Handle a Special Quiz answer. Stored in user_special_quiz_responses with
+     * the same scoring formula as the main quiz, but the main pivot score is
+     * left untouched so special points never affect the main ranking.
+     */
+    private function submitSpecialQuiz(User $user, LiveShow $liveShow, LiveShowQuiz $quizModel, int $option, float $totalMilliSecondsToSubmit, float $totalSecondsToSubmit)
+    {
+        $quizId = $quizModel->id;
+
+        // Prevent duplicate answers (also enforced by the unique index).
+        $existing = UserSpecialQuizResponse::where('user_id', $user->id)->where('quiz_id', $quizId)->first();
+        if ($existing) {
+            return response()->json(['success' => false, 'message' => 'Du hast dieses Quiz bereits beantwortet.'], 403);
+        }
+
+        $quizOption = QuizOption::where('id', $option)->where('quiz_id', $quizId)->first();
+        $isCorrect = $quizOption ? (bool) $quizOption->is_correct : false;
+        $responseScore = $isCorrect ? $this->calculateScoreFromMilliseconds($totalMilliSecondsToSubmit) : 0;
+
+        UserSpecialQuizResponse::create([
+            'user_id' => $user->id,
+            'quiz_id' => $quizId,
+            'quiz_option_id' => $quizOption->id ?? null,
+            'is_correct' => $isCorrect,
+            'seconds_to_submit' => $totalSecondsToSubmit,
+            'response_score' => $responseScore,
+            'user_response' => $quizOption->option_text ?? 'Invalid option',
+        ]);
+
+        $correctOption = QuizOption::where('quiz_id', $quizId)->where('is_correct', 1)->first();
+        $specialScore = $liveShow->users()->where('user_id', $user->id)->first()->pivot->special_score ?? $responseScore;
+
+        return response()->json([
+            'success' => true,
+            'is_special' => true,
+            'is_correct' => $isCorrect,
+            'message' => $isCorrect ? 'Correct option selected.' : 'Incorrect option selected.',
+            'selected_option_id' => $quizOption->id ?? null,
+            'correct_option_id' => $correctOption->id ?? null,
+            'response_score' => $responseScore,
+            'special_score' => $specialScore,
+        ], 200);
     }
 
     public function calculateScoreFromMilliseconds(float $timeToSubmitMs): float
@@ -652,6 +705,48 @@ class GamePlayController extends Controller
                     'is_blocked' => $user->blockedLiveShows()
                         ->where('live_show_id', $liveShowId)
                         ->exists(),
+                ];
+            })
+            ->values();
+
+        $you = $users->firstWhere('id', Auth::guard('web')->user()->id ?? null);
+        if (! $you) {
+            $you = null;
+        }
+
+        return response()->json(['users' => $users, 'totalUsers' => $totalUsers, 'you' => $you ?? null]);
+    }
+
+    // Special Quiz leaderboard for participants (independent of the main one).
+    public function getSpecialLiveShowUsersWithScores($liveShowId)
+    {
+        $liveShow = LiveShow::find($liveShowId);
+        if (! $liveShow) {
+            return response()->json(['message' => 'Live show not found.'], 404);
+        }
+
+        $skip = request()->get('skip', 0);
+        $take = request()->get('take', 100);
+
+        $totalUsers = $liveShow->users()->count();
+        $quizService = new LiveShowQuizService;
+
+        $users = $quizService->getSortedSpecialPlayers($liveShow);
+
+        $users = $users
+            ->skip($skip)
+            ->take($take)
+            ->map(function ($user, $index) use ($liveShow) {
+                return [
+                    'id' => $user->id,
+                    'position' => $this->formatPosition($index + 1, (bool) $liveShow->special_winners_announced),
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'is_online' => $user->pivot->is_online,
+                    'is_winner' => $user->pivot->is_special_winner ?? null,
+                    'status' => $user->pivot->status ?? null,
+                    'score' => $user->pivot->special_score ?? 0,
+                    'prize_won' => $user->pivot->special_prize_won ?? null,
                 ];
             })
             ->values();

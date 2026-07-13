@@ -29,6 +29,15 @@ class UserLiveShow extends Pivot
         'winner_email_sent_at',
         'winner_voucher_email_sent_at',
         'winner_cash_email_sent_at',
+        // Special Quiz winner outcome (independent of the main winner fields).
+        'is_special_winner',
+        'special_gift_id',
+        'special_prize_won',
+        'special_discount_code',
+        'special_winner_email_sent_status',
+        'special_winner_email_sent_at',
+        'special_type_email_sent_status',
+        'special_type_email_sent_at',
     ];
 
     public $timestamps = true;
@@ -47,6 +56,28 @@ class UserLiveShow extends Pivot
 
         return round($sum, 2);
 
+    }
+
+    // Special Quiz score: sum of response_score from the dedicated special
+    // responses table for this show's special questions. Kept fully separate
+    // from the main `score` accessor so the two never mix.
+    public function getSpecialScoreAttribute()
+    {
+        $userId = $this->user_id;
+        $liveShowId = $this->live_show_id;
+
+        $sum = \DB::table('user_special_quiz_responses')
+            ->join('live_show_quizzes', 'user_special_quiz_responses.quiz_id', '=', 'live_show_quizzes.id')
+            ->where('user_special_quiz_responses.user_id', $userId)
+            ->where('live_show_quizzes.live_show_id', $liveShowId)
+            ->sum('user_special_quiz_responses.response_score');
+
+        return round($sum, 2);
+    }
+
+    public function specialGift()
+    {
+        return $this->belongsTo(SpecialGift::class, 'special_gift_id');
     }
 
     public function userQuizResponses()

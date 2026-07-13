@@ -9,11 +9,22 @@ class LiveShowQuiz extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['live_show_id', 'question', 'created_by', 'has_shown'];
+    protected $fillable = ['live_show_id', 'question', 'is_special', 'created_by', 'has_shown'];
 
     protected $casts = [
         'has_shown' => 'boolean',
+        'is_special' => 'boolean',
     ];
+
+    public function scopeSpecial($query)
+    {
+        return $query->where('is_special', true);
+    }
+
+    public function scopeMain($query)
+    {
+        return $query->where('is_special', false);
+    }
 
     public function liveShow()
     {
@@ -23,6 +34,11 @@ class LiveShowQuiz extends Model
     public function options()
     {
         return $this->hasMany(QuizOption::class, 'quiz_id');
+    }
+
+    public function specialResponses()
+    {
+        return $this->hasMany(UserSpecialQuizResponse::class, 'quiz_id');
     }
 
     public function userQuizzes()

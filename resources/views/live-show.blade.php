@@ -908,6 +908,32 @@
             });
         });
 
+        // Special Quiz winners tab (independent data source from the main quiz).
+        channel2.bind('HideSpecialWinnersTabEvent', function(data) {
+            console.log('Hide special winners tab event received:', data);
+            hideWinnersTabForParticipants();
+        });
+        channel2.bind('ShowSpecialWinnersTabEvent', function(data) {
+            console.log('Show special winners tab event received:', data);
+            const winnersData = data.winnersData;
+
+            const drumsRollAudio = playSound('drums-roll');
+            showSpecialWinnersTabForParticipants().then(() => {
+                toggleQuiz("remove");
+                stopSound(drumsRollAudio);
+
+                if (Array.isArray(winnersData)) {
+                    const winner = winnersData.find(winner => winner.user_id == userId);
+                    if (winner) {
+                        showSpecialWinnerSwalDialog(winner.prize_won);
+                    }
+                }
+
+                fireWorksConfetti();
+                playSound('winner');
+            });
+        });
+
 
         var channelChatStatus = pusher.subscribe('live-show-chat-status.{{ $liveShow->id }}');
         channelChatStatus.bind('pusher:subscription_succeeded', function() {
@@ -1144,6 +1170,86 @@
             });
         }
 
+        // Special Quiz leaderboard: same rendering, different data source.
+        function updateSpecialPlayersLeaderboard() {
+            return fetch('{{ url('live-show/' . $liveShow->id . '/get-special-live-show-users-with-scores') }}')
+                .then(response => response.json())
+                .then(data => {
+                    const users = data.users;
+                    const totalUsers = data.totalUsers;
+
+                    const playersListContainer = document.getElementById('players-leaderbord');
+                    if (!playersListContainer) return;
+                    playersListContainer.innerHTML = '';
+
+                    users.forEach((user, index) => {
+                        let winnerBgColorClass = '';
+                        switch (index) {
+                            case 0:
+                                winnerBgColorClass = 'winner-div gold-div';
+                                break;
+                            case 1:
+                                winnerBgColorClass = 'winner-div silver-div';
+                                break;
+                            case 2:
+                                winnerBgColorClass = 'winner-div bronze-div';
+                                break;
+                            default:
+                                winnerBgColorClass = 'winner-div platinum-div';
+                                break;
+                        }
+                        const userDiv = document.createElement('div');
+                        userDiv.className =
+                            'player-list-item d-flex justify-content-between align-items-center mb-2 p-2 rounded ' +
+                            (user.id == userId ? 'sticky-position' : '');
+                        if (user.score > 0 && user.is_winner) {
+                            userDiv.className += ` ${winnerBgColorClass}`;
+                        }
+                        userDiv.innerHTML = `
+                        <div>
+                            <span style="margin-right: 20px;">${user.position}</span>
+                            ${user.name} ${user.id == userId ? '(You)' : ''}
+                            <span class="trophy-icon">${user.is_winner ? '<i class="fas fa-trophy " title="Winner"></i>' : ''}</span>
+                        </div>
+                        <div class="score-text">
+                            ${user.score ? Math.round(user.score) : 0}
+                        </div>
+                    `;
+                        playersListContainer.appendChild(userDiv);
+                    });
+
+                    const userCountEl = document.getElementById('user-count');
+                    if (userCountEl) userCountEl.innerHTML = totalUsers;
+                    const spinner = document.getElementById('players-list-loading-spinner');
+                    if (spinner) spinner.style.display = 'none';
+                })
+                .catch(error => console.error('Error fetching special players with scores:', error));
+        }
+
+        function showSpecialWinnersTabForParticipants() {
+            return updateSpecialPlayersLeaderboard().then(() => {
+                const playerTabLink = document.getElementById('playerTab-tab');
+                const playerTabPane = document.getElementById('playerTab');
+                const chatTabLink = document.getElementById('chatTab-tab');
+                const chatTabPane = document.getElementById('chatTab');
+
+                if (chatTabLink) {
+                    chatTabLink.classList.remove('active');
+                    chatTabLink.setAttribute('aria-selected', 'false');
+                }
+                if (chatTabPane) {
+                    chatTabPane.classList.remove('show', 'active');
+                }
+                if (playerTabLink) {
+                    playerTabLink.classList.add('active');
+                    playerTabLink.setAttribute('aria-selected', 'true');
+                }
+                if (playerTabPane) {
+                    playerTabPane.classList.add('show', 'active');
+                }
+            });
+        }
+
 
 
         // Toggle quiz mode
@@ -1212,6 +1318,7 @@
             <div class="quiz-section-inner">
                 <input type="hidden" id="quizId" value="${quiz.id}">
                 <div class="quiz-question">
+                    ${quiz.isSpecial ? '<div class="special-quiz-badge" style="display:inline-block;background:#ffc107;color:#212529;font-weight:700;letter-spacing:1px;padding:2px 10px;border-radius:12px;margin-bottom:6px;font-size:0.75rem;">SPECIAL QUIZ</div>' : ''}
                     <div class="quiz-question-index">${quiz.index} von ${quiz.totalQuizQuestions}</div>
                     <div class="quiz-question-text" translate="no">${quiz.question}</div>
                 </div>
@@ -1681,6 +1788,7 @@
 
             // add them to quizQuestion
             quizQuestion.index = data.quizQuestionIndex;
+            quizQuestion.isSpecial = data.isSpecial ?? quizQuestion.isSpecial ?? false;
 
 
             showQuestionAndSetTimer(quizQuestion, timer);
@@ -2027,6 +2135,28 @@
             });
             winnerAnnounced = 1;
 
+        }
+
+        function showSpecialWinnerSwalDialog(prizeWon) {
+            Swal.fire({
+                title: "{{ __('de.winner.title') }}",
+                html: `
+                                        <i class="mb-3 fas fa-gift fa-3x text-warning"></i>
+                                        <h3 class="mb-2" style="color:#ff5f00;">Special Quiz</h3>
+                                        <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.selected') }}</p>
+                                        <p class="mb-2" style="font-size:1.1rem;">{{ __('de.winner.prize') }}</p>
+                                        <div class="text-center mb-3" style="font-size: 1.3rem; color:rgba(229, 84, 0, 1)">
+                                            ${prizeWon}
+                                        </div>
+                                    `,
+                icon: 'success',
+                confirmButtonText: '<i class="fas fa-check me-2"></i>{{ __('de.profile.close') }}',
+                width: 350,
+                customClass: {
+                    popup: 'swal2-dialog-custom-winner',
+                    title: 'swal2-title-custom-winner'
+                }
+            });
         }
 
         function userBlockedFromLiveShowEventTrigger() {

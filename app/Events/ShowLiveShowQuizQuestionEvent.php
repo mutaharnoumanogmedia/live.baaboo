@@ -64,6 +64,9 @@ class ShowLiveShowQuizQuestionEvent implements ShouldBroadcastNow
             'liveShowId' => $this->live_show_id,
             'timer' => $this->timer ?? 15,
             'isLast' => $this->is_last ?? false,
+            'isSpecial' => is_array($this->quiz_question)
+                ? (bool) ($this->quiz_question['is_special'] ?? false)
+                : (bool) ($this->quiz_question->is_special ?? false),
 
         ];
     }

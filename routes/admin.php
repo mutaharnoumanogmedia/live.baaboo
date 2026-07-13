@@ -27,6 +27,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::resource('live-shows', \App\Http\Controllers\Admin\LiveShowController::class);
     Route::put('live-shows/{live_show}/winner-prizes', [\App\Http\Controllers\Admin\LiveShowController::class, 'updateWinnerPrizes'])->name('live-shows.winner-prizes.update');
+    Route::put('live-shows/{live_show}/special-gifts', [\App\Http\Controllers\Admin\LiveShowController::class, 'updateSpecialGifts'])->name('live-shows.special-gifts.update');
     Route::get('live-shows/{live_show}/gallery-attach', [\App\Http\Controllers\Admin\MediaGalleryController::class, 'liveShowsAttachPage'])->name('live-shows.gallery-attach');
     Route::get('live-shows/{live_show}/copy', [\App\Http\Controllers\Admin\LiveShowController::class, 'copyLiveShow'])->name('live-shows.copy');
 
@@ -74,6 +75,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('live-shows/stream-broadcaster/{id}/active-tab', [\App\Http\Controllers\Admin\LiveShowController::class, 'getBroadcasterTab'])->name('live-shows.stream-management.broadcaster.active-tab');
 
     Route::get('live-shows/{id}/players', [\App\Http\Controllers\Admin\LiveShowController::class, 'allPlayers'])->name('live-shows.players');
+    Route::get('all-live-show-players', [\App\Http\Controllers\Admin\LiveShowController::class, 'allLiveShowPlayers'])->name('all-live-show-players');
 
     Route::post('live-shows/stream-management/{id}/save-room-id', [\App\Http\Controllers\Admin\LiveShowController::class, 'saveRoomID'])->name('live-shows.stream-management.save-room-id');
 
@@ -102,6 +104,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('live-shows/stream-management/{liveShowId}/resend-voucher-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'resendVoucherWinners'])->name('live-shows.resend-voucher-winners');
 
     Route::post('live-shows/stream-management/{liveShowId}/unannounce-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'unannounceWinners'])->name('live-shows.unannounce-winners');
+
+    // Special Quiz winner announcement (independent of the main winners).
+    Route::post('live-shows/stream-management/{liveShowId}/announce-special-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'announceSpecialWinners'])->name('live-shows.announce-special-winners');
+    Route::post('live-shows/stream-management/{liveShowId}/unannounce-special-winners', [\App\Http\Controllers\Admin\LiveShowController::class, 'unannounceSpecialWinners'])->name('live-shows.unannounce-special-winners');
+    Route::post('live-shows/stream-management/{id}/show-special-winners-tab', [\App\Http\Controllers\Admin\LiveShowController::class, 'showSpecialWinnersTab'])->name('live-shows.stream-management.show-special-winners-tab');
+    Route::post('live-shows/stream-management/{id}/hide-special-winners-tab', [\App\Http\Controllers\Admin\LiveShowController::class, 'hideSpecialWinnersTab'])->name('live-shows.stream-management.hide-special-winners-tab');
 
     // Trigger a web-push notification to every player of a specific live show.
     Route::post('live-shows/stream-management/{liveShowId}/notify-players', [\App\Http\Controllers\Admin\LiveShowController::class, 'notifyPlayers'])->name('live-shows.notify-players');
@@ -143,9 +151,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('live-shows/{id}/view-details', [LiveShowController::class, 'viewDetails'])->name('live-shows.view-details');
     Route::get('live-shows/{id}/player-responses/{userId}', [LiveShowController::class, 'getPlayerResponses'])->name('live-shows.player-responses');
+    Route::get('live-shows/{id}/special-player-responses/{userId}', [LiveShowController::class, 'getSpecialPlayerResponses'])->name('live-shows.special-player-responses');
     Route::get('live-shows/{id}/export-participants-csv', [LiveShowController::class, 'exportAllParticipantsCSV'])->name('live-shows.export-participants-csv');
     Route::get('live-shows/{id}/export-player-csv/{userId}', [LiveShowController::class, 'exportPlayerCSV'])->name('live-shows.export-player-csv');
     Route::get('live-shows/{id}/export-winners-csv', [LiveShowController::class, 'exportWinnersCSV'])->name('live-shows.export-winners-csv');
+    Route::get('live-shows/{id}/export-special-winners-csv', [LiveShowController::class, 'exportSpecialWinnersCSV'])->name('live-shows.export-special-winners-csv');
 
     Route::resource(
         'push-notifications',
