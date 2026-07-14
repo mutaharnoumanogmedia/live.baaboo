@@ -527,7 +527,7 @@ class MediaGalleryController extends Controller
     public function flowOrder($live_show): JsonResponse
     {
         $liveShow = LiveShow::with([
-            'quizzes' => fn ($q) => $q->orderBy('id'),
+            'quizzes' => fn ($q) => $q->orderBy('sorting_order')->orderBy('id'),
             'quizzes.questionMedia',
             'endMedia',
         ])->findOrFail($live_show);
@@ -628,7 +628,7 @@ class MediaGalleryController extends Controller
     public function attachShow(GalleryMedia $media_gallery)
     {
         $liveShows = LiveShow::with(['quizzes' => function ($q) {
-            $q->orderBy('id');
+            $q->orderBy('sorting_order')->orderBy('id');
         }])->orderBy('scheduled_at', 'desc')->get();
 
         $attachedIds = $media_gallery->liveShows()->pluck('live_shows.id')->toArray();
@@ -658,7 +658,7 @@ class MediaGalleryController extends Controller
     public function liveShowsAttachPage(LiveShow $live_show)
     {
         $liveShow = $live_show->load(['galleryMedia', 'endMedia', 'quizzes' => function ($q) {
-            $q->orderBy('id');
+            $q->orderBy('sorting_order')->orderBy('id');
         }]);
         $allMedia = GalleryMedia::orderBy('created_at', 'desc')->get();
 
@@ -907,7 +907,7 @@ class MediaGalleryController extends Controller
     {
         $liveShow = LiveShow::with([
             'endMedia',
-            'quizzes' => fn ($q) => $q->orderBy('id'),
+            'quizzes' => fn ($q) => $q->orderBy('sorting_order')->orderBy('id'),
         ])->findOrFail($live_show);
 
         $quizNumById = $liveShow->quizzes->values()

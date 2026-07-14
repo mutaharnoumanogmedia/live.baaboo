@@ -9,7 +9,7 @@ class LiveShowQuiz extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['live_show_id', 'question', 'is_special', 'created_by', 'has_shown'];
+    protected $fillable = ['live_show_id', 'question', 'sorting_order', 'is_special', 'created_by', 'has_shown'];
 
     protected $casts = [
         'has_shown' => 'boolean',

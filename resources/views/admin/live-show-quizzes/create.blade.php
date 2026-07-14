@@ -14,6 +14,10 @@
                 </select>
             </div>
 
+            <p class="text-muted small mb-2">
+                <i class="fas fa-grip-vertical me-1"></i> Drag questions to set their order before saving.
+            </p>
+
             <div class="my-2">
                 <button type="button" class="btn btn-secondary" id="add-question">Add Question</button>
             </div>
@@ -24,24 +28,64 @@
         </form>
     </div>
 
+    <style>
+        .sortable-ghost {
+            opacity: 0.4;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .sortable-chosen {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .quiz-drag-handle:active {
+            cursor: grabbing;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            addQuestion(); // add initial question with 4 options
+            addQuestion();
+            initQuestionSortable();
         });
 
         document.getElementById("add-question").addEventListener("click", function() {
             addQuestion();
         });
 
-        // Add Question Block
+        function initQuestionSortable() {
+            const container = document.getElementById("question-container");
+            if (!container || typeof Sortable === 'undefined') return;
+
+            if (container._questionSortable) {
+                container._questionSortable.destroy();
+            }
+
+            container._questionSortable = new Sortable(container, {
+                handle: '.quiz-drag-handle',
+                draggable: '.question-wrapper',
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                onEnd: function() {
+                    reindexQuestions();
+                }
+            });
+        }
+
         function addQuestion() {
             const container = document.getElementById("question-container");
 
             const html = `
                 <div class="card mb-3 question-wrapper">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between mb-3">
-                            <strong>Question</strong>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="quiz-drag-handle text-muted" style="cursor: grab;" title="Drag to reorder">
+                                    <i class="fas fa-grip-vertical"></i>
+                                </span>
+                                <strong>Question <span class="question-index-label">1</span></strong>
+                            </div>
                             <button type="button" class="btn btn-danger btn-sm remove-question">
                                 <i class="bi bi-x"></i>
                             </button>
@@ -75,7 +119,6 @@
             const wrapper = container.querySelector(".question-wrapper:last-child");
             const addOptionBtn = wrapper.querySelector(".add-option");
 
-            // default 4 options
             addOption(addOptionBtn);
             addOption(addOptionBtn);
             addOption(addOptionBtn);
@@ -84,7 +127,6 @@
             reindexQuestions();
         }
 
-        // Add Option
         function addOption(btn) {
             const questionWrapper = btn.closest(".question-wrapper");
             const optionsWrapper = questionWrapper.querySelector(".options-wrapper");
@@ -110,7 +152,6 @@
             reindexQuestions();
         }
 
-        // Global remove button handlers
         document.addEventListener("click", function(e) {
             if (e.target.closest(".remove-question")) {
                 e.target.closest(".question-wrapper").remove();
@@ -127,25 +168,23 @@
             }
         });
 
-        // Reindex questions + options to match backend structure
         function reindexQuestions() {
             const questions = document.querySelectorAll(".question-wrapper");
 
             questions.forEach((question, qIndex) => {
-                // question name
+                const indexLabel = question.querySelector(".question-index-label");
+                if (indexLabel) {
+                    indexLabel.textContent = qIndex + 1;
+                }
+
                 const qInput = question.querySelector(".question-input");
                 qInput.name = `questions[${qIndex}][question]`;
 
-                // quiz-type (main/special) radio group name, per question
                 const typeRadios = question.querySelectorAll(".quiz-type-radio");
                 typeRadios.forEach((typeRadio) => {
                     typeRadio.name = `questions[${qIndex}][is_special]`;
                 });
 
-                // correct radio group name
-                const radios = question.querySelectorAll(".is-correct");
-
-                // options
                 const options = question.querySelectorAll(".option-item");
 
                 options.forEach((opt, oIndex) => {

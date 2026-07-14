@@ -7,7 +7,9 @@ use App\Models\LiveShow;
 use App\Models\LiveShowQuiz;
 use App\Models\QuizOption;
 use App\Models\UserQuizResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LiveShowQuizController extends Controller
 {
@@ -22,8 +24,12 @@ class LiveShowQuizController extends Controller
             ->when(request('live_show_id'), function ($query) {
                 $query->where('live_show_id', request('live_show_id'));
             })
-            ->orderBy('id', 'asc')
-            ->orderBy('live_show_id', 'desc')
+            ->when(request('live_show_id'), function ($query) {
+                $query->orderBy('sorting_order');
+            }, function ($query) {
+                $query->orderBy('live_show_id', 'desc')->orderBy('sorting_order');
+            })
+            ->orderBy('id')
             ->get();
 
         $liveShows = LiveShow::query()
@@ -55,12 +61,15 @@ class LiveShowQuizController extends Controller
             'questions.*.correct' => 'nullable|integer',
         ]);
 
+        $nextOrder = (int) LiveShowQuiz::where('live_show_id', $request->live_show_id)->max('sorting_order') + 1;
+
         foreach ($request->questions as $qIndex => $qData) {
 
             $quiz = LiveShowQuiz::create([
                 'live_show_id' => $request->live_show_id,
                 'question' => $qData['question'],
                 'is_special' => ! empty($qData['is_special']),
+                'sorting_order' => $nextOrder + $qIndex,
                 'created_by' => auth()->user()->id,
             ]);
 
@@ -154,5 +163,36 @@ class LiveShowQuizController extends Controller
         LiveShowQuiz::where('id', $id)->delete();
 
         return redirect()->back()->with('success', 'Quiz deleted successfully.');
+    }
+
+    public function reorder(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'live_show_id' => 'required|exists:live_shows,id',
+            'order' => 'required|array',
+            'order.*' => 'integer|exists:live_show_quizzes,id',
+        ]);
+
+        $liveShowId = (int) $validated['live_show_id'];
+        $order = array_map('intval', $validated['order']);
+
+        $quizCount = LiveShowQuiz::where('live_show_id', $liveShowId)
+            ->whereIn('id', $order)
+            ->count();
+
+        if ($quizCount !== count($order)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'One or more quizzes do not belong to this live show.',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($order) {
+            foreach ($order as $position => $quizId) {
+                LiveShowQuiz::where('id', $quizId)->update(['sorting_order' => $position]);
+            }
+        });
+
+        return response()->json(['success' => true, 'message' => 'Quiz order updated.']);
     }
 }

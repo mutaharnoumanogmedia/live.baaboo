@@ -73,7 +73,7 @@ class LiveShowQuizService
     {
         return $liveShow->users()
             ->withPivot([
-                'status', 'is_online', 'is_special_winner', 'special_prize_won', 'created_at',
+                'special_score', 'status', 'is_online', 'is_special_winner', 'special_prize_won', 'created_at',
                 'special_gift_id', 'special_discount_code',
                 'special_winner_email_sent_status', 'special_winner_email_sent_at',
                 'special_type_email_sent_status', 'special_type_email_sent_at',

@@ -189,6 +189,7 @@ class GamePlayController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                     'score' => 0,
+                    'special_score' => 0,
                     'status' => 'registered',
                     'last_active_at' => now(),
                     
@@ -325,6 +326,7 @@ class GamePlayController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                     'score' => 0,
+                    'special_score' => 0,
                     'status' => 'registered',
                     'last_active_at' => now(),
                 ]
@@ -494,7 +496,14 @@ class GamePlayController extends Controller
         ]);
 
         $correctOption = QuizOption::where('quiz_id', $quizId)->where('is_correct', 1)->first();
-        $specialScore = $liveShow->users()->where('user_id', $user->id)->first()->pivot->special_score ?? $responseScore;
+        $currentSpecialScore = $liveShow->users()->where('user_id', $user->id)->first()->pivot->special_score ?? 0;
+
+        if ($isCorrect) {
+            $newSpecialScore = $currentSpecialScore + $responseScore;
+            $liveShow->users()->updateExistingPivot($user->id, ['special_score' => $newSpecialScore]);
+        } else {
+            $newSpecialScore = $currentSpecialScore;
+        }
 
         return response()->json([
             'success' => true,
@@ -504,7 +513,7 @@ class GamePlayController extends Controller
             'selected_option_id' => $quizOption->id ?? null,
             'correct_option_id' => $correctOption->id ?? null,
             'response_score' => $responseScore,
-            'special_score' => $specialScore,
+            'special_score' => $newSpecialScore,
         ], 200);
     }
 
