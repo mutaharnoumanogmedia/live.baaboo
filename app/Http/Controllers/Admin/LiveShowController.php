@@ -152,6 +152,8 @@ class LiveShowController extends Controller
         $specialMaxWinners = (int) $validated['special_max_winners'];
         $specialGifts = $request->input('special_gifts', []);
 
+        $validated['title'] = $validated['title'] . ' - ' . Carbon::parse($validated['scheduled_at'])->format('d.m.Y H:i');
+
         $show = LiveShow::create($validated);
 
         $this->syncWinnerPrizes($show->id, $maxWinners, $prizes, $vouchers, $voucherAmounts);
