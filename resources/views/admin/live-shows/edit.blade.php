@@ -342,12 +342,16 @@
                                                             placeholder="e.g. PlayStation 5, 50€ cash"
                                                             value="{{ old('special_gifts.' . $r . '.name', $gift->name ?? '') }}">
                                                     </td>
+                                                @php
+                                                    $giftType = old('special_gifts.' . $r . '.type', $gift->type ?? 'cash');
+                                                    $isVoucherType = $giftType === 'voucher';
+                                                @endphp
                                                     <td style="max-width: 140px;">
                                                         <select name="special_gifts[{{ $r }}][type]"
                                                             class="form-select special-gift-type">
-                                                            @foreach (['cash' => 'Cash', 'voucher' => 'Voucher', 'custom' => 'Custom'] as $tVal => $tLabel)
+                                                            @foreach ($specialGiftTypes as $tVal => $tLabel)
                                                                 <option value="{{ $tVal }}"
-                                                                    {{ old('special_gifts.' . $r . '.type', $gift->type ?? 'cash') === $tVal ? 'selected' : '' }}>
+                                                                    {{ $giftType === $tVal ? 'selected' : '' }}>
                                                                     {{ $tLabel }}</option>
                                                             @endforeach
                                                         </select>
@@ -355,13 +359,15 @@
                                                     <td style="max-width: 120px;">
                                                         <input type="number" min="0" step="0.01"
                                                             name="special_gifts[{{ $r }}][value]"
-                                                            class="form-control"
+                                                            class="form-control special-gift-value"
+                                                            {{ $isVoucherType ? 'readonly' : '' }}
                                                             value="{{ old('special_gifts.' . $r . '.value', $gift->value ?? '') }}">
                                                     </td>
                                                     <td style="max-width: 120px;">
                                                         <input type="number" min="0" step="0.01"
                                                             name="special_gifts[{{ $r }}][voucher_amount]"
-                                                            class="form-control"
+                                                            class="form-control special-gift-voucher-amount"
+                                                            {{ $isVoucherType ? '' : 'readonly' }}
                                                             value="{{ old('special_gifts.' . $r . '.voucher_amount', $gift->voucher_amount ?? '') }}">
                                                     </td>
                                                 </tr>
@@ -502,6 +508,42 @@
                 var specialMaxEl = document.getElementById('specialMaxWinners');
                 var specialRows = document.querySelectorAll('.special-gift-row');
 
+                function applySpecialGiftTypeFields(row, clearInactive) {
+                    var typeSelect = row.querySelector('.special-gift-type');
+                    var valueInput = row.querySelector('.special-gift-value');
+                    var voucherInput = row.querySelector('.special-gift-voucher-amount');
+                    if (!typeSelect || !valueInput || !voucherInput) {
+                        return;
+                    }
+
+                    if (typeSelect.value === 'voucher') {
+                        valueInput.setAttribute('readonly', 'readonly');
+                        if (clearInactive) {
+                            valueInput.value = '';
+                        }
+                        voucherInput.removeAttribute('readonly');
+                    } else {
+                        valueInput.removeAttribute('readonly');
+                        voucherInput.setAttribute('readonly', 'readonly');
+                        if (clearInactive) {
+                            voucherInput.value = '';
+                        }
+                    }
+                }
+
+                function bindSpecialGiftTypeFields() {
+                    document.querySelectorAll('.special-gift-row .special-gift-type').forEach(function(select) {
+                        select.removeEventListener('change', select._specialGiftTypeHandler);
+                        select._specialGiftTypeHandler = function() {
+                            applySpecialGiftTypeFields(select.closest('.special-gift-row'), true);
+                        };
+                        select.addEventListener('change', select._specialGiftTypeHandler);
+                    });
+                    specialRows.forEach(function(row) {
+                        applySpecialGiftTypeFields(row, false);
+                    });
+                }
+
                 function updateSpecial() {
                     var maxRank = specialRows.length;
                     var n = parseInt(specialMaxEl.value, 10);
@@ -511,11 +553,14 @@
                         var rank = parseInt(tr.getAttribute('data-rank'), 10);
                         tr.style.display = rank <= n ? '' : 'none';
                     });
+                    bindSpecialGiftTypeFields();
                 }
                 if (specialMaxEl) {
                     specialMaxEl.addEventListener('change', updateSpecial);
                     specialMaxEl.addEventListener('input', updateSpecial);
                     updateSpecial();
+                } else {
+                    bindSpecialGiftTypeFields();
                 }
             })();
         </script>

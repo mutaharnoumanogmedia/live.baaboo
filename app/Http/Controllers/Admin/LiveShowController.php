@@ -6,6 +6,7 @@ use App\Events\BroadcasterTabClaimedEvent;
 use App\Events\GameResetEvent;
 use App\Events\HideGalleryImageEvent;
 use App\Events\HideLiveShowWinnersTabEvent;
+use App\Events\HideSpecialWinnersTabEvent;
 use App\Events\LiveShowAdminStateEvent;
 use App\Events\LiveShowChatStatusUpdatedEvent;
 use App\Events\LiveShowMediaHidden;
@@ -16,11 +17,11 @@ use App\Events\RemoveLiveShowQuizQuestionEvent;
 use App\Events\ResetChatEvent;
 use App\Events\SetBroadcastRoomIdEvent;
 use App\Events\ShowGalleryImageEvent;
-use App\Events\HideSpecialWinnersTabEvent;
 use App\Events\ShowLiveShowQuizQuestionEvent;
 use App\Events\ShowLiveShowWinnersTabEvent;
 use App\Events\ShowPlayerAsWinnerEvent;
 use App\Events\ShowSpecialWinnersTabEvent;
+use App\Events\UpdateLiveShowEvent;
 use App\Events\UserBlockFromLiveShowEvent;
 use App\Http\Controllers\Controller;
 use App\Jobs\GenerateSpecialWinnerDiscountCodeJob;
@@ -32,29 +33,42 @@ use App\Models\GalleryMedia;
 use App\Models\LiveShow;
 use App\Models\LiveShowEndMedia;
 use App\Models\LiveShowGalleryMedia;
-use App\Models\LiveShowGalleryState;
 use App\Models\LiveShowQuiz;
 use App\Models\LiveShowWinnerPrize;
 use App\Models\QuizOption;
 use App\Models\SpecialGift;
-use App\Models\UserSpecialQuizResponse;
+use App\Models\User;
 use App\Models\UserLiveShow;
 use App\Models\UserQuiz;
 use App\Models\UserQuizResponse;
+use App\Models\UserSpecialQuizResponse;
 use App\Services\LiveShowQuizService;
 use App\Services\PushNotificationService;
 use App\Services\ShopifyDiscountService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class LiveShowController extends Controller
 {
+    /**
+     * Allowed special gift types (value => label) for Special Quiz winners.
+     *
+     * @var array<string, string>
+     */
+    protected array $specialGiftTypes = [
+        'cash' => 'Cash',
+        'voucher' => 'Voucher',
+        'custom' => 'Custom',
+    ];
+
     public function __construct()
     {
         $this->middleware('permission:can-manage-live-shows');
@@ -63,7 +77,7 @@ class LiveShowController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function index()
     {
@@ -87,18 +101,19 @@ class LiveShowController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function create()
     {
-        //
-        return view('admin.live-shows.create');
+        $specialGiftTypes = $this->specialGiftTypes;
+
+        return view('admin.live-shows.create', compact('specialGiftTypes'));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function store(Request $request)
     {
@@ -121,6 +136,12 @@ class LiveShowController extends Controller
             'winner_voucher.*' => 'nullable|integer|max:255',
             'winner_voucher_amount.*' => 'nullable|numeric|min:0',
             'is_test_show' => 'required|boolean',
+            'special_max_winners' => 'required|integer|min:0|max:50',
+            'special_gifts' => 'nullable|array',
+            'special_gifts.*.name' => 'nullable|string|max:255',
+            'special_gifts.*.type' => 'nullable|in:'.implode(',', array_keys($this->specialGiftTypes)),
+            'special_gifts.*.value' => 'nullable|numeric|min:0',
+            'special_gifts.*.voucher_amount' => 'nullable|numeric|min:0',
         ]);
 
         $validated['created_by'] = Auth::id();
@@ -128,10 +149,13 @@ class LiveShowController extends Controller
         $prizes = $request->input('winner_prizes', []);
         $vouchers = $request->input('winner_voucher', []);
         $voucherAmounts = $request->input('winner_voucher_amount', []);
+        $specialMaxWinners = (int) $validated['special_max_winners'];
+        $specialGifts = $request->input('special_gifts', []);
 
         $show = LiveShow::create($validated);
 
         $this->syncWinnerPrizes($show->id, $maxWinners, $prizes, $vouchers, $voucherAmounts);
+        $this->syncSpecialGifts($show->id, $specialMaxWinners, $specialGifts);
 
         return redirect()->route('admin.live-shows.show', $show->id)->with('success', 'Live Show created successfully!');
     }
@@ -140,7 +164,7 @@ class LiveShowController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function show(LiveShow $liveShow)
     {
@@ -158,20 +182,21 @@ class LiveShowController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function edit(LiveShow $liveShow)
     {
         $liveShow->load('winnerPrizes', 'specialGifts');
+        $specialGiftTypes = $this->specialGiftTypes;
 
-        return view('admin.live-shows.edit', compact('liveShow'));
+        return view('admin.live-shows.edit', compact('liveShow', 'specialGiftTypes'));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function update(Request $request, LiveShow $live_show)
     {
@@ -225,7 +250,7 @@ class LiveShowController extends Controller
             'special_max_winners' => 'required|integer|min:0|max:50',
             'special_gifts' => 'nullable|array',
             'special_gifts.*.name' => 'nullable|string|max:255',
-            'special_gifts.*.type' => 'nullable|in:cash,voucher,custom',
+            'special_gifts.*.type' => 'nullable|in:'.implode(',', array_keys($this->specialGiftTypes)),
             'special_gifts.*.value' => 'nullable|numeric|min:0',
             'special_gifts.*.voucher_amount' => 'nullable|numeric|min:0',
         ]);
@@ -241,6 +266,42 @@ class LiveShowController extends Controller
     }
 
     /**
+     * Normalize special gift row input so only the relevant amount field is kept.
+     *
+     * @param  array<string, mixed>  $giftData
+     * @return array{name: string, type: string, value: ?float, voucher_amount: ?float}
+     */
+    protected function normalizeSpecialGiftRow(array $giftData): array
+    {
+        $type = (string) ($giftData['type'] ?? 'cash');
+        if (! array_key_exists($type, $this->specialGiftTypes)) {
+            $type = 'cash';
+        }
+
+        $value = $giftData['value'] ?? null;
+        $voucherAmount = $giftData['voucher_amount'] ?? null;
+
+        if ($type === 'voucher') {
+            $value = null;
+            $voucherAmount = ($voucherAmount !== '' && $voucherAmount !== null)
+                ? (float) $voucherAmount
+                : null;
+        } else {
+            $voucherAmount = null;
+            $value = ($value !== '' && $value !== null)
+                ? (float) $value
+                : null;
+        }
+
+        return [
+            'name' => trim((string) ($giftData['name'] ?? '')),
+            'type' => $type,
+            'value' => $value,
+            'voucher_amount' => $voucherAmount,
+        ];
+    }
+
+    /**
      * Sync ranked special gift rows for a live show. For voucher-type gifts on
      * non-test shows a Shopify price rule is created/updated (mirrors the main
      * winner-prize behaviour) so voucher codes can be generated at announcement.
@@ -251,11 +312,11 @@ class LiveShowController extends Controller
         $errors = [];
 
         for ($rank = 1; $rank <= $maxWinners; $rank++) {
-            $giftData = $gifts[$rank] ?? [];
-            $name = trim((string) ($giftData['name'] ?? ''));
-            $type = (string) ($giftData['type'] ?? 'cash');
-            $value = $giftData['value'] ?? null;
-            $voucherAmount = $giftData['voucher_amount'] ?? null;
+            $giftData = $this->normalizeSpecialGiftRow($gifts[$rank] ?? []);
+            $name = $giftData['name'];
+            $type = $giftData['type'];
+            $value = $giftData['value'];
+            $voucherAmount = $giftData['voucher_amount'];
 
             $existing = SpecialGift::where('live_show_id', $liveShowId)->where('rank', $rank)->first();
             $oldGift = $existing;
@@ -326,7 +387,7 @@ class LiveShowController extends Controller
             $sum += (float) ($prizes[$r] ?? 0);
         }
         if (abs($sum - 100) > 0.01) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'winner_prizes' => ['The prize percentages for the first '.$maxWinners.' winner(s) must total 100%. Current total: '.round($sum, 1).'%.'],
             ]);
         }
@@ -413,7 +474,7 @@ class LiveShowController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy(LiveShow $live_show)
     {
@@ -439,8 +500,16 @@ class LiveShowController extends Controller
 
     public function streamManagement($id)
     {
-        $liveShow = LiveShow::with(['quizzes.options', 'quizzes.questionMedia', 'endMedia', 'users', 'winnerPrizes', 'galleryMedia'])->findOrFail($id);
-        $allGalleryMedia = \App\Models\GalleryMedia::orderBy('created_at', 'desc')->get();
+        $liveShow = LiveShow::with([
+            'quizzes' => fn ($q) => $q->orderBy('sorting_order')->orderBy('id'),
+            'quizzes.options',
+            'quizzes.questionMedia',
+            'endMedia',
+            'users',
+            'winnerPrizes',
+            'galleryMedia',
+        ])->findOrFail($id);
+        $allGalleryMedia = GalleryMedia::orderBy('created_at', 'desc')->get();
 
         return view('admin.live-shows.stream-management', compact('liveShow', 'allGalleryMedia'));
     }
@@ -475,7 +544,7 @@ class LiveShowController extends Controller
         // Number questions within their own quiz type so Special Quiz questions
         // have their own "2 / 5" sequence, independent of the main quiz.
         $isSpecial = (bool) $quizModel->is_special;
-        $scopedQuizzes = $liveShow->quizzes()->where('is_special', $isSpecial)->orderBy('id')->get();
+        $scopedQuizzes = $liveShow->quizzes()->where('is_special', $isSpecial)->orderBy('sorting_order')->orderBy('id')->get();
         $totalQuizQuestions = $scopedQuizzes->count();
         $quiz['totalQuizQuestions'] = $totalQuizQuestions;
         $quiz['isSpecial'] = $isSpecial;
@@ -548,14 +617,10 @@ class LiveShowController extends Controller
             return response()->json(['message' => 'unauthorized', 'authStatus' => Auth::check()], 401);
         }
 
-
-
         $liveShow = LiveShow::find($liveShowId);
         if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
-
-
 
         if ($liveShow->winners_announced) {
             return response()->json([
@@ -565,63 +630,31 @@ class LiveShowController extends Controller
             ], 422);
         }
 
-
-
-
         // make all users is_winner = false
         UserLiveShow::where('live_show_id', $liveShow->id)->update(['is_winner' => false]);
 
         $maxWinners = (int) $liveShow->max_winners;
-        $topMaxWinnersByScore =
-            $topMaxWinnersByScore = $liveShow->users()
-                ->with(['quizResponses' => function ($query) use ($liveShowId) {
-                    $query->whereHas('userQuiz.quiz', function ($q) use ($liveShowId) {
-                        $q->where('live_show_id', $liveShowId);
-                    });
-                }])
-                ->wherePivot('status', 'registered')
-                ->get()
-                ->map(function ($user) use ($liveShowId) {
-
-                    // Calculate total score
-                    $score = $user->pivot->score ?? 0;
-                    // Find the user's quiz responses for this live show and calculate total seconds_to_submit
-                    $userQuizResponses = $user->quizResponses()
-                        ->whereHas('userQuiz', function ($q) use ($liveShowId) {
-                            $q->where('live_show_id', $liveShowId);
-                        })
-                        ->get();
-
-                    $totalSecondsToSubmit = $userQuizResponses->sum('seconds_to_submit');
-                    $firstResponseTime = $userQuizResponses->min('created_at') ?? now();
-
-                    return [
-                        'id' => $user->id,
-                        'name' => $user->name,
-                        'score' => $score,
-
-                        'total_seconds_to_submit' => $totalSecondsToSubmit,
-                        'first_response_time' => $firstResponseTime,
-                    ];
-                })
-                ->sort(function ($a, $b) {
-                    // Sort by score descending, then by total_seconds_to_submit ascending
-                    if ($a['score'] === $b['score']) {
-                        return $a['total_seconds_to_submit'] <=> $b['total_seconds_to_submit'];
-                    }
-
-                    return $b['score'] <=> $a['score'];
-                })
-                ->values()
-                ->take($maxWinners);
+        $topMaxWinnersByScore = DB::table('users')
+            ->join('user_live_shows', 'users.id', '=', 'user_live_shows.user_id')
+            ->where('user_live_shows.live_show_id', $liveShow->id)
+            ->where('score', '>', 0)
+            ->orderBy('user_live_shows.score', 'desc')
+            ->take($maxWinners)
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => $user->user_id,
+                    'name' => $user->name,
+                    'score' => $user->score,
+                ];
+            });
 
         // Update pivot table to set is_winner = true for top three users
         foreach ($topMaxWinnersByScore as $winner) {
             Log::info("Updating winner {$winner['id']} to is_winner = true");
-            // if score is greater than 0, then update is_winner = true
-            if ($winner['score'] > 0) {
-                $liveShow->users()->updateExistingPivot($winner['id'], ['is_winner' => true]);
-            }
+
+            UserLiveShow::where('user_id', $winner['id'])->where('live_show_id', $liveShow->id)->update(['is_winner' => true]);
+
         }
 
         // update each winner prize won
@@ -655,18 +688,18 @@ class LiveShowController extends Controller
             $liveShow->users()->updateExistingPivot($winner['id'], ['prize_won' => $prizeWon, 'winner_prize_id' => $prize->id ?? null]);
 
             // if (! $liveShow->is_test_show) {
-                // Dispatch job to send winner email after 30 minutes
-                try {
-                    // SendWinnerEmailJob routes to the correct email 30 minutes later:
-                    // voucher winners -> WinnerVoucherNotificationMail, cash winners
-                    // (prize is_voucher = 0) -> WinnerCashNotificationMail.
-                    SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now()->addMinutes((int) env('WINNER_EMAIL_DELAY', 30)));
+            // Dispatch job to send winner email after 30 minutes
+            try {
+                // SendWinnerEmailJob routes to the correct email 30 minutes later:
+                // voucher winners -> WinnerVoucherNotificationMail, cash winners
+                // (prize is_voucher = 0) -> WinnerCashNotificationMail.
+                SendWinnerEmailJob::dispatch($winner['id'], $prizeWon, $liveShow)->delay(now()->addMinutes((int) env('WINNER_EMAIL_DELAY', 30)));
 
-                    Log::info("SendWinnerEmailJob dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon} ".now()->format('d M Y, H:i'));
-                } catch (\Exception $e) {
-                    // log the error
-                    Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage().' '.now()->format('d M Y, H:i'));
-                }
+                Log::info("SendWinnerEmailJob dispatched for user ID {$winner['id']}, live show ID {$liveShowId} and prize won: {$prizeWon} ".now()->format('d M Y, H:i'));
+            } catch (\Exception $e) {
+                // log the error
+                Log::error("Failed to dispatch SendWinnerEmailJob for user ID {$winner['id']}: ".$e->getMessage().' '.now()->format('d M Y, H:i'));
+            }
             // }
 
         }
@@ -915,33 +948,20 @@ class LiveShowController extends Controller
             ], 422);
         }
 
-        $topWinners = $liveShow->users()
-            ->wherePivot('status', 'registered')
+        $topWinners = DB::table('users')
+            ->join('user_live_shows', 'users.id', '=', 'user_live_shows.user_id')
+            ->where('user_live_shows.live_show_id', $liveShow->id)
+            ->where('user_live_shows.special_score', '>', 0)
+            ->orderBy('user_live_shows.special_score', 'desc')
+            ->take($maxWinners)
             ->get()
-            ->map(function ($u) use ($liveShowId) {
-                $score = $u->pivot->special_score ?? 0;
-                $responses = UserSpecialQuizResponse::where('user_id', $u->id)
-                    ->whereHas('quiz', function ($q) use ($liveShowId) {
-                        $q->where('live_show_id', $liveShowId);
-                    })
-                    ->get();
-
+            ->map(function ($user) {
                 return [
-                    'id' => $u->id,
-                    'name' => $u->name,
-                    'score' => $score,
-                    'total_seconds_to_submit' => $responses->sum('seconds_to_submit'),
+                    'id' => $user->user_id,
+                    'name' => $user->name,
+                    'score' => $user->special_score,
                 ];
-            })
-            ->sort(function ($a, $b) {
-                if ($a['score'] === $b['score']) {
-                    return $a['total_seconds_to_submit'] <=> $b['total_seconds_to_submit'];
-                }
-
-                return $b['score'] <=> $a['score'];
-            })
-            ->values()
-            ->take($maxWinners);
+            });
 
         foreach ($topWinners as $index => $winner) {
             if ($winner['score'] <= 0) {
@@ -1411,7 +1431,7 @@ class LiveShowController extends Controller
                         'score' => $user->pivot->score ?? null,
                         'prize_won' => $user->pivot->prize_won ?? null,
                         'joined_at' => $user->pivot->created_at
-                            ? \Carbon\Carbon::parse($user->pivot->created_at)->format('d M Y, H:i')
+                            ? Carbon::parse($user->pivot->created_at)->format('d M Y, H:i')
                             : 'N/A',
                         'is_blocked' => $user->blockedLiveShows()
                             ->where('live_show_id', $id)
@@ -1484,7 +1504,7 @@ class LiveShowController extends Controller
                         'score' => $user->pivot->special_score ?? 0,
                         'prize_won' => $user->pivot->special_prize_won ?? null,
                         'joined_at' => $user->pivot->created_at
-                            ? \Carbon\Carbon::parse($user->pivot->created_at)->format('d M Y, H:i')
+                            ? Carbon::parse($user->pivot->created_at)->format('d M Y, H:i')
                             : 'N/A',
                         'is_blocked' => $user->blockedLiveShows()
                             ->where('live_show_id', $id)
@@ -1654,6 +1674,7 @@ class LiveShowController extends Controller
 
         // event to update the player block status
         $isBlocked = $action === 'block' ? true : false;
+
         UserBlockFromLiveShowEvent::dispatch($liveShowId, $userId, $isBlocked);
 
         return response()->json(['success' => true, 'message' => 'Player block status updated to '.($isBlocked ? 'blocked' : 'unblocked').'.', 'user' => $user]);
@@ -1811,7 +1832,7 @@ class LiveShowController extends Controller
         $liveShow->status = $newStatus;
         $liveShow->save();
 
-        \App\Events\UpdateLiveShowEvent::dispatch((string) $liveShow->id, $liveShow->status, $updateMessage);
+        UpdateLiveShowEvent::dispatch((string) $liveShow->id, $liveShow->status, $updateMessage);
 
         LiveShowAdminStateEvent::dispatch((string) $liveShow->id, 'status', [
             'status' => $liveShow->status,
@@ -1844,7 +1865,7 @@ class LiveShowController extends Controller
         $liveShow->status = $newStatus;
         $liveShow->save();
 
-        \App\Events\UpdateLiveShowEvent::dispatch((string) $liveShow->id, $liveShow->status, $updateMessage);
+        UpdateLiveShowEvent::dispatch((string) $liveShow->id, $liveShow->status, $updateMessage);
 
         LiveShowAdminStateEvent::dispatch((string) $liveShow->id, 'status', [
             'status' => $liveShow->status,
@@ -2321,7 +2342,7 @@ class LiveShowController extends Controller
     public function exportPlayerCSV($liveShowId, $userId)
     {
         $liveShow = LiveShow::findOrFail($liveShowId);
-        $user = \App\Models\User::findOrFail($userId);
+        $user = User::findOrFail($userId);
 
         $responses = UserQuizResponse::where('user_id', $userId)
             ->whereHas('userQuiz', fn ($q) => $q->where('live_show_id', $liveShowId))
@@ -2371,6 +2392,8 @@ class LiveShowController extends Controller
             $newQuiz = LiveShowQuiz::create([
                 'live_show_id' => $newLiveShow->id,
                 'question' => $quiz->question,
+                'is_special' => $quiz->is_special,
+                'sorting_order' => $quiz->sorting_order,
             ]);
             $newQuiz->options()->createMany($quiz->options->map(function ($option) {
                 return [

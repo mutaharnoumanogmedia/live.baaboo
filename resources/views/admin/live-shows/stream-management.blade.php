@@ -1519,7 +1519,7 @@
              }
 
              .bg-special-quiz {
-                 background-color: rgba(255, 183, 0, 0.4);
+                 background-color: rgba(255, 183, 0, 0.2);
              }
 
 

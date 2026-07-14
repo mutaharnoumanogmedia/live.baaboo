@@ -115,13 +115,12 @@ Route::post('/live-show/{id}/quizzes/{quizId}/send-quiz-question', function (\Il
     $quizOptions = \App\Models\QuizOption::where('quiz_id', $quizId)->select('id', 'quiz_id', 'option_text')->get()->toArray();
     $quizArr['options'] = $quizOptions;
 
-    $totalQuizQuestions = $liveShow->quizzes()->count();
+    $isSpecial = (bool) $quiz->is_special;
+    $scopedQuizzes = $liveShow->quizzes()->where('is_special', $isSpecial)->orderBy('sorting_order')->orderBy('id')->get();
+    $totalQuizQuestions = $scopedQuizzes->count();
     $quizArr['totalQuizQuestions'] = $totalQuizQuestions;
 
-    // check this question is at what index in all quiz questions
-    $quizQuestionIndex = $liveShow->quizzes()->get()->toArray();
-    // from all quiz questions, get the index of this quiz question
-    $quizQuestionIndex = array_search($quizId, array_column($quizQuestionIndex, 'id'));
+    $quizQuestionIndex = $scopedQuizzes->pluck('id')->search((int) $quizId);
 
     \App\Events\ShowLiveShowQuizQuestionEvent::dispatch(
         $quizArr, (string) $liveShow->id, $request->seconds ?? 10, $request->is_last ?? false, $quizQuestionIndex+1

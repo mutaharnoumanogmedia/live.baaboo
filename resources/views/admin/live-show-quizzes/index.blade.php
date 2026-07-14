@@ -42,24 +42,44 @@
             </div>
         </form>
 
+        @if (request('live_show_id'))
+            <p class="text-muted small mb-2">
+                <i class="fas fa-grip-vertical me-1"></i> Drag rows to reorder questions for this live show.
+            </p>
+        @else
+            <p class="text-muted small mb-2">Filter by a live show to enable drag-and-drop reordering.</p>
+        @endif
+
         <table class="table table-borderless table-dark data-table">
             <thead>
                 <tr>
+                    @if (request('live_show_id'))
+                        <th style="width: 40px"></th>
+                    @endif
                     <th>#</th>
-                    <th style="width: 180px">Live Show</th>
+                    @unless (request('live_show_id'))
+                        <th style="width: 180px">Live Show</th>
+                    @endunless
                     <th>Question</th>
                     <th>Options</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="quiz-sortable-list">
                 @foreach ($quizzes as $index => $quiz)
-                    <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>
-                            <a class="text-warning"
-                                href="{{ route('admin.live-shows.show', $quiz->liveShow->id ?? -1) }}">{{ $quiz->liveShow->title ?? 'N/A' }}</a>
-                        </td>
+                    <tr data-quiz-id="{{ $quiz->id }}">
+                        @if (request('live_show_id'))
+                            <td class="quiz-drag-handle text-muted" style="cursor: grab;" title="Drag to reorder">
+                                <i class="fas fa-grip-vertical"></i>
+                            </td>
+                        @endif
+                        <td class="quiz-row-index">{{ $index + 1 }}</td>
+                        @unless (request('live_show_id'))
+                            <td>
+                                <a class="text-warning"
+                                    href="{{ route('admin.live-shows.show', $quiz->liveShow->id ?? -1) }}">{{ $quiz->liveShow->title ?? 'N/A' }}</a>
+                            </td>
+                        @endunless
                         <td>
                             @if ($quiz->is_special)
                                 <span class="badge bg-warning text-dark me-1">SPECIAL QUIZ</span>
@@ -103,4 +123,77 @@
         </table>
 
     </div>
+
+    @if (request('live_show_id'))
+        <style>
+            .sortable-ghost {
+                opacity: 0.4;
+                background: rgba(255, 255, 255, 0.08);
+            }
+
+            .sortable-chosen {
+                background: rgba(255, 255, 255, 0.05);
+            }
+
+            .quiz-drag-handle:active {
+                cursor: grabbing;
+            }
+        </style>
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const tbody = document.getElementById('quiz-sortable-list');
+                if (!tbody || typeof Sortable === 'undefined') return;
+
+                const liveShowId = {{ (int) request('live_show_id') }};
+                const reorderUrl = @json(route('admin.live-show-quizzes.reorder'));
+                const csrfToken = @json(csrf_token());
+
+                function updateRowIndices() {
+                    tbody.querySelectorAll('tr').forEach((row, i) => {
+                        const cell = row.querySelector('.quiz-row-index');
+                        if (cell) cell.textContent = i + 1;
+                    });
+                }
+
+                function persistOrder() {
+                    const order = Array.from(tbody.querySelectorAll('tr[data-quiz-id]'))
+                        .map(row => parseInt(row.dataset.quizId, 10));
+
+                    if (order.length === 0) return;
+
+                    fetch(reorderUrl, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': csrfToken,
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                live_show_id: liveShowId,
+                                order: order
+                            })
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (!data.success) {
+                                console.error('Quiz reorder failed', data);
+                            }
+                        })
+                        .catch(err => console.error('Quiz reorder error:', err));
+                }
+
+                new Sortable(tbody, {
+                    handle: '.quiz-drag-handle',
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    chosenClass: 'sortable-chosen',
+                    onEnd: function() {
+                        updateRowIndices();
+                        persistOrder();
+                    }
+                });
+            });
+        </script>
+    @endif
 </x-app-dashboard-layout>

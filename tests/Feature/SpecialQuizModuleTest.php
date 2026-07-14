@@ -150,6 +150,9 @@ class SpecialQuizModuleTest extends TestCase
             'response_score' => $score,
             'user_response' => 'x',
         ]);
+
+        $pivot = UserLiveShow::where('live_show_id', $show->id)->where('user_id', $user->id)->firstOrFail();
+        $pivot->update(['special_score' => ($pivot->special_score ?? 0) + $score]);
     }
 
     /** @test */

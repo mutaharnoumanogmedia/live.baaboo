@@ -110,7 +110,7 @@ class LiveShow extends Model
     {
         return $this->belongsToMany(User::class, 'user_live_shows')
             ->using(UserLiveShow::class)   // tell Laravel to use pivot model
-            ->withPivot(['score', 'status', 'is_online', 'is_winner', 'prize_won']) // include extra fields
+            ->withPivot(['score', 'special_score', 'status', 'is_online', 'is_winner', 'prize_won']) // include extra fields
             ->withTimestamps();
     }
 
@@ -121,17 +121,25 @@ class LiveShow extends Model
 
     public function quizzes()
     {
-        return $this->hasMany(LiveShowQuiz::class, 'live_show_id');
+        return $this->hasMany(LiveShowQuiz::class, 'live_show_id')
+            ->orderBy('sorting_order')
+            ->orderBy('id');
     }
 
     public function mainQuizzes()
     {
-        return $this->hasMany(LiveShowQuiz::class, 'live_show_id')->where('is_special', false);
+        return $this->hasMany(LiveShowQuiz::class, 'live_show_id')
+            ->where('is_special', false)
+            ->orderBy('sorting_order')
+            ->orderBy('id');
     }
 
     public function specialQuizzes()
     {
-        return $this->hasMany(LiveShowQuiz::class, 'live_show_id')->where('is_special', true);
+        return $this->hasMany(LiveShowQuiz::class, 'live_show_id')
+            ->where('is_special', true)
+            ->orderBy('sorting_order')
+            ->orderBy('id');
     }
 
     public function winnerPrizes()
