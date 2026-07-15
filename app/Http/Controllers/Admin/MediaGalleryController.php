@@ -665,10 +665,9 @@ class MediaGalleryController extends Controller
         // Map of gallery_media_id => [quiz_id, ...] for question-level attachments.
         $questionAttachments = LiveShowGalleryMedia::where('live_show_id', $liveShow->id)
             ->whereNotNull('before_question')
+            ->orderBy('sort_order')
             ->get(['gallery_media_id', 'before_question'])
             ->groupBy('gallery_media_id')
-            ->orderBy('sort_order')
-
             ->map(fn ($rows) => $rows->pluck('before_question')->map(fn ($id) => (int) $id)->values()->all())
             ->toArray();
 
