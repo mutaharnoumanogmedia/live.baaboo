@@ -46,7 +46,7 @@ class LiveShowQuizService
     public function getSortedPlayers(LiveShow $liveShow): Collection
     {
         return $liveShow->users()
-            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at'])
+            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at', 'game_joined_at'])
             ->get()
             ->when(
                 $liveShow->winners_announced,
@@ -60,7 +60,7 @@ class LiveShowQuizService
     public function getSortedByScore(LiveShow $liveShow): Collection
     {
         return $liveShow->users()
-            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at'])
+            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at', 'game_joined_at'])
             ->get()
             ->sortByDesc(fn ($user) => $user->pivot->score)
             ->values();
@@ -74,7 +74,7 @@ class LiveShowQuizService
         return $liveShow->users()
             ->withPivot([
                 'special_score', 'status', 'is_online', 'is_special_winner', 'special_prize_won', 'created_at',
-                'special_gift_id', 'special_discount_code',
+                'special_gift_id', 'special_discount_code', 'game_joined_at',
                 'special_winner_email_sent_status', 'special_winner_email_sent_at',
                 'special_type_email_sent_status', 'special_type_email_sent_at',
             ])

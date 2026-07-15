@@ -86,7 +86,7 @@ class PlayerController extends Controller
             'liveShows',
             $player->liveShows()
                 ->withPivot([
-                    'score', 'status', 'created_at', 'prize_won',
+                    'score', 'status', 'created_at', 'prize_won', 'game_joined_at',
                     'is_winner', 'is_online', 'winner_prize_id', 'discount_code',
                 ])
                 ->orderByPivot('created_at', 'desc')

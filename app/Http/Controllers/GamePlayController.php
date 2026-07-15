@@ -60,6 +60,12 @@ class GamePlayController extends Controller
             $updateMessage = 'Die Live-Sendung ist geplant. Die Show startet am '.(Carbon::parse($liveShow->scheduled_at)->locale('de')->translatedFormat('d.F Y \u\m H:i')).'Uhr.';
         }
 
+        // when live show status is 'live', then set the user as online and set the game_joined_at
+        if (Auth::guard('web')->check()) {
+            $user = Auth::guard('web')->user();
+            $this->setUserGameJoinedAtForLiveShow($user, $liveShow);
+        }
+
         return view('live-show', compact('liveShow', 'isEliminated', 'galleryStreamInitial', 'updateMessage'));
     }
 
@@ -77,7 +83,7 @@ class GamePlayController extends Controller
             }
 
             // if user already registered , login it and update pivot table
-            $existingUser = \App\Models\User::where('email', $request->email)->first();
+            $existingUser = User::where('email', $request->email)->first();
             if ($existingUser) {
                 $userPivot = $liveShow->users()->where('user_id', $existingUser->id)->first();
                 $isAlreadyRegisteredForThisShow = (bool) $userPivot;
@@ -109,6 +115,8 @@ class GamePlayController extends Controller
                     return response()->json(['success' => false, 'messages' => [$sessionResult['message']], 'user' => null, 'authStatus' => Auth::guard('web')->check()], 500);
                 }
                 // $this->triggerOnlineUsersEvent($liveShowId);
+
+                $this->setUserGameJoinedAtForLiveShow($existingUser, $liveShow);
 
                 return response()->json(['success' => true, 'message' => 'User logged in successfully.', 'user' => $existingUser, 'authStatus' => Auth::guard('web')->check(), 'isEliminated' => $this->getEliminationStatus($liveShowId)]);
             }
@@ -192,12 +200,13 @@ class GamePlayController extends Controller
                     'special_score' => 0,
                     'status' => 'registered',
                     'last_active_at' => now(),
-                    
+
                 ]
             );
 
             Auth::guard('web')->login($user);
             $sessionResult = $this->sessionGeneration(Auth::guard('web')->user(), $request);
+            $this->setUserGameJoinedAtForLiveShow($user, $liveShow);
 
             if (! $sessionResult['success']) {
                 return response()->json(['success' => false, 'messages' => [$sessionResult['message']], 'user' => null, 'authStatus' => Auth::guard('web')->check()], 500);
@@ -253,6 +262,27 @@ class GamePlayController extends Controller
         // remove session from sessions table
 
         return back()->with('success', 'You have been logged out successfully.');
+    }
+
+    private function setUserGameJoinedAtForLiveShow(User $user, LiveShow $liveShow)
+    {
+        try {
+            $userLiveShow = UserLiveShow::where('user_id', $user->id)->where('live_show_id', $liveShow->id)->first();
+            $liveShow->users()->updateExistingPivot($user->id, ['is_online' => 1, 'last_active_at' => now()]);
+
+            if ($liveShow->status == 'live' && ($userLiveShow && $userLiveShow->game_joined_at == null)) {
+                $liveShow->users()->updateExistingPivot($user->id, ['game_joined_at' => now()]);
+                \Log::info('User game joined at set for live show at '.now()->toIso8601String(), ['user' => $user->id, 'liveShow' => $liveShow->id]);
+            }
+
+            return true;
+
+        } catch (\Exception $e) {
+            \Log::error('Error setting user game joined at for live show', ['user' => $user->id, 'liveShow' => $liveShow->id, 'error' => $e->getMessage()]);
+
+            return false;
+        }
+
     }
 
     private function triggerOnlineUsersEvent($liveShowId)
@@ -344,18 +374,6 @@ class GamePlayController extends Controller
         if ($quizModel && $quizModel->is_special) {
             return $this->submitSpecialQuiz($user, $liveShow, $quizModel, (int) $option, $totalMilliSecondsToSubmit, $totalSecondsToSubmit);
         }
-
-        // $userQuiz = UserQuiz::firstOrCreate(
-        //     [
-        //         'user_id' => $user->id,
-        //         'live_show_id' => $liveShow->id,
-        //         'quiz_id' => $quizId,
-        //     ],
-        //     [
-        //         'created_at' => now(),
-        //     ]
-        // );
-
         $userQuiz = UserQuiz::where('user_id', $user->id)->where('live_show_id', $liveShow->id)->where('quiz_id', $quizId)->first();
         if ($userQuiz) {
             // prevent duplicate quiz
@@ -394,6 +412,13 @@ class GamePlayController extends Controller
                     'created_at' => now(),
                 ]
             );
+            // sum all the response scores from user_quiz_responses table for the user and live show
+            $newScore = UserQuizResponse::query()
+                ->join('user_quizzes', 'user_quiz_responses.user_quiz_id', '=', 'user_quizzes.id')
+                ->where('user_quizzes.user_id', $user->id)
+                ->where('user_quizzes.live_show_id', $liveShow->id)
+                ->sum('user_quiz_responses.response_score');
+            $liveShow->users()->updateExistingPivot($user->id, ['score' => $newScore]);
         }
         if (! $quizOption) {
             // just create a quiz entry
@@ -440,9 +465,7 @@ class GamePlayController extends Controller
 
             ], 200);
         } else {
-            $newScore = $currentScore + $responseScore;
 
-            $liveShow->users()->updateExistingPivot($user->id, ['score' => $newScore]);
             UserQuizResponse::updateOrCreate(
                 [
                     'user_id' => $user->id,
@@ -453,6 +476,15 @@ class GamePlayController extends Controller
                     'response_score' => $responseScore,
                 ]
             );
+
+            // sum all the response scores from user_quiz_responses table for the user and live show
+            $newScore = UserQuizResponse::query()
+                ->join('user_quizzes', 'user_quiz_responses.user_quiz_id', '=', 'user_quizzes.id')
+                ->where('user_quizzes.user_id', $user->id)
+                ->where('user_quizzes.live_show_id', $liveShow->id)
+                ->sum('user_quiz_responses.response_score');
+          
+            $liveShow->users()->updateExistingPivot($user->id, ['score' => $newScore]);
 
             return response()->json([
                 'success' => true,

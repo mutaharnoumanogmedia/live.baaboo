@@ -172,7 +172,7 @@ class LiveShowController extends Controller
     {
         // eager-load users from pivot table
         $liveShow->load(['creator', 'winnerPrizes', 'users' => function ($query) {
-            $query->withPivot(['score', 'status', 'created_at', 'prize_won', 'is_winner', 'is_online', 'created_at'])
+            $query->withPivot(['score', 'status', 'created_at', 'prize_won', 'is_winner', 'is_online', 'created_at', 'game_joined_at'])
                 ->orderByDesc('user_live_shows.is_winner')
                 ->orderByDesc('user_live_shows.score');
         }]);
@@ -1541,7 +1541,7 @@ class LiveShowController extends Controller
         $liveShow = LiveShow::findOrFail($id);
 
         $players = $liveShow->users()
-            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at', 'winner_cash_email_sent_at', 'winner_voucher_email_sent_at', 'winner_email_sent_at', 'winner_email_sent_status', 'winner_voucher_email_sent_status', 'winner_cash_email_sent_status', 'winner_prize_id', 'discount_code'])
+            ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at', 'winner_cash_email_sent_at', 'winner_voucher_email_sent_at', 'winner_email_sent_at', 'winner_email_sent_status', 'winner_voucher_email_sent_status', 'winner_cash_email_sent_status', 'winner_prize_id', 'discount_code', 'game_joined_at'])
             ->withExists(['blockedLiveShows as is_blocked_for_live_show' => function ($query) use ($id) {
                 $query->where('live_show_id', $id);
             }])
