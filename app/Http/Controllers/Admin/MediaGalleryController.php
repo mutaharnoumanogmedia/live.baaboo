@@ -667,6 +667,8 @@ class MediaGalleryController extends Controller
             ->whereNotNull('before_question')
             ->get(['gallery_media_id', 'before_question'])
             ->groupBy('gallery_media_id')
+            ->orderBy('sort_order')
+
             ->map(fn ($rows) => $rows->pluck('before_question')->map(fn ($id) => (int) $id)->values()->all())
             ->toArray();
 
