@@ -187,9 +187,9 @@
         }
 
         #overlay-toggle {
-            position: fixed;
-            bottom: 20%;
-            right: 20px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
             z-index: 99998;
             background: rgba(20, 20, 20, 1);
             color: #fff;
@@ -203,9 +203,9 @@
         }
 
         #bgm-toggle {
-            position: fixed;
-            bottom: 28%;
-            right: 20px;
+            position: absolute;
+            top: 55px;
+            left: 20px;
             z-index: 99998;
             background: rgba(20, 20, 20, 0.95);
             color: #fff;
@@ -394,13 +394,11 @@
             }
 
             #overlay-toggle {
-                bottom: 80px;
-                right: 10px;
+                left: 10px;
             }
 
             #bgm-toggle {
-                bottom: 130px;
-                right: 10px;
+                left: 10px;
             }
 
             #overlay-controls {
@@ -566,8 +564,7 @@
         </button>
     @endif
 
-    <button id="overlay-toggle" class="btn btn-primary btn-lg" type="button" title="Show video overlay controls">Media
-        Management</button>
+    <button id="overlay-toggle" class="btn btn-primary btn-lg" type="button" title="Show video overlay controls">Media Management</button>
 
     <div id="overlay-controls" style="display: none;">
         <h4>
@@ -1594,9 +1591,15 @@
                 bitrate: 3000,
                 layout: "Sidebar", // Options: "Auto" | "Grid" | "Sidebar"
                 config: {
-                    sidebarConfig: {
-                        showBestSpeakerAsMainView: true // Pins the host/primary speaker to the big window
-                    }
+                    // 2. CRUCIAL: Stops the layout from switching automatically when a Co-host speaks
+                    switchLargeOrSmallViewByClick: false,
+
+                    // 3. Prevents screen share takeovers from breaking the Host focus layout
+                    showNewScreenShareNotification: false,
+
+                    // 4. Clean up the UI so participants don't see manual pin buttons
+                    showPinButton: false,
+                    showLayoutButton: false,
                 },
 
                 showPinButton: true,
@@ -1606,6 +1609,22 @@
                     config: {
                         role
                     },
+                },
+
+                // 3. Listen to User Join Events to Intercept the Target Name
+                onUserJoin: (userList) => {
+                    userList.forEach(user => {
+                        console.log("User joined:", user);
+
+                        // Check if the joining user matches your exact target email/username
+                        if (user.userName === "admin@baaboo.com") {
+
+                            // Pin the target user dynamically into the main layout slot
+                            // zp.pinUserVideo(user.userID, true);
+
+                            // console.log(`Successfully pinned admin user: ${user.userName}`);
+                        }
+                    });
                 },
 
                 onLiveStart: (user) => {
