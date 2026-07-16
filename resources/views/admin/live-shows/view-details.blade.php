@@ -730,7 +730,7 @@
                                 document.getElementById('summaryWrong').textContent = wrongCount +
                                     ' / ' + data.responses.length;
                                 var avgTime = data.responses.length > 0 ? (totalTime / data
-                                    .responses.length).toFixed(1) + 's' : '-';
+                                    .responses.length).toFixed(2) + 's' : '-';
                                 document.getElementById('summaryAvgTime').textContent = avgTime;
 
                                 responsesContent.style.display = 'block';
