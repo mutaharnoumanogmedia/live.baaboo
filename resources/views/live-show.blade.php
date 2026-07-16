@@ -136,14 +136,14 @@
             border: none;
         }
 
-       .quiz-mode #root video {
+        .quiz-mode #root video {
             object-fit: cover !important;
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw !important;
             height: 100vh !important;
-             
+
         }
 
         /* #zego-live-root video {
@@ -577,7 +577,8 @@
                         <div class="container-fluid px-2 py-2">
                             <div class="players-list-group-container">
                                 <h5 class="mb-3 text-center">
-                                    <i class="fas fa-users me-2"></i>{{ __('de.main_ui.players_scores') }}
+                                    <i class="fas fa-users me-2"></i> <span
+                                        id="players-scores-title">{{ __('de.main_ui.players_scores') }}</span>
                                 </h5>
                                 <ul class="list-group" id="players-leaderbord"></ul>
                             </div>
@@ -1028,7 +1029,7 @@
             preloadSounds();
             fetchMessages();
             updatePlayersLeaderboard();
-            
+
             updateChatComposerState();
 
 
@@ -1055,6 +1056,8 @@
                     // console.log('Players with scores:', users, 'totalUsers:', totalUsers);
 
                     const playersListContainer = document.getElementById('players-leaderbord');
+                    const playersScoresTitle = document.getElementById('players-scores-title');
+                    if (playersScoresTitle) playersScoresTitle.innerHTML = 'Spieler & Punkte';
                     playersListContainer.innerHTML = '';
                     const you = data.you;
 
@@ -1070,7 +1073,7 @@
                                 winnerBgColorClass =
                                     'winner-div silver-div'; // Silver
                                 break;
-                                case 2:
+                            case 2:
                                 winnerBgColorClass =
                                     'winner-div bronze-div'; // Bronze
                                 break;
@@ -1143,7 +1146,7 @@
         }
 
         function showWinnersTabForParticipants() {
-          return  updatePlayersLeaderboard().then(() => {
+            return updatePlayersLeaderboard().then(() => {
                 const playerTabLink = document.getElementById('playerTab-tab');
                 const playerTabPane = document.getElementById('playerTab');
                 const chatTabLink = document.getElementById('chatTab-tab');
@@ -1179,6 +1182,8 @@
                     const totalUsers = data.totalUsers;
 
                     const playersListContainer = document.getElementById('players-leaderbord');
+                    const playersScoresTitle = document.getElementById('players-scores-title');
+                    if (playersScoresTitle) playersScoresTitle.innerHTML = 'Blitzquiz Spieler & Punkte';
                     if (!playersListContainer) return;
                     playersListContainer.innerHTML = '';
 
@@ -1318,24 +1323,24 @@
             <div class="quiz-section-inner">
                 <input type="hidden" id="quizId" value="${quiz.id}">
                 <div class="quiz-question">
-                    ${quiz.isSpecial ? '<div class="special-quiz-badge" style="display:inline-block;background:#ffc107;color:#212529;font-weight:700;letter-spacing:1px;padding:2px 10px;border-radius:12px;margin-bottom:6px;font-size:0.75rem;">SPECIAL QUIZ</div>' : ''}
+                    ${quiz.isSpecial ? '<div class="special-quiz-badge" style="display:inline-block;background:#ffc107;color:#212529;font-weight:700;letter-spacing:1px;padding:2px 10px;border-radius:12px;margin-bottom:6px;font-size:0.75rem;">Blitzquiz</div>' : ''}
                     <div class="quiz-question-index">${quiz.index} von ${quiz.totalQuizQuestions}</div>
                     <div class="quiz-question-text" translate="no">${quiz.question}</div>
                 </div>
                 <div class="quiz-options row g-2">
                     ${quiz.options.map((option, index) => `
-                        <div class="quiz-option col-12 position-relative" id="quiz-option-${option.id}">
-                            <div class="option-result-container" id="option-result-container-${option.id}">
-                                <div id="option-result-bar-${option.id}" class="option-result-bar"></div>
-                                <span id="option-result-label-${option.id}" class="option-result-label">0%</span>
+                            <div class="quiz-option col-12 position-relative" id="quiz-option-${option.id}">
+                                <div class="option-result-container" id="option-result-container-${option.id}">
+                                    <div id="option-result-bar-${option.id}" class="option-result-bar"></div>
+                                    <span id="option-result-label-${option.id}" class="option-result-label">0%</span>
+                                </div>
+                                <input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">
+                                <label for="option${option.id}" class="quiz-option-label" translate="no">
+                                    <span class="quiz-option-letter">${numberToLetter(index)}</span>
+                                    <span class="quiz-option-text">${option.option_text}</span>
+                                </label>
                             </div>
-                            <input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">
-                            <label for="option${option.id}" class="quiz-option-label" translate="no">
-                                <span class="quiz-option-letter">${numberToLetter(index)}</span>
-                                <span class="quiz-option-text">${option.option_text}</span>
-                            </label>
-                        </div>
-                    `).join('')}
+                        `).join('')}
                 </div>
             </div>
             `;
@@ -2773,7 +2778,10 @@
     @endif
 
     <div class="d-none">
-        Sound Effect by <a href="https://pixabay.com/users/freesound_community-46691455/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=88344">freesound_community</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=88344">Pixabay</a>
+        Sound Effect by <a
+            href="https://pixabay.com/users/freesound_community-46691455/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=88344">freesound_community</a>
+        from <a
+            href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=88344">Pixabay</a>
     </div>
 
 </body>
