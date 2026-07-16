@@ -1183,7 +1183,7 @@
 
                     const playersListContainer = document.getElementById('players-leaderbord');
                     const playersScoresTitle = document.getElementById('players-scores-title');
-                    if (playersScoresTitle) playersScoresTitle.innerHTML = 'Blitzquiz Spieler & Punkte';
+                    if (playersScoresTitle) playersScoresTitle.innerHTML = '<span style="font-weight:bold; font-size:1.2rem; background:#ffc107; color:#212529; padding:2px 10px; border-radius:12px;">Blitzquiz</span> Spieler & Punkte';
                     if (!playersListContainer) return;
                     playersListContainer.innerHTML = '';
 
