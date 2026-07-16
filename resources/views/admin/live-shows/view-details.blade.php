@@ -715,10 +715,10 @@
                                         ) +
                                         '</td>' +
                                         '<td>' + (resp.seconds_to_submit !== null ?
-                                            parseFloat(resp.seconds_to_submit).toFixed(1) +
+                                            parseFloat(resp.seconds_to_submit).toFixed(2) +
                                             's' : '-') + '</td>' +
                                         '<td>' + (resp.response_score !== null ? parseFloat(
-                                            resp.response_score).toFixed(1) : '-') +
+                                            resp.response_score).toFixed(2) : '-') +
                                         '</td>' +
                                         '</tr>';
 
