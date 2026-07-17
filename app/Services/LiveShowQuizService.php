@@ -46,6 +46,7 @@ class LiveShowQuizService
     public function getSortedPlayers(LiveShow $liveShow): Collection
     {
         return $liveShow->users()
+            ->where('users.is_blocked', false)
             ->withPivot(['score', 'status', 'is_winner', 'prize_won', 'is_online', 'created_at', 'game_joined_at'])
             ->get()
             ->when(
@@ -72,6 +73,7 @@ class LiveShowQuizService
     public function getSortedSpecialPlayers(LiveShow $liveShow): Collection
     {
         return $liveShow->users()
+            ->where('users.is_blocked', false)
             ->withPivot([
                 'special_score', 'status', 'is_online', 'is_special_winner', 'special_prize_won', 'created_at',
                 'special_gift_id', 'special_discount_code', 'game_joined_at',

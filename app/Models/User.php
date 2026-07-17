@@ -30,6 +30,9 @@ class User extends Authenticatable
         'agree_for_terms',
         'agree_for_email',
         'is_affiliate',
+        'is_active',
+        'is_blocked',
+        'blocked_at',
     ];
 
     /**
@@ -49,6 +52,8 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'is_blocked' => 'boolean',
+        'blocked_at' => 'datetime',
     ];
 
     // append custom fields

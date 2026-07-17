@@ -640,6 +640,7 @@ class LiveShowController extends Controller
             ->join('user_live_shows', 'users.id', '=', 'user_live_shows.user_id')
             ->where('user_live_shows.live_show_id', $liveShow->id)
             ->where('score', '>', 0)
+            ->where('users.is_blocked', false)            
             ->orderBy('user_live_shows.score', 'desc')
             ->take($maxWinners)
             ->get()
@@ -1668,14 +1669,22 @@ class LiveShowController extends Controller
             return response()->json(['success' => false, 'message' => 'User not found in this live show.'], 404);
         }
 
-        if ($action === 'block') {
+        $isBlocked = $action === 'block';
+
+        if ($isBlocked) {
             $liveShow->blockedUsers()->syncWithoutDetaching($userId);
         } else {
             $liveShow->blockedUsers()->detach($userId);
         }
 
+        // Mirror the block onto the user record so it is enforced globally
+        // (logout + kept out of the platform, not just this show).
+        User::whereKey($userId)->update([
+            'is_blocked' => $isBlocked,
+            'blocked_at' => $isBlocked ? now() : null,
+        ]);
+
         // event to update the player block status
-        $isBlocked = $action === 'block' ? true : false;
 
         UserBlockFromLiveShowEvent::dispatch($liveShowId, $userId, $isBlocked);
 

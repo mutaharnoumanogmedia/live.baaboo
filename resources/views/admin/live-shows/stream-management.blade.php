@@ -2240,11 +2240,13 @@
                 const prizeWon = escapeHtml(player.prize_won ?? '');
                 const playerShowUrl = `{{ url('admin/players') }}/${player.id}`;
 
+                const playerStatus = player.is_blocked ? 'text-danger' : player.is_online == 1 ? 'text-success' : 'text-secondary';
+
                 return `<tr class="align-middle bg-dark">
                     <td class='text-white'>
                         ${index}.
                         <strong class='${player.status != 'eliminated' ? 'text-white' : 'text-secondary'}'>${playerName}</strong>
-                        <span class="ms-2 ${player.is_online == 1 ? 'text-success' : 'text-secondary'}">
+                        <span class="ms-2 ${playerStatus}">
                             <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
                         </span>
 
