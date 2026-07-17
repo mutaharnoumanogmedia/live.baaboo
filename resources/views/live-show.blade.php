@@ -687,6 +687,8 @@
         let isEliminated = {{ $isEliminated ? 'true' : 'false' }};
         let isChatEnabled = {{ $liveShow->chat_enabled ? 'true' : 'false' }};
         let isUserBlockedFromChat = false;
+        // Blocked users cannot participate in chat or quizzes, in this show or future ones.
+        let isUserBlocked = {{ ($isBlocked ?? false) ? 'true' : 'false' }};
 
         let winnerAnnounced = {{ $liveShow->winners_announced ? 1 : 0 }};
 
@@ -1334,7 +1336,7 @@
                                     <div id="option-result-bar-${option.id}" class="option-result-bar"></div>
                                     <span id="option-result-label-${option.id}" class="option-result-label">0%</span>
                                 </div>
-                                <input ${isEliminated ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">
+                                <input ${isEliminated || isUserBlocked ? 'disabled' : ''} type="radio" id="option${option.id}" name="option" value="${option.id}">
                                 <label for="option${option.id}" class="quiz-option-label" translate="no">
                                     <span class="quiz-option-letter">${numberToLetter(index)}</span>
                                     <span class="quiz-option-text">${option.option_text}</span>
@@ -1365,11 +1367,17 @@
                 .then(data => {
                     if (data.blocked) {
                         // console.log('User blocked from live show:', data);
+                        isUserBlocked = true;
                         isUserBlockedFromChat = true;
-                        alert('You have been blocked from live chat participation.');
+                        alert('Du kannst nicht weiter teilnehmen.');
                         //disable message input and send button
                         disableMessageInputAndSendButton();
+                        // Also lock any currently displayed quiz options.
+                        document.querySelectorAll('input[name="option"]').forEach(option => {
+                            option.disabled = true;
+                        });
                     } else {
+                        isUserBlocked = false;
                         isUserBlockedFromChat = false;
                         updateChatComposerState();
 
@@ -1406,6 +1414,14 @@
         // Quiz functionality
         function submitQuiz() {
 
+            // Blocked users cannot submit answers; show the German notice instead.
+            if (isUserBlocked) {
+                document.querySelectorAll('input[name="option"]').forEach(option => {
+                    option.disabled = true;
+                });
+                appendQuestionResponseStatus('warning', 'Du kannst nicht weiter teilnehmen.');
+                return;
+            }
 
             const selected = document.querySelector('input[name="option"]:checked') ?? -1;
             if (selected) {
@@ -1437,6 +1453,16 @@
                             console.log('Quiz submitted successfully.');
 
                         } else {
+                            // Blocked from participation: lock quiz and chat, show German notice.
+                            if (data.blocked) {
+                                isUserBlocked = true;
+                                document.querySelectorAll('input[name="option"]').forEach(option => {
+                                    option.disabled = true;
+                                });
+                                disableMessageInputAndSendButton();
+                                appendQuestionResponseStatus('warning', data.message || 'Du kannst nicht weiter teilnehmen.');
+                                return;
+                            }
                             //if authStatus
                             if (data.message && data.message == "unauthorized") {
                                 //open register modal
@@ -2175,10 +2201,16 @@
                 if (data.userId == userId) {
                     console.log('User block from live show event received:', data);
                     if (data.isBlocked) {
+                        isUserBlocked = true;
                         isUserBlockedFromChat = true;
-                        alert('Du wurdest für die Chat Teilnahme blockiert.');
+                        alert('Du kannst nicht weiter teilnehmen.');
                         disableMessageInputAndSendButton();
+                        // Immediately lock any currently displayed quiz options.
+                        document.querySelectorAll('input[name="option"]').forEach(option => {
+                            option.disabled = true;
+                        });
                     } else {
+                        isUserBlocked = false;
                         isUserBlockedFromChat = false;
                         alert('Sie wurden aus der Live-Chat-Teilnahme entblockt.');
                         enableMessageInputAndSendButton();

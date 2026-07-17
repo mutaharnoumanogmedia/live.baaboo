@@ -6,6 +6,7 @@ use App\Events\HeartReactionEvent;
 use App\Events\LiveShowMessageEvent;
 use App\Events\LiveShowOnlineUsersEvent;
 use App\Models\LiveShow;
+use App\Models\LiveShowBlockUser;
 use App\Models\LiveShowMessages;
 use App\Models\LiveShowQuiz;
 use App\Models\QuizOption;
@@ -61,12 +62,25 @@ class GamePlayController extends Controller
         }
 
         // when live show status is 'live', then set the user as online and set the game_joined_at
+        $isBlocked = false;
         if (Auth::guard('web')->check()) {
             $user = Auth::guard('web')->user();
+
+            // Admin has fully blocked this account: force logout and send them to
+            // the homepage with a notice, regardless of which show they open.
+            if ($user->is_blocked) {
+                $user->forceFill(['current_session_id' => null])->save();
+                \DB::table('sessions')->where('user_id', $user->id)->delete();
+                Auth::guard('web')->logout();
+
+                return redirect()->route('index')->with('error', 'Du wurdest gesperrt und kannst nicht mehr an den Shows teilnehmen.');
+            }
+
+            $isBlocked = $this->isUserBlockedFromShows($user->id);
             $this->setUserGameJoinedAtForLiveShow($user, $liveShow);
         }
 
-        return view('live-show', compact('liveShow', 'isEliminated', 'galleryStreamInitial', 'updateMessage'));
+        return view('live-show', compact('liveShow', 'isEliminated', 'galleryStreamInitial', 'updateMessage', 'isBlocked'));
     }
 
     public function registerUser(Request $request, $liveShowId)
@@ -85,6 +99,11 @@ class GamePlayController extends Controller
             // if user already registered , login it and update pivot table
             $existingUser = User::where('email', $request->email)->first();
             if ($existingUser) {
+                // Blocked users are barred from joining any show (including future ones).
+                if ($this->isUserBlockedFromShows($existingUser->id)) {
+                    return response()->json(['success' => false, 'blocked' => true, 'messages' => ['Du kannst nicht weiter teilnehmen.'], 'user' => null, 'authStatus' => Auth::guard('web')->check()], 403);
+                }
+
                 $userPivot = $liveShow->users()->where('user_id', $existingUser->id)->first();
                 $isAlreadyRegisteredForThisShow = (bool) $userPivot;
 
@@ -325,6 +344,11 @@ class GamePlayController extends Controller
 
         if ($liveShow->status != 'live') {
             return response()->json(['message' => 'Live show is not live.'], 403);
+        }
+
+        // Blocked users cannot participate: their answers are never recorded.
+        if ($this->isUserBlockedFromShows($user->id)) {
+            return response()->json(['success' => false, 'blocked' => true, 'message' => 'Du kannst nicht weiter teilnehmen.'], 403);
         }
 
         $totalMilliSecondsToSubmit = (float) ($request->milliseconds_to_submit ?? 0);
@@ -599,10 +623,9 @@ class GamePlayController extends Controller
         if (! $liveShow->chat_enabled) {
             return response()->json(['message' => 'Der Chat ist derzeit vom Moderator deaktiviert.'], 403);
         }
-        // check if user is blocked from the live show
-        $isBlocked = $liveShow->blockedUsers()->where('user_id', $user->id)->first();
-        if ($isBlocked) {
-            return response()->json(['message' => 'You have been blocked from the live show.'], 403);
+        // check if user is blocked (applies across current and future shows)
+        if ($this->isUserBlockedFromShows($user->id)) {
+            return response()->json(['message' => 'Du kannst nicht weiter teilnehmen.'], 403);
         }
 
         $messageText = $request->message;
@@ -658,9 +681,8 @@ class GamePlayController extends Controller
             return response()->json(['message' => 'Live show not found.'], 404);
         }
 
-        $isBlocked = $liveShow->blockedUsers()->where('user_id', $user->id)->first();
-        if ($isBlocked) {
-            return response()->json(['message' => 'You have been blocked from the live show.'], 403);
+        if ($this->isUserBlockedFromShows($user->id)) {
+            return response()->json(['message' => 'Du kannst nicht weiter teilnehmen.'], 403);
         }
 
         HeartReactionEvent::dispatch((string) $liveShow->id, $user->id, $user->name);
@@ -1023,12 +1045,18 @@ class GamePlayController extends Controller
         if (! $liveShow) {
             return response()->json(['message' => 'Live show not found.'], 404);
         }
-        $isBlocked = $liveShow->blockedUsers()->where('user_id', $user->id)->first();
-        if ($isBlocked) {
-            return response()->json(['blocked' => true], 200);
-        }
 
-        return response()->json(['blocked' => false], 200);
+        return response()->json(['blocked' => $this->isUserBlockedFromShows($user->id)], 200);
+    }
+
+    /**
+     * A blocked user is barred from every show (current and future), so the
+     * block is evaluated globally against the live_show_block_users table
+     * rather than being scoped to a single live show.
+     */
+    private function isUserBlockedFromShows($userId): bool
+    {
+        return LiveShowBlockUser::where('user_id', $userId)->exists();
     }
 
     /**
