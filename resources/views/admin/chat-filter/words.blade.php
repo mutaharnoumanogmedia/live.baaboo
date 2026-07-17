@@ -111,8 +111,8 @@
 
     {{-- chat_filter_module: shared add/edit modal --}}
     <div class="modal fade" id="wordModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
+        <div class="modal-dialog ">
+            <div class="modal-content bg-dark text-white">
                 <form method="POST" id="wordForm" action="{{ route('admin.chat-filter.words.store') }}">
                     @csrf
                     <input type="hidden" name="_method" id="wordFormMethod" value="POST">
