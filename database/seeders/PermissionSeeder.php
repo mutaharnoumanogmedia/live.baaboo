@@ -27,6 +27,8 @@ class PermissionSeeder extends Seeder
             'can-manage-users',
             'can-manage-roles',
             'can-manage-permissions',
+            // chat_filter_module: access to the chat filter admin module
+            'can-manage-chat-filter',
         ];
 
         foreach ($permissions as $name) {

@@ -146,6 +146,15 @@
                         </li>
                     @endcan
 
+                    @can('can-manage-chat-filter')
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('admin.chat-filter.*') ? 'active' : '' }}"
+                                href="{{ route('admin.chat-filter.index') }}">
+                                <i class="bi bi-shield-exclamation me-1"></i> Chat Filter
+                            </a>
+                        </li>
+                    @endcan
+
                     @canany(['can-manage-settings', 'can-manage-gtm', 'can-manage-push-notifications'])
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle {{ request()->routeIs(['admin.settings.*', 'admin.gtm.*', 'admin.push-notifications.*', 'admin.push-subscriptions.*']) ? 'active' : '' }}"

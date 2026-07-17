@@ -25,7 +25,8 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             UsersByRoleSeeder::class,
             LiveShowSeeder::class,
-            
+            // chat_filter_module: tiers + full word list
+            ChatFilterSeeder::class,
         ]);
     }
 }

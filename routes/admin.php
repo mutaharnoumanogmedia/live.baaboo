@@ -118,6 +118,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('live-shows/{id}/block-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'blockUser'])->name('live-shows.block-user');
     Route::post('live-shows/{id}/unblock-user/{userId}', [\App\Http\Controllers\Admin\LiveShowController::class, 'unblockUser'])->name('live-shows.unblock-user');
 
+    // chat_filter_module: dynamic chat filter management (tiers, words, watchlist)
+    Route::prefix('chat-filter')->name('chat-filter.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\ChatFilterController::class, 'index'])->name('index');
+        Route::put('tiers/{tier}', [\App\Http\Controllers\Admin\ChatFilterController::class, 'updateTier'])->name('tiers.update');
+
+        Route::get('words', [\App\Http\Controllers\Admin\ChatFilterController::class, 'words'])->name('words');
+        Route::post('words', [\App\Http\Controllers\Admin\ChatFilterController::class, 'storeWord'])->name('words.store');
+        Route::put('words/{word}', [\App\Http\Controllers\Admin\ChatFilterController::class, 'updateWord'])->name('words.update');
+        Route::delete('words/{word}', [\App\Http\Controllers\Admin\ChatFilterController::class, 'destroyWord'])->name('words.destroy');
+        Route::post('words/{word}/toggle', [\App\Http\Controllers\Admin\ChatFilterController::class, 'toggleWord'])->name('words.toggle');
+
+        Route::get('watchlist', [\App\Http\Controllers\Admin\ChatFilterController::class, 'watchlist'])->name('watchlist');
+        Route::post('watchlist/{violation}/review', [\App\Http\Controllers\Admin\ChatFilterController::class, 'reviewViolation'])->name('watchlist.review');
+        Route::post('users/{user}/unmute', [\App\Http\Controllers\Admin\ChatFilterController::class, 'unmute'])->name('users.unmute');
+        Route::post('users/{user}/unblock', [\App\Http\Controllers\Admin\ChatFilterController::class, 'unblock'])->name('users.unblock');
+    });
+
     Route::get('players', [\App\Http\Controllers\Admin\PlayerController::class, 'index'])->name('players.index');
     Route::get('players/{id}', [\App\Http\Controllers\Admin\PlayerController::class, 'show'])->name('players.show');
 

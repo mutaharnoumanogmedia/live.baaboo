@@ -33,6 +33,8 @@ class User extends Authenticatable
         'is_active',
         'is_blocked',
         'blocked_at',
+        // chat_filter_module: timestamp until which the user is temporarily muted
+        'chat_muted_until',
     ];
 
     /**
@@ -54,6 +56,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'is_blocked' => 'boolean',
         'blocked_at' => 'datetime',
+        // chat_filter_module
+        'chat_muted_until' => 'datetime',
     ];
 
     // append custom fields
@@ -62,6 +66,12 @@ class User extends Authenticatable
     public function getRoleAttribute()
     {
         return $this->getRoleNames()->first();
+    }
+
+    // chat_filter_module: true while a temporary chat mute (timeout) is active.
+    public function isChatMuted(): bool
+    {
+        return $this->chat_muted_until !== null && $this->chat_muted_until->isFuture();
     }
 
     public function scopeRole($query, $role)

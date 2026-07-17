@@ -875,6 +875,21 @@
         });
 
 
+        // chat_filter_module: personal moderation notices (blocked message / timeout / ban)
+        if (typeof userId !== 'undefined' && userId) {
+            var chatFilterChannel = pusher.subscribe('chat-filter-user.' + userId);
+            chatFilterChannel.bind('ChatMessageBlockedEvent', function(data) {
+                try {
+                    alert(data.message);
+                } catch (e) {}
+                if (data.action === 'ban') {
+                    setTimeout(function() {
+                        window.location.href = '/';
+                    }, 1500);
+                }
+            });
+        }
+
         var channelChatMessages = pusher.subscribe('live-show-chat-messages.{{ $liveShow->id }}');
         // Your Laravel broadcast event (drop the dot)
         channelChatMessages.bind('LiveShowChatMessagesEvent', function(data) {
@@ -1567,10 +1582,31 @@
                         $chatInput.disabled = false;
                         $chatInput.focus();
                         document.querySelector('#send-btn-overlay').disabled = false;
+
+                        // chat_filter_module: the message was blocked/timed-out by the filter.
+                        // Remove the optimistic local bubble and tell the user why.
+                        if (response && response.filtered) {
+                            const overlayChat = document.getElementById('overlayChat');
+                            if (overlayChat) {
+                                const bubbles = overlayChat.querySelectorAll('.chat-message-overlay');
+                                if (bubbles.length) {
+                                    bubbles[bubbles.length - 1].remove();
+                                }
+                            }
+                            alert(response.message || 'Deine Nachricht wurde blockiert.');
+                        }
                     },
                     error: function(xhr) {
                         // Handle error
                         console.error(xhr.responseText);
+
+                        // chat_filter_module: user is currently muted (timeout) -> 403 with a reason
+                        if (xhr.status === 403 && xhr.responseJSON?.filtered) {
+                            $chatInput.disabled = false;
+                            document.querySelector('#send-btn-overlay').disabled = false;
+                            alert(xhr.responseJSON.message || 'Du bist derzeit stummgeschaltet.');
+                            return;
+                        }
                         //if message ==  "Too Many Attempts."
                         if (xhr.responseJSON?.message == "Too Many Attempts.") {
                             alert('Du kannst nur 40 Nachrichten pro Minute senden 🙂');
