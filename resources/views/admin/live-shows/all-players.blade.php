@@ -187,7 +187,7 @@
                                                             ? ($player->pivot->winnerPrize->is_voucher
                                                                 ? '<span class="badge bg-warning text-dark">Voucher</span> <div>' .
                                                                     '<a target="_blank" href="https://admin.shopify.com/store/store-baaboo/discounts/' .
-                                                                    ($player->pivot->discount_code ?? '--') .
+                                                                    ($player->pivot->winnerPrize->discountRule->shopify_id ?? '--') .
                                                                     '">' .
                                                                     ($player->pivot->discount_code ?? '--') .
                                                                     '</a>' .
