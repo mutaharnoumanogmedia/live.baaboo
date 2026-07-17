@@ -18,6 +18,7 @@ use App\Models\UserSpecialQuizResponse;
 use App\Models\Viewer;
 use App\Services\ActiveCampaign\ActiveCampaignClient;
 use App\Services\AffiliateAPIService;
+use App\Services\ChatFilterService;
 use App\Services\LeadGenerationService;
 use App\Services\LiveShowQuizService;
 use Carbon\Carbon;
@@ -628,6 +629,17 @@ class GamePlayController extends Controller
             return response()->json(['message' => 'Du kannst nicht weiter teilnehmen.'], 403);
         }
 
+        // chat_filter_module: reject messages while the user is under a temporary mute (timeout)
+        $chatFilter = new ChatFilterService;
+        if ($chatFilter->isMuted($user)) {
+            return response()->json([
+                'message' => ChatFilterService::MESSAGES['muted'],
+                'filtered' => true,
+                'action' => 'muted',
+                'muted_until' => optional($user->chat_muted_until)->toIso8601String(),
+            ], 403);
+        }
+
         $messageText = $request->message;
         $messageText = trim($messageText);
         $messageText = strip_tags($messageText);
@@ -635,6 +647,24 @@ class GamePlayController extends Controller
 
         if (! $messageText || strlen(trim($messageText)) == 0) {
             return response()->json(['message' => 'Message cannot be empty.'], 200);
+        }
+
+        // chat_filter_module: run the message through the moderation engine.
+        // A blocking action (ban/timeout/hard_block) drops the message here; a
+        // Tier 4 watchlist hit is logged/flagged but still allowed through.
+        $filterInput = trim(strip_tags((string) $request->message));
+        $hit = $chatFilter->check($filterInput);
+        if ($hit) {
+            $result = $chatFilter->enforce($user, $liveShow, $filterInput, $hit);
+            if ($result['blocked']) {
+                return response()->json([
+                    'success' => false,
+                    'filtered' => true,
+                    'action' => $result['action'],
+                    'message' => $result['message'],
+                    'muted_until' => $result['muted_until'],
+                ], 200);
+            }
         }
 
         // Save the message to the database
