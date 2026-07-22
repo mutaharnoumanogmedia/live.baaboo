@@ -333,8 +333,8 @@ class LiveShowController extends Controller
             $discount_rule_id = null;
             if ($type === 'voucher' && ! $liveShow->is_test_show && $voucherAmount) {
                 try {
-                    $starts_at = Carbon::parse($liveShow->start_time ?? now(), 'CET')->toIso8601String();
-                    $ends_at = Carbon::parse($liveShow->start_time ?? now(), 'CET')->addDays(31)->toIso8601String();
+                    $starts_at = Carbon::parse($liveShow->scheduled_at ?? now(), 'CET')->toIso8601String();
+                    $ends_at = Carbon::parse($liveShow->scheduled_at ?? now(), 'CET')->addDays(31)->toIso8601String();
                     $prizeRule = [
                         'title' => 'BADABING SPECIAL - '.$liveShow->title.' - Rank '.$rank,
                         'target_type' => 'line_item',
@@ -422,8 +422,8 @@ class LiveShowController extends Controller
             $discount_rule_id = null;
             if (! $liveShow->is_test_show) {
                 try {
-                    $starts_at = Carbon::parse($liveShow->start_time, 'CET')->toIso8601String();
-                    $ends_at = Carbon::parse($liveShow->start_time, 'CET')->addDays(31)->toIso8601String();
+                    $starts_at = Carbon::parse($liveShow->scheduled_at, 'CET')->toIso8601String();
+                    $ends_at = Carbon::parse($liveShow->scheduled_at, 'CET')->addDays(31)->toIso8601String();
                     $prizeRule = [
                         'title' => 'BADABING - '.$liveShow->title.' - Rank '.$rank,
                         'target_type' => 'line_item',
@@ -640,7 +640,7 @@ class LiveShowController extends Controller
             ->join('user_live_shows', 'users.id', '=', 'user_live_shows.user_id')
             ->where('user_live_shows.live_show_id', $liveShow->id)
             ->where('score', '>', 0)
-            ->where('users.is_blocked', false)            
+            ->where('users.is_blocked', false)
             ->orderBy('user_live_shows.score', 'desc')
             ->take($maxWinners)
             ->get()
