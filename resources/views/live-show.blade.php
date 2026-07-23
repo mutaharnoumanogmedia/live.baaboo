@@ -25,7 +25,7 @@
 
 
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="{{ asset('/styles/live-show.css?' . time()) }}" rel="stylesheet">
+    <link href="{{ asset('styles/live-show.css?' . time()) }}" rel="stylesheet">
 
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}">
