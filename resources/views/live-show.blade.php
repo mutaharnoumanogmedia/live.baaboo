@@ -1120,7 +1120,7 @@
                             <span class="trophy-icon">${user.is_winner ? '<i class="fas fa-trophy " title="Winner"></i>' : ''}</span>
                         </div>
                         
-                        <div class="score-text${!winnerAnnounced && user.id != userId ? ' blur' : ''}">
+                        <div class="score-text${!winnerAnnounced && user.id != userId ? ' hard-blur' : ''}">
                             ${user.score ? Math.round(user.score) : 0}
                         </div>
                     `;
@@ -1232,7 +1232,7 @@
                             ${user.name} ${user.id == userId ? '(You)' : ''}
                             <span class="trophy-icon">${user.is_winner ? '<i class="fas fa-trophy " title="Winner"></i>' : ''}</span>
                         </div>
-                        <div class="score-text${!specialWinnerAnnounced && user.id != userId ? ' blur' : ''}">
+                        <div class="score-text${!specialWinnerAnnounced && user.id != userId ? ' hard-blur' : ''}">
                             ${user.score ? Math.round(user.score) : 0}
                         </div>
                     `;

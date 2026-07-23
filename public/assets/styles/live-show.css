@@ -253,10 +253,13 @@ body .end-show {
 }
 
 .blur {
+    filter: blur(3px);
+}
+
+.hard-blur {
     filter: blur(6px);
     user-select: none;
 }
-
 /* nav.navbar {
     position: absolute;
     top: 0;
