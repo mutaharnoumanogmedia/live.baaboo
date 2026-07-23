@@ -108,33 +108,35 @@
         cursor: pointer;
     }
 </style>
-
-<div id="baabooPushBanner" role="dialog" aria-live="polite" aria-label="Benachrichtigungen aktivieren">
-    <button type="button" class="baaboo-push-close" id="baabooPushClose" aria-label="Schließen">&times;</button>
-    <div class="baaboo-push-bell" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z"/>
-        </svg>
-    </div>
-    <div>
-        <p class="baaboo-push-title">Verpasse keine Game-Show mehr!</p>
-        <p class="baaboo-push-text">
-            Aktiviere Benachrichtigungen und wir erinnern dich rechtzeitig,
-            bevor die nächste Live-Show startet &ndash; so sicherst du dir deine Gewinnchance.
-        </p>
-        <div class="baaboo-push-actions">
-            <button type="button" class="baaboo-push-allow" id="baabooPushAllow">
-                Benachrichtigungen aktivieren
-            </button>
-            <button type="button" class="baaboo-push-later" id="baabooPushLater">
-                Vielleicht später
-            </button>
+@if (!request()->boolean('debug_bot'))
+    <div id="baabooPushBanner" role="dialog" aria-live="polite" aria-label="Benachrichtigungen aktivieren">
+        <button type="button" class="baaboo-push-close" id="baabooPushClose" aria-label="Schließen">&times;</button>
+        <div class="baaboo-push-bell" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 16 16"
+                fill="currentColor">
+                <path
+                    d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z" />
+            </svg>
+        </div>
+        <div>
+            <p class="baaboo-push-title">Verpasse keine Game-Show mehr!</p>
+            <p class="baaboo-push-text">
+                Aktiviere Benachrichtigungen und wir erinnern dich rechtzeitig,
+                bevor die nächste Live-Show startet &ndash; so sicherst du dir deine Gewinnchance.
+            </p>
+            <div class="baaboo-push-actions">
+                <button type="button" class="baaboo-push-allow" id="baabooPushAllow">
+                    Benachrichtigungen aktivieren
+                </button>
+                <button type="button" class="baaboo-push-later" id="baabooPushLater">
+                    Vielleicht später
+                </button>
+            </div>
         </div>
     </div>
-</div>
-
+@endif
 <script>
-    (function () {
+    (function() {
         'use strict';
 
         // --- Configuration injected from the server ----------------------------
@@ -213,23 +215,24 @@
                 return Promise.resolve(false);
             }
 
-                return Notification.requestPermission().then(function (permission) {
+            return Notification.requestPermission().then(function(permission) {
                 if (permission !== 'granted') {
                     console.log('Push permission was not granted:', permission);
                     return false;
                 }
 
-                var swReady = window.baabooServiceWorkerReady || navigator.serviceWorker.register(@json(asset('sw.js')));
-                return Promise.resolve(swReady).then(function () {
-                    return navigator.serviceWorker.ready;
-                })
-                    .then(function (registration) {
+                var swReady = window.baabooServiceWorkerReady || navigator.serviceWorker.register(
+                    @json(asset('sw.js')));
+                return Promise.resolve(swReady).then(function() {
+                        return navigator.serviceWorker.ready;
+                    })
+                    .then(function(registration) {
                         return registration.pushManager.subscribe({
                             userVisibleOnly: true,
                             applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
                         });
                     })
-                    .then(function (subscription) {
+                    .then(function(subscription) {
                         return fetch(SUBSCRIBE_URL, {
                             method: 'POST',
                             headers: {
@@ -241,11 +244,11 @@
                             body: JSON.stringify(subscription),
                         });
                     })
-                    .then(function () {
+                    .then(function() {
                         console.log('Push notifications enabled.');
                         return true;
                     });
-            }).catch(function (error) {
+            }).catch(function(error) {
                 console.error('Failed to enable push notifications:', error);
                 return false;
             });
@@ -253,10 +256,10 @@
 
         // --- Wire up the banner buttons ----------------------------------------
         if (allowBtn) {
-            allowBtn.addEventListener('click', function () {
+            allowBtn.addEventListener('click', function() {
                 allowBtn.disabled = true;
                 allowBtn.textContent = 'Wird aktiviert…';
-                enablePush().then(function (ok) {
+                enablePush().then(function(ok) {
                     hideBanner();
                     rememberDismissal();
                 });
@@ -264,14 +267,14 @@
         }
 
         if (laterBtn) {
-            laterBtn.addEventListener('click', function () {
+            laterBtn.addEventListener('click', function() {
                 rememberDismissal();
                 hideBanner();
             });
         }
 
         if (closeBtn) {
-            closeBtn.addEventListener('click', function () {
+            closeBtn.addEventListener('click', function() {
                 rememberDismissal();
                 hideBanner();
             });
