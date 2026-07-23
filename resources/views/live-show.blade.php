@@ -25,7 +25,7 @@
 
 
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="{{ asset('styles/live-show.css?' . time()) }}" rel="stylesheet">
+    <link href="{{ asset('/styles/live-show.css?' . time()) }}" rel="stylesheet">
 
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="{{ __('de.main_ui.title', ['title' => $liveShow->title ?? '']) }}">
@@ -691,6 +691,7 @@
         let isUserBlocked = {{ ($isBlocked ?? false) ? 'true' : 'false' }};
 
         let winnerAnnounced = {{ $liveShow->winners_announced ? 1 : 0 }};
+        let specialWinnerAnnounced = {{ $liveShow->special_winners_announced ? 1 : 0 }};
 
         const zegoLiveRoot = document.getElementById('zego-live-root');
 
@@ -905,6 +906,7 @@
         channel2.bind('ShowLiveShowWinnersTabEvent', function(data) {
             console.log('Show winners tab event received:', data);
             const winnersData = data.winnersData;
+            winnerAnnounced = 1;
 
             // play an audio, drums-roll.mp3
             const drumsRollAudio = playSound('drums-roll');
@@ -934,6 +936,7 @@
         channel2.bind('ShowSpecialWinnersTabEvent', function(data) {
             console.log('Show special winners tab event received:', data);
             const winnersData = data.winnersData;
+            specialWinnerAnnounced = 1;
 
             const drumsRollAudio = playSound('drums-roll');
             showSpecialWinnersTabForParticipants().then(() => {
@@ -1117,7 +1120,7 @@
                             <span class="trophy-icon">${user.is_winner ? '<i class="fas fa-trophy " title="Winner"></i>' : ''}</span>
                         </div>
                         
-                        <div class="score-text }">
+                        <div class="score-text${!winnerAnnounced && user.id != userId ? ' blur' : ''}">
                             ${user.score ? Math.round(user.score) : 0}
                         </div>
                     `;
@@ -1126,12 +1129,8 @@
 
                     document.getElementById('user-count').innerHTML = totalUsers;
 
-                    if (winnerAnnounced) {
-                        // document.querySelectorAll('.score-text').forEach(scoreText => {
-                        //     scoreText.classList.remove('blur');
-                        // });
-                        document.getElementById('players-list-loading-spinner').style.display = 'none';
-                    }
+                    const spinner = document.getElementById('players-list-loading-spinner');
+                    if (spinner) spinner.style.display = 'none';
                 })
                 .catch(error => console.error('Error fetching players with scores:', error));
 
@@ -1233,7 +1232,7 @@
                             ${user.name} ${user.id == userId ? '(You)' : ''}
                             <span class="trophy-icon">${user.is_winner ? '<i class="fas fa-trophy " title="Winner"></i>' : ''}</span>
                         </div>
-                        <div class="score-text">
+                        <div class="score-text${!specialWinnerAnnounced && user.id != userId ? ' blur' : ''}">
                             ${user.score ? Math.round(user.score) : 0}
                         </div>
                     `;
@@ -2151,6 +2150,7 @@
                         .then(prizeData => {
 
                             console.log('Prize data:', prizeData);
+                            winnerAnnounced = 1;
                             showWinnersTabForParticipants();
                             fireWorksConfetti();
                             playSound('winner');
